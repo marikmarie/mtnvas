@@ -1,0 +1,40 @@
+import { Container, Flex, rem, ScrollArea } from '@mantine/core'
+
+import { Header } from './Header'
+import React, { useEffect } from 'react'
+import { useScreenWidth } from '../hooks/use-screen-width'
+import { useDispatch } from 'react-redux'
+import { setCollapsedValue } from '../app/slices/nav'
+
+type PageProps = {
+  children: React.ReactNode
+}
+
+export default React.memo( function Layout( { children }: PageProps ) {
+  const dispatch = useDispatch()
+
+  const screen = useScreenWidth()
+
+  const effect = function renderBasedOnScreenSize() {
+    if ( screen === 'lg' || screen === 'xl' ) {
+      dispatch( setCollapsedValue( false ) )
+    } else {
+      dispatch( setCollapsedValue( true ) )
+    }
+  }
+
+  useEffect( effect, [screen] )
+
+  return (
+    <>
+      <Flex>
+        <ScrollArea type="never" h="100vh" w="100vw">
+          <Header />
+          <Container size={rem( 1500 )}>
+            {children}
+          </Container>
+        </ScrollArea>
+      </Flex>
+    </>
+  )
+} )
