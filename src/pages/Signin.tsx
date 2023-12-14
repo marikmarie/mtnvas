@@ -35,7 +35,7 @@ const useStyles = createStyles( () => ( {
   },
 } ) );
 
-export default function Signin( props: PaperProps ) {
+export default React.memo( function Signin( props: PaperProps ) {
   const {
     classes: { root },
   } = useStyles();
@@ -65,7 +65,7 @@ export default function Signin( props: PaperProps ) {
   } );
 
   const mutation = useMutation( {
-    mutationFn: () => axios.post( "", form.values ),
+    mutationFn: () => axios.post( "/signin", form.values ),
     onSuccess: ( res: AxiosResponse ) => {
       dispatch( signin( res.data as unknown as { user: User } ) );
       navigate( ROUTES.VIEW_INVOICES );
@@ -158,4 +158,4 @@ export default function Signin( props: PaperProps ) {
       </Paper>
     </Container>
   );
-}
+} )
