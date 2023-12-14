@@ -9,7 +9,6 @@ import {
 } from '@mantine/core'
 import { Illustration } from '../components/Illustration'
 import { Link } from 'react-router-dom'
-import { ROUTES } from '../constants/routes'
 
 const useStyles = createStyles( theme => ( {
 	root: {
@@ -76,7 +75,7 @@ export default function NotFound() {
 						support.
 					</Text>
 					<Group position="center">
-						<Button component={Link} to={ROUTES.VIEW_INVOICES} size="md">
+						<Button component={Link} to={"/"} size="md">
 							Take me back to home page
 						</Button>
 					</Group>

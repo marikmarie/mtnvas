@@ -25,7 +25,7 @@ import { useDispatch } from "react-redux";
 import { signin, User } from "../app/slices/auth";
 import React from "react";
 
-const useStyles = createStyles(() => ({
+const useStyles = createStyles( () => ( {
   root: {
     overflow: "hidden",
     display: "flex",
@@ -33,9 +33,9 @@ const useStyles = createStyles(() => ({
     alignItems: "center",
     height: "100vh",
   },
-}));
+} ) );
 
-export default function Signin(props: PaperProps) {
+export default function Signin( props: PaperProps ) {
   const {
     classes: { root },
   } = useStyles();
@@ -46,55 +46,55 @@ export default function Signin(props: PaperProps) {
   const mtnEmailRegex = /^\S+@mtn\.com$/;
   const gdeEmailRegex = /^\S+@gdexperts\.com$/;
 
-  const form = useForm({
+  const form = useForm( {
     initialValues: {
       email: "",
       password: "",
     },
 
     validate: {
-      email: (val: string) =>
-        mtnEmailRegex.test(val) || gdeEmailRegex.test(val)
+      email: ( val: string ) =>
+        mtnEmailRegex.test( val ) || gdeEmailRegex.test( val )
           ? null
           : "Should be a valid MTN or GDExperts email",
-      password: (val: string | any[]) =>
+      password: ( val: string | any[] ) =>
         val.length <= 6
           ? "Password should include at least 6 characters"
           : null,
     },
-  });
+  } );
 
-  const mutation = useMutation({
-    mutationFn: () => axios.post("/auth/login", form.values),
-    onSuccess: (res: AxiosResponse) => {
-      dispatch(signin(res.data as unknown as { user: User }));
-      navigate(ROUTES.VIEW_INVOICES);
+  const mutation = useMutation( {
+    mutationFn: () => axios.post( "", form.values ),
+    onSuccess: ( res: AxiosResponse ) => {
+      dispatch( signin( res.data as unknown as { user: User } ) );
+      navigate( ROUTES.VIEW_INVOICES );
     },
-    onError: (error: AxiosError) => {
-      notifications.show({
+    onError: ( error: AxiosError ) => {
+      notifications.show( {
         title:
-          ((error.response?.data as { httpStatus: string })
-            .httpStatus as unknown as React.ReactNode) ||
-          ((
+          ( ( error.response?.data as { httpStatus: string } )
+            .httpStatus as unknown as React.ReactNode ) ||
+          ( (
             error.response?.data as {
               status: string;
             }
-          ).status as unknown as React.ReactNode),
+          ).status as unknown as React.ReactNode ),
         message:
-          ((
+          ( (
             error.response?.data as {
               message: string;
             }
-          ).message! as unknown as React.ReactNode) ||
-          ((
+          ).message! as unknown as React.ReactNode ) ||
+          ( (
             error.response?.data as {
               error: string;
             }
-          ).error as unknown as React.ReactNode),
+          ).error as unknown as React.ReactNode ),
         color: "red",
-      });
+      } );
     },
-  });
+  } );
 
   return (
     <Container className={root} size="xs">
@@ -117,7 +117,7 @@ export default function Signin(props: PaperProps) {
           </Title>
         </Center>
 
-        <form onSubmit={form.onSubmit(() => mutation.mutate())}>
+        <form onSubmit={form.onSubmit( () => mutation.mutate() )}>
           <Stack>
             <TextInput
               label="Email"
@@ -128,16 +128,16 @@ export default function Signin(props: PaperProps) {
               }
               placeholder="mail@mtn.com"
               value={form.values.email}
-              onChange={(event) =>
-                form.setFieldValue("email", event.currentTarget.value)
+              onChange={( event ) =>
+                form.setFieldValue( "email", event.currentTarget.value )
               }
               error={form.errors.email}
             />
 
             <TextInput
               value={form.values.password}
-              onChange={(event) =>
-                form.setFieldValue("password", event.currentTarget.value)
+              onChange={( event ) =>
+                form.setFieldValue( "password", event.currentTarget.value )
               }
               placeholder="Password"
               label="Password"

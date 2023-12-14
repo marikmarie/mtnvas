@@ -41,7 +41,7 @@ ReactDOM.createRoot( document.getElementById( "root" ) as HTMLElement ).render(
 );
 
 function AppWrapper() {
-  const [colorScheme, setColorScheme] = React.useState<ColorScheme>( "light" );
+  const [colorScheme, setColorScheme] = React.useState<ColorScheme>( "dark" );
   const toggleColorScheme = ( value?: ColorScheme ) =>
     setColorScheme( value || ( colorScheme === "dark" ? "light" : "dark" ) );
 
