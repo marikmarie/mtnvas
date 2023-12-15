@@ -14,21 +14,21 @@ interface UpdateDetailsData {
   salesAgentEmail: string;
 }
 
-interface EditUserByAdminProps {
-  user: UpdateDetailsData | null;
+interface DetailsProp {
+  detail: UpdateDetailsData | null;
 }
 
-export default function UpdateDetailsModal( { user }: EditUserByAdminProps ) {
+export default function UpdateDetailsModal( { detail }: DetailsProp ) {
   const emailRegex = /^\S+@\S+\.\S+$/;
   const msisdn = /^256(78|77|76)\d{7}$/;
 
   const form = useForm( {
     initialValues: {
-      email: user?.email,
-      salesAgentEmail: user?.salesAgentEmail,
-      msisdn: user?.msisdn,
-      subscriptionId: user?.subscriptionId,
-      bnumber: user?.bnumber,
+      email: detail?.email,
+      salesAgentEmail: detail?.salesAgentEmail,
+      msisdn: detail?.msisdn,
+      subscriptionId: detail?.subscriptionId,
+      bnumber: detail?.bnumber,
     },
 
     validate: {
@@ -93,18 +93,18 @@ export default function UpdateDetailsModal( { user }: EditUserByAdminProps ) {
         <TextInput
           required
           label="Email"
-          placeholder={user?.email}
+          placeholder={detail?.email}
           value={form.values.email}
           onChange={( event ) =>
-            form.setFieldValue( "emailAddress", event.currentTarget.value )
+            form.setFieldValue( "email", event.currentTarget.value )
           }
-          error={form.errors.emailAddress && form.errors.emailAddress}
+          error={form.errors.email && form.errors.email}
           radius={"sm"}
         />
         <TextInput
           required
           label="MSISDN"
-          placeholder={user?.msisdn}
+          placeholder={detail?.msisdn}
           value={form.values.msisdn}
           onChange={( event ) =>
             form.setFieldValue( "msisdn", event.currentTarget.value )
@@ -115,18 +115,18 @@ export default function UpdateDetailsModal( { user }: EditUserByAdminProps ) {
         <TextInput
           required
           label="SubscriptionId"
-          placeholder={user?.subscriptionId}
+          placeholder={detail?.subscriptionId}
           value={form.values.subscriptionId}
           onChange={( event ) =>
             form.setFieldValue( "SubscriptionId", event.currentTarget.value )
           }
-          error={form.errors.userName && form.errors.userName}
+          error={form.errors.SubscriptionId && form.errors.SubscriptionId}
           radius={"sm"}
         />
         <TextInput
           required
           label="Sales Agent Email"
-          placeholder={user?.salesAgentEmail}
+          placeholder={detail?.salesAgentEmail}
           value={form.values.salesAgentEmail}
           onChange={( event ) =>
             form.setFieldValue( "salesAgentEmail", event.currentTarget.value )

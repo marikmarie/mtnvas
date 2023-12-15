@@ -65,7 +65,7 @@ export default React.memo( function UpdateDetails() {
         },
     } )
 
-    console.log( "detils: ", mutation.data )
+    const details = mutation.data?.data;
 
     return (
         <Paper p="lg" mt="xl" shadow="lg">
@@ -74,7 +74,7 @@ export default React.memo( function UpdateDetails() {
             </Text>
 
             <Modal opened={opened} close={close}>
-                <UpdateDetailsModal user={null} />
+                <UpdateDetailsModal detail={details || null} />
             </Modal>
 
             <Stack mt={'sm'}>
