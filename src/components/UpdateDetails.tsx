@@ -8,6 +8,7 @@ import { useForm } from '@mantine/form'
 import { Modal } from './Modal'
 import UpdateDetailsModal from './UpdateDetailsModal'
 import { useDisclosure } from '@mantine/hooks'
+import { IconPlus } from '@tabler/icons-react'
 
 export default React.memo( function UpdateDetails() {
     const axios = useAxios()
@@ -87,8 +88,8 @@ export default React.memo( function UpdateDetails() {
                 />
             </Stack>
 
-            <Flex mt="md" w="100%" gap={'sm'}>
-                <Button fullWidth onClick={() => mutation.mutate( form.values.wakanetNumber )} variant="filled">
+            <Flex mt="md" w="100%" justify={"flex-end"} gap={'sm'}>
+                <Button leftIcon={<IconPlus />} onClick={() => mutation.mutate( form.values.wakanetNumber )} variant="filled">
                     Search User
                 </Button>
             </Flex>
