@@ -93,14 +93,6 @@ export default React.memo( function Signup() {
     )
 } )
 
-interface SubscriptionItem {
-    subscriptionId: number;
-    msisdn: string;
-    bnumber: string | null;
-    email: string;
-    status: string | null;
-}
-
 const ActivationTable = React.memo( () => {
     const qc = useQueryClient()
     const mutation = useMutation( {
@@ -147,10 +139,6 @@ const ActivationTable = React.memo( () => {
         queryFn: () => axios.get( "/bundle-activations" ).then( ( res ) => res.data ),
     } );
 
-    if ( query.isSuccess ) {
-        const data = query.data.data as unknown as SubscriptionItem[];
-    }
-
     if ( query.isError ) {
         console.log( "Error:", query.error );
     }
@@ -186,14 +174,11 @@ const ActivationTable = React.memo( () => {
         headerAlign: "center",
     } );
 
-
-    const items = query.data.data
-
     return (
         <ReactDataGrid
             idProperty="id"
             columns={columns}
-            dataSource={[...items]}
+            dataSource={query.data?.data || []}
             pagination={false}
             showCellBorders
             style={{ minHeight: "25vh" }}

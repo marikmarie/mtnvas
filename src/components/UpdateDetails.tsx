@@ -1,19 +1,96 @@
-import { Button, Flex, Paper, Stack, Text, TextInput } from '@mantine/core';
-import React from 'react';
+import { Button, Flex, Paper, Stack, Text, TextInput } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { AxiosResponse, AxiosError } from 'axios'
+import React from 'react'
+import useAxios from '../hooks/use-axios'
+import { useForm } from '@mantine/form'
+import { Modal } from './Modal'
+import UpdateDetailsModal from './UpdateDetailsModal'
+import { useDisclosure } from '@mantine/hooks'
 
 export default React.memo( function UpdateDetails() {
+    const axios = useAxios()
+    const qc = useQueryClient()
+
+    const [opened, { open, close }] = useDisclosure( false );
+
+
+    const form = useForm( {
+        initialValues: {
+            wakanetNumber: '',
+        },
+
+        validate: {
+            wakanetNumber: ( val: string ) => ( val.length > 9 ? null : 'Should be a valid wakanetNumber' ),
+        },
+    } )
+
+    const mutation = useMutation( {
+        mutationFn: ( wakanetNumber: string ) => axios.put( '/customers', { bnumber: wakanetNumber } ),
+        onSuccess: ( _: AxiosResponse ) => {
+            open()
+            notifications.show( {
+                title: 'Success',
+                message: 'details updated successfully',
+                color: 'green',
+            } )
+            qc.invalidateQueries( {
+                queryKey: ['update-details'],
+            } )
+        },
+        onError: ( error: AxiosError ) => {
+            notifications.show( {
+                title:
+                    ( ( error.response?.data as { httpStatus: string } ).httpStatus as unknown as React.ReactNode ) ||
+                    ( (
+                        error.response?.data as {
+                            status: string
+                        }
+                    ).status as unknown as React.ReactNode ),
+                message:
+                    ( (
+                        error.response?.data as {
+                            message: string
+                        }
+                    ).message! as unknown as React.ReactNode ) ||
+                    ( (
+                        error.response?.data as {
+                            error: string
+                        }
+                    ).error as unknown as React.ReactNode ),
+                color: 'red',
+            } )
+        },
+    } )
+
+    console.log( "detils: ", mutation.data )
+
     return (
-        <Paper p="lg" mt="xl" shadow='lg'>
-            <Text fz="xl" fw="bold" c="dimmed" >
+        <Paper p="lg" mt="xl" shadow="lg">
+            <Text fz="xl" fw="bold" c="dimmed">
                 Update Existing customer details
             </Text>
 
-            <Stack mt={"sm"}>
-                <TextInput label="WakaNet Number" placeholder="Forexample 2563945 ..." withAsterisk />
+            <Modal opened={opened} close={close}>
+                <UpdateDetailsModal user={null} />
+            </Modal>
+
+            <Stack mt={'sm'}>
+                <TextInput
+                    label="WakaNet Number"
+                    value={form.values.wakanetNumber}
+                    onChange={event => form.setFieldValue( 'wakanetNumber', event.currentTarget.value )}
+                    error={form.errors.wakanetNumber}
+                    placeholder="Forexample 2563945..."
+                    withAsterisk
+                />
             </Stack>
 
-            <Flex mt="md" w="100%" gap={"sm"} >
-                <Button fullWidth variant="filled">Search User</Button>
+            <Flex mt="md" w="100%" gap={'sm'}>
+                <Button fullWidth onClick={() => mutation.mutate( form.values.wakanetNumber )} variant="filled">
+                    Search User
+                </Button>
             </Flex>
         </Paper>
     )
