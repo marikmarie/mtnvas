@@ -26,11 +26,12 @@ export default React.memo( function LoadBundle() {
                 <TextInput icon={<IconPhone />} label="Agent/Customer Number" placeholder="Forexample 2563945 ..." withAsterisk />
             </Stack>
 
-            <Flex mt="md" w="100%" gap={"sm"} >
-                <Button fullWidth variant="filled">Signup</Button>
-                <Button fullWidth variant="light">Reset</Button>
+            <Flex mt="md" w="100%" gap={"sm"} justify={"flex-end"} >
+                <Flex gap={"sm"} w="30%" >
+                    <Button fullWidth variant="filled">Signup</Button>
+                    <Button fullWidth variant="light">Reset</Button>
+                </Flex>
             </Flex>
-
         </Paper>
     )
 } )

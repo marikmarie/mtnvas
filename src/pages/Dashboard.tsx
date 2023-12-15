@@ -98,7 +98,6 @@ export default React.memo( function AddUser() {
             <Button fullWidth variant={activeBtn === "update-details" ? "filled" : "light"} onClick={() => setActiveBtn( "update-details" )} >Update Details</Button>
           </SimpleGrid>
         </Paper>
-
         {
           ( () => {
             switch ( activeBtn ) {
@@ -115,7 +114,6 @@ export default React.memo( function AddUser() {
             }
           } )()
         }
-
       </Container>
     </Layout>
   );

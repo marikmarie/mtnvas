@@ -1,7 +1,7 @@
 import { Button, Flex, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosResponse, AxiosError } from 'axios';
 import React from 'react';
 import useAxios from '../hooks/use-axios';
@@ -24,7 +24,7 @@ export default React.memo( function Signup() {
 
     const mutation = useMutation( {
         mutationFn: () => axios.post( "/bundle-activations", form.values ),
-        onSuccess: ( res: AxiosResponse ) => {
+        onSuccess: ( _: AxiosResponse ) => {
             notifications.show( {
                 title: "Success",
                 message: "starter bundle loaded",
@@ -102,15 +102,18 @@ interface SubscriptionItem {
 }
 
 const ActivationTable = React.memo( () => {
-
+    const qc = useQueryClient()
     const mutation = useMutation( {
-        mutationFn: ( msisdn: string ) => axios.post( "/bundle-activations", { msisdn } ),
+        mutationFn: ( subscriptionId: number ) => axios.post( "/bundle-activations", { subscriptionId } ),
         onSuccess: ( _: AxiosResponse ) => {
             notifications.show( {
                 title: "Success",
                 message: "starter bundle loaded",
                 color: "green",
             } );
+            qc.invalidateQueries( {
+                queryKey: ["activationData"]
+            } )
         },
         onError: ( error: AxiosError ) => {
             notifications.show( {
@@ -146,8 +149,6 @@ const ActivationTable = React.memo( () => {
 
     if ( query.isSuccess ) {
         const data = query.data.data as unknown as SubscriptionItem[];
-
-        console.log( "data: ===> ", data )
     }
 
     if ( query.isError ) {
@@ -174,7 +175,7 @@ const ActivationTable = React.memo( () => {
                     size="xs"
                     fullWidth
                     variant='light'
-                    onClick={() => mutation.mutate( rowData?.data.msisdn )}
+                    onClick={() => mutation.mutate( Number.parseInt( rowData?.data.subscriptionId ) )}
                 >
                     Activate
                 </Button>
@@ -186,13 +187,7 @@ const ActivationTable = React.memo( () => {
     } );
 
 
-    const items = [
-        { subscriptionId: 1, msisdn: "256787666745", email: "ian.balijawa@gdexperts.com" },
-        { subscriptionId: 2, msisdn: "256787666746", email: "ian.balijawa@gdexperts.com" },
-        { subscriptionId: 3, msisdn: "256787666747", email: "ian.balijawa@gdexperts.com" },
-        { subscriptionId: 4, msisdn: "256787666748", email: "ian.balijawa@gdexperts.com" },
-        { subscriptionId: 5, msisdn: "256787666749", email: "ian.balijawa@gdexperts.com" },
-    ]
+    const items = query.data.data
 
     return (
         <ReactDataGrid
