@@ -70,6 +70,7 @@ export default React.memo( function LoadBundle() {
                         onChange={( event ) =>
                             form.setFieldValue( "wakanetNumber", event.currentTarget.value )
                         }
+                        error={form.errors.wakanetNumber}
                         placeholder="Forexample 2563945 ..." withAsterisk />
                     <Radio.Group
                         name="bundle"
