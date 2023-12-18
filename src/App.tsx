@@ -1,5 +1,4 @@
 import { useRoutes } from "react-router-dom";
-import { ROUTES } from "./constants/routes";
 import { PublicLoader } from "./components/Loadable";
 import { lazy } from "react";
 
@@ -10,7 +9,7 @@ const NotFound = PublicLoader( lazy( () => import( "./pages/404" ) ) );
 export default function App() {
   return useRoutes( [
     {
-      path: ROUTES.ACCOUNT,
+      path: "/signin",
       element: <Signin />,
     },
     {
@@ -18,7 +17,7 @@ export default function App() {
       element: <Dashboard />,
     },
     {
-      path: ROUTES.ALL,
+      path: "*",
       element: <NotFound />,
     },
   ] );

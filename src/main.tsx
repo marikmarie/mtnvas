@@ -25,13 +25,8 @@ ReactDOM.createRoot( document.getElementById( "root" ) as HTMLElement ).render(
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <BrowserRouter>
-            <MantineProvider
-              theme={{ primaryColor: "yellow" }}
-              withNormalizeCSS
-            >
-              <Notifications position="top-right" zIndex={2077} />
-              <AppWrapper />
-            </MantineProvider>
+            <Notifications position="top-right" zIndex={2077} />
+            <AppWrapper />
           </BrowserRouter>
         </PersistGate>
       </Provider>
@@ -51,7 +46,7 @@ function AppWrapper() {
       toggleColorScheme={toggleColorScheme}
     >
       <MantineProvider
-        theme={{ colorScheme, primaryColor: "yellow" }}
+        theme={{ colorScheme, primaryColor: "yellow", cursorType: "pointer" }}
         withNormalizeCSS
         withGlobalStyles
       >

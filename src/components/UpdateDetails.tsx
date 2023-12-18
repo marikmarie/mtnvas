@@ -10,7 +10,7 @@ import UpdateDetailsModal from './UpdateDetailsModal'
 import { useDisclosure } from '@mantine/hooks'
 import { IconPlus } from '@tabler/icons-react'
 
-export default React.memo( function UpdateDetails() {
+export default React.memo( () => {
     const axios = useAxios()
     const qc = useQueryClient()
 
@@ -68,7 +68,7 @@ export default React.memo( function UpdateDetails() {
     const details = mutation.data?.data;
 
     return (
-        <Paper p="lg" mt="xl" shadow="lg">
+        <Paper p="lg" my="xl" shadow="lg">
             <Text fz="xl" fw="bold" c="dimmed">
                 Update Existing customer details
             </Text>

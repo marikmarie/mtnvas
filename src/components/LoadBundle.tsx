@@ -7,24 +7,24 @@ import { AxiosResponse, AxiosError } from 'axios';
 import React from 'react';
 import useAxios from '../hooks/use-axios';
 
-export default React.memo( function LoadBundle() {
+export default React.memo( () => {
     const axios = useAxios();
     const form = useForm( {
         initialValues: {
             wakanetNumber: "",
             agentNumber: "",
-            size: "",
+            package: "",
         },
 
         validate: {
             wakanetNumber: ( val: string ) => val.length > 9 ? null : "Should be a valid wakanetNumber",
-            agentNumber: ( val: string ) => val.length > 9 ? null : "Should be a valid wakanetNumber",
+            agentNumber: ( val: string ) => val.length > 9 ? null : "Should be a valid custmer/agent number",
         },
     } );
 
 
     const mutation = useMutation( {
-        mutationFn: () => axios.post( "", form.values ),
+        mutationFn: () => axios.post( "/load-bundle", form.values ),
         onSuccess: ( _: AxiosResponse ) => {
             notifications.show( {
                 title: "Success",
@@ -75,17 +75,17 @@ export default React.memo( function LoadBundle() {
                     <Radio.Group
                         name="bundle"
                         withAsterisk
-                        value={form.values.size}
+                        value={form.values.package}
                         onChange={( value ) =>
-                            form.setFieldValue( "size", value )
+                            form.setFieldValue( "package", value )
                         }
                     >
                         <Group mt="xs">
-                            <Radio value="10GB" label="10GB" />
-                            <Radio value="25GB" label="25GB" />
-                            <Radio value="45GB" label="45GB" />
-                            <Radio value="95GB" label="95GB" />
-                            <Radio value="195GB" label="195GB" />
+                            <Radio value="1778FHI1" label="10GB" />
+                            <Radio value="1778FHI2" label="25GB" />
+                            <Radio value="1778FHI3" label="45GB" />
+                            <Radio value="1778FHI4" label="95GB" />
+                            <Radio value="1778FHI5" label="195GB" />
                         </Group>
                     </Radio.Group>
                     <TextInput icon={<IconPhone />} label="Agent/Customer Number" value={form.values.agentNumber}

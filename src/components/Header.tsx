@@ -13,7 +13,6 @@ import { RootState } from '../app/store'
 import { IconUser } from '@tabler/icons-react'
 import useAxios from '../hooks/use-axios'
 import { signout } from '../app/slices/auth'
-import { ROUTES } from '../constants/routes'
 import { useNavigate } from 'react-router-dom'
 import { ActionToggle } from './ActionToggle'
 import { useMutation } from '@tanstack/react-query'
@@ -82,7 +81,7 @@ export function Header() {
 		mutationFn: () => axios.post( '/auth/logout' ),
 		onSuccess: () => {
 			dispatch( signout() )
-			navigate( ROUTES.AUTH )
+			navigate( "/signin" )
 		},
 		onError: ( error: AxiosError ) => {
 			console.log( error )

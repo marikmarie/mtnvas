@@ -20,7 +20,6 @@ import useAxios from "../hooks/use-axios";
 import { notifications } from "@mantine/notifications";
 import { AxiosError, AxiosResponse } from "axios";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "../constants/routes";
 import { useDispatch } from "react-redux";
 import { signin, User } from "../app/slices/auth";
 import React from "react";
@@ -68,7 +67,7 @@ export default React.memo( function Signin( props: PaperProps ) {
     mutationFn: () => axios.post( "/signin", form.values ),
     onSuccess: ( res: AxiosResponse ) => {
       dispatch( signin( res.data as unknown as { user: User } ) );
-      navigate( ROUTES.VIEW_INVOICES );
+      navigate( "/" );
     },
     onError: ( error: AxiosError ) => {
       notifications.show( {

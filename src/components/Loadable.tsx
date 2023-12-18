@@ -2,8 +2,6 @@ import { Flex, Loader } from "@mantine/core";
 import React, { Suspense } from "react";
 import "../loader.css";
 
-// HOC   HIGHER ORDER COMPONENT
-
 export const PrivateLoader = <P extends object>(
   WrappedComponent: React.FunctionComponent<P>,
 ) => {

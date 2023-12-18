@@ -1,4 +1,4 @@
-import { Button, Flex, Paper, Stack, Text, TextInput } from '@mantine/core';
+import { Button, Flex, Loader, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useMutation } from '@tanstack/react-query';
@@ -6,27 +6,28 @@ import { AxiosResponse, AxiosError } from 'axios';
 import React from 'react';
 import useAxios from '../hooks/use-axios';
 
-export default React.memo( function CheckBalance() {
+export default React.memo( () => {
     const axios = useAxios();
     const form = useForm( {
         initialValues: {
-            wakanetNumber: "",
+            msisdn: "",
         },
 
         validate: {
-            wakanetNumber: ( val: string ) => val.length > 9 ? null : "Should be a valid wakanetNumber",
+            msisdn: ( val: string ) => val.length > 9 ? null : "Should be a valid wakanetNumber",
         },
     } );
 
 
     const mutation = useMutation( {
-        mutationFn: () => axios.post( "", form.values ),
+        mutationFn: () => axios.post( "/balance-check", form.values ),
         onSuccess: ( _: AxiosResponse ) => {
             notifications.show( {
                 title: "Success",
                 message: "starter bundle loaded",
                 color: "green",
             } );
+            form.reset()
         },
         onError: ( error: AxiosError ) => {
             notifications.show( {
@@ -64,14 +65,14 @@ export default React.memo( function CheckBalance() {
                 <Stack mt={"sm"}>
                     <TextInput label="WakaNet Number"
                         onChange={( event ) =>
-                            form.setFieldValue( "wakanetNumber", event.currentTarget.value )
+                            form.setFieldValue( "msisdn", event.currentTarget.value )
                         }
-                        error={form.errors.wakanetNumber}
+                        error={form.errors.msisdn}
                         placeholder="Forexample 2563945 ..." withAsterisk />
                 </Stack>
 
                 <Flex mt="md" w="100%" gap={"sm"} justify={"flex-end"} >
-                    <Button fullWidth variant="filled" type='submit'>Check Balance</Button>
+                    {mutation.isLoading ? <Button> <Loader variant='dots' /> </Button> : <Button fullWidth variant="filled" type='submit'>Check Balance</Button>}
                     <Button fullWidth variant="light" onClick={() => form.reset()} >Reset</Button>
                 </Flex>
             </form>
