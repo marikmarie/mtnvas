@@ -16,7 +16,6 @@ export default React.memo( () => {
 
     const [opened, { open, close }] = useDisclosure( false );
 
-
     const form = useForm( {
         initialValues: {
             wakanetNumber: '',
@@ -28,7 +27,7 @@ export default React.memo( () => {
     } )
 
     const mutation = useMutation( {
-        mutationFn: ( wakanetNumber: string ) => axios.put( '/customers', { bnumber: wakanetNumber } ),
+        mutationFn: ( wakanetNumber: string ) => axios.put( '/customer-details', { bnumber: wakanetNumber } ),
         onSuccess: ( _: AxiosResponse ) => {
             open()
             notifications.show( {
