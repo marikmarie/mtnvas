@@ -6,7 +6,7 @@ const Signin = PublicLoader( lazy( () => import( "./pages/Signin" ) ) );
 const Dashboard = PublicLoader( lazy( () => import( "./pages/Dashboard" ) ) );
 const NotFound = PublicLoader( lazy( () => import( "./pages/404" ) ) );
 
-export default function App() {
+export default function AppRouter() {
   return useRoutes( [
     {
       path: "/",

@@ -5,10 +5,10 @@ import {
     type MRT_ColumnDef,
 } from 'mantine-react-table';
 import React from 'react';
-import useAxios from '../../hooks/use-axios';
 import { Button } from '@mantine/core';
 import { useDispatch } from 'react-redux';
 import { setSubscriptionId } from '../../app/slices/sub-id';
+import axios from 'axios';
 
 type Data = {
     subscriptionId: string;
@@ -19,7 +19,7 @@ type Data = {
 const ActivationTable = () => {
     const dispatch = useDispatch()
 
-    const columns = useMemo<MRT_ColumnDef<Data>[]>(
+    const columns: any = useMemo<MRT_ColumnDef<Data>[]>(
         () => [
             {
                 accessorKey: 'subscriptionId',
@@ -44,19 +44,16 @@ const ActivationTable = () => {
         [],
     );
 
-    const axios = useAxios()
     const [data, setData] = React.useState<any>( null )
 
     const getBundleActivations = useCallback( async () => {
-        const result = await axios.get( "/bundle-activations" )
+        const result = await axios.get( import.meta.env.VITE_APP_BASE_URL! + "/bundle-activations" )
         setData( result.data )
     }, [] )
 
     React.useEffect( () => {
         getBundleActivations()
     }, [] )
-
-    console.log( "===>", data?.data )
 
     const table = useMantineReactTable( {
         columns,

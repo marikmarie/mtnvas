@@ -34,7 +34,7 @@ const useStyles = createStyles( () => ( {
   },
 } ) );
 
-export default React.memo( function Signin( props: PaperProps ) {
+export default React.memo( ( props: PaperProps ) => {
   const {
     classes: { root },
   } = useStyles();

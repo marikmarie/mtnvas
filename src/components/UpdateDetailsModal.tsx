@@ -3,8 +3,7 @@ import { useForm } from "@mantine/form";
 import { TextInput, Button, Stack, Text } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { notifications } from "@mantine/notifications";
-import useAxios from "../hooks/use-axios";
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 
 interface UpdateDetailsData {
   subscriptionId: string;
@@ -51,13 +50,12 @@ export default function UpdateDetailsModal( { detail }: DetailsProp ) {
     },
   } );
 
-  const axios = useAxios();
   const queryClient = useQueryClient();
 
   const mutation = useMutation( {
     mutationKey: ["details"],
     mutationFn: ( data: UpdateDetailsData ) =>
-      axios.put( `/customers`, data ).then( ( res ) => res.data ),
+      axios.put( import.meta.env.VITE_APP_BASE_URL! + `/customers`, data ).then( ( res ) => res.data ),
     onSuccess: ( response: AxiosResponse ) => {
       queryClient.invalidateQueries( {
         queryKey: ["details"],

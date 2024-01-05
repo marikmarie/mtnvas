@@ -3,12 +3,10 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconPhone } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
-import { AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosResponse, AxiosError } from 'axios';
 import React from 'react';
-import useAxios from '../hooks/use-axios';
 
 export default React.memo( () => {
-    const axios = useAxios();
     const form = useForm( {
         initialValues: {
             wakanetNumber: "",
@@ -24,7 +22,7 @@ export default React.memo( () => {
 
 
     const mutation = useMutation( {
-        mutationFn: () => axios.post( "/load-bundle", form.values ),
+        mutationFn: () => axios.post( import.meta.env.VITE_APP_BASE_URL! + "/load-bundle", form.values ),
         onSuccess: ( _: AxiosResponse ) => {
             notifications.show( {
                 title: "Success",
@@ -63,18 +61,23 @@ export default React.memo( () => {
 
     return (
         <Paper p="lg" mt="xl" shadow='lg'>
-            <Text fz="xl" fw="bold" c="dimmed" >
+            <Text
+                fz="xl"
+                fw="bold"
+                c="dimmed" >
                 Load new WakaNet bundle
             </Text>
 
             <form onSubmit={form.onSubmit( () => mutation.mutate() )}>
                 <Stack mt={"sm"}>
-                    <TextInput icon={<IconPhone />} label="WakaNet Number"
+                    <TextInput
+                        icon={<IconPhone />}
+                        label="WakaNet Number"
                         onChange={( event ) =>
                             form.setFieldValue( "wakanetNumber", event.currentTarget.value )
                         }
                         error={form.errors.wakanetNumber}
-                        placeholder="Forexample 2563945 ..." withAsterisk />
+                        placeholder="Forexample 2563945..." withAsterisk />
                     <Radio.Group
                         name="bundle"
                         withAsterisk
@@ -100,8 +103,14 @@ export default React.memo( () => {
 
                 <Flex mt="md" w="100%" gap={"sm"} justify={"flex-end"}>
                     <Flex gap={"sm"} w="30%" >
-                        <Button fullWidth variant="filled" type='submit'>Signup</Button>
-                        <Button fullWidth variant="light" onClick={() => form.reset()} >Reset</Button>
+                        <Button
+                            fullWidth
+                            variant="filled"
+                            type='submit'>Signup</Button>
+                        <Button
+                            fullWidth
+                            variant="light"
+                            onClick={() => form.reset()} >Reset</Button>
                     </Flex>
                 </Flex>
             </form>

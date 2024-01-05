@@ -7,7 +7,7 @@ import {
 } from "@mantine/core";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
+import AppRouter from "./App";
 import { BrowserRouter } from "react-router-dom";
 import store, { persistor } from "./app/store";
 import { Provider } from "react-redux";
@@ -26,7 +26,7 @@ ReactDOM.createRoot( document.getElementById( "root" ) as HTMLElement ).render(
         <PersistGate loading={null} persistor={persistor}>
           <BrowserRouter>
             <Notifications position="top-right" zIndex={2077} />
-            <AppWrapper />
+            <App />
           </BrowserRouter>
         </PersistGate>
       </Provider>
@@ -35,7 +35,7 @@ ReactDOM.createRoot( document.getElementById( "root" ) as HTMLElement ).render(
   </React.StrictMode>,
 );
 
-function AppWrapper() {
+function App() {
   const [colorScheme, setColorScheme] = React.useState<ColorScheme>( "light" );
   const toggleColorScheme = ( value?: ColorScheme ) =>
     setColorScheme( value || ( colorScheme === "dark" ? "light" : "dark" ) );
@@ -52,7 +52,7 @@ function AppWrapper() {
       >
         <Notifications position="top-right" zIndex={2077} />
         <ModalsProvider>
-          <App />
+          <AppRouter />
         </ModalsProvider>
       </MantineProvider>
     </ColorSchemeProvider>
