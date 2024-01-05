@@ -31,8 +31,11 @@ export default React.memo( () => {
                 message: "starter bundle loaded",
                 color: "green",
             } );
+            console.log( "error: " )
         },
         onError: ( error: AxiosError ) => {
+            console.log( "error: " )
+            console.log( "error: " )
             notifications.show( {
                 title:
                     ( ( error.response?.data as { httpStatus: string } )
@@ -81,11 +84,10 @@ export default React.memo( () => {
                         }
                     >
                         <Group mt="xs">
-                            <Radio value="1778FHI1" label="10GB" />
-                            <Radio value="1778FHI2" label="25GB" />
-                            <Radio value="1778FHI3" label="45GB" />
-                            <Radio value="1778FHI4" label="95GB" />
-                            <Radio value="1778FHI5" label="195GB" />
+                            <Radio value="FWA_40MBPS" label="40MBPS" />
+                            <Radio value="FWA_60MBPS" label="60MBPS" />
+                            <Radio value="FWA_80MBPS" label="80MBPS" />
+                            <Radio value="FWA_150MBPS" label="150MBPS" />
                         </Group>
                     </Radio.Group>
                     <TextInput icon={<IconPhone />} label="Agent/Customer Number" value={form.values.agentNumber}
@@ -97,7 +99,7 @@ export default React.memo( () => {
 
                 <Flex mt="md" w="100%" gap={"sm"} justify={"flex-end"}>
                     <Flex gap={"sm"} w="30%" >
-                        <Button fullWidth variant="filled" type='submit' >Signup</Button>
+                        <Button fullWidth variant="filled" type='submit'>Signup</Button>
                         <Button fullWidth variant="light" onClick={() => form.reset()} >Reset</Button>
                     </Flex>
                 </Flex>
