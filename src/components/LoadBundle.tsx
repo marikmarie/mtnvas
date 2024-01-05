@@ -87,6 +87,7 @@ export default React.memo( () => {
                             <Radio value="FWA_40MBPS" label="40MBPS" />
                             <Radio value="FWA_60MBPS" label="60MBPS" />
                             <Radio value="FWA_80MBPS" label="80MBPS" />
+                            <Radio value="FWA_100MBPS" label="100MBPS" />
                             <Radio value="FWA_150MBPS" label="150MBPS" />
                         </Group>
                     </Radio.Group>

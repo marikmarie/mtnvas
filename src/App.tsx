@@ -9,11 +9,11 @@ const NotFound = PublicLoader( lazy( () => import( "./pages/404" ) ) );
 export default function App() {
   return useRoutes( [
     {
-      path: "/signin",
+      path: "/",
       element: <Signin />,
     },
     {
-      path: "/",
+      path: "/dashboard",
       element: <Dashboard />,
     },
     {

@@ -66,11 +66,10 @@ export default React.memo( function Signin( props: PaperProps ) {
   const mutation = useMutation( {
     mutationFn: () => axios.post( "/signin", form.values ),
     onSuccess: ( res: AxiosResponse ) => {
-      navigate( "/" );
       dispatch( signin( res.data as unknown as { user: User } ) );
+      navigate( "/dashboard" );
     },
     onError: ( error: AxiosError ) => {
-      navigate( "/" );
       notifications.show( {
         title:
           ( ( error.response?.data as { httpStatus: string } )
@@ -118,7 +117,7 @@ export default React.memo( function Signin( props: PaperProps ) {
         </Center>
 
         {/* <form onSubmit={form.onSubmit( () => mutation.mutate() )}> */}
-        <form onSubmit={() => navigate( "/" )}>
+        <form onSubmit={() => navigate( "/dashboard" )}>
           <Stack>
             <TextInput
               label="Email"
