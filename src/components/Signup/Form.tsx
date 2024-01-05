@@ -3,11 +3,13 @@ import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { IconPhone } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
-import axios, { AxiosResponse, AxiosError } from 'axios'
+import { AxiosResponse, AxiosError } from 'axios'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../app/store'
+import useAxios from '../../hooks/use-axios'
 
 export const Form = () => {
+    const axios = useAxios()
 
     const subscriptionId = useSelector( ( state: RootState ) => state.subId.subscriptionId )
 
@@ -22,7 +24,7 @@ export const Form = () => {
 
     const mutation = useMutation( {
         mutationFn: () =>
-            axios.post( import.meta.env.VITE_APP_BASE_URL! + '/bundle-activations', { subscriptionId: parseInt( subscriptionId ), ...form.values } ),
+            axios.post( '/bundle-activations', { subscriptionId: parseInt( subscriptionId ), ...form.values } ),
         onSuccess: ( _: AxiosResponse ) => {
             notifications.show( {
                 title: 'Success',
@@ -54,6 +56,8 @@ export const Form = () => {
             } )
         },
     } )
+
+    console.log( "values: ", form.values )
 
     return (
         <div>
