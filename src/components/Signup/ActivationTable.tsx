@@ -15,7 +15,7 @@ type Data = {
     email: string;
 };
 
-const ActivationTable = () => {
+export default React.memo( () => {
     const dispatch = useDispatch()
     const axios = useAxios()
 
@@ -45,10 +45,12 @@ const ActivationTable = () => {
     );
 
     const [activations, setActivations] = React.useState<{ data: Data[] }>( { data: [] } )
+    // const activations = React.useRef<{ data: Data[] }>( { data: [] } )
 
     const getBundleActivations = React.useCallback( async () => {
         const response = await axios.get( "/bundle-activations" )
         setActivations( response.data as unknown as { data: Data[] } )
+        // activations.current = response.data
     }, [] )
 
     React.useEffect( () => {
@@ -58,6 +60,7 @@ const ActivationTable = () => {
     const table = useMantineReactTable( {
         columns,
         data: activations.data || [],
+        // data: activations.current.data || [],
         enableRowSelection: true,
         initialState: {
             pagination: { pageSize: 5, pageIndex: 0 },
@@ -68,6 +71,4 @@ const ActivationTable = () => {
     } );
 
     return <MantineReactTable table={table} />;
-};
-
-export default ActivationTable;
+} )
