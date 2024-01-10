@@ -31,7 +31,8 @@ export default React.memo( () => {
         onSuccess: ( _: AxiosResponse ) => {
             notifications.show( {
                 title: "Success",
-                message: JSON.stringify( _.data ),
+                // @ts-ignore
+                message: _.data?.message,
                 color: "green",
             } );
         },
@@ -110,8 +111,7 @@ export default React.memo( () => {
                             fullWidth
                             variant="filled"
                             onClick={() => mutation.mutate()}
-                        // onClick={() => console.log( form.values )}
-                        >Signup</Button>
+                        >Load</Button>
                         <Button
                             fullWidth
                             variant="light"

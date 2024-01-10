@@ -1,4 +1,4 @@
-import { Button, Flex, Loader, Paper, Stack, Text, TextInput } from '@mantine/core';
+import { Button, Flex, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useMutation } from '@tanstack/react-query';
@@ -10,11 +10,11 @@ export default React.memo( () => {
     const axios = useAxios();
     const form = useForm( {
         initialValues: {
-            msisdn: "",
+            bnumber: "",
         },
 
         validate: {
-            msisdn: ( val: string ) => val.length > 9 ? null : "Should be a valid wakanetNumber",
+            bnumber: ( val: string ) => val.length > 9 ? null : "Should be a valid wakanetNumber",
         },
     } );
 
@@ -24,7 +24,8 @@ export default React.memo( () => {
         onSuccess: ( _: AxiosResponse ) => {
             notifications.show( {
                 title: "Success",
-                message: "starter bundle loaded",
+                // @ts-ignore
+                message: _.data?.message,
                 color: "green",
             } );
             form.reset()
@@ -65,14 +66,14 @@ export default React.memo( () => {
                 <Stack mt={"sm"}>
                     <TextInput label="WakaNet Number"
                         onChange={( event ) =>
-                            form.setFieldValue( "msisdn", event.currentTarget.value )
+                            form.setFieldValue( "bnumber", event.currentTarget.value )
                         }
-                        error={form.errors.msisdn}
+                        error={form.errors.bnumber}
                         placeholder="Forexample 2563945 ..." withAsterisk />
                 </Stack>
 
                 <Flex mt="md" w="100%" gap={"sm"} justify={"flex-end"} >
-                    {mutation.isLoading ? <Button> <Loader variant='dots' /> </Button> : <Button fullWidth variant="filled" type='submit'>Check Balance</Button>}
+                    <Button fullWidth variant="filled" type='submit'>Check Balance</Button>
                     <Button fullWidth variant="light" onClick={() => form.reset()} >Reset</Button>
                 </Flex>
             </form>

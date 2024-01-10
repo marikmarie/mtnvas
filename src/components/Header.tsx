@@ -91,10 +91,10 @@ export function Header() {
 	const displayName = user?.name
 
 	const avatar = user
-		? `${user?.name.toUpperCase().split(
+		? `${user?.name?.toUpperCase().split(
 			' ',
 		)[0][0]
-		} ${user?.name.toUpperCase().split(
+		} ${user?.name?.toUpperCase().split(
 			' ',
 		)[1][0]
 		}`
