@@ -88,21 +88,17 @@ export function Header() {
 		}
 	} )
 
-	const parts = user?.displayName.split( ' ' )
-
-	const displayName = user
-		? `${parts![0][0]} ${parts![1][0]}`
-		: 'Ian Balijawa'
+	const displayName = user?.name
 
 	const avatar = user
-		? `${user?.displayName.split(
+		? `${user?.name.toUpperCase().split(
 			' ',
 		)[0][0]
-		} ${user?.displayName.split(
+		} ${user?.name.toUpperCase().split(
 			' ',
 		)[1][0]
 		}`
-		: 'IB'
+		: 'U'
 
 	return (
 		<Wrapper

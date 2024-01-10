@@ -24,11 +24,13 @@ export const Form = () => {
 
     const mutation = useMutation( {
         mutationFn: () =>
-            axios.post( '/bundle-activations', { subscriptionId: parseInt( subscriptionId ), ...form.values } ),
-        onSuccess: ( _: AxiosResponse ) => {
+            axios.post( '/bundle-activations', { subscriptionId, ...form.values }, {
+                headers: {}
+            } ),
+        onSuccess: ( response: AxiosResponse ) => {
             notifications.show( {
                 title: 'Success',
-                message: 'starter bundle loaded',
+                message: response.data.message,
                 color: 'green',
             } )
         },
@@ -56,8 +58,6 @@ export const Form = () => {
             } )
         },
     } )
-
-    console.log( "values: ", form.values )
 
     return (
         <div>

@@ -3,37 +3,39 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconPhone } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import { AxiosResponse, AxiosError } from 'axios';
 import React from 'react';
+import useAxios from '../hooks/use-axios';
 
 export default React.memo( () => {
+
+    const axios = useAxios()
+
     const form = useForm( {
         initialValues: {
-            wakanetNumber: "",
-            agentNumber: "",
-            package: "",
+            msisdn: "",
+            bnumber: "",
+            Package: "",
         },
 
         validate: {
-            wakanetNumber: ( val: string ) => val.length > 9 ? null : "Should be a valid wakanetNumber",
-            agentNumber: ( val: string ) => val.length > 9 ? null : "Should be a valid custmer/agent number",
+            bnumber: ( val: string ) => val.length > 9 ? null : "Should be a valid WakaNet Number",
+            msisdn: ( val: string ) => val.length > 9 ? null : "Should be a valid custmer/agent number",
+            Package: ( val: string ) => !val ? "Package is required" : null,
         },
     } );
 
 
     const mutation = useMutation( {
-        mutationFn: () => axios.post( import.meta.env.VITE_APP_BASE_URL! + "/load-bundle", form.values ),
+        mutationFn: () => axios.post( "/load-bundle", form.values ),
         onSuccess: ( _: AxiosResponse ) => {
             notifications.show( {
                 title: "Success",
-                message: "starter bundle loaded",
+                message: JSON.stringify( _.data ),
                 color: "green",
             } );
-            console.log( "error: " )
         },
         onError: ( error: AxiosError ) => {
-            console.log( "error: " )
-            console.log( "error: " )
             notifications.show( {
                 title:
                     ( ( error.response?.data as { httpStatus: string } )
@@ -68,23 +70,24 @@ export default React.memo( () => {
                 Load new WakaNet bundle
             </Text>
 
-            <form onSubmit={form.onSubmit( () => mutation.mutate() )}>
+            <form >
                 <Stack mt={"sm"}>
                     <TextInput
                         icon={<IconPhone />}
                         label="WakaNet Number"
                         onChange={( event ) =>
-                            form.setFieldValue( "wakanetNumber", event.currentTarget.value )
+                            form.setFieldValue( "bnumber", event.currentTarget.value )
                         }
-                        error={form.errors.wakanetNumber}
+                        error={form.errors.bnumber}
                         placeholder="Forexample 2563945..." withAsterisk />
                     <Radio.Group
-                        name="bundle"
+                        name="Package"
                         withAsterisk
-                        value={form.values.package}
+                        value={form.values.Package}
                         onChange={( value ) =>
-                            form.setFieldValue( "package", value )
+                            form.setFieldValue( "Package", value )
                         }
+                        error={form.errors.bnumber}
                     >
                         <Group mt="xs">
                             <Radio value="FWA_40MBPS" label="40MBPS" />
@@ -94,9 +97,9 @@ export default React.memo( () => {
                             <Radio value="FWA_150MBPS" label="150MBPS" />
                         </Group>
                     </Radio.Group>
-                    <TextInput icon={<IconPhone />} label="Agent/Customer Number" value={form.values.agentNumber}
+                    <TextInput icon={<IconPhone />} label="Agent/Customer Number" value={form.values.msisdn}
                         onChange={( event ) =>
-                            form.setFieldValue( "agentNumber", event.currentTarget.value )
+                            form.setFieldValue( "msisdn", event.currentTarget.value )
                         }
                         placeholder="Forexample 2563945 ..." withAsterisk />
                 </Stack>
@@ -106,7 +109,9 @@ export default React.memo( () => {
                         <Button
                             fullWidth
                             variant="filled"
-                            type='submit'>Signup</Button>
+                            onClick={() => mutation.mutate()}
+                        // onClick={() => console.log( form.values )}
+                        >Signup</Button>
                         <Button
                             fullWidth
                             variant="light"

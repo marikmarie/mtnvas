@@ -18,9 +18,8 @@ export default React.memo( () => {
   return (
     <Layout>
       <Container size={"xl"}>
-        <Paper shadow='lg' p="md">
+        <Paper withBorder mt="md" p="sm">
           <SimpleGrid
-            mt="md"
             cols={4}
             breakpoints={[
               { maxWidth: 'md', cols: 2 },

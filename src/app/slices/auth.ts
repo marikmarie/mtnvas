@@ -2,17 +2,11 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 
 export type User = {
-  jwtToken: string;
-  userName: string;
-  displayName: string;
-  department: string;
-  jobTitle: string;
-  phoneNumber: string;
-  emailAddress: string;
-  authenticated: boolean;
-  authSystemError: string;
-  authUserError: string;
+  email: "george.onen@mtn.com"
+  name: "george onen"
+  role: "CEX"
 } | null;
+
 
 export interface Auth {
   user: User;

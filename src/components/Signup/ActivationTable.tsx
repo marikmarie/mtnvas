@@ -1,4 +1,3 @@
-import { useCallback, useMemo } from 'react';
 import {
     MantineReactTable,
     useMantineReactTable,
@@ -8,7 +7,7 @@ import React from 'react';
 import { Button } from '@mantine/core';
 import { useDispatch } from 'react-redux';
 import { setSubscriptionId } from '../../app/slices/sub-id';
-import axios from 'axios';
+import useAxios from '../../hooks/use-axios';
 
 type Data = {
     subscriptionId: string;
@@ -18,8 +17,9 @@ type Data = {
 
 const ActivationTable = () => {
     const dispatch = useDispatch()
+    const axios = useAxios()
 
-    const columns: any = useMemo<MRT_ColumnDef<Data>[]>(
+    const columns: any = React.useMemo<MRT_ColumnDef<Data>[]>(
         () => [
             {
                 accessorKey: 'subscriptionId',
@@ -35,7 +35,7 @@ const ActivationTable = () => {
             },
             {
                 accessorKey: 'action',
-                header: 'Action',
+                header: 'ACTION',
                 Cell: ( { row } ) => (
                     <Button onClick={() => dispatch( setSubscriptionId( row.original.subscriptionId ) )}>Select</Button>
                 ),
@@ -44,11 +44,11 @@ const ActivationTable = () => {
         [],
     );
 
-    const [data, setData] = React.useState<any>( null )
+    const [activations, setActivations] = React.useState<{ data: Data[] }>( { data: [] } )
 
-    const getBundleActivations = useCallback( async () => {
-        const result = await axios.get( import.meta.env.VITE_APP_BASE_URL! + "/bundle-activations" )
-        setData( result.data )
+    const getBundleActivations = React.useCallback( async () => {
+        const response = await axios.get( "/bundle-activations" )
+        setActivations( response.data as unknown as { data: Data[] } )
     }, [] )
 
     React.useEffect( () => {
@@ -57,7 +57,7 @@ const ActivationTable = () => {
 
     const table = useMantineReactTable( {
         columns,
-        data: data?.data || [],
+        data: activations.data || [],
         enableRowSelection: true,
         initialState: {
             pagination: { pageSize: 5, pageIndex: 0 },

@@ -1,16 +1,17 @@
 import { Button, Flex, Paper, Stack, Text, TextInput } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import axios, { AxiosResponse, AxiosError } from 'axios'
+import { AxiosResponse, AxiosError } from 'axios'
 import React from 'react'
 import { useForm } from '@mantine/form'
 import { Modal } from './Modal'
 import UpdateDetailsModal from './UpdateDetailsModal'
 import { useDisclosure } from '@mantine/hooks'
 import { IconPlus } from '@tabler/icons-react'
+import useAxios from '../hooks/use-axios'
 
 export default React.memo( () => {
-
+    const axios = useAxios()
     const qc = useQueryClient()
 
     const [opened, { open, close }] = useDisclosure( false );
@@ -26,7 +27,7 @@ export default React.memo( () => {
     } )
 
     const mutation = useMutation( {
-        mutationFn: ( wakanetNumber: string ) => axios.put( import.meta.env.VITE_APP_BASE_URL! + '/customer-details', { bnumber: wakanetNumber } ),
+        mutationFn: ( wakanetNumber: string ) => axios.put( '/customer-details', { bnumber: wakanetNumber } ),
         onSuccess: ( _: AxiosResponse ) => {
             open()
             notifications.show( {

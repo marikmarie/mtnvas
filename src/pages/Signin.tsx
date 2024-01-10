@@ -42,20 +42,17 @@ export default React.memo( ( props: PaperProps ) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const mtnEmailRegex = /^\S+@mtn\.com$/;
-  const gdeEmailRegex = /^\S+@gdexperts\.com$/;
-
   const form = useForm( {
     initialValues: {
-      email: "",
+      username: "",
       password: "",
     },
 
     validate: {
-      email: ( val: string ) =>
-        mtnEmailRegex.test( val ) || gdeEmailRegex.test( val )
+      username: ( val: string ) =>
+        /^\S+@gdexperts\.com$/.test( val ) || /^\S+@mtn\.com$/.test( val )
           ? null
-          : "Should be a valid MTN or GDExperts email",
+          : "Should be a valid MTN or GDExperts EMAIL",
       password: ( val: string | any[] ) =>
         val.length <= 6
           ? "Password should include at least 6 characters"
@@ -64,8 +61,9 @@ export default React.memo( ( props: PaperProps ) => {
   } );
 
   const mutation = useMutation( {
-    mutationFn: () => axios.post( "/signin", form.values ),
+    mutationFn: () => axios.post( "/login", form.values ),
     onSuccess: ( res: AxiosResponse ) => {
+      console.log( res, " ==user" )
       dispatch( signin( res.data as unknown as { user: User } ) );
       navigate( "/dashboard" );
     },
@@ -116,8 +114,7 @@ export default React.memo( ( props: PaperProps ) => {
           </Title>
         </Center>
 
-        {/* <form onSubmit={form.onSubmit( () => mutation.mutate() )}> */}
-        <form onSubmit={() => navigate( "/dashboard" )}>
+        <form onSubmit={form.onSubmit( () => mutation.mutate() )}>
           <Stack>
             <TextInput
               label="Email"
@@ -127,11 +124,11 @@ export default React.memo( ( props: PaperProps ) => {
                 </ThemeIcon>
               }
               placeholder="mail@mtn.com"
-              value={form.values.email}
+              value={form.values.username}
               onChange={( event ) =>
-                form.setFieldValue( "email", event.currentTarget.value )
+                form.setFieldValue( "username", event.currentTarget.value )
               }
-              error={form.errors.email}
+              error={form.errors.username}
             />
 
             <TextInput
