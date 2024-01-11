@@ -2,25 +2,29 @@ import {
 	createStyles,
 	Header as Wrapper,
 	Container,
-	rem, ActionIcon,
+	rem,
+	ActionIcon,
 	Avatar,
-	Menu, Group, Flex, Image
+	Menu,
+	Group,
+	Flex,
+	Image,
 } from '@mantine/core'
 import { IconLogout } from '@tabler/icons-react'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../app/store'
 import { IconUser } from '@tabler/icons-react'
-import useAxios from '../hooks/use-axios'
+import useRequest from '../hooks/use-request'
 import { signout } from '../app/slices/auth'
 import { useNavigate } from 'react-router-dom'
-import { ActionToggle } from './ActionToggle'
+import { ActionToggle } from './action-toggle'
 import { useMutation } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 
-const HEADER_HEIGHT = rem( 60 )
+const HEADER_HEIGHT = rem(60)
 
-const useStyles = createStyles( theme => ( {
+const useStyles = createStyles(theme => ({
 	root: {
 		position: 'sticky',
 	},
@@ -32,13 +36,13 @@ const useStyles = createStyles( theme => ( {
 	},
 
 	links: {
-		[theme.fn.smallerThan( 'sm' )]: {
+		[theme.fn.smallerThan('sm')]: {
 			display: 'none',
 		},
 	},
 
 	burger: {
-		[theme.fn.largerThan( 'sm' )]: {
+		[theme.fn.largerThan('sm')]: {
 			display: 'none',
 		},
 	},
@@ -46,67 +50,50 @@ const useStyles = createStyles( theme => ( {
 	link: {
 		display: 'block',
 		lineHeight: 1,
-		padding: `${rem( 8 )} ${rem( 12 )}`,
+		padding: `${rem(8)} ${rem(12)}`,
 		borderRadius: theme.radius.sm,
 		textDecoration: 'none',
-		color:
-			theme.colorScheme === 'dark'
-				? theme.colors.dark[0]
-				: theme.colors.gray[7],
+		color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[7],
 		fontSize: theme.fontSizes.sm,
 		fontWeight: 500,
 
 		'&:hover': {
-			backgroundColor:
-				theme.colorScheme === 'dark'
-					? theme.colors.dark[6]
-					: theme.colors.gray[0],
+			backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 		},
 	},
 
 	linkLabel: {
-		marginRight: rem( 5 ),
+		marginRight: rem(5),
 	},
-} ) )
+}))
 
 export function Header() {
 	const { classes } = useStyles()
 	const dispatch = useDispatch()
 
-	const user = useSelector( ( state: RootState ) => state.auth.user )
-	const axios = useAxios()
+	const user = useSelector((state: RootState) => state.auth.user)
+	const request = useRequest()
 	const navigate = useNavigate()
 
-	const mutation = useMutation( {
-		mutationFn: () => axios.post( '/auth/logout' ),
+	const mutation = useMutation({
+		mutationFn: () => request.post('/auth/logout'),
 		onSuccess: () => {
-			dispatch( signout() )
-			navigate( "/signin" )
+			dispatch(signout())
+			navigate('/signin')
 		},
-		onError: ( error: AxiosError ) => {
-			console.log( error )
-		}
-	} )
+		onError: (error: AxiosError) => {
+			console.log(error)
+		},
+	})
 
 	const displayName = user?.name
 
 	const avatar = user
-		? `${user?.name?.toUpperCase().split(
-			' ',
-		)[0][0]
-		} ${user?.name?.toUpperCase().split(
-			' ',
-		)[1][0]
-		}`
+		? `${user?.name?.toUpperCase().split(' ')[0][0]} ${user?.name?.toUpperCase().split(' ')[1][0]}`
 		: 'U'
 
 	return (
-		<Wrapper
-			withBorder
-			zIndex={1}
-			className={classes.root}
-			height={HEADER_HEIGHT}
-		>
+		<Wrapper withBorder zIndex={1} className={classes.root} height={HEADER_HEIGHT}>
 			<Container className={classes.inner} fluid>
 				<Flex justify={'space-between'} w="100%" align={'center'}>
 					<Image src="/Logo.png" width={50} />
@@ -123,9 +110,7 @@ export function Header() {
 
 							<Menu.Dropdown>
 								<Menu.Label>Account</Menu.Label>
-								<Menu.Item icon={<IconUser size={14} />}>
-									{displayName}
-								</Menu.Item>
+								<Menu.Item icon={<IconUser size={14} />}>{displayName}</Menu.Item>
 
 								<Menu.Item
 									onClick={() => mutation.mutate()}
