@@ -1,12 +1,14 @@
 import { Button, Container, Paper, SimpleGrid } from '@mantine/core'
 import React from 'react'
 import Layout from '../components/Layout'
-import Signup from '../components/signup'
+import Signup from '../components/5g-stater-pack'
 import LoadBundle from '../components/load-bundle'
 import CheckBalance from '../components/check-balance'
 import UpdateDetails from '../components/update-details'
+import Report from '../components/report'
+import { WakanetActivation } from '../components/wakanet-activation'
 
-type BTN_TYPE = 'signup' | 'load-bundle' | 'check-balance' | 'update-details'
+type BTN_TYPE = 'signup' | 'load-bundle' | 'check-balance' | 'update-details' | 'report' | 'wakanet-activation'
 
 export default React.memo(() => {
 	const [activeBtn, setActiveBtn] = React.useState<BTN_TYPE>('signup')
@@ -16,7 +18,7 @@ export default React.memo(() => {
 			<Container size={'xl'}>
 				<Paper withBorder mt="md" p="sm">
 					<SimpleGrid
-						cols={4}
+						cols={6}
 						breakpoints={[
 							{ maxWidth: 'md', cols: 2 },
 							{ maxWidth: 'xs', cols: 2 },
@@ -28,7 +30,14 @@ export default React.memo(() => {
 							variant={activeBtn === 'signup' ? 'filled' : 'light'}
 							onClick={() => setActiveBtn('signup')}
 						>
-							Sign up
+							5G StarterPack
+						</Button>
+						<Button
+							fullWidth
+							variant={activeBtn === 'wakanet-activation' ? 'filled' : 'light'}
+							onClick={() => setActiveBtn('wakanet-activation')}
+						>
+							WakaNet StarterPack
 						</Button>
 						<Button
 							fullWidth
@@ -51,6 +60,13 @@ export default React.memo(() => {
 						>
 							Update Details
 						</Button>
+						<Button
+							fullWidth
+							variant={activeBtn === 'report' ? 'filled' : 'light'}
+							onClick={() => setActiveBtn('report')}
+						>
+							Activations Report
+						</Button>
 					</SimpleGrid>
 				</Paper>
 				{(() => {
@@ -63,6 +79,10 @@ export default React.memo(() => {
 							return <CheckBalance />
 						case 'update-details':
 							return <UpdateDetails />
+						case 'report':
+							return <Report />
+						case 'wakanet-activation':
+							return <WakanetActivation />
 						default:
 							return null
 					}

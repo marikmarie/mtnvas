@@ -22,10 +22,50 @@ export const Form = () => {
 		},
 	})
 
-	const mutation = useMutation({
+	const activation = useMutation({
 		mutationFn: () =>
 			request.post(
 				'/bundle-activations',
+				{ subscriptionId, ...form.values },
+				{
+					headers: {},
+				},
+			),
+		onSuccess: (response: AxiosResponse) => {
+			notifications.show({
+				title: 'Success',
+				message: response.data.message,
+				color: 'green',
+			})
+		},
+		onError: (error: AxiosError) => {
+			notifications.show({
+				title:
+					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
+					((
+						error.response?.data as {
+							status: string
+						}
+					).status as unknown as React.ReactNode),
+				message:
+					((
+						error.response?.data as {
+							message: string
+						}
+					).message! as unknown as React.ReactNode) ||
+					((
+						error.response?.data as {
+							error: string
+						}
+					).error as unknown as React.ReactNode),
+				color: 'red',
+			})
+		},
+	})
+	const rejection = useMutation({
+		mutationFn: () =>
+			request.post(
+				'/reject-activations',
 				{ subscriptionId, ...form.values },
 				{
 					headers: {},
@@ -66,7 +106,7 @@ export const Form = () => {
 	return (
 		<div>
 			{subscriptionId ? (
-				<form onSubmit={form.onSubmit(() => mutation.mutate())}>
+				<form onSubmit={form.onSubmit(() => activation.mutate())}>
 					<Stack my={'sm'}>
 						<Flex justify={'start'} gap="xl" align={'center'}>
 							<Badge variant="light" size="xl">
@@ -84,7 +124,14 @@ export const Form = () => {
 							withAsterisk
 							w="100%"
 						/>
-						<Button type="submit">Activate</Button>
+						<Flex justify={'start'} gap="xl" align={'center'}>
+							<Button fullWidth type="submit">
+								Activate
+							</Button>
+							<Button fullWidth color="red" onClick={() => rejection.mutate()}>
+								Reject
+							</Button>
+						</Flex>
 					</Stack>
 				</form>
 			) : null}

@@ -1,4 +1,4 @@
-import { Button, Flex, Group, Paper, Radio, Stack, Text, TextInput } from '@mantine/core'
+import { Box, Button, Flex, Group, Paper, Radio, Stack, Text, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { IconPhone } from '@tabler/icons-react'
@@ -61,7 +61,7 @@ export default React.memo(() => {
 
 	return (
 		<Paper p="lg" mt="xl" shadow="lg">
-			<Text fz="xl" fw="bold" c="dimmed">
+			<Text fz="xl" fw="bold">
 				Load new WakaNet bundle
 			</Text>
 
@@ -77,36 +77,48 @@ export default React.memo(() => {
 					/>
 					<Paper withBorder p="md">
 						<Stack>
-							<Radio.Group
-								name="Package"
-								withAsterisk
-								value={form.values.Package}
-								onChange={value => form.setFieldValue('Package', value)}
-								error={form.errors.bnumber}
-							>
-								<Group mt="xs">
-									<Radio value="FWA_40MBPS" label="40MBPS" />
-									<Radio value="FWA_60MBPS" label="60MBPS" />
-									<Radio value="FWA_80MBPS" label="80MBPS" />
-									<Radio value="FWA_100MBPS" label="100MBPS" />
-									<Radio value="FWA_150MBPS" label="150MBPS" />
-								</Group>
-							</Radio.Group>
-							<Radio.Group
-								name="Package1"
-								withAsterisk
-								value={form.values.Package}
-								onChange={value => form.setFieldValue('Package', value)}
-								error={form.errors.bnumber}
-							>
-								<Group mt="xs">
-									<Radio label="10GB" value="ITTH_10GB_PST" />
-									<Radio label="25GB" value="1778FHI4" />
-									<Radio label="45GB" value="1778FHI1" />
-									<Radio label="95GB" value="1778FHI2" />
-									<Radio label="195GB" value="1778FHI3" />
-								</Group>
-							</Radio.Group>
+							<Box>
+								<Text fz="xl" fw="bold">
+									5G Bundles
+								</Text>
+
+								<Radio.Group
+									name="Package"
+									withAsterisk
+									value={form.values.Package}
+									onChange={value => form.setFieldValue('Package', value)}
+									error={form.errors.bnumber}
+								>
+									<Group mt="xs">
+										<Radio value="FWA_40MBPS" label="40MBPS" />
+										<Radio value="FWA_60MBPS" label="60MBPS" />
+										<Radio value="FWA_80MBPS" label="80MBPS" />
+										<Radio value="FWA_100MBPS" label="100MBPS" />
+										<Radio value="FWA_150MBPS" label="150MBPS" />
+									</Group>
+								</Radio.Group>
+							</Box>
+							<Box>
+								<Text fz="xl" fw="bold">
+									WakaNet Bundles
+								</Text>
+
+								<Radio.Group
+									name="Package1"
+									withAsterisk
+									value={form.values.Package}
+									onChange={value => form.setFieldValue('Package', value)}
+									error={form.errors.bnumber}
+								>
+									<Group mt="xs">
+										<Radio label="10GB" value="ITTH_10GB_PST" />
+										<Radio label="25GB" value="1778FHI4" />
+										<Radio label="45GB" value="1778FHI1" />
+										<Radio label="95GB" value="1778FHI2" />
+										<Radio label="195GB" value="1778FHI3" />
+									</Group>
+								</Radio.Group>
+							</Box>
 						</Stack>
 					</Paper>
 
