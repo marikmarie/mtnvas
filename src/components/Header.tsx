@@ -15,12 +15,8 @@ import { IconLogout } from '@tabler/icons-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../app/store'
 import { IconUser } from '@tabler/icons-react'
-import useRequest from '../hooks/use-request'
-import { signout } from '../app/slices/auth'
-import { useNavigate } from 'react-router-dom'
 import { ActionToggle } from './action-toggle'
-import { useMutation } from '@tanstack/react-query'
-import type { AxiosError } from 'axios'
+import { signout } from '../app/slices/auth'
 
 const HEADER_HEIGHT = rem(60)
 
@@ -72,19 +68,6 @@ export function Header() {
 	const dispatch = useDispatch()
 
 	const user = useSelector((state: RootState) => state.auth.user)
-	const request = useRequest()
-	const navigate = useNavigate()
-
-	const mutation = useMutation({
-		mutationFn: () => request.post('/auth/logout'),
-		onSuccess: () => {
-			dispatch(signout())
-			navigate('/signin')
-		},
-		onError: (error: AxiosError) => {
-			console.log(error)
-		},
-	})
 
 	const displayName = user?.name
 
@@ -113,7 +96,7 @@ export function Header() {
 								<Menu.Item icon={<IconUser size={14} />}>{displayName}</Menu.Item>
 
 								<Menu.Item
-									onClick={() => mutation.mutate()}
+									onClick={() => dispatch(signout())}
 									color="red"
 									icon={<IconLogout size={14} />}
 								>

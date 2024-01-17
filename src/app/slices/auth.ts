@@ -10,30 +10,32 @@ export type User = {
 
 export interface Auth {
   user: User;
-  jwtToken?: string;
+  token?: string;
 }
 
 const initialState: Auth = {
   user: null,
-  jwtToken: "",
+  token: "",
 };
 
 const slice = createSlice( {
   name: "auth",
   initialState,
   reducers: {
-    signin: ( state, action: PayloadAction<{ user: User }> ) => {
+    signin: ( state, action: PayloadAction<Auth> ) => {
+      console.log( "auth: ", action.payload )
       state.user = action.payload.user;
+      state.token = action.payload.token;
     },
     signout: ( state ) => {
       state.user = null;
-      state.jwtToken = "";
+      state.token = "";
     },
   },
 } );
 
 export const { signin, signout } = slice.actions;
 export const user = ( state: RootState ) => state.auth.user;
-export const selectToken = ( state: RootState ) => state.auth.jwtToken;
+export const selectToken = ( state: RootState ) => state.auth.token;
 
 export default slice.reducer

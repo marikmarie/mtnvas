@@ -2,16 +2,20 @@ import { MantineReactTable, useMantineReactTable, type MRT_ColumnDef } from 'man
 import React from 'react'
 import useRequest from '../hooks/use-request'
 
-type Data = {
+interface Report {
 	subscriptionId: string
 	msisdn: string
 	email: string
+	bnumber: string
+	salesAgentEmail: string
+	createdAt: string
+	status: string
 }
 
 export default React.memo(() => {
 	const request = useRequest()
 
-	const columns: any = React.useMemo<MRT_ColumnDef<Data>[]>(
+	const columns = React.useMemo<MRT_ColumnDef<Report>[]>(
 		() => [
 			{
 				accessorKey: 'subscriptionId',
@@ -45,20 +49,20 @@ export default React.memo(() => {
 		[],
 	)
 
-	const [activations, setActivations] = React.useState<{ data: Data[] }>({ data: [] })
+	const [report, setReport] = React.useState<{ data: Report[] }>({ data: [] })
 
-	const getBundleActivations = React.useCallback(async () => {
+	const getReport = React.useCallback(async () => {
 		const response = await request.get('/activations')
-		setActivations(response.data as unknown as { data: Data[] })
+		setReport(response.data as unknown as { data: Report[] })
 	}, [])
 
 	React.useEffect(() => {
-		getBundleActivations()
+		getReport()
 	}, [])
 
 	const table = useMantineReactTable({
 		columns,
-		data: activations.data || [],
+		data: report.data || [],
 		enableRowSelection: true,
 		initialState: {
 			pagination: { pageSize: 5, pageIndex: 0 },

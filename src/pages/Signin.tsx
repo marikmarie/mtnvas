@@ -21,7 +21,7 @@ import { notifications } from '@mantine/notifications'
 import { AxiosError, AxiosResponse } from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { signin, User } from '../app/slices/auth'
+import { Auth, signin } from '../app/slices/auth'
 import React from 'react'
 
 const useStyles = createStyles(() => ({
@@ -61,8 +61,8 @@ export default React.memo((props: PaperProps) => {
 	const mutation = useMutation({
 		mutationFn: () => request.post('/login', form.values),
 		onSuccess: (res: AxiosResponse) => {
-			console.log(res, ' ==user')
-			dispatch(signin(res.data as unknown as { user: User }))
+			console.log('auth: ', res.data)
+			dispatch(signin(res.data as unknown as Auth))
 			navigate('/dashboard')
 		},
 		onError: (error: AxiosError) => {
