@@ -61,7 +61,7 @@ export const WakanetActivation = () => {
 	return (
 		<div>
 			<form onSubmit={form.onSubmit(() => activation.mutate())}>
-				<Stack my={'sm'}>
+				<Stack py={'lg'}>
 					<TextInput
 						icon={<IconPhone />}
 						label="WakaNet Number"

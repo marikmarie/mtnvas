@@ -55,7 +55,7 @@ export default React.memo(() => {
 	})
 
 	return (
-		<Paper p="lg" mt="xl" shadow="lg">
+		<Paper py="lg">
 			<Text fz="xl" fw="bold" c="dimmed">
 				Check Customer Subscription balance
 			</Text>

@@ -1,6 +1,8 @@
-import { MantineReactTable, useMantineReactTable, type MRT_ColumnDef } from 'mantine-react-table'
-import React from 'react'
+import { MantineReactTable, type MRT_ColumnDef } from 'mantine-react-table'
+import React, { useState } from 'react'
 import useRequest from '../hooks/use-request'
+import { Stack } from '@mantine/core'
+import { useTable } from '../hooks/use-table'
 
 interface Report {
 	subscriptionId: string
@@ -14,6 +16,7 @@ interface Report {
 
 export default React.memo(() => {
 	const request = useRequest()
+	const [loading, setLoading] = useState(false)
 
 	const columns = React.useMemo<MRT_ColumnDef<Report>[]>(
 		() => [
@@ -44,6 +47,10 @@ export default React.memo(() => {
 			{
 				accessorKey: 'createdAt',
 				header: 'CREATED AT',
+				Cell: ({ row }) =>
+					new Date(row.original.createdAt).toDateString() +
+					' ' +
+					new Date(row.original.createdAt).toLocaleTimeString(),
 			},
 		],
 		[],
@@ -52,6 +59,17 @@ export default React.memo(() => {
 	const [report, setReport] = React.useState<{ data: Report[] }>({ data: [] })
 
 	const getReport = React.useCallback(async () => {
+		try {
+			setLoading(true)
+			const response = await request.get('/activations')
+			setReport(response.data as unknown as { data: Report[] })
+
+			setLoading(false)
+		} catch (error) {
+		} finally {
+			setLoading(false)
+		}
+
 		const response = await request.get('/activations')
 		setReport(response.data as unknown as { data: Report[] })
 	}, [])
@@ -60,17 +78,11 @@ export default React.memo(() => {
 		getReport()
 	}, [])
 
-	const table = useMantineReactTable({
-		columns,
-		data: report.data || [],
-		enableRowSelection: true,
-		initialState: {
-			pagination: { pageSize: 5, pageIndex: 0 },
-			showGlobalFilter: false,
-			density: 'xs',
-		},
-		paginationDisplayMode: 'pages',
-	})
+	const table = useTable(report.data, columns, loading)
 
-	return <MantineReactTable table={table} />
+	return (
+		<Stack py="lg">
+			<MantineReactTable table={table} />
+		</Stack>
+	)
 })

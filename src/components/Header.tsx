@@ -69,11 +69,11 @@ export function Header() {
 
 	const user = useSelector((state: RootState) => state.auth.user)
 
-	const displayName = user?.name
+	const displayName = user?.name || 'user'
 
-	const avatar = user
-		? `${user?.name?.toUpperCase().split(' ')[0][0]} ${user?.name?.toUpperCase().split(' ')[1][0]}`
-		: 'U'
+	// const avatar = user
+	// 	? `${user?.name?.toUpperCase()?.split(' ')[0][0]} ${user?.name?.toUpperCase()?.split(' ')[1][0]}`
+	// 	: 'U'
 
 	return (
 		<Wrapper withBorder zIndex={1} className={classes.root} height={HEADER_HEIGHT}>
@@ -86,7 +86,7 @@ export function Header() {
 							<Menu.Target>
 								<ActionIcon>
 									<Avatar color="cyan" radius="xl">
-										{avatar}
+										{'U'}
 									</Avatar>
 								</ActionIcon>
 							</Menu.Target>

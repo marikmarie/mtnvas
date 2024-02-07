@@ -68,7 +68,7 @@ export default React.memo(() => {
 	const details = mutation.data?.data?.data
 
 	return (
-		<Paper p="lg" my="xl" shadow="lg">
+		<Paper py="lg">
 			<Text fz="xl" fw="bold" c="dimmed">
 				Update Existing customer details
 			</Text>

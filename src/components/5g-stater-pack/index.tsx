@@ -5,7 +5,7 @@ import { Form } from './form'
 
 export default React.memo(() => {
 	return (
-		<Paper p="lg" mt="xl" shadow="lg">
+		<Paper py="lg" mt="xl">
 			<ActivationTable />
 			<Form />
 		</Paper>

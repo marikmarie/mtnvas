@@ -1,25 +1,12 @@
 
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { useSelector } from 'react-redux';
-import { RootState } from '../app/store';
 
 export default function useRequest(): AxiosInstance {
-	const token = useSelector( ( state: RootState ) => state.auth.token );
+	// const token = useSelector( ( state: RootState ) => state.auth.token );
 
-	const instance = location.pathname === "/"
-		? axios.create( {
-			baseURL: import.meta.env.VITE_APP_BASE_URL!,
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		} )
-		: axios.create( {
-			baseURL: import.meta.env.VITE_APP_BASE_URL!,
-			headers: {
-				Authorization: `Bearer ${token}`,
-				'Content-Type': 'application/json',
-			},
-		} );
+	const instance = axios.create( {
+		baseURL: import.meta.env.VITE_APP_BASE_URL!,
+	} )
 
 	instance.interceptors.request.use(
 		( config: InternalAxiosRequestConfig<any> ) => {

@@ -1,26 +1,31 @@
 :root {
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
-    color-scheme: light dark;
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-text-size-adjust: 100%;
+	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
+	color-scheme: light dark;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-text-size-adjust: 100%;
 }
 
 body {
-    margin: 0;
-    background: rgb(255, 255, 255);
+	margin: 0;
+	background: rgb(255, 255, 255);
 }
 
 a {
-    text-decoration: none;
-    color: rgb(128, 128, 128);
-    background: #fff3d4;
+	text-decoration: none;
+	color: rgb(128, 128, 128);
+	background: #fff3d4;
 }
 
 ::-webkit-scrollbar {
-    display: none;
+	display: none;
 }
+
+/* .overflow-container {
+	width: 100%;
+	overflow: hidden;
+} */

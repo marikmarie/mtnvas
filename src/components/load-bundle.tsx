@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Group, Paper, Radio, Stack, Text, TextInput } from '@mantine/core'
+import { Box, Button, Divider, Flex, Group, Paper, Radio, Stack, Text, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { IconPhone } from '@tabler/icons-react'
@@ -14,13 +14,13 @@ export default React.memo(() => {
 		initialValues: {
 			msisdn: '',
 			bnumber: '',
-			Package: '',
+			serviceCode: '',
 		},
 
 		validate: {
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid WakaNet Number'),
 			msisdn: (val: string) => (val.length > 9 ? null : 'Should be a valid custmer/agent number'),
-			Package: (val: string) => (!val ? 'Package is required' : null),
+			serviceCode: (val: string) => (!val ? 'Service Code is required' : null),
 		},
 	})
 
@@ -60,8 +60,8 @@ export default React.memo(() => {
 	})
 
 	return (
-		<Paper p="lg" mt="xl" shadow="lg">
-			<Text fz="xl" fw="bold">
+		<Paper py="lg">
+			<Text fz="xl" fw="bold" tt="uppercase">
 				Load new WakaNet bundle
 			</Text>
 
@@ -78,15 +78,15 @@ export default React.memo(() => {
 					<Paper withBorder p="md">
 						<Stack>
 							<Box>
-								<Text fz="xl" fw="bold">
-									5G Bundles
+								<Text fz="xl" fw="bold" tt="uppercase">
+									Wakanet 5G
 								</Text>
 
 								<Radio.Group
-									name="Package"
+									name="serviceCode"
 									withAsterisk
-									value={form.values.Package}
-									onChange={value => form.setFieldValue('Package', value)}
+									value={form.values.serviceCode}
+									onChange={value => form.setFieldValue('serviceCode', value)}
 									error={form.errors.bnumber}
 								>
 									<Group mt="xs">
@@ -98,16 +98,39 @@ export default React.memo(() => {
 									</Group>
 								</Radio.Group>
 							</Box>
+							<Divider />
 							<Box>
-								<Text fz="xl" fw="bold">
+								<Text fz="xl" fw="bold" tt="uppercase">
+									Wakanet 4G
+								</Text>
+
+								<Radio.Group
+									name="serviceCode"
+									withAsterisk
+									value={form.values.serviceCode}
+									onChange={value => form.setFieldValue('serviceCode', value)}
+									error={form.errors.bnumber}
+								>
+									<Group mt="xs">
+										<Radio value="FWA_3MBPS" label="3MBPS" />
+										<Radio value="FWA_5MBPS" label="5MBPS" />
+										<Radio value="FWA_10MBPS" label="10MBPS" />
+										<Radio value="FWA_20MBPS" label="20MBPS" />
+									</Group>
+								</Radio.Group>
+							</Box>
+							<Divider />
+
+							<Box>
+								<Text fz="xl" fw="bold" tt="uppercase">
 									WakaNet Bundles
 								</Text>
 
 								<Radio.Group
-									name="Package1"
+									name="serviceCode"
 									withAsterisk
-									value={form.values.Package}
-									onChange={value => form.setFieldValue('Package', value)}
+									value={form.values.serviceCode}
+									onChange={value => form.setFieldValue('serviceCode', value)}
 									error={form.errors.bnumber}
 								>
 									<Group mt="xs">

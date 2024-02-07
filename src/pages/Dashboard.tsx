@@ -9,16 +9,20 @@ import Report from '../components/report'
 import { WakanetActivation } from '../components/wakanet-activation'
 import { withAuth } from '../hocs/with-auth'
 
-type BTN_TYPE = 'signup' | 'load-bundle' | 'check-balance' | 'update-details' | 'report' | 'wakanet-activation'
+type TAB = 'signup' | 'load-bundle' | 'check-balance' | 'update-details' | 'report' | 'wakanet-activation'
 
 export default React.memo(
 	withAuth(() => {
-		const [activeBtn, setActiveBtn] = React.useState<BTN_TYPE>('signup')
+		const [activeTab, setActiveTab] = React.useState<TAB>('signup')
+
+		const handleSwitchToTab = React.useCallback((tab: TAB) => {
+			setActiveTab(tab)
+		}, [])
 
 		return (
 			<Layout>
-				<Container size={'xl'}>
-					<Paper withBorder mt="md" p="sm">
+				<Container size={1480}>
+					<Paper mt="md" py="sm">
 						<SimpleGrid
 							cols={6}
 							breakpoints={[
@@ -29,50 +33,50 @@ export default React.memo(
 						>
 							<Button
 								fullWidth
-								variant={activeBtn === 'signup' ? 'filled' : 'light'}
-								onClick={() => setActiveBtn('signup')}
+								variant={activeTab === 'signup' ? 'filled' : 'light'}
+								onClick={() => handleSwitchToTab('signup')}
 							>
-								5G StarterPack
+								4G/5G WakaNet Starterpack
 							</Button>
 							<Button
 								fullWidth
-								variant={activeBtn === 'wakanet-activation' ? 'filled' : 'light'}
-								onClick={() => setActiveBtn('wakanet-activation')}
+								variant={activeTab === 'wakanet-activation' ? 'filled' : 'light'}
+								onClick={() => handleSwitchToTab('wakanet-activation')}
 							>
-								WakaNet StarterPack
+								WakaNet Router Starterpack
 							</Button>
 							<Button
 								fullWidth
-								variant={activeBtn === 'load-bundle' ? 'filled' : 'light'}
-								onClick={() => setActiveBtn('load-bundle')}
+								variant={activeTab === 'load-bundle' ? 'filled' : 'light'}
+								onClick={() => handleSwitchToTab('load-bundle')}
 							>
 								Load Bundle
 							</Button>
 							<Button
 								fullWidth
-								variant={activeBtn === 'check-balance' ? 'filled' : 'light'}
-								onClick={() => setActiveBtn('check-balance')}
+								variant={activeTab === 'check-balance' ? 'filled' : 'light'}
+								onClick={() => handleSwitchToTab('check-balance')}
 							>
 								Check Balance
 							</Button>
 							<Button
 								fullWidth
-								variant={activeBtn === 'update-details' ? 'filled' : 'light'}
-								onClick={() => setActiveBtn('update-details')}
+								variant={activeTab === 'update-details' ? 'filled' : 'light'}
+								onClick={() => handleSwitchToTab('update-details')}
 							>
 								Update Details
 							</Button>
 							<Button
 								fullWidth
-								variant={activeBtn === 'report' ? 'filled' : 'light'}
-								onClick={() => setActiveBtn('report')}
+								variant={activeTab === 'report' ? 'filled' : 'light'}
+								onClick={() => handleSwitchToTab('report')}
 							>
 								Activations Report
 							</Button>
 						</SimpleGrid>
 					</Paper>
 					{(() => {
-						switch (activeBtn) {
+						switch (activeTab) {
 							case 'signup':
 								return <Signup />
 							case 'load-bundle':
