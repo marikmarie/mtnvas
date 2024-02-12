@@ -28,7 +28,6 @@ export default React.memo(() => {
 				message: _.data?.message,
 				color: 'green',
 			})
-			form.reset()
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
@@ -62,26 +61,25 @@ export default React.memo(() => {
 				Check Customer Subscription balance
 			</Text>
 
-			<form>
-				<Stack mt={'sm'}>
-					<TextInput
-						label="WakaNet Number"
-						onChange={event => form.setFieldValue('bnumber', event.currentTarget.value)}
-						error={form.errors.bnumber}
-						placeholder="Forexample 2563945 ..."
-						withAsterisk
-					/>
-				</Stack>
+			<Stack mt={'sm'}>
+				<TextInput
+					label="WakaNet Number"
+					onChange={event => form.setFieldValue('bnumber', event.currentTarget.value)}
+					error={form.errors.bnumber}
+					value={form.values.bnumber}
+					placeholder="Forexample 2563945 ..."
+					withAsterisk
+				/>
+			</Stack>
 
-				<Flex mt="md" w="100%" gap={'sm'} justify={'flex-end'}>
-					<Button fullWidth variant="filled" onClick={() => mutation.mutate()}>
-						Check Balance
-					</Button>
-					<Button fullWidth variant="light" onClick={() => form.reset()}>
-						Reset
-					</Button>
-				</Flex>
-			</form>
+			<Flex mt="md" w="100%" gap={'sm'} justify={'flex-end'}>
+				<Button fullWidth variant="filled" onClick={() => mutation.mutate()}>
+					Check Balance
+				</Button>
+				<Button fullWidth variant="light" onClick={() => form.reset()}>
+					Reset
+				</Button>
+			</Flex>
 		</Paper>
 	)
 })

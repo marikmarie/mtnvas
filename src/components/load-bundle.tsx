@@ -95,7 +95,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_40MBPS"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													40MBPS (295000)
 												</Badge>
 											}
@@ -103,7 +103,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_60MBPS"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													60MBPS (395000)
 												</Badge>
 											}
@@ -111,7 +111,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_80MBPS"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													80MBPS (495000)
 												</Badge>
 											}
@@ -119,7 +119,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_100MBPS"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													100MBPS (595000)
 												</Badge>
 											}
@@ -127,7 +127,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_150MBPS"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													150MBPS (695000)
 												</Badge>
 											}
@@ -152,7 +152,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_3MBPS"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													{' '}
 													3MBPS (55000)
 												</Badge>
@@ -161,7 +161,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_5MBPS"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													{' '}
 													5MBPS (85000)
 												</Badge>
@@ -170,7 +170,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_10MBPS"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													{' '}
 													10MBPS (130000)
 												</Badge>
@@ -179,7 +179,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_20MBPS"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													{' '}
 													20MBPS (195000)
 												</Badge>
@@ -206,7 +206,7 @@ export default memo(() => {
 										<Radio
 											value="ITTH_10GB_PST"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													starterpack
 												</Badge>
 											}
@@ -214,7 +214,7 @@ export default memo(() => {
 										<Radio
 											value="1778FHI4"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													{' '}
 													5MBPS (55000){' '}
 												</Badge>
@@ -223,7 +223,7 @@ export default memo(() => {
 										<Radio
 											value="1778FHI1"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													{' '}
 													10MBPS (85000){' '}
 												</Badge>
@@ -232,7 +232,7 @@ export default memo(() => {
 										<Radio
 											value="1778FHI2"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													{' '}
 													20MBPS (170000){' '}
 												</Badge>
@@ -241,7 +241,7 @@ export default memo(() => {
 										<Radio
 											value="1778FHI3"
 											label={
-												<Badge variant="dot" size="lg">
+												<Badge variant="outline" size="lg">
 													{' '}
 													20MBPS (335000){' '}
 												</Badge>
@@ -265,7 +265,7 @@ export default memo(() => {
 
 				<Flex mt="md" w="100%" gap={'sm'} justify={'flex-end'}>
 					<Flex gap={'sm'} w="30%">
-						<Button fullWidth variant="dot" onClick={() => mutation.mutate()}>
+						<Button fullWidth variant="outline" onClick={() => mutation.mutate()}>
 							Load
 						</Button>
 						<Button fullWidth variant="light" onClick={() => form.reset()}>
