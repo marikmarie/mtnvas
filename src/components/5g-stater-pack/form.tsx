@@ -1,7 +1,7 @@
 import { Stack, Flex, Badge, TextInput, Button, Text } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
-import { IconPhone } from '@tabler/icons-react'
+import { IconCircleCheck, IconPhone, IconTrash } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import { AxiosResponse, AxiosError } from 'axios'
 import { useSelector } from 'react-redux'
@@ -11,11 +11,12 @@ import useRequest from '../../hooks/use-request'
 export const Form = () => {
 	const request = useRequest()
 
-	const subscriptionId = useSelector((state: RootState) => state.subId.subscriptionId)
+	const subscriptionId = useSelector((state: RootState) => state.bundleActivation.subscriptionId)
 
 	const form = useForm({
 		initialValues: {
 			bnumber: '',
+			subscriptionId: '',
 		},
 		validate: {
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid wakanetNumber'),
@@ -26,13 +27,14 @@ export const Form = () => {
 		mutationFn: () =>
 			request.post(
 				'/bundle-activations',
-				{ subscriptionId, ...form.values },
+				{ ...form.values, subscriptionId },
 				{
 					headers: {},
 				},
 			),
 		onSuccess: (response: AxiosResponse) => {
 			notifications.show({
+				autoClose: 10000,
 				title: 'Success',
 				message: response.data.message,
 				color: 'green',
@@ -40,6 +42,7 @@ export const Form = () => {
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
+				autoClose: 10000,
 				title:
 					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
 					((
@@ -66,13 +69,14 @@ export const Form = () => {
 		mutationFn: () =>
 			request.post(
 				'/reject-activations',
-				{ subscriptionId, ...form.values },
+				{ ...form.values, subscriptionId },
 				{
 					headers: {},
 				},
 			),
 		onSuccess: (response: AxiosResponse) => {
 			notifications.show({
+				autoClose: 10000,
 				title: 'Success',
 				message: response.data.message,
 				color: 'green',
@@ -80,6 +84,7 @@ export const Form = () => {
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
+				autoClose: 10000,
 				title:
 					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
 					((
@@ -106,7 +111,7 @@ export const Form = () => {
 	return (
 		<div>
 			{subscriptionId ? (
-				<form onSubmit={form.onSubmit(() => activation.mutate())}>
+				<form>
 					<Stack my={'sm'}>
 						<Flex justify={'start'} gap="xl" align={'center'}>
 							<Badge variant="light" size="xl">
@@ -125,10 +130,10 @@ export const Form = () => {
 							w="100%"
 						/>
 						<Flex justify={'start'} gap="xl" align={'center'}>
-							<Button fullWidth type="submit">
+							<Button leftIcon={<IconCircleCheck />} fullWidth onClick={() => activation.mutate()}>
 								Activate
 							</Button>
-							<Button fullWidth color="red" onClick={() => rejection.mutate()}>
+							<Button leftIcon={<IconTrash />} fullWidth color="red" onClick={() => rejection.mutate()}>
 								Reject
 							</Button>
 						</Flex>

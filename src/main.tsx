@@ -21,7 +21,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 			<Provider store={store}>
 				<PersistGate loading={null} persistor={persistor}>
 					<BrowserRouter>
-						<Notifications position="top-right" zIndex={2077} />
+						<Notifications autoClose={10000} position="top-right" zIndex={2077} />
 						<App />
 					</BrowserRouter>
 				</PersistGate>

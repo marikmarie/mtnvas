@@ -1,5 +1,5 @@
 import { MantineReactTable, type MRT_ColumnDef } from 'mantine-react-table'
-import React, { useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import useRequest from '../hooks/use-request'
 import { Stack } from '@mantine/core'
 import { useTable } from '../hooks/use-table'
@@ -14,11 +14,11 @@ interface Report {
 	status: string
 }
 
-export default React.memo(() => {
+export default memo(() => {
 	const request = useRequest()
 	const [loading, setLoading] = useState(false)
 
-	const columns = React.useMemo<MRT_ColumnDef<Report>[]>(
+	const columns = useMemo<MRT_ColumnDef<Report>[]>(
 		() => [
 			{
 				accessorKey: 'subscriptionId',
@@ -35,6 +35,10 @@ export default React.memo(() => {
 			{
 				accessorKey: 'email',
 				header: 'EMAIL',
+			},
+			{
+				accessorKey: 'amount',
+				header: 'AMOUNT',
 			},
 			{
 				accessorKey: 'status',
@@ -56,14 +60,13 @@ export default React.memo(() => {
 		[],
 	)
 
-	const [report, setReport] = React.useState<{ data: Report[] }>({ data: [] })
+	const [report, setReport] = useState<{ data: Report[] }>({ data: [] })
 
-	const getReport = React.useCallback(async () => {
+	const handleGetActivationsReport = useCallback(async () => {
 		try {
 			setLoading(true)
 			const response = await request.get('/activations')
 			setReport(response.data as unknown as { data: Report[] })
-
 			setLoading(false)
 		} catch (error) {
 		} finally {
@@ -74,8 +77,8 @@ export default React.memo(() => {
 		setReport(response.data as unknown as { data: Report[] })
 	}, [])
 
-	React.useEffect(() => {
-		getReport()
+	useEffect(() => {
+		handleGetActivationsReport()
 	}, [])
 
 	const table = useTable(report.data, columns, loading)

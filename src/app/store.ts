@@ -2,14 +2,14 @@ import storage from 'redux-persist/lib/storage'
 import { configureStore } from '@reduxjs/toolkit'
 import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, REHYDRATE } from 'redux-persist'
 import authReducer from './slices/auth'
-import subIdReducer from './slices/sub-id'
+import subIdReducer from './slices/bundle-activations'
 
 const persistedAuthReducer = persistReducer( { key: 'auth', storage }, authReducer )
 
 const store = configureStore( {
 	reducer: {
 		auth: persistedAuthReducer,
-		subId: subIdReducer,
+		bundleActivation: subIdReducer,
 	},
 	devTools: process.env.NODE_ENV !== 'production',
 	middleware: getDefaultMiddleware =>

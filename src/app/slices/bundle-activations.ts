@@ -1,21 +1,23 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { RootState } from "../store";
 
 const initialState = {
     subscriptionId: "",
+    serviceCode: "",
 };
 
 const slice = createSlice( {
-    name: "subId",
+    name: "bundleActivation",
     initialState,
     reducers: {
         setSubscriptionId: ( state, action: PayloadAction<string> ) => {
             state.subscriptionId = action.payload;
         },
+        setServiceCode: ( state, action: PayloadAction<string> ) => {
+            state.serviceCode = action.payload;
+        },
     },
 } );
 
-export const { setSubscriptionId } = slice.actions;
-export const subscriptionId = ( state: RootState ) => state.subId.subscriptionId
+export const { setSubscriptionId, setServiceCode } = slice.actions;
 
 export default slice.reducer

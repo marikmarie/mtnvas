@@ -51,6 +51,7 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 				queryKey: ['details'],
 			})
 			notifications.show({
+				autoClose: 10000,
 				title: 'SUCCESS',
 				// @ts-ignore
 				message: response?.message as React.ReactNode,
@@ -73,7 +74,7 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 	}
 
 	return (
-		<form onSubmit={handleSubmission}>
+		<form>
 			<Stack>
 				<Text ta="center" fz="xl" fw="lighter" c="dimmed">
 					Edit Details
@@ -110,7 +111,7 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 					error={form.errors.salesAgentEmail}
 					radius="sm"
 				/>
-				<Button onClick={handleSubmission} type="submit" radius={'sm'}>
+				<Button onClick={handleSubmission} radius={'sm'}>
 					Edit
 				</Button>
 			</Stack>

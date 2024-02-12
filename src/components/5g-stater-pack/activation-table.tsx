@@ -1,10 +1,11 @@
 import { MantineReactTable, type MRT_ColumnDef } from 'mantine-react-table'
-import React, { useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@mantine/core'
 import { useDispatch } from 'react-redux'
-import { setSubscriptionId } from '../../app/slices/sub-id'
+import { setServiceCode, setSubscriptionId } from '../../app/slices/bundle-activations'
 import useRequest from '../../hooks/use-request'
 import { useTable } from '../../hooks/use-table'
+import { date } from '../../utils/date'
 
 type Data = {
 	subscriptionId: string
@@ -14,12 +15,12 @@ type Data = {
 	createdAt: string
 }
 
-export default React.memo(() => {
+export default memo(() => {
 	const dispatch = useDispatch()
 	const request = useRequest()
 	const [loading, setLoading] = useState(false)
 
-	const columns: any = React.useMemo<MRT_ColumnDef<Data>[]>(
+	const columns: any = useMemo<MRT_ColumnDef<Data>[]>(
 		() => [
 			{
 				accessorKey: 'subscriptionId',
@@ -40,37 +41,41 @@ export default React.memo(() => {
 			{
 				accessorKey: 'createdAt',
 				header: 'CREATED AT',
-				Cell: ({ row }) =>
-					new Date(row.original.createdAt).toDateString() +
-					' ' +
-					new Date(row.original.createdAt).toLocaleTimeString(),
+				Cell: ({ row }) => date(row.original.createdAt),
 			},
 			{
 				accessorKey: 'action',
 				header: 'ACTION',
 				Cell: ({ row }) => (
-					<Button onClick={() => dispatch(setSubscriptionId(row.original.subscriptionId))}>Select</Button>
+					<Button
+						fullWidth
+						onClick={() => {
+							Promise.all([
+								dispatch(setSubscriptionId(row.original.subscriptionId)),
+								dispatch(setServiceCode(row.original.serviceCode)),
+							])
+						}}
+					>
+						Select
+					</Button>
 				),
 			},
 		],
 		[],
 	)
 
-	const [activations, setActivations] = React.useState<{ data: Data[] }>({ data: [] })
+	const [activations, setActivations] = useState<{ data: Data[] }>({ data: [] })
 
-	const getBundleActivations = React.useCallback(async () => {
+	const getBundleActivations = useCallback(async () => {
 		try {
 			setLoading(true)
 			const response = await request.get('/bundle-activations')
 			setActivations(response.data as unknown as { data: Data[] })
 			setLoading(false)
-		} catch (error) {
-		} finally {
-			setLoading(false)
-		}
+		} catch (error) {}
 	}, [])
 
-	React.useEffect(() => {
+	useEffect(() => {
 		getBundleActivations()
 	}, [])
 

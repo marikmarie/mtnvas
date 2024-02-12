@@ -1,13 +1,13 @@
-import { Box, Button, Divider, Flex, Group, Paper, Radio, Stack, Text, TextInput } from '@mantine/core'
+import { Badge, Box, Button, Divider, Flex, Group, Paper, Radio, Stack, Text, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { IconPhone } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import { AxiosResponse, AxiosError } from 'axios'
-import React from 'react'
+import { ReactNode, memo } from 'react'
 import useRequest from '../hooks/use-request'
 
-export default React.memo(() => {
+export default memo(() => {
 	const request = useRequest()
 
 	const form = useForm({
@@ -28,6 +28,7 @@ export default React.memo(() => {
 		mutationFn: () => request.post('/load-bundle', form.values),
 		onSuccess: (_: AxiosResponse) => {
 			notifications.show({
+				autoClose: 10000,
 				title: 'Success',
 				// @ts-ignore
 				message: _.data?.message,
@@ -36,24 +37,25 @@ export default React.memo(() => {
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
+				autoClose: 10000,
 				title:
-					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
+					((error.response?.data as { httpStatus: string }).httpStatus as unknown as ReactNode) ||
 					((
 						error.response?.data as {
 							status: string
 						}
-					).status as unknown as React.ReactNode),
+					).status as unknown as ReactNode),
 				message:
 					((
 						error.response?.data as {
 							message: string
 						}
-					).message! as unknown as React.ReactNode) ||
+					).message! as unknown as ReactNode) ||
 					((
 						error.response?.data as {
 							error: string
 						}
-					).error as unknown as React.ReactNode),
+					).error as unknown as ReactNode),
 				color: 'red',
 			})
 		},
@@ -90,11 +92,46 @@ export default React.memo(() => {
 									error={form.errors.bnumber}
 								>
 									<Group mt="xs">
-										<Radio value="FWA_40MBPS" label="40MBPS" />
-										<Radio value="FWA_60MBPS" label="60MBPS" />
-										<Radio value="FWA_80MBPS" label="80MBPS" />
-										<Radio value="FWA_100MBPS" label="100MBPS" />
-										<Radio value="FWA_150MBPS" label="150MBPS" />
+										<Radio
+											value="FWA_40MBPS"
+											label={
+												<Badge variant="dot" size="lg">
+													40MBPS (295000)
+												</Badge>
+											}
+										/>
+										<Radio
+											value="FWA_60MBPS"
+											label={
+												<Badge variant="dot" size="lg">
+													60MBPS (395000)
+												</Badge>
+											}
+										/>
+										<Radio
+											value="FWA_80MBPS"
+											label={
+												<Badge variant="dot" size="lg">
+													80MBPS (495000)
+												</Badge>
+											}
+										/>
+										<Radio
+											value="FWA_100MBPS"
+											label={
+												<Badge variant="dot" size="lg">
+													100MBPS (595000)
+												</Badge>
+											}
+										/>
+										<Radio
+											value="FWA_150MBPS"
+											label={
+												<Badge variant="dot" size="lg">
+													150MBPS (695000)
+												</Badge>
+											}
+										/>
 									</Group>
 								</Radio.Group>
 							</Box>
@@ -112,10 +149,42 @@ export default React.memo(() => {
 									error={form.errors.bnumber}
 								>
 									<Group mt="xs">
-										<Radio value="FWA_3MBPS" label="3MBPS" />
-										<Radio value="FWA_5MBPS" label="5MBPS" />
-										<Radio value="FWA_10MBPS" label="10MBPS" />
-										<Radio value="FWA_20MBPS" label="20MBPS" />
+										<Radio
+											value="FWA_3MBPS"
+											label={
+												<Badge variant="dot" size="lg">
+													{' '}
+													3MBPS (55000)
+												</Badge>
+											}
+										/>
+										<Radio
+											value="FWA_5MBPS"
+											label={
+												<Badge variant="dot" size="lg">
+													{' '}
+													5MBPS (85000)
+												</Badge>
+											}
+										/>
+										<Radio
+											value="FWA_10MBPS"
+											label={
+												<Badge variant="dot" size="lg">
+													{' '}
+													10MBPS (130000)
+												</Badge>
+											}
+										/>
+										<Radio
+											value="FWA_20MBPS"
+											label={
+												<Badge variant="dot" size="lg">
+													{' '}
+													20MBPS (195000)
+												</Badge>
+											}
+										/>
 									</Group>
 								</Radio.Group>
 							</Box>
@@ -134,11 +203,50 @@ export default React.memo(() => {
 									error={form.errors.bnumber}
 								>
 									<Group mt="xs">
-										<Radio label="10GB" value="ITTH_10GB_PST" />
-										<Radio label="25GB" value="1778FHI4" />
-										<Radio label="45GB" value="1778FHI1" />
-										<Radio label="95GB" value="1778FHI2" />
-										<Radio label="195GB" value="1778FHI3" />
+										<Radio
+											value="ITTH_10GB_PST"
+											label={
+												<Badge variant="dot" size="lg">
+													starterpack
+												</Badge>
+											}
+										/>
+										<Radio
+											value="1778FHI4"
+											label={
+												<Badge variant="dot" size="lg">
+													{' '}
+													5MBPS (55000){' '}
+												</Badge>
+											}
+										/>
+										<Radio
+											value="1778FHI1"
+											label={
+												<Badge variant="dot" size="lg">
+													{' '}
+													10MBPS (85000){' '}
+												</Badge>
+											}
+										/>
+										<Radio
+											value="1778FHI2"
+											label={
+												<Badge variant="dot" size="lg">
+													{' '}
+													20MBPS (170000){' '}
+												</Badge>
+											}
+										/>
+										<Radio
+											value="1778FHI3"
+											label={
+												<Badge variant="dot" size="lg">
+													{' '}
+													20MBPS (335000){' '}
+												</Badge>
+											}
+										/>
 									</Group>
 								</Radio.Group>
 							</Box>
@@ -157,7 +265,7 @@ export default React.memo(() => {
 
 				<Flex mt="md" w="100%" gap={'sm'} justify={'flex-end'}>
 					<Flex gap={'sm'} w="30%">
-						<Button fullWidth variant="filled" onClick={() => mutation.mutate()}>
+						<Button fullWidth variant="dot" onClick={() => mutation.mutate()}>
 							Load
 						</Button>
 						<Button fullWidth variant="light" onClick={() => form.reset()}>

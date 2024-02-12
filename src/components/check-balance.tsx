@@ -22,6 +22,7 @@ export default React.memo(() => {
 		mutationFn: () => request.post('/balance-check', form.values),
 		onSuccess: (_: AxiosResponse) => {
 			notifications.show({
+				autoClose: 10000,
 				title: 'Success',
 				// @ts-ignore
 				message: _.data?.message,
@@ -31,6 +32,7 @@ export default React.memo(() => {
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
+				autoClose: 10000,
 				title:
 					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
 					((
@@ -60,7 +62,7 @@ export default React.memo(() => {
 				Check Customer Subscription balance
 			</Text>
 
-			<form onSubmit={form.onSubmit(() => mutation.mutate())}>
+			<form>
 				<Stack mt={'sm'}>
 					<TextInput
 						label="WakaNet Number"
@@ -72,7 +74,7 @@ export default React.memo(() => {
 				</Stack>
 
 				<Flex mt="md" w="100%" gap={'sm'} justify={'flex-end'}>
-					<Button fullWidth variant="filled" type="submit">
+					<Button fullWidth variant="filled" onClick={() => mutation.mutate()}>
 						Check Balance
 					</Button>
 					<Button fullWidth variant="light" onClick={() => form.reset()}>

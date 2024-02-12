@@ -67,6 +67,7 @@ export default React.memo((props: PaperProps) => {
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
+				autoClose: 10000,
 				title:
 					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
 					((
@@ -104,7 +105,7 @@ export default React.memo((props: PaperProps) => {
 					</Title>
 				</Center>
 
-				<form onSubmit={form.onSubmit(() => mutation.mutate())}>
+				<form>
 					<Stack>
 						<TextInput
 							label="Email"
@@ -135,7 +136,7 @@ export default React.memo((props: PaperProps) => {
 						/>
 					</Stack>
 					<Stack>
-						<Button type="submit">Sign In</Button>
+						<Button onClick={() => mutation.mutate()}>Sign In</Button>
 					</Stack>
 				</form>
 			</Paper>
