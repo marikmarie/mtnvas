@@ -2,19 +2,36 @@ import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
 import { notifications } from '@mantine/notifications';
+import { useState } from 'react';
 
 export default function useRequest(): AxiosInstance {
 	const token = useSelector( ( state: RootState ) => state.auth.token );
+	const [requireAuth, setRequireAuth] = useState( true );
 
+	const authIgnoredPaths = [
+		"/onboard-activation",
+		"/balance-check",
+		"/balance-detail",
+		"/activation-response",
+		"/login",
+		"/request-otp",
+		"/password-reset",
+	];
+
+	console.log( "require auth: ", requireAuth );
 	const instance = axios.create( {
 		baseURL: import.meta.env.VITE_APP_BASE_URL!,
-		headers: {
-			Authorization: `Bearer ${token}`
-		}
-	} )
+	} );
 
 	instance.interceptors.request.use(
 		( config: InternalAxiosRequestConfig<any> ) => {
+			console.log( "config::", config );
+			if ( config.url && authIgnoredPaths.includes( config.url ) ) {
+				setRequireAuth( false );
+			} else {
+				setRequireAuth( true );
+				config.headers.Authorization = `Bearer ${token}`;
+			}
 			return config;
 		},
 		( error ) => {
@@ -30,7 +47,7 @@ export default function useRequest(): AxiosInstance {
 				// @ts-ignore
 				message: response?.data.message,
 				color: "green",
-			} )
+			} );
 			return response;
 		},
 		( error ) => {
@@ -41,7 +58,7 @@ export default function useRequest(): AxiosInstance {
 					// @ts-ignore
 					message: error.response?.data.message,
 					color: 'red',
-				} )
+				} );
 			} else if ( error.request ) {
 				notifications.show( {
 					autoClose: 60000,
@@ -49,7 +66,7 @@ export default function useRequest(): AxiosInstance {
 					// @ts-ignore
 					message: 'Request was made, No response received',
 					color: 'red',
-				} )
+				} );
 				console.error( 'Request was made, No response received' );
 			} else {
 				notifications.show( {
@@ -58,7 +75,7 @@ export default function useRequest(): AxiosInstance {
 					// @ts-ignore
 					message: 'Error setting up the request:: ' + error.message,
 					color: 'red',
-				} )
+				} );
 			}
 
 			// handle specific error cases here (e.g., token expiration, redirect to login, etc.)

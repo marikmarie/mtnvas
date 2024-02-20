@@ -1,4 +1,4 @@
-import { Button, Flex, Paper, Stack, Text, TextInput } from '@mantine/core'
+import { Button, Flex, Loader, Paper, Stack, Text, TextInput } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosResponse, AxiosError } from 'axios'
@@ -7,7 +7,7 @@ import { useForm } from '@mantine/form'
 import { Modal } from './Modal'
 import UpdateDetailsModal from './update-details-modal'
 import { useDisclosure } from '@mantine/hooks'
-import { IconPlus } from '@tabler/icons-react'
+import { IconPlus, IconSearch } from '@tabler/icons-react'
 import useRequest from '../hooks/use-request'
 
 export default React.memo(() => {
@@ -92,11 +92,11 @@ export default React.memo(() => {
 
 			<Flex mt="md" w="100%" justify={'flex-end'} gap={'sm'}>
 				<Button
-					leftIcon={<IconPlus />}
+					leftIcon={<IconSearch />}
 					onClick={() => mutation.mutate(form.values.wakanetNumber)}
 					variant="filled"
 				>
-					Search User
+					{mutation.isLoading ? <Loader color="white" variant="dots" /> : 'Searh User'}
 				</Button>
 			</Flex>
 		</Paper>

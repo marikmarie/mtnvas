@@ -1,4 +1,4 @@
-import { Button, Divider, Flex, Paper, Stack, Text, TextInput } from '@mantine/core'
+import { Button, Divider, Flex, Loader, Paper, Stack, Text, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { useMutation } from '@tanstack/react-query'
 import React from 'react'
@@ -75,7 +75,7 @@ export default React.memo(() => {
 
 			<Flex mt="md" w="100%" gap={'sm'} justify={'flex-end'}>
 				<Button fullWidth variant="filled" onClick={() => mutation.mutate()}>
-					Check Balance
+					{mutation.isLoading ? <Loader color="white" variant="dots" /> : 'Check Balance'}
 				</Button>
 				<Button fullWidth variant="light" onClick={() => form.reset()}>
 					Reset

@@ -1,4 +1,4 @@
-import { Stack, Flex, Badge, TextInput, Button, Text } from '@mantine/core'
+import { Stack, Flex, Badge, TextInput, Button, Text, Loader } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { IconCircleCheck, IconPhone, IconTrash } from '@tabler/icons-react'
@@ -131,10 +131,10 @@ export const Form = () => {
 						/>
 						<Flex justify={'start'} gap="xl" align={'center'}>
 							<Button leftIcon={<IconCircleCheck />} fullWidth onClick={() => activation.mutate()}>
-								Activate
+								{activation.isLoading ? <Loader color="white" variant="dots" /> : 'Activate'}
 							</Button>
 							<Button leftIcon={<IconTrash />} fullWidth color="red" onClick={() => rejection.mutate()}>
-								Reject
+								{rejection.isLoading ? <Loader color="white" variant="dots" /> : 'Reject'}
 							</Button>
 						</Flex>
 					</Stack>

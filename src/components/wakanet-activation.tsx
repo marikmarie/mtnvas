@@ -1,4 +1,4 @@
-import { Stack, Flex, TextInput, Button } from '@mantine/core'
+import { Stack, Flex, TextInput, Button, Loader } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { IconPhone } from '@tabler/icons-react'
@@ -96,7 +96,7 @@ export const WakanetActivation = () => {
 					/>
 					<Flex justify={'center'} gap="xl" align={'center'}>
 						<Button fullWidth onClick={() => activation.mutate()}>
-							Activate
+							{activation.isLoading ? <Loader color="white" variant="dots" /> : 'Activate'}
 						</Button>
 					</Flex>
 				</Stack>

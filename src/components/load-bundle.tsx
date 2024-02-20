@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Divider, Flex, Group, Paper, Radio, Stack, Text, TextInput } from '@mantine/core'
+import { Badge, Box, Button, Divider, Flex, Group, Loader, Paper, Radio, Stack, Text, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { IconPhone } from '@tabler/icons-react'
@@ -264,8 +264,8 @@ export default memo(() => {
 
 				<Flex mt="md" w="100%" gap={'sm'} justify={'flex-end'}>
 					<Flex gap={'sm'} w="30%">
-						<Button fullWidth variant="outline" onClick={() => mutation.mutate()}>
-							Load
+						<Button fullWidth onClick={() => mutation.mutate()}>
+							{mutation.isLoading ? <Loader color="white" variant="dots" /> : 'Load'}
 						</Button>
 						<Button fullWidth variant="light" onClick={() => form.reset()}>
 							Reset
