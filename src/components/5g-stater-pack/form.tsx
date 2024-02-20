@@ -34,7 +34,7 @@ export const Form = () => {
 			),
 		onSuccess: (response: AxiosResponse) => {
 			notifications.show({
-				autoClose: 10000,
+				autoClose: 60000,
 				title: 'Success',
 				message: response.data.message,
 				color: 'green',
@@ -42,7 +42,7 @@ export const Form = () => {
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
-				autoClose: 10000,
+				autoClose: 60000,
 				title:
 					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
 					((
@@ -76,7 +76,7 @@ export const Form = () => {
 			),
 		onSuccess: (response: AxiosResponse) => {
 			notifications.show({
-				autoClose: 10000,
+				autoClose: 60000,
 				title: 'Success',
 				message: response.data.message,
 				color: 'green',
@@ -84,7 +84,7 @@ export const Form = () => {
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
-				autoClose: 10000,
+				autoClose: 60000,
 				title:
 					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
 					((

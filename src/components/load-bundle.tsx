@@ -28,7 +28,7 @@ export default memo(() => {
 		mutationFn: () => request.post('/load-bundle', form.values),
 		onSuccess: (_: AxiosResponse) => {
 			notifications.show({
-				autoClose: 10000,
+				autoClose: 60000,
 				title: 'Success',
 				// @ts-ignore
 				message: _.data?.message,
@@ -37,7 +37,7 @@ export default memo(() => {
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
-				autoClose: 10000,
+				autoClose: 60000,
 				title:
 					((error.response?.data as { httpStatus: string }).httpStatus as unknown as ReactNode) ||
 					((
@@ -63,7 +63,7 @@ export default memo(() => {
 
 	return (
 		<Paper py="lg">
-			<Text fz="xl" fw="bold" tt="uppercase">
+			<Text fz="xl" fw="bold" c="dimmed">
 				Load new WakaNet bundle
 			</Text>
 
@@ -80,7 +80,7 @@ export default memo(() => {
 					<Paper withBorder p="md">
 						<Stack>
 							<Box>
-								<Text fz="xl" fw="bold" tt="uppercase">
+								<Text fz="xl" fw="bold" c="dimmed">
 									Wakanet 5G
 								</Text>
 
@@ -95,7 +95,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_40MBPS"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													40MBPS (295000)
 												</Badge>
 											}
@@ -103,7 +103,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_60MBPS"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													60MBPS (395000)
 												</Badge>
 											}
@@ -111,7 +111,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_80MBPS"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													80MBPS (495000)
 												</Badge>
 											}
@@ -119,7 +119,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_100MBPS"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													100MBPS (595000)
 												</Badge>
 											}
@@ -127,7 +127,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_150MBPS"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													150MBPS (695000)
 												</Badge>
 											}
@@ -137,7 +137,7 @@ export default memo(() => {
 							</Box>
 							<Divider />
 							<Box>
-								<Text fz="xl" fw="bold" tt="uppercase">
+								<Text fz="xl" fw="bold" c="dimmed">
 									Wakanet 4G
 								</Text>
 
@@ -152,8 +152,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_3MBPS"
 											label={
-												<Badge variant="outline" size="lg">
-													{' '}
+												<Badge c="dark" variant="outline" size="lg">
 													3MBPS (55000)
 												</Badge>
 											}
@@ -161,7 +160,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_5MBPS"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													{' '}
 													5MBPS (85000)
 												</Badge>
@@ -170,7 +169,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_10MBPS"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													{' '}
 													10MBPS (130000)
 												</Badge>
@@ -179,7 +178,7 @@ export default memo(() => {
 										<Radio
 											value="FWA_20MBPS"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													{' '}
 													20MBPS (195000)
 												</Badge>
@@ -191,7 +190,7 @@ export default memo(() => {
 							<Divider />
 
 							<Box>
-								<Text fz="xl" fw="bold" tt="uppercase">
+								<Text fz="xl" fw="bold" c="dimmed">
 									WakaNet Bundles
 								</Text>
 
@@ -206,7 +205,7 @@ export default memo(() => {
 										<Radio
 											value="ITTH_10GB_PST"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													starterpack
 												</Badge>
 											}
@@ -214,7 +213,7 @@ export default memo(() => {
 										<Radio
 											value="1778FHI4"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													{' '}
 													5MBPS (55000){' '}
 												</Badge>
@@ -223,7 +222,7 @@ export default memo(() => {
 										<Radio
 											value="1778FHI1"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													{' '}
 													10MBPS (85000){' '}
 												</Badge>
@@ -232,7 +231,7 @@ export default memo(() => {
 										<Radio
 											value="1778FHI2"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													{' '}
 													20MBPS (170000){' '}
 												</Badge>
@@ -241,7 +240,7 @@ export default memo(() => {
 										<Radio
 											value="1778FHI3"
 											label={
-												<Badge variant="outline" size="lg">
+												<Badge c="dark" variant="outline" size="lg">
 													{' '}
 													20MBPS (335000){' '}
 												</Badge>

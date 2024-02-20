@@ -3,13 +3,17 @@ import { configureStore } from '@reduxjs/toolkit'
 import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, REHYDRATE } from 'redux-persist'
 import authReducer from './slices/auth'
 import subIdReducer from './slices/bundle-activations'
+import navReducer from './slices/nav'
 
 const persistedAuthReducer = persistReducer( { key: 'auth', storage }, authReducer )
+const persistedNavReducer = persistReducer( { key: 'nav', storage }, navReducer )
+
 
 const store = configureStore( {
 	reducer: {
 		auth: persistedAuthReducer,
 		bundleActivation: subIdReducer,
+		nav: persistedNavReducer,
 	},
 	devTools: process.env.NODE_ENV !== 'production',
 	middleware: getDefaultMiddleware =>

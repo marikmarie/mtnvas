@@ -8,15 +8,18 @@ import {
 	Menu,
 	Group,
 	Flex,
-	Image,
+	Title,
 } from '@mantine/core'
 import { IconLogout } from '@tabler/icons-react'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../app/store'
 import { IconUser } from '@tabler/icons-react'
-import { ActionToggle } from './action-toggle'
 import { signout } from '../app/slices/auth'
+import { useNavigate } from 'react-router-dom'
+import { ActionToggle } from './action-toggle'
+import { useCallback } from 'react'
+import { ROUTES } from '../constants/routes'
 
 const HEADER_HEIGHT = rem(60)
 
@@ -65,28 +68,33 @@ const useStyles = createStyles(theme => ({
 
 export function Header() {
 	const { classes } = useStyles()
-	const dispatch = useDispatch()
 
+	const dispatch = useDispatch()
 	const user = useSelector((state: RootState) => state.auth.user)
 
-	const displayName = user?.name || 'user'
+	const navigate = useNavigate()
 
-	// const avatar = user
-	// 	? `${user?.name?.toUpperCase()?.split(' ')[0][0]} ${user?.name?.toUpperCase()?.split(' ')[1][0]}`
-	// 	: 'U'
+	const handleLogout = useCallback(() => {
+		dispatch(signout())
+		navigate(ROUTES.AUTH)
+	}, [])
+
+	const displayName = user?.name || 'Ian Balijawa'
+
+	const avatar = displayName[0]?.toUpperCase() || 'I'
 
 	return (
 		<Wrapper withBorder zIndex={1} className={classes.root} height={HEADER_HEIGHT}>
 			<Container className={classes.inner} fluid>
 				<Flex justify={'space-between'} w="100%" align={'center'}>
-					<Image src="/Logo.png" width={50} />
+					<Title c="dimmed">5G PORTAL</Title>
 					<Group>
 						<ActionToggle />
 						<Menu shadow="md" width={200}>
 							<Menu.Target>
 								<ActionIcon>
 									<Avatar color="cyan" radius="xl">
-										{'U'}
+										{avatar}
 									</Avatar>
 								</ActionIcon>
 							</Menu.Target>
@@ -95,11 +103,7 @@ export function Header() {
 								<Menu.Label>Account</Menu.Label>
 								<Menu.Item icon={<IconUser size={14} />}>{displayName}</Menu.Item>
 
-								<Menu.Item
-									onClick={() => dispatch(signout())}
-									color="red"
-									icon={<IconLogout size={14} />}
-								>
+								<Menu.Item onClick={handleLogout} color="red" icon={<IconLogout size={14} />}>
 									Log out
 								</Menu.Item>
 							</Menu.Dropdown>

@@ -51,13 +51,12 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 				queryKey: ['details'],
 			})
 			notifications.show({
-				autoClose: 10000,
+				autoClose: 60000,
 				title: 'SUCCESS',
 				// @ts-ignore
 				message: response?.message as React.ReactNode,
 				color: 'green',
 				withCloseButton: true,
-				autoClose: 5000,
 			})
 		},
 	})

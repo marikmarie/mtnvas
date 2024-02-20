@@ -6,6 +6,7 @@ import { setServiceCode, setSubscriptionId } from '../../app/slices/bundle-activ
 import useRequest from '../../hooks/use-request'
 import { useTable } from '../../hooks/use-table'
 import { date } from '../../utils/date'
+import { IconCheck } from '@tabler/icons-react'
 
 type Data = {
 	subscriptionId: string
@@ -46,19 +47,23 @@ export default memo(() => {
 			{
 				accessorKey: 'action',
 				header: 'ACTION',
-				Cell: ({ row }) => (
-					<Button
-						fullWidth
-						onClick={() => {
-							Promise.all([
-								dispatch(setSubscriptionId(row.original.subscriptionId)),
-								dispatch(setServiceCode(row.original.serviceCode)),
-							])
-						}}
-					>
-						Select
-					</Button>
-				),
+				Cell: ({ row }) => {
+					return (
+						<Button
+							variant="light"
+							fullWidth
+							leftIcon={<IconCheck />}
+							onClick={() => {
+								Promise.all([
+									dispatch(setSubscriptionId(row.original.subscriptionId)),
+									dispatch(setServiceCode(row.original.serviceCode)),
+								])
+							}}
+						>
+							Select
+						</Button>
+					)
+				},
 			},
 		],
 		[],

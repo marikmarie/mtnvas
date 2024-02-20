@@ -67,7 +67,7 @@ export default React.memo((props: PaperProps) => {
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
-				autoClose: 10000,
+				autoClose: 60000,
 				title:
 					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
 					((

@@ -28,7 +28,7 @@ export const WakanetActivation = () => {
 		mutationFn: () => request.post('/wakanet-activation', form.values),
 		onSuccess: (response: AxiosResponse) => {
 			notifications.show({
-				autoClose: 10000,
+				autoClose: 60000,
 				title: 'Success',
 				message: response.data.message,
 				color: 'green',
@@ -36,7 +36,7 @@ export const WakanetActivation = () => {
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
-				autoClose: 10000,
+				autoClose: 60000,
 				title:
 					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
 					((
