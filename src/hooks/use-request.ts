@@ -1,14 +1,12 @@
-import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
 import { notifications } from '@mantine/notifications';
-import { useState } from 'react';
 
 export default function useRequest(): AxiosInstance {
 	const token = useSelector( ( state: RootState ) => state.auth.token );
-	const [requireAuth, setRequireAuth] = useState( true );
 
-	const authIgnoredPaths = [
+	const notRequireAuthorizationEndpoints = [
 		"/onboard-activation",
 		"/balance-check",
 		"/balance-detail",
@@ -17,21 +15,34 @@ export default function useRequest(): AxiosInstance {
 		"/request-otp",
 		"/password-reset",
 	];
+	const requireAuthorizationEndpoints = [
+		"/bundle-activations",
+		"/customer-details",
+		"/customers",
+		"/load-bundle",
+		"/activations",
+		"/wakanet-activation",
+		"/reject-activations",
+	];
 
-	console.log( "require auth: ", requireAuth );
 	const instance = axios.create( {
 		baseURL: import.meta.env.VITE_APP_BASE_URL!,
 	} );
 
 	instance.interceptors.request.use(
-		( config: InternalAxiosRequestConfig<any> ) => {
-			console.log( "config::", config );
-			if ( config.url && authIgnoredPaths.includes( config.url ) ) {
-				setRequireAuth( false );
-			} else {
-				setRequireAuth( true );
-				config.headers.Authorization = `Bearer ${token}`;
+		( config ) => {
+			const { url } = config;
+
+			if ( url ) {
+				if ( notRequireAuthorizationEndpoints.includes( url ) ) {
+					return config;
+				}
+
+				if ( requireAuthorizationEndpoints.includes( url ) ) {
+					config.headers.Authorization = `Bearer ${token}`;
+				}
 			}
+
 			return config;
 		},
 		( error ) => {

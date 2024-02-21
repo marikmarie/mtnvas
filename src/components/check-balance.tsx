@@ -39,7 +39,7 @@ export default React.memo(() => {
 				</Text>
 				{parts?.map(part =>
 					part ? (
-						<Flex gap={'md'} m="md" justify={'space-between'} align={'center'}>
+						<Flex key={part} gap={'md'} m="md" justify={'space-between'} align={'center'}>
 							<Button variant="light" fullWidth>
 								{part.split(':')[1].split(' ')[0]}
 							</Button>

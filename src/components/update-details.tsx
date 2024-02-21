@@ -7,7 +7,7 @@ import { useForm } from '@mantine/form'
 import { Modal } from './Modal'
 import UpdateDetailsModal from './update-details-modal'
 import { useDisclosure } from '@mantine/hooks'
-import { IconPlus, IconSearch } from '@tabler/icons-react'
+import { IconSearch } from '@tabler/icons-react'
 import useRequest from '../hooks/use-request'
 
 export default React.memo(() => {
