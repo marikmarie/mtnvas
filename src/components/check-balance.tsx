@@ -10,7 +10,7 @@ export default React.memo(() => {
 	const [opened, { open: openSuccess, close: closeSuccess }] = useDisclosure(false)
 	const [errOpened, { open: openErr, close: closeErr }] = useDisclosure(false)
 
-	const request = useRequest()
+	const request = useRequest(false)
 	const form = useForm({
 		initialValues: {
 			bnumber: '',
@@ -27,9 +27,7 @@ export default React.memo(() => {
 		onError: () => openErr(),
 	})
 
-	const parts = mutation.data?.data?.message?.split(',') as string[]
-
-	console.log(parts)
+	const parts = mutation.data?.data?.message ? (mutation.data?.data?.message.split(',') as string[]) : []
 
 	return (
 		<Paper py="lg">
@@ -37,27 +35,48 @@ export default React.memo(() => {
 				<Text fw="bold" mb="md" ta="center">
 					BALANCE CHECK
 				</Text>
-				{parts?.map(part =>
-					part ? (
-						<Flex key={part} gap={'md'} m="md" justify={'space-between'} align={'center'}>
-							<Button variant="light" fullWidth>
-								{part.split(':')[1].split(' ')[0]}
-							</Button>
-							<Button variant="outline" fullWidth>
+				{parts?.length > 0 ? (
+					parts?.map(part =>
+						part ? (
+							<Flex key={part} gap={'md'} m="md" justify={'space-between'} align={'center'}>
+								<Button variant="light" fullWidth>
+									{part && part.split(':')[1] && part.split(':')[1].split(' ')[0]}
+								</Button>
+								{/* <Button variant="outline" fullWidth> */}
 								{(() => {
-									const parts = part.split(' ')
-									return parts[2] + ' ' + parts[3]
+									const partsArray = part && part.split(' ')
+									return partsArray && partsArray[2] && partsArray[3] ? (
+										<Button variant="outline" fullWidth>
+											{partsArray[2] + ' ' + partsArray[3]}
+										</Button>
+									) : null
 								})()}
-							</Button>
-							<Divider />
-						</Flex>
-					) : null,
+								{/* </Button> */}
+								<Divider />
+							</Flex>
+						) : null,
+					)
+				) : (
+					<Text fw="bold" mb="md" ta="center">
+						NONE
+					</Text>
 				)}
 			</Modal>
 			<Modal opened={errOpened} close={closeErr}>
-				{/* @ts-ignore */}
-				<Text>{mutation.error?.response?.data?.message}</Text>
+				<Text ta="center" fw="bold">
+					Error Checking balance
+				</Text>
+				<Text>
+					{mutation.error &&
+						// @ts-ignore
+						mutation.error.response &&
+						// @ts-ignore
+						mutation.error.response.data &&
+						// @ts-ignore
+						mutation.error.response.data.message}
+				</Text>
 			</Modal>
+
 			<Text fz="xl" fw="bold" c="dimmed">
 				Check Customer Subscription balance
 			</Text>
@@ -75,7 +94,7 @@ export default React.memo(() => {
 
 			<Flex mt="md" w="100%" gap={'sm'} justify={'flex-end'}>
 				<Button fullWidth variant="filled" onClick={() => mutation.mutate()}>
-					{mutation.isLoading ? <Loader color="white" variant="dots" /> : 'Check Balance'}
+					{mutation.isLoading ? <Loader color="white" size={'xs'} /> : 'Check Balance'}
 				</Button>
 				<Button fullWidth variant="light" onClick={() => form.reset()}>
 					Reset

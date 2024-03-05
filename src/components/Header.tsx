@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router-dom'
 import { ActionToggle } from './action-toggle'
 import { useCallback } from 'react'
 import { ROUTES } from '../constants/routes'
+import { IconPasswordFingerprint } from '@tabler/icons-react'
 
 const HEADER_HEIGHT = rem(60)
 
@@ -79,7 +80,7 @@ export function Header() {
 		navigate(ROUTES.AUTH)
 	}, [])
 
-	const displayName = user?.name || 'Ian Balijawa'
+	const displayName = user?.name || 'Wakanet user'
 
 	const avatar = displayName[0]?.toUpperCase() || 'I'
 
@@ -87,7 +88,7 @@ export function Header() {
 		<Wrapper withBorder zIndex={1} className={classes.root} height={HEADER_HEIGHT}>
 			<Container className={classes.inner} fluid>
 				<Flex justify={'space-between'} w="100%" align={'center'}>
-					<Title c="dimmed">5G PORTAL</Title>
+					<Title c="dimmed">WAKANET ROUTER | 5G PORTAL</Title>
 					<Group>
 						<ActionToggle />
 						<Menu shadow="md" width={200}>
@@ -105,6 +106,13 @@ export function Header() {
 
 								<Menu.Item onClick={handleLogout} color="red" icon={<IconLogout size={14} />}>
 									Log out
+								</Menu.Item>
+								<Menu.Item
+									onClick={() => navigate(ROUTES.PASSWORD_RESET)}
+									color="red"
+									icon={<IconPasswordFingerprint size={14} />}
+								>
+									Reset your password
 								</Menu.Item>
 							</Menu.Dropdown>
 						</Menu>

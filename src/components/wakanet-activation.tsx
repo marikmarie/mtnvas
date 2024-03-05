@@ -1,13 +1,11 @@
 import { Stack, Flex, TextInput, Button, Loader } from '@mantine/core'
 import { useForm } from '@mantine/form'
-import { notifications } from '@mantine/notifications'
 import { IconPhone } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
-import { AxiosResponse, AxiosError } from 'axios'
 import useRequest from '../hooks/use-request'
 
 export const WakanetActivation = () => {
-	const request = useRequest()
+	const request = useRequest(true)
 
 	const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/
 
@@ -26,38 +24,6 @@ export const WakanetActivation = () => {
 
 	const activation = useMutation({
 		mutationFn: () => request.post('/wakanet-activation', form.values),
-		onSuccess: (response: AxiosResponse) => {
-			notifications.show({
-				autoClose: 60000,
-				title: 'Success',
-				message: response.data.message,
-				color: 'green',
-			})
-		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 60000,
-				title:
-					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
-					((
-						error.response?.data as {
-							status: string
-						}
-					).status as unknown as React.ReactNode),
-				message:
-					((
-						error.response?.data as {
-							message: string
-						}
-					).message! as unknown as React.ReactNode) ||
-					((
-						error.response?.data as {
-							error: string
-						}
-					).error as unknown as React.ReactNode),
-				color: 'red',
-			})
-		},
 	})
 
 	return (
@@ -96,7 +62,7 @@ export const WakanetActivation = () => {
 					/>
 					<Flex justify={'center'} gap="xl" align={'center'}>
 						<Button fullWidth onClick={() => activation.mutate()}>
-							{activation.isLoading ? <Loader color="white" variant="dots" /> : 'Activate'}
+							{activation.isLoading ? <Loader color="white" size={'xs'} /> : 'Activate'}
 						</Button>
 					</Flex>
 				</Stack>

@@ -11,7 +11,7 @@ import { IconSearch } from '@tabler/icons-react'
 import useRequest from '../hooks/use-request'
 
 export default React.memo(() => {
-	const request = useRequest()
+	const request = useRequest(true)
 	const qc = useQueryClient()
 
 	const [opened, { open, close }] = useDisclosure(false)
@@ -31,7 +31,7 @@ export default React.memo(() => {
 		onSuccess: (_: AxiosResponse) => {
 			open()
 			notifications.show({
-				autoClose: 60000,
+				autoClose: 15000,
 				title: 'Success',
 				// @ts-ignore
 				message: _.data.message,
@@ -43,7 +43,7 @@ export default React.memo(() => {
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
-				autoClose: 60000,
+				autoClose: 15000,
 				title:
 					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
 					((
@@ -96,7 +96,7 @@ export default React.memo(() => {
 					onClick={() => mutation.mutate(form.values.wakanetNumber)}
 					variant="filled"
 				>
-					{mutation.isLoading ? <Loader color="white" variant="dots" /> : 'Searh User'}
+					{mutation.isLoading ? <Loader color="white" size={'xs'} /> : 'Searh User'}
 				</Button>
 			</Flex>
 		</Paper>

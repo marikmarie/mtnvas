@@ -22,7 +22,7 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 	const emailRegex = /^\S+@\S+\.\S+$/
 	const msisdn = /^256(78|77|76)\d{7}$/
 
-	const request = useRequest()
+	const request = useRequest(true)
 
 	const form = useForm({
 		initialValues: {
@@ -51,7 +51,7 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 				queryKey: ['details'],
 			})
 			notifications.show({
-				autoClose: 60000,
+				autoClose: 15000,
 				title: 'SUCCESS',
 				// @ts-ignore
 				message: response?.message as React.ReactNode,
@@ -80,7 +80,7 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 				</Text>
 				<TextInput
 					required
-					label="Email"
+					label="Customer Email"
 					value={form.values.email}
 					onChange={event => form.setFieldValue('email', event.currentTarget.value)}
 					error={form.errors.email}
@@ -96,18 +96,12 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 				/>
 				<TextInput
 					required
-					label="SubscriptionId"
-					value={form.values.subscriptionId}
-					onChange={event => form.setFieldValue('subscriptionId', event.currentTarget.value)}
-					error={form.errors.subscriptionId}
-					radius="sm"
-				/>
-				<TextInput
-					required
-					label="Sales Agent Email"
-					value={form.values.salesAgentEmail}
-					onChange={event => form.setFieldValue('salesAgentEmail', event.currentTarget.value)}
-					error={form.errors.salesAgentEmail}
+					label="Router number"
+					value={detail?.bnumber}
+					onChange={event => form.setFieldValue('bnumber', event.currentTarget.value)}
+					disabled
+					readOnly
+					error={form.errors.bnumber}
 					radius="sm"
 				/>
 				<Button onClick={handleSubmission} radius={'sm'}>

@@ -8,7 +8,6 @@ import navReducer from './slices/nav'
 const persistedAuthReducer = persistReducer( { key: 'auth', storage }, authReducer )
 const persistedNavReducer = persistReducer( { key: 'nav', storage }, navReducer )
 
-
 const store = configureStore( {
 	reducer: {
 		auth: persistedAuthReducer,

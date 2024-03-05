@@ -14,7 +14,11 @@ import {
 } from '@mantine/core'
 import { memo, useCallback } from 'react'
 import { IconMail } from '@tabler/icons-react'
-import useRequest from '../../hooks/use-request'
+import useRequest from '../hooks/use-request'
+import { useSelector } from 'react-redux'
+import { RootState } from '../app/store'
+import { Link, useNavigate } from 'react-router-dom'
+import { ROUTES } from '../constants/routes'
 
 const useStyles = createStyles(() => ({
 	root: {
@@ -31,11 +35,13 @@ export default memo((props: PaperProps) => {
 		classes: { root },
 	} = useStyles()
 
-	const request = useRequest()
+	const request = useRequest(false)
+	const navigate = useNavigate()
+	const user = useSelector((state: RootState) => state.auth.user)
 
 	const form = useForm({
 		initialValues: {
-			email: '',
+			email: user?.email || '',
 			password: '',
 			passwordConfirm: '',
 			otp: '',
@@ -50,18 +56,21 @@ export default memo((props: PaperProps) => {
 
 	const requestOTP = useCallback(async () => {
 		await request.post(`/request-otp`, {
-			email: form.values.email,
+			email: form.values.email || user?.email,
 		})
 	}, [form.values.email])
 
 	const passwordReset = useCallback(async () => {
-		await request.post(`/password-reset`, {
+		const res = await request.post(`/password-reset`, {
 			otp: form.values.otp,
 			email: form.values.email,
 			password: form.values.password,
 			passwordConfirm: form.values.passwordConfirm,
 		})
-	}, [form.values.otp, form.values.email])
+		if (res.data?.status !== 200) {
+			navigate(ROUTES.AUTH)
+		}
+	}, [form.values.otp, form.values.email, form.values.password, form.values.passwordConfirm])
 
 	return (
 		<>
@@ -72,11 +81,12 @@ export default memo((props: PaperProps) => {
 						<Image src="/Logo.png" width={100} />
 					</Center>
 
-					<Center>
-						<Text c="dimmed" fz={'lg'} my="md">
-							Please enter your email to receive an OTP
-						</Text>
-					</Center>
+					<Text c="dimmed" fz={'lg'} ta="center" mt="md">
+						Please enter your email to receive a
+					</Text>
+					<Text c="dimmed" fz={'lg'} ta="center">
+						One Time Password
+					</Text>
 
 					<TextInput
 						name="email"
@@ -118,6 +128,9 @@ export default memo((props: PaperProps) => {
 					<Button onClick={passwordReset} mt="xl" fullWidth>
 						Reset Password
 					</Button>
+					<Center mt="xs">
+						<Link to={ROUTES.AUTH}>Signin instead</Link>
+					</Center>
 				</Paper>
 			</Container>
 		</>

@@ -1,6 +1,6 @@
 import { Container, Flex, rem, ScrollArea } from '@mantine/core'
 
-import { Header } from './header'
+import { Header } from './Header'
 import React, { useCallback, useEffect } from 'react'
 import { useScreenWidth } from '../hooks/use-screen-width'
 import { useDispatch } from 'react-redux'

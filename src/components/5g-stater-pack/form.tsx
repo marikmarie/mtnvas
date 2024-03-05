@@ -1,15 +1,13 @@
 import { Stack, Flex, Badge, TextInput, Button, Text, Loader } from '@mantine/core'
 import { useForm } from '@mantine/form'
-import { notifications } from '@mantine/notifications'
 import { IconCircleCheck, IconPhone, IconTrash } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
-import { AxiosResponse, AxiosError } from 'axios'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../app/store'
 import useRequest from '../../hooks/use-request'
 
 export const Form = () => {
-	const request = useRequest()
+	const request = useRequest(true)
 
 	const subscriptionId = useSelector((state: RootState) => state.bundleActivation.subscriptionId)
 
@@ -24,88 +22,10 @@ export const Form = () => {
 	})
 
 	const activation = useMutation({
-		mutationFn: () =>
-			request.post(
-				'/bundle-activations',
-				{ ...form.values, subscriptionId },
-				{
-					headers: {},
-				},
-			),
-		onSuccess: (response: AxiosResponse) => {
-			notifications.show({
-				autoClose: 60000,
-				title: 'Success',
-				message: response.data.message,
-				color: 'green',
-			})
-		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 60000,
-				title:
-					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
-					((
-						error.response?.data as {
-							status: string
-						}
-					).status as unknown as React.ReactNode),
-				message:
-					((
-						error.response?.data as {
-							message: string
-						}
-					).message! as unknown as React.ReactNode) ||
-					((
-						error.response?.data as {
-							error: string
-						}
-					).error as unknown as React.ReactNode),
-				color: 'red',
-			})
-		},
+		mutationFn: () => request.post('/bundle-activations', { ...form.values, subscriptionId }),
 	})
 	const rejection = useMutation({
-		mutationFn: () =>
-			request.post(
-				'/reject-activations',
-				{ ...form.values, subscriptionId },
-				{
-					headers: {},
-				},
-			),
-		onSuccess: (response: AxiosResponse) => {
-			notifications.show({
-				autoClose: 60000,
-				title: 'Success',
-				message: response.data.message,
-				color: 'green',
-			})
-		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 60000,
-				title:
-					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
-					((
-						error.response?.data as {
-							status: string
-						}
-					).status as unknown as React.ReactNode),
-				message:
-					((
-						error.response?.data as {
-							message: string
-						}
-					).message! as unknown as React.ReactNode) ||
-					((
-						error.response?.data as {
-							error: string
-						}
-					).error as unknown as React.ReactNode),
-				color: 'red',
-			})
-		},
+		mutationFn: () => request.post('/reject-activations', { ...form.values, subscriptionId }),
 	})
 
 	return (
@@ -131,10 +51,10 @@ export const Form = () => {
 						/>
 						<Flex justify={'start'} gap="xl" align={'center'}>
 							<Button leftIcon={<IconCircleCheck />} fullWidth onClick={() => activation.mutate()}>
-								{activation.isLoading ? <Loader color="white" variant="dots" /> : 'Activate'}
+								{activation.isLoading ? <Loader color="white" size={'xs'} /> : 'Activate'}
 							</Button>
 							<Button leftIcon={<IconTrash />} fullWidth color="red" onClick={() => rejection.mutate()}>
-								{rejection.isLoading ? <Loader color="white" variant="dots" /> : 'Reject'}
+								{rejection.isLoading ? <Loader color="white" size={'xs'} /> : 'Reject'}
 							</Button>
 						</Flex>
 					</Stack>

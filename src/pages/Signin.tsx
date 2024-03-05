@@ -1,5 +1,6 @@
 import { useForm } from '@mantine/form'
 import {
+	Box,
 	Button,
 	Center,
 	Container,
@@ -17,12 +18,13 @@ import {
 import { IconAt, IconLock } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import useRequest from '../hooks/use-request'
-import { notifications } from '@mantine/notifications'
-import { AxiosError, AxiosResponse } from 'axios'
+import { AxiosResponse } from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { Auth, signin } from '../app/slices/auth'
 import React from 'react'
+import { Link } from 'react-router-dom'
+import { ROUTES } from '../constants/routes'
 
 const useStyles = createStyles(() => ({
 	root: {
@@ -38,7 +40,7 @@ export default React.memo((props: PaperProps) => {
 	const {
 		classes: { root },
 	} = useStyles()
-	const request = useRequest()
+	const request = useRequest(false)
 	const navigate = useNavigate()
 	const dispatch = useDispatch()
 
@@ -64,30 +66,6 @@ export default React.memo((props: PaperProps) => {
 			console.log('auth: ', res.data)
 			dispatch(signin(res.data as unknown as Auth))
 			navigate('/dashboard')
-		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 60000,
-				title:
-					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
-					((
-						error.response?.data as {
-							status: string
-						}
-					).status as unknown as React.ReactNode),
-				message:
-					((
-						error.response?.data as {
-							message: string
-						}
-					).message! as unknown as React.ReactNode) ||
-					((
-						error.response?.data as {
-							error: string
-						}
-					).error as unknown as React.ReactNode),
-				color: 'red',
-			})
 		},
 	})
 
@@ -120,20 +98,23 @@ export default React.memo((props: PaperProps) => {
 							error={form.errors.username}
 						/>
 
-						<TextInput
-							value={form.values.password}
-							onChange={event => form.setFieldValue('password', event.currentTarget.value)}
-							placeholder="Password"
-							label="Password"
-							mb="md"
-							type="password"
-							icon={
-								<ThemeIcon color="transparent" size="sm">
-									<IconLock color="gray" />
-								</ThemeIcon>
-							}
-							error={form.errors.password}
-						/>
+						<Box mb="xs">
+							<TextInput
+								value={form.values.password}
+								onChange={event => form.setFieldValue('password', event.currentTarget.value)}
+								placeholder="Password"
+								label="Password"
+								type="password"
+								mb="xs"
+								icon={
+									<ThemeIcon color="transparent" size="sm">
+										<IconLock color="gray" />
+									</ThemeIcon>
+								}
+								error={form.errors.password}
+							/>
+							<Link to={ROUTES.PASSWORD_RESET}>Reset Password</Link>
+						</Box>
 					</Stack>
 					<Stack>
 						<Button onClick={() => mutation.mutate()}>Sign In</Button>

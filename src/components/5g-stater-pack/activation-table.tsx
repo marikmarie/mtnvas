@@ -18,7 +18,7 @@ type Data = {
 
 export default memo(() => {
 	const dispatch = useDispatch()
-	const request = useRequest()
+	const request = useRequest(true)
 	const [loading, setLoading] = useState(false)
 
 	const columns: any = useMemo<MRT_ColumnDef<Data>[]>(

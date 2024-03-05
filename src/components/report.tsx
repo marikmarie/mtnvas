@@ -15,7 +15,7 @@ interface Report {
 }
 
 export default memo(() => {
-	const request = useRequest()
+	const request = useRequest(true)
 	const [loading, setLoading] = useState(false)
 
 	const columns = useMemo<MRT_ColumnDef<Report>[]>(
@@ -49,12 +49,16 @@ export default memo(() => {
 				header: 'SALES AGENT EMAIL',
 			},
 			{
-				accessorKey: 'createdAt',
-				header: 'CREATED AT',
+				accessorKey: 'activatedAt',
+				header: 'ACTIVATED AT',
 				Cell: ({ row }) =>
 					new Date(row.original.createdAt).toDateString() +
 					' ' +
 					new Date(row.original.createdAt).toLocaleTimeString(),
+			},
+			{
+				accessorKey: 'activatedBy',
+				header: 'ACTIVATED BY',
 			},
 		],
 		[],
@@ -72,9 +76,6 @@ export default memo(() => {
 		} finally {
 			setLoading(false)
 		}
-
-		const response = await request.get('/activations')
-		setReport(response.data as unknown as { data: Report[] })
 	}, [])
 
 	useEffect(() => {

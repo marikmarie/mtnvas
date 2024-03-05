@@ -1,48 +1,22 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { notifications } from '@mantine/notifications';
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
-import { notifications } from '@mantine/notifications';
 
-export default function useRequest(): AxiosInstance {
+export default function useRequest( requireAuth: boolean ): AxiosInstance {
 	const token = useSelector( ( state: RootState ) => state.auth.token );
 
-	const notRequireAuthorizationEndpoints = [
-		"/onboard-activation",
-		"/balance-check",
-		"/balance-detail",
-		"/activation-response",
-		"/login",
-		"/request-otp",
-		"/password-reset",
-	];
-	const requireAuthorizationEndpoints = [
-		"/bundle-activations",
-		"/customer-details",
-		"/customers",
-		"/load-bundle",
-		"/activations",
-		"/wakanet-activation",
-		"/reject-activations",
-	];
-
-	const instance = axios.create( {
+	const instance = !requireAuth ? axios.create( {
 		baseURL: import.meta.env.VITE_APP_BASE_URL!,
-	} );
+	} ) : axios.create( {
+		baseURL: import.meta.env.VITE_APP_BASE_URL!,
+		headers: {
+			Authorization: `Bearer ${token}`
+		}
+	} )
 
 	instance.interceptors.request.use(
 		( config ) => {
-			const { url } = config;
-
-			if ( url ) {
-				if ( notRequireAuthorizationEndpoints.includes( url ) ) {
-					return config;
-				}
-
-				if ( requireAuthorizationEndpoints.includes( url ) ) {
-					config.headers.Authorization = `Bearer ${token}`;
-				}
-			}
-
 			return config;
 		},
 		( error ) => {
@@ -53,9 +27,8 @@ export default function useRequest(): AxiosInstance {
 	instance.interceptors.response.use(
 		( response: AxiosResponse ) => {
 			notifications.show( {
-				autoClose: 60000,
-				// title: "SUCCESS :: " + response.data?.message,
-				// @ts-ignore
+				title: "Success",
+				autoClose: 15000,
 				message: response?.data.message,
 				color: "green",
 			} );
@@ -64,32 +37,26 @@ export default function useRequest(): AxiosInstance {
 		( error ) => {
 			if ( error.response ) {
 				notifications.show( {
-					autoClose: 60000,
-					// title: "Error status :: " + error.response.status,
-					// @ts-ignore
+					title: "Error",
+					autoClose: 15000,
 					message: error.response?.data.message,
 					color: 'red',
 				} );
 			} else if ( error.request ) {
 				notifications.show( {
-					autoClose: 60000,
+					autoClose: 15000,
 					title: "Error status :: " + error.response.status,
-					// @ts-ignore
 					message: 'Request was made, No response received',
 					color: 'red',
 				} );
-				console.error( 'Request was made, No response received' );
 			} else {
 				notifications.show( {
-					autoClose: 60000,
+					autoClose: 15000,
 					title: "Error status :: " + error.response.status,
-					// @ts-ignore
 					message: 'Error setting up the request:: ' + error.message,
 					color: 'red',
 				} );
 			}
-
-			// handle specific error cases here (e.g., token expiration, redirect to login, etc.)
 			return Promise.reject( error );
 		}
 	);

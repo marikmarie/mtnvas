@@ -5,7 +5,7 @@ import { lazy } from 'react'
 const Signin = Loader(lazy(() => import('./pages/signin')))
 const Dashboard = Loader(lazy(() => import('./pages/dashboard')))
 const NotFound = Loader(lazy(() => import('./pages/404')))
-const RequestOtp = Loader(lazy(() => import('./pages/otp/request-otp')))
+const PasswordReset = Loader(lazy(() => import('./pages/password-reset')))
 
 export default function AppRouter() {
 	return useRoutes([
@@ -14,8 +14,8 @@ export default function AppRouter() {
 			element: <Signin />,
 		},
 		{
-			path: '/otp/request',
-			element: <RequestOtp />,
+			path: '/password-reset',
+			element: <PasswordReset />,
 		},
 		{
 			path: '/dashboard',
