@@ -26,32 +26,26 @@ export default function useRequest( requireAuth: boolean ): AxiosInstance {
 
 	instance.interceptors.response.use(
 		( response: AxiosResponse ) => {
-			notifications.show( {
-				title: "Success",
-				autoClose: 15000,
-				message: response?.data.message,
-				color: "green",
-			} );
 			return response;
 		},
 		( error ) => {
 			if ( error.response ) {
 				notifications.show( {
 					title: "Error",
-					autoClose: 15000,
+					autoClose: 5000,
 					message: error.response?.data.message,
 					color: 'red',
 				} );
 			} else if ( error.request ) {
 				notifications.show( {
-					autoClose: 15000,
+					autoClose: 5000,
 					title: "Error status :: " + error.response.status,
 					message: 'Request was made, No response received',
 					color: 'red',
 				} );
 			} else {
 				notifications.show( {
-					autoClose: 15000,
+					autoClose: 5000,
 					title: "Error status :: " + error.response.status,
 					message: 'Error setting up the request:: ' + error.message,
 					color: 'red',

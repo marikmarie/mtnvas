@@ -31,7 +31,7 @@ export default React.memo(() => {
 		onSuccess: (_: AxiosResponse) => {
 			open()
 			notifications.show({
-				autoClose: 15000,
+				autoClose: 5000,
 				title: 'Success',
 				// @ts-ignore
 				message: _.data.message,
@@ -43,7 +43,7 @@ export default React.memo(() => {
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
-				autoClose: 15000,
+				autoClose: 5000,
 				title:
 					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
 					((

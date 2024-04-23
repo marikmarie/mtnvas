@@ -1,6 +1,6 @@
 import { Stack, Flex, Badge, TextInput, Button, Text, Loader } from '@mantine/core'
 import { useForm } from '@mantine/form'
-import { IconCircleCheck, IconPhone, IconTrash } from '@tabler/icons-react'
+import { IconCircleCheck, IconPhone, IconRestore } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../app/store'
@@ -53,8 +53,8 @@ export const Form = () => {
 							<Button leftIcon={<IconCircleCheck />} fullWidth onClick={() => activation.mutate()}>
 								{activation.isLoading ? <Loader color="white" size={'xs'} /> : 'Activate'}
 							</Button>
-							<Button leftIcon={<IconTrash />} fullWidth color="red" onClick={() => rejection.mutate()}>
-								{rejection.isLoading ? <Loader color="white" size={'xs'} /> : 'Reject'}
+							<Button leftIcon={<IconRestore stroke={2} />} fullWidth color="red" onClick={() => rejection.mutate()}>
+								{rejection.isLoading ? <Loader color="white" size={'xs'} /> : 'Refund'}
 							</Button>
 						</Flex>
 					</Stack>

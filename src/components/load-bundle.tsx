@@ -6,13 +6,13 @@ import { memo, useState } from 'react'
 import useRequest from '../hooks/use-request'
 import { Package } from './package'
 import { IconBrandSpeedtest } from '@tabler/icons-react'
+import { RootState } from '../app/store'
+import { useSelector } from 'react-redux'
 
-export default memo(() => {
-	const request = useRequest(true)
+export default memo( () => {
+	const request = useRequest( true )
 
-	const [selectedSrvCode, setSelectedSrvCode] = useState('')
-
-	console.log(selectedSrvCode)
+	const [selectedSrvCode, setSelectedSrvCode] = useState( '' )
 
 	const wakanet_5g = [
 		{ serviceCode: 'FWA_40MBPS', amount: '29500UGX', speed: '40MBPS' },
@@ -37,21 +37,31 @@ export default memo(() => {
 		{ serviceCode: '1778FHI3', amount: '335000UGX', speed: '195GB' },
 	]
 
-	const form = useForm({
+	const post_paid_bundles = [
+		{ serviceCode: 'Waka10PST', amount: '35000UGX', speed: '14GB' },
+		{ serviceCode: 'Waka20PST', amount: '55000UGX', speed: '25GB' },
+		{ serviceCode: 'Waka40PST', amount: '85000UGX', speed: '45GB' },
+		{ serviceCode: 'Waka85PST', amount: '170000UGX', speed: '95GB' },
+		{ serviceCode: 'Waka195PST', amount: '335000UGX', speed: '195GB' },
+	]
+
+	const user = useSelector( ( state: RootState ) => state.auth.user )
+
+	const form = useForm( {
 		initialValues: {
 			msisdn: '',
 			bnumber: '',
 		},
 
 		validate: {
-			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid WakaNet Number'),
-			msisdn: (val: string) => (val.length > 9 ? null : 'Should be a valid custmer/agent number'),
+			bnumber: ( val: string ) => ( val.length > 9 ? null : 'Should be a valid WakaNet Number' ),
+			msisdn: ( val: string ) => ( val.length > 9 ? null : 'Should be a valid custmer/agent number' ),
 		},
-	})
+	} )
 
-	const mutation = useMutation({
-		mutationFn: () => request.post('/load-bundle', { ...form.values, serviceCode: selectedSrvCode }),
-	})
+	const mutation = useMutation( {
+		mutationFn: () => request.post( '/load-bundle', { ...form.values, serviceCode: selectedSrvCode } ),
+	} )
 
 	return (
 		<Paper py="lg">
@@ -63,7 +73,7 @@ export default memo(() => {
 				<TextInput
 					icon={<IconPhone />}
 					label="WakaNet Number"
-					onChange={event => form.setFieldValue('bnumber', event.currentTarget.value)}
+					onChange={event => form.setFieldValue( 'bnumber', event.currentTarget.value )}
 					error={form.errors.bnumber}
 					placeholder="Forexample 2563945..."
 					withAsterisk
@@ -86,7 +96,7 @@ export default memo(() => {
 											{ maxWidth: 'xs', cols: 1 },
 										]}
 									>
-										{wakanet_5g.map(srv => (
+										{wakanet_5g.map( srv => (
 											<Package
 												selectedSrvCode={selectedSrvCode}
 												key={srv.serviceCode}
@@ -95,7 +105,7 @@ export default memo(() => {
 												amount={srv.amount}
 												speed={srv.speed}
 											/>
-										))}
+										) )}
 									</SimpleGrid>
 								</Accordion.Panel>
 							</Accordion.Item>
@@ -116,7 +126,7 @@ export default memo(() => {
 											{ maxWidth: 'xs', cols: 1 },
 										]}
 									>
-										{wakanet_4g.map(srv => (
+										{wakanet_4g.map( srv => (
 											<Package
 												key={srv.serviceCode}
 												serviceCode={srv.serviceCode}
@@ -125,7 +135,7 @@ export default memo(() => {
 												amount={srv.amount}
 												speed={srv.speed}
 											/>
-										))}
+										) )}
 									</SimpleGrid>
 								</Accordion.Panel>
 							</Accordion.Item>
@@ -134,7 +144,7 @@ export default memo(() => {
 							<Accordion.Item value="wakanet_bundles">
 								<Accordion.Control icon={<IconBrandSpeedtest />}>
 									<Text fz="xl" fw="bold">
-										WakaNet Bundles
+										WakaNet Router Bundles
 									</Text>
 								</Accordion.Control>
 								<Accordion.Panel>
@@ -146,7 +156,7 @@ export default memo(() => {
 											{ maxWidth: 'xs', cols: 1 },
 										]}
 									>
-										{wakanet_bundles.map(srv => (
+										{wakanet_bundles.map( srv => (
 											<Package
 												key={srv.serviceCode}
 												serviceCode={srv.serviceCode}
@@ -155,11 +165,43 @@ export default memo(() => {
 												amount={srv.amount}
 												speed={srv.speed}
 											/>
-										))}
+										) )}
 									</SimpleGrid>
 								</Accordion.Panel>
 							</Accordion.Item>
 						</Accordion>
+						{user?.role === "WAKA_CORP" ?
+								<Accordion variant="contained">
+									<Accordion.Item value="wakanet_bundles">
+										<Accordion.Control icon={<IconBrandSpeedtest />}>
+											<Text fz="xl" fw="bold">
+												Post Paid bundles
+											</Text>
+										</Accordion.Control>
+										<Accordion.Panel>
+											<SimpleGrid
+												cols={4}
+												breakpoints={[
+													{ maxWidth: 'md', cols: 4 },
+													{ maxWidth: 'sm', cols: 2 },
+													{ maxWidth: 'xs', cols: 1 },
+												]}
+											>
+												{post_paid_bundles.map( srv => (
+													<Package
+														key={srv.serviceCode}
+														serviceCode={srv.serviceCode}
+														selectedSrvCode={selectedSrvCode}
+														setSelectedSrvCode={setSelectedSrvCode}
+														amount={srv.amount}
+														speed={srv.speed}
+													/>
+												) )}
+											</SimpleGrid>
+										</Accordion.Panel>
+									</Accordion.Item>
+								</Accordion> : null
+						}
 					</Stack>
 				</Paper>
 
@@ -167,7 +209,7 @@ export default memo(() => {
 					icon={<IconPhone />}
 					label="Agent/Customer Number"
 					value={form.values.msisdn}
-					onChange={event => form.setFieldValue('msisdn', event.currentTarget.value)}
+					onChange={event => form.setFieldValue( 'msisdn', event.currentTarget.value )}
 					placeholder="Forexample 078..."
 					error={form.errors.msisdn}
 					withAsterisk
@@ -186,4 +228,4 @@ export default memo(() => {
 			</form>
 		</Paper>
 	)
-})
+} )

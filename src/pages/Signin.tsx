@@ -1,6 +1,5 @@
 import { useForm } from '@mantine/form'
 import {
-	Box,
 	Button,
 	Center,
 	Container,
@@ -14,8 +13,9 @@ import {
 	TextInput,
 	ThemeIcon,
 	Title,
+	Text,
 } from '@mantine/core'
-import { IconAt, IconLock } from '@tabler/icons-react'
+import { IconLock, IconMail } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import useRequest from '../hooks/use-request'
 import { AxiosResponse } from 'axios'
@@ -23,7 +23,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { Auth, signin } from '../app/slices/auth'
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 import { ROUTES } from '../constants/routes'
 
 const useStyles = createStyles(() => ({
@@ -89,7 +89,7 @@ export default React.memo((props: PaperProps) => {
 							label="Email"
 							icon={
 								<ThemeIcon color="transparent" size="sm">
-									<IconAt color="gray" />
+									<IconMail color="gray" />
 								</ThemeIcon>
 							}
 							placeholder="mail@mtn.com"
@@ -98,25 +98,23 @@ export default React.memo((props: PaperProps) => {
 							error={form.errors.username}
 						/>
 
-						<Box mb="xs">
-							<TextInput
-								value={form.values.password}
-								onChange={event => form.setFieldValue('password', event.currentTarget.value)}
-								placeholder="Password"
-								label="Password"
-								type="password"
-								mb="xs"
-								icon={
-									<ThemeIcon color="transparent" size="sm">
-										<IconLock color="gray" />
-									</ThemeIcon>
-								}
-								error={form.errors.password}
-							/>
-							<Link to={ROUTES.PASSWORD_RESET}>Reset Password</Link>
-						</Box>
-					</Stack>
-					<Stack>
+						<TextInput
+							value={form.values.password}
+							onChange={event => form.setFieldValue('password', event.currentTarget.value)}
+							placeholder="Password"
+							label="Password"
+							type="password"
+							mb="xs"
+							icon={
+								<ThemeIcon color="transparent" size="sm">
+									<IconLock color="gray" />
+								</ThemeIcon>
+							}
+							error={form.errors.password}
+						/>
+						<Text component={RouterLink} to={ROUTES.PASSWORD_RESET}>
+							Reset Password
+						</Text>
 						<Button onClick={() => mutation.mutate()}>Sign In</Button>
 					</Stack>
 				</form>

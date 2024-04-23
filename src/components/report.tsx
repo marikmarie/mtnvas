@@ -1,10 +1,11 @@
 import { MantineReactTable, type MRT_ColumnDef } from 'mantine-react-table'
-import { memo, useCallback, useEffect, useMemo, useState } from 'react'
-import useRequest from '../hooks/use-request'
-import { Stack } from '@mantine/core'
+import { memo, useMemo } from 'react'
+import { Stack, TextInput } from '@mantine/core'
 import { useTable } from '../hooks/use-table'
+import { IconSearch } from '@tabler/icons-react'
+import { useActivations } from "../hooks/use-activations"
 
-interface Report {
+export interface Activation {
 	subscriptionId: string
 	msisdn: string
 	email: string
@@ -12,13 +13,14 @@ interface Report {
 	salesAgentEmail: string
 	createdAt: string
 	status: string
+	activatedAt:string;
+	activatedBy:string;
 }
 
 export default memo(() => {
-	const request = useRequest(true)
-	const [loading, setLoading] = useState(false)
+	const { loading,filtered,searchQuery,setSearchQuery} = useActivations()
 
-	const columns = useMemo<MRT_ColumnDef<Report>[]>(
+	const columns = useMemo<MRT_ColumnDef<Activation>[]>(
 		() => [
 			{
 				accessorKey: 'subscriptionId',
@@ -50,7 +52,7 @@ export default memo(() => {
 			},
 			{
 				accessorKey: 'activatedAt',
-				header: 'ACTIVATED AT',
+				header: 'PERFORMED AT',
 				Cell: ({ row }) =>
 					new Date(row.original.createdAt).toDateString() +
 					' ' +
@@ -58,34 +60,23 @@ export default memo(() => {
 			},
 			{
 				accessorKey: 'activatedBy',
-				header: 'ACTIVATED BY',
+				header: 'PERFORMED BY',
 			},
 		],
 		[],
 	)
 
-	const [report, setReport] = useState<{ data: Report[] }>({ data: [] })
-
-	const handleGetActivationsReport = useCallback(async () => {
-		try {
-			setLoading(true)
-			const response = await request.get('/activations')
-			setReport(response.data as unknown as { data: Report[] })
-			setLoading(false)
-		} catch (error) {
-		} finally {
-			setLoading(false)
-		}
-	}, [])
-
-	useEffect(() => {
-		handleGetActivationsReport()
-	}, [])
-
-	const table = useTable(report.data, columns, loading)
+	const table = useTable(filtered, columns, loading)
 
 	return (
 		<Stack py="lg">
+			<TextInput
+				placeholder='Search by msisdn'
+				icon={<IconSearch/>}
+				value={searchQuery}
+				onChange={(event) => setSearchQuery(event.currentTarget.value)}
+				// onChange={(value) => }
+			/>
 			<MantineReactTable table={table} />
 		</Stack>
 	)
