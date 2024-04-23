@@ -1,6 +1,6 @@
 export const ROUTES = {
-  AUTH: "/",
-  DASHRBOARD: "/dashboard",
+  AUTH: "/signin",
+  DASHRBOARD: "/",
   PASSWORD_RESET: "/password-reset",
   ACCOUNT: "/account",
   UPLOAD: "/upload",

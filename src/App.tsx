@@ -1,6 +1,7 @@
 import { useRoutes } from 'react-router-dom'
 import { PublicLoader as Loader } from './hocs/loadable'
 import { lazy } from 'react'
+import { ROUTES } from './constants/routes'
 
 const Signin = Loader(lazy(() => import('./pages/signin')))
 const Dashboard = Loader(lazy(() => import('./pages/dashboard')))
@@ -10,19 +11,19 @@ const PasswordReset = Loader(lazy(() => import('./pages/password-reset')))
 export default function AppRouter() {
 	return useRoutes([
 		{
-			path: '/',
+			path: ROUTES.AUTH,
 			element: <Signin />,
 		},
 		{
-			path: '/password-reset',
+			path: ROUTES.PASSWORD_RESET,
 			element: <PasswordReset />,
 		},
 		{
-			path: '/dashboard',
+			path: ROUTES.DASHRBOARD,
 			element: <Dashboard />,
 		},
 		{
-			path: '*',
+			path: ROUTES.NOT_FOUND,
 			element: <NotFound />,
 		},
 	])
