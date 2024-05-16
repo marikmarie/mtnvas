@@ -11,7 +11,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Notifications } from '@mantine/notifications'
 import { PersistGate } from 'redux-persist/integration/react'
 import { ModalsProvider } from '@mantine/modals'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 const client = new QueryClient()
 
@@ -26,7 +25,6 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 					</BrowserRouter>
 				</PersistGate>
 			</Provider>
-			<ReactQueryDevtools />
 		</QueryClientProvider>
 	</React.StrictMode>,
 )

@@ -10,62 +10,62 @@ import { useDisclosure } from '@mantine/hooks'
 import { IconSearch } from '@tabler/icons-react'
 import useRequest from '../hooks/use-request'
 
-export default React.memo(() => {
-	const request = useRequest(true)
+export default React.memo( () => {
+	const request = useRequest( true )
 	const qc = useQueryClient()
 
-	const [opened, { open, close }] = useDisclosure(false)
+	const [opened, { open, close }] = useDisclosure( false )
 
-	const form = useForm({
+	const form = useForm( {
 		initialValues: {
 			wakanetNumber: '',
 		},
 
 		validate: {
-			wakanetNumber: (val: string) => (val.length > 9 ? null : 'Should be a valid wakanetNumber'),
+			wakanetNumber: ( val: string ) => ( val.length > 9 ? null : 'Should be a valid wakanetNumber' ),
 		},
-	})
+	} )
 
-	const mutation = useMutation({
-		mutationFn: (wakanetNumber: string) => request.post('/customer-details', { bnumber: wakanetNumber }),
-		onSuccess: (_: AxiosResponse) => {
+	const mutation = useMutation( {
+		mutationFn: ( wakanetNumber: string ) => request.post( '/customer-details', { bnumber: wakanetNumber } ),
+		onSuccess: ( _: AxiosResponse ) => {
 			open()
-			notifications.show({
+			notifications.show( {
 				autoClose: 5000,
 				title: 'Success',
 				// @ts-ignore
 				message: _.data.message,
 				color: 'green',
-			})
-			qc.invalidateQueries({
+			} )
+			qc.invalidateQueries( {
 				queryKey: ['update-details'],
-			})
+			} )
 		},
-		onError: (error: AxiosError) => {
-			notifications.show({
+		onError: ( error: AxiosError ) => {
+			notifications.show( {
 				autoClose: 5000,
 				title:
-					((error.response?.data as { httpStatus: string }).httpStatus as unknown as React.ReactNode) ||
-					((
+					( ( error.response?.data as { httpStatus: string } ).httpStatus as unknown as React.ReactNode ) ||
+					( (
 						error.response?.data as {
 							status: string
 						}
-					).status as unknown as React.ReactNode),
+					).status as unknown as React.ReactNode ),
 				message:
-					((
+					( (
 						error.response?.data as {
 							message: string
 						}
-					).message! as unknown as React.ReactNode) ||
-					((
+					).message! as unknown as React.ReactNode ) ||
+					( (
 						error.response?.data as {
 							error: string
 						}
-					).error as unknown as React.ReactNode),
+					).error as unknown as React.ReactNode ),
 				color: 'red',
-			})
+			} )
 		},
-	})
+	} )
 
 	const details = mutation.data?.data?.data
 
@@ -79,26 +79,28 @@ export default React.memo(() => {
 				<UpdateDetailsModal detail={details || null} />
 			</Modal>
 
-			<Stack mt={'sm'}>
-				<TextInput
-					label="WakaNet Number"
-					value={form.values.wakanetNumber}
-					onChange={event => form.setFieldValue('wakanetNumber', event.currentTarget.value)}
-					error={form.errors.wakanetNumber}
-					placeholder="Forexample 2563945..."
-					withAsterisk
-				/>
-			</Stack>
+			<form>
+				<Stack mt={'sm'}>
+					<TextInput
+						label="WakaNet Number"
+						value={form.values.wakanetNumber}
+						onChange={event => form.setFieldValue( 'wakanetNumber', event.currentTarget.value )}
+						error={form.errors.wakanetNumber}
+						placeholder="Forexample 2563945..."
+						withAsterisk
+					/>
+				</Stack>
 
-			<Flex mt="md" w="100%" justify={'flex-end'} gap={'sm'}>
-				<Button
-					leftIcon={<IconSearch />}
-					onClick={() => mutation.mutate(form.values.wakanetNumber)}
-					variant="filled"
-				>
-					{mutation.isLoading ? <Loader color="white" size={'xs'} /> : 'Searh User'}
-				</Button>
-			</Flex>
+				<Flex mt="md" w="100%" justify={'flex-end'} gap={'sm'}>
+					<Button
+						leftIcon={<IconSearch />}
+						onClick={() => mutation.mutate( form.values.wakanetNumber )}
+						variant="filled"
+					>
+						{mutation.isLoading ? <Loader color="white" size={'xs'} /> : 'Searh User'}
+					</Button>
+				</Flex>
+			</form>
 		</Paper>
 	)
-})
+} )

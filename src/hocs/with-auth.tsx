@@ -8,7 +8,7 @@ export const withAuth = <P extends object>(ProtectedComponent: React.FC<P>) => {
 	const ComponentWithAuth: React.FC<P> = props => {
 		const token = useSelector((state: RootState) => state.auth.token)
 
-		const isAuthenticated = token ? true : false
+		const isAuthenticated = token ? true : process.env.NODE_ENV === "development"
 
 		const location = useLocation()
 

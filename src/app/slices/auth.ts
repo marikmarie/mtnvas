@@ -23,7 +23,6 @@ const slice = createSlice( {
   initialState,
   reducers: {
     signin: ( state, action: PayloadAction<Auth> ) => {
-      console.log( "auth: ", action.payload )
       state.user = action.payload.user;
       state.token = action.payload.token;
     },

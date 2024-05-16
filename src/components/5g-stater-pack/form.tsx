@@ -54,7 +54,7 @@ export const Form = () => {
 								{activation.isLoading ? <Loader color="white" size={'xs'} /> : 'Activate'}
 							</Button>
 							<Button leftIcon={<IconRestore stroke={2} />} fullWidth color="red" onClick={() => rejection.mutate()}>
-								{rejection.isLoading ? <Loader color="white" size={'xs'} /> : 'Refund'}
+								{rejection.isLoading ? <Loader color="white" size={'xs'} /> : 'Reject'}
 							</Button>
 						</Flex>
 					</Stack>

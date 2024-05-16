@@ -25,6 +25,7 @@ import { Auth, signin } from '../app/slices/auth'
 import React from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { ROUTES } from '../constants/routes'
+import { customLoader } from '../components/custom-loader'
 
 const useStyles = createStyles(() => ({
 	root: {
@@ -63,15 +64,14 @@ export default React.memo((props: PaperProps) => {
 	const mutation = useMutation({
 		mutationFn: () => request.post('/login', form.values),
 		onSuccess: (res: AxiosResponse) => {
-			console.log('auth: ', res.data)
 			dispatch(signin(res.data as unknown as Auth))
-			navigate('/dashboard')
+			navigate('/')
 		},
 	})
 
 	return (
 		<Container className={root} size="xs">
-			<LoadingOverlay visible={mutation.isLoading} zIndex={1000} />
+			<LoadingOverlay visible={mutation.isLoading} loader={customLoader}  zIndex={1000} />
 			<Paper mt="xl" withBorder p="xl" {...props} w={'100%'} sx={{ background: 'transparent' }}>
 				<Flex align={'center'} justify={'center'} gap="md">
 					<Image src="/Logo.png" width={80} />
@@ -83,7 +83,7 @@ export default React.memo((props: PaperProps) => {
 					</Title>
 				</Center>
 
-				<form>
+				<form onSubmit={form.onSubmit(() => mutation.mutate())}>
 					<Stack>
 						<TextInput
 							label="Email"
@@ -112,10 +112,10 @@ export default React.memo((props: PaperProps) => {
 							}
 							error={form.errors.password}
 						/>
-						<Text component={RouterLink} to={ROUTES.PASSWORD_RESET}>
+						<Text mt={-20} component={RouterLink} to={ROUTES.PASSWORD_RESET}>
 							Reset Password
 						</Text>
-						<Button onClick={() => mutation.mutate()}>Sign In</Button>
+						<Button type='submit'>Sign In</Button>
 					</Stack>
 				</form>
 			</Paper>

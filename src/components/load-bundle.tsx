@@ -5,7 +5,6 @@ import { useMutation } from '@tanstack/react-query'
 import { memo, useState } from 'react'
 import useRequest from '../hooks/use-request'
 import { Package } from './package'
-import { IconBrandSpeedtest } from '@tabler/icons-react'
 import { RootState } from '../app/store'
 import { useSelector } from 'react-redux'
 
@@ -82,16 +81,17 @@ export default memo( () => {
 					<Stack>
 						<Accordion variant="contained" defaultValue={'wakanet_5g'}>
 							<Accordion.Item value="wakanet_5g">
-								<Accordion.Control icon={<IconBrandSpeedtest />}>
+								<Accordion.Control>
 									<Text fz="xl" fw="bold">
 										Wakanet 5G
 									</Text>
 								</Accordion.Control>
 								<Accordion.Panel>
 									<SimpleGrid
-										cols={4}
+										cols={5}
 										breakpoints={[
-											{ maxWidth: 'md', cols: 2 },
+											{ maxWidth: 'lg', cols: 4 },
+											{ maxWidth: 'md', cols: 3 },
 											{ maxWidth: 'sm', cols: 2 },
 											{ maxWidth: 'xs', cols: 1 },
 										]}
@@ -110,18 +110,19 @@ export default memo( () => {
 								</Accordion.Panel>
 							</Accordion.Item>
 						</Accordion>
-						<Accordion variant="contained">
+						<Accordion variant="contained" defaultValue={"wakanet_4g"}>
 							<Accordion.Item value="wakanet_4g">
-								<Accordion.Control icon={<IconBrandSpeedtest />}>
+								<Accordion.Control>
 									<Text fz="xl" fw="bold">
 										Wakanet 4G
 									</Text>
 								</Accordion.Control>
 								<Accordion.Panel>
 									<SimpleGrid
-										cols={4}
+										cols={5}
 										breakpoints={[
-											{ maxWidth: 'md', cols: 2 },
+											{ maxWidth: 'lg', cols: 4 },
+											{ maxWidth: 'md', cols: 3 },
 											{ maxWidth: 'sm', cols: 2 },
 											{ maxWidth: 'xs', cols: 1 },
 										]}
@@ -140,18 +141,19 @@ export default memo( () => {
 								</Accordion.Panel>
 							</Accordion.Item>
 						</Accordion>
-						<Accordion variant="contained">
+						<Accordion variant="contained" defaultValue={"wakanet_bundles"}>
 							<Accordion.Item value="wakanet_bundles">
-								<Accordion.Control icon={<IconBrandSpeedtest />}>
+								<Accordion.Control>
 									<Text fz="xl" fw="bold">
 										WakaNet Router Bundles
 									</Text>
 								</Accordion.Control>
 								<Accordion.Panel>
 									<SimpleGrid
-										cols={4}
+										cols={5}
 										breakpoints={[
-											{ maxWidth: 'md', cols: 4 },
+											{ maxWidth: 'lg', cols: 4 },
+											{ maxWidth: 'md', cols: 3 },
 											{ maxWidth: 'sm', cols: 2 },
 											{ maxWidth: 'xs', cols: 1 },
 										]}
@@ -170,19 +172,20 @@ export default memo( () => {
 								</Accordion.Panel>
 							</Accordion.Item>
 						</Accordion>
-						{user?.role === "WAKA_CORP" ?
+						{user?.role === "WAKA_CORP" || user?.role ?
 								<Accordion variant="contained">
 									<Accordion.Item value="wakanet_bundles">
-										<Accordion.Control icon={<IconBrandSpeedtest />}>
+										<Accordion.Control>
 											<Text fz="xl" fw="bold">
-												Post Paid bundles
+												PostPaid Bundles
 											</Text>
 										</Accordion.Control>
 										<Accordion.Panel>
 											<SimpleGrid
-												cols={4}
+												cols={5}
 												breakpoints={[
-													{ maxWidth: 'md', cols: 4 },
+													{ maxWidth: 'lg', cols: 4 },
+													{ maxWidth: 'md', cols: 3 },
 													{ maxWidth: 'sm', cols: 2 },
 													{ maxWidth: 'xs', cols: 1 },
 												]}

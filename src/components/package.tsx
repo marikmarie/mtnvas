@@ -15,6 +15,8 @@ export const Package: FC<{
 		? '4g speed'
 		: '5g speed'
 
+		const selected = selectedSrvCode === serviceCode
+
 	return (
 		<Card w="100%" radius={'md'} withBorder>
 			<Flex justify={'space-between'} align={'center'} mb="md" gap={'lg'}>
@@ -30,14 +32,14 @@ export const Package: FC<{
 			</Text>
 
 			<Button
-				leftIcon={selectedSrvCode === serviceCode ? <IconCircleCheck /> : null}
+				leftIcon={selected ? <IconCircleCheck /> : null}
 				onClick={() => setSelectedSrvCode(serviceCode)}
-				variant={selectedSrvCode === serviceCode ? 'filled' : 'outline'}
+				variant={selected ? 'filled' : 'outline'}
 				fullWidth
 				radius="md"
 				mt="lg"
 			>
-				Select Package
+				{ selected ? "Package Selected" : 'Select Package'}
 			</Button>
 		</Card>
 	)

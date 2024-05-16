@@ -6,7 +6,7 @@ export default defineConfig( {
 	plugins: [react()],
 	server: {
 		hmr: true,
-		port: 5005,
+		port: 3000,
 		open: true,
 	},
 	optimizeDeps: {
