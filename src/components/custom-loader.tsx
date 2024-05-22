@@ -1,4 +1,4 @@
-import { DEFAULT_THEME } from '@mantine/core'
+import { DEFAULT_THEME } from '@mantine/core';
 
 export const customLoader = (
 	<svg
@@ -35,4 +35,4 @@ export const customLoader = (
 			</g>
 		</g>
 	</svg>
-)
+);

@@ -3,55 +3,57 @@ import { notifications } from '@mantine/notifications';
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
 
-export default function useRequest( requireAuth: boolean ): AxiosInstance {
-	const token = useSelector( ( state: RootState ) => state.auth.token );
+export default function useRequest(requireAuth: boolean): AxiosInstance {
+	const token = useSelector((state: RootState) => state.auth.token);
 
-	const instance = !requireAuth ? axios.create( {
-		baseURL: import.meta.env.VITE_APP_BASE_URL!,
-	} ) : axios.create( {
-		baseURL: import.meta.env.VITE_APP_BASE_URL!,
-		headers: {
-			Authorization: `Bearer ${token}`
-		}
-	} )
+	const instance = !requireAuth
+		? axios.create({
+				baseURL: import.meta.env.VITE_APP_BASE_URL!,
+			})
+		: axios.create({
+				baseURL: import.meta.env.VITE_APP_BASE_URL!,
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
 
 	instance.interceptors.request.use(
-		( config ) => {
+		(config) => {
 			return config;
 		},
-		( error ) => {
-			return Promise.reject( error );
+		(error) => {
+			return Promise.reject(error);
 		}
 	);
 
 	instance.interceptors.response.use(
-		( response: AxiosResponse ) => {
+		(response: AxiosResponse) => {
 			return response;
 		},
-		( error ) => {
-			if ( error.response ) {
-				notifications.show( {
-					title: "Error",
+		(error) => {
+			if (error.response) {
+				notifications.show({
+					title: 'Error',
 					autoClose: 5000,
 					message: error.response?.data.message,
 					color: 'red',
-				} );
-			} else if ( error.request ) {
-				notifications.show( {
+				});
+			} else if (error.request) {
+				notifications.show({
 					autoClose: 5000,
-					title: "Error status :: " + error.response.status,
+					title: 'Error status :: ' + error.response.status,
 					message: 'Request was made, No response received',
 					color: 'red',
-				} );
+				});
 			} else {
-				notifications.show( {
+				notifications.show({
 					autoClose: 5000,
-					title: "Error status :: " + error.response.status,
+					title: 'Error status :: ' + error.response.status,
 					message: 'Error setting up the request:: ' + error.message,
 					color: 'red',
-				} );
+				});
 			}
-			return Promise.reject( error );
+			return Promise.reject(error);
 		}
 	);
 

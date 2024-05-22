@@ -1,15 +1,19 @@
-import { Stack, Flex, Badge, TextInput, Button, Text, Loader } from '@mantine/core'
-import { useForm } from '@mantine/form'
-import { IconCircleCheck, IconPhone, IconRestore } from '@tabler/icons-react'
-import { useMutation } from '@tanstack/react-query'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../app/store'
-import useRequest from '../../hooks/use-request'
+import { Stack, Flex, Badge, TextInput, Button, Text, Loader } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { IconCircleCheck, IconPhone, IconRestore } from '@tabler/icons-react';
+import { useMutation } from '@tanstack/react-query';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../app/store';
+import useRequest from '../../hooks/use-request';
+import { notifications } from '@mantine/notifications';
+import { AxiosResponse, AxiosError } from 'axios';
+import { setServiceCode, setSubscriptionId } from '../../app/slices/bundle-activations';
 
 export const Form = () => {
-	const request = useRequest(true)
+	const request = useRequest(true);
 
-	const subscriptionId = useSelector((state: RootState) => state.bundleActivation.subscriptionId)
+	const subscriptionId = useSelector((state: RootState) => state.bundleActivation.subscriptionId);
+	const dispatch = useDispatch();
 
 	const form = useForm({
 		initialValues: {
@@ -19,22 +23,72 @@ export const Form = () => {
 		validate: {
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid wakanetNumber'),
 		},
-	})
+	});
+
+	const onReset = function () {
+		dispatch(setSubscriptionId(''));
+		dispatch(setServiceCode(''));
+		form.reset();
+	};
 
 	const activation = useMutation({
 		mutationFn: () => request.post('/bundle-activations', { ...form.values, subscriptionId }),
-	})
+		onSuccess: (response: AxiosResponse) => {
+			notifications.show({
+				autoClose: 5000,
+				title: 'Success',
+				// @ts-ignore
+				message: response.data.message,
+				color: 'green',
+			});
+			onReset();
+		},
+		onError: (error: AxiosError) => {
+			notifications.show({
+				autoClose: 5000,
+				title: 'FAILURE',
+				message: JSON.stringify(error.response?.data),
+				color: 'red',
+			});
+			onReset();
+		},
+	});
 	const rejection = useMutation({
 		mutationFn: () => request.post('/reject-activations', { ...form.values, subscriptionId }),
-	})
+		onSuccess: (response: AxiosResponse) => {
+			notifications.show({
+				autoClose: 5000,
+				title: 'Success',
+				// @ts-ignore
+				message: JSON.stringify(response.data),
+				color: 'green',
+			});
+		},
+		onError: (error: AxiosError) => {
+			notifications.show({
+				autoClose: 5000,
+				title: 'FAILURE',
+				message: JSON.stringify(error.response?.data),
+				color: 'red',
+			});
+			onReset();
+		},
+	});
 
 	return (
 		<div>
 			{subscriptionId ? (
-				<form>
+				<form onSubmit={form.onSubmit(() => activation.mutate())}>
 					<Stack my={'sm'}>
-						<Flex justify={'start'} gap="xl" align={'center'}>
-							<Badge variant="light" size="xl">
+						<Flex
+							justify={'start'}
+							gap="xl"
+							align={'center'}
+						>
+							<Badge
+								variant="light"
+								size="xl"
+							>
 								Subscription Id
 							</Badge>
 							<Text>{subscriptionId}</Text>
@@ -43,23 +97,54 @@ export const Form = () => {
 							icon={<IconPhone />}
 							label="WakaNet Number"
 							value={form.values.bnumber}
-							onChange={event => form.setFieldValue('bnumber', event.currentTarget.value)}
+							onChange={(event) =>
+								form.setFieldValue('bnumber', event.currentTarget.value)
+							}
 							error={form.errors.bnumber}
 							placeholder="Forexample 2563945..."
 							withAsterisk
 							w="100%"
 						/>
-						<Flex justify={'start'} gap="xl" align={'center'}>
-							<Button leftIcon={<IconCircleCheck />} fullWidth onClick={() => activation.mutate()}>
-								{activation.isLoading ? <Loader color="white" size={'xs'} /> : 'Activate'}
+						<Flex
+							justify={'start'}
+							gap="xl"
+							align={'center'}
+						>
+							<Button
+								leftIcon={<IconCircleCheck />}
+								fullWidth
+								type="submit"
+								disabled={form.errors.bnumber ? true : false}
+							>
+								{activation.isLoading ? (
+									<Loader
+										color="white"
+										size={'xs'}
+									/>
+								) : (
+									'Activate'
+								)}
 							</Button>
-							<Button leftIcon={<IconRestore stroke={2} />} fullWidth color="red" onClick={() => rejection.mutate()}>
-								{rejection.isLoading ? <Loader color="white" size={'xs'} /> : 'Reject'}
+							<Button
+								leftIcon={<IconRestore stroke={2} />}
+								fullWidth
+								color="red"
+								disabled={form.errors.bnumber ? true : false}
+								onClick={() => rejection.mutate()}
+							>
+								{rejection.isLoading ? (
+									<Loader
+										color="white"
+										size={'xs'}
+									/>
+								) : (
+									'Reject'
+								)}
 							</Button>
 						</Flex>
 					</Stack>
 				</form>
 			) : null}
 		</div>
-	)
-}
+	);
+};

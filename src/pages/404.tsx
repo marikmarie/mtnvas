@@ -1,19 +1,11 @@
-import {
-	createStyles,
-	Container,
-	Title,
-	Text,
-	Button,
-	Group,
-	rem,
-} from '@mantine/core'
-import { Illustration } from '../components/Illustration'
-import { Link } from 'react-router-dom'
+import { createStyles, Container, Title, Text, Button, Group, rem } from '@mantine/core';
+import { Illustration } from '../components/Illustration';
+import { Link } from 'react-router-dom';
 
-const useStyles = createStyles( theme => ( {
+const useStyles = createStyles((theme) => ({
 	root: {
-		paddingTop: rem( 80 ),
-		paddingBottom: rem( 80 ),
+		paddingTop: rem(80),
+		paddingBottom: rem(80),
 	},
 
 	inner: {
@@ -26,12 +18,12 @@ const useStyles = createStyles( theme => ( {
 	},
 
 	content: {
-		paddingTop: rem( 220 ),
+		paddingTop: rem(220),
 		position: 'relative',
 		zIndex: 1,
 
-		[theme.fn.smallerThan( 'sm' )]: {
-			paddingTop: rem( 120 ),
+		[theme.fn.smallerThan('sm')]: {
+			paddingTop: rem(120),
 		},
 	},
 
@@ -39,23 +31,23 @@ const useStyles = createStyles( theme => ( {
 		fontFamily: `Greycliff CF, ${theme.fontFamily}`,
 		textAlign: 'center',
 		fontWeight: 900,
-		fontSize: rem( 38 ),
+		fontSize: rem(38),
 
-		[theme.fn.smallerThan( 'sm' )]: {
-			fontSize: rem( 32 ),
+		[theme.fn.smallerThan('sm')]: {
+			fontSize: rem(32),
 		},
 	},
 
 	description: {
-		maxWidth: rem( 540 ),
+		maxWidth: rem(540),
 		margin: 'auto',
 		marginTop: theme.spacing.xl,
 		marginBottom: `calc(${theme.spacing.xl} * 1.5)`,
 	},
-} ) )
+}));
 
 export default function NotFound() {
-	const { classes } = useStyles()
+	const { classes } = useStyles();
 
 	return (
 		<Container className={classes.root}>
@@ -69,18 +61,21 @@ export default function NotFound() {
 						align="center"
 						className={classes.description}
 					>
-						Page you are trying to open does not exist. You may have
-						mistyped the address, or the page has been moved to
-						another URL. If you think this is an error contact
-						support.
+						Page you are trying to open does not exist. You may have mistyped the
+						address, or the page has been moved to another URL. If you think this is an
+						error contact support.
 					</Text>
 					<Group position="center">
-						<Button component={Link} to={"/"} size="md">
+						<Button
+							component={Link}
+							to={'/'}
+							size="md"
+						>
 							Take me back to home page
 						</Button>
 					</Group>
 				</div>
 			</div>
 		</Container>
-	)
+	);
 }

@@ -1,9 +1,9 @@
-import { MRT_ColumnDef, useMantineReactTable } from 'mantine-react-table'
+import { MRT_ColumnDef, useMantineReactTable } from 'mantine-react-table';
 
 export const useTable = function <T extends Record<string, any>>(
 	data: T[] = [],
 	columns: MRT_ColumnDef<T>[],
-	loading: boolean,
+	loading: boolean
 ) {
 	const table = useMantineReactTable({
 		columns,
@@ -48,7 +48,7 @@ export const useTable = function <T extends Record<string, any>>(
 				},
 			},
 		},
-	})
+	});
 
-	return table
-}
+	return table;
+};

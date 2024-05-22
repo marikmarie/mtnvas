@@ -1,12 +1,12 @@
-import { useRoutes } from 'react-router-dom'
-import { Loadable } from './hocs/loadable'
-import { lazy } from 'react'
-import { ROUTES } from './constants/routes'
+import { useRoutes } from 'react-router-dom';
+import { Loadable } from './hocs/loadable';
+import { lazy } from 'react';
+import { ROUTES } from './constants/routes';
 
-const Signin = Loadable(lazy(() => import('./pages/signin')))
-const Dashboard = Loadable(lazy(() => import('./pages/dashboard')))
-const NotFound = Loadable(lazy(() => import('./pages/404')))
-const PasswordReset = Loadable(lazy(() => import('./pages/password-reset')))
+const Signin = Loadable(lazy(() => import('./pages/signin')));
+const Dashboard = Loadable(lazy(() => import('./pages/dashboard')));
+const NotFound = Loadable(lazy(() => import('./pages/404')));
+const PasswordReset = Loadable(lazy(() => import('./pages/password-reset')));
 
 export default function AppRouter() {
 	return useRoutes([
@@ -26,5 +26,5 @@ export default function AppRouter() {
 			path: ROUTES.ALL,
 			element: <NotFound />,
 		},
-	])
+	]);
 }

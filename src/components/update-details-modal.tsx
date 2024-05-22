@@ -1,28 +1,28 @@
-import React from 'react'
-import { useForm } from '@mantine/form'
-import { TextInput, Button, Stack, Text } from '@mantine/core'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { notifications } from '@mantine/notifications'
-import { AxiosResponse } from 'axios'
-import useRequest from '../hooks/use-request'
+import React from 'react';
+import { useForm } from '@mantine/form';
+import { TextInput, Button, Stack, Text } from '@mantine/core';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { notifications } from '@mantine/notifications';
+import { AxiosError, AxiosResponse } from 'axios';
+import useRequest from '../hooks/use-request';
 
 interface UpdateDetailsData {
-	subscriptionId: string
-	msisdn: string
-	bnumber: string
-	email: string
-	salesAgentEmail: string
+	subscriptionId: string;
+	msisdn: string;
+	bnumber: string;
+	email: string;
+	salesAgentEmail: string;
 }
 
 interface DetailsProp {
-	detail: UpdateDetailsData | null
+	detail: UpdateDetailsData | null;
 }
 
 export default function UpdateDetailsModal({ detail }: DetailsProp) {
-	const emailRegex = /^\S+@\S+\.\S+$/
-	const msisdn = /^256(78|77|76)\d{7}$/
+	const emailRegex = /^\S+@\S+\.\S+$/;
+	const msisdn = /^256(78|77|76)\d{7}$/;
 
-	const request = useRequest(true)
+	const request = useRequest(true);
 
 	const form = useForm({
 		initialValues: {
@@ -34,55 +34,71 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 		},
 
 		validate: {
-			subscriptionId: val => ((val as string).length <= 2 ? 'Should include at least 2 characters' : null),
-			email: val => (emailRegex.test(val as string) ? null : 'Should be a valid email address'),
-			msisdn: val => (msisdn.test(val as string) ? null : 'Should be a valid phone number'),
-			bnumber: val => ((val as string).length <= 2 ? 'Should include at least 2 characters' : null),
+			subscriptionId: (val) =>
+				(val as string).length <= 2 ? 'Should include at least 2 characters' : null,
+			email: (val) =>
+				emailRegex.test(val as string) ? null : 'Should be a valid email address',
+			msisdn: (val) => (msisdn.test(val as string) ? null : 'Should be a valid phone number'),
+			bnumber: (val) =>
+				(val as string).length <= 2 ? 'Should include at least 2 characters' : null,
 		},
-	})
+	});
 
-	const queryClient = useQueryClient()
+	const queryClient = useQueryClient();
 
 	const mutation = useMutation({
 		mutationKey: ['details'],
-		mutationFn: (data: UpdateDetailsData) => request.put(`/customers`, data).then(res => res.data),
+		mutationFn: (data: UpdateDetailsData) =>
+			request.put(`/customers`, data).then((res) => res.data),
 		onSuccess: (response: AxiosResponse) => {
 			queryClient.invalidateQueries({
 				queryKey: ['details'],
-			})
+			});
 			notifications.show({
 				autoClose: 5000,
-				title: 'SUCCESS',
+				title: 'Success',
 				// @ts-ignore
-				message: response?.message as React.ReactNode,
+				message: JSON.stringify(response.data),
 				color: 'green',
-				withCloseButton: true,
-			})
+			});
 		},
-	})
+		onError: (error: AxiosError) => {
+			notifications.show({
+				autoClose: 5000,
+				title: 'FAILURE',
+				message: JSON.stringify(error.response?.data),
+				color: 'red',
+			});
+		},
+	});
 
 	const handleSubmission = (event: React.FormEvent) => {
-		event.preventDefault()
+		event.preventDefault();
 		mutation.mutate({
 			subscriptionId: form.values.subscriptionId ?? '',
 			msisdn: form.values.msisdn ?? '',
 			bnumber: form.values.bnumber ?? '',
 			email: form.values.email ?? '',
 			salesAgentEmail: form.values.salesAgentEmail ?? '',
-		})
-	}
+		});
+	};
 
 	return (
 		<form>
 			<Stack>
-				<Text ta="center" fz="xl" fw="lighter" c="dimmed">
+				<Text
+					ta="center"
+					fz="xl"
+					fw="lighter"
+					c="dimmed"
+				>
 					Edit Details
 				</Text>
 				<TextInput
 					required
 					label="Customer Email"
 					value={form.values.email}
-					onChange={event => form.setFieldValue('email', event.currentTarget.value)}
+					onChange={(event) => form.setFieldValue('email', event.currentTarget.value)}
 					error={form.errors.email}
 					radius="sm"
 				/>
@@ -90,7 +106,7 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 					required
 					label="MSISDN"
 					value={form.values.msisdn}
-					onChange={event => form.setFieldValue('msisdn', event.currentTarget.value)}
+					onChange={(event) => form.setFieldValue('msisdn', event.currentTarget.value)}
 					error={form.errors.msisdn}
 					radius="sm"
 				/>
@@ -98,16 +114,19 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 					required
 					label="Router number"
 					value={detail?.bnumber}
-					onChange={event => form.setFieldValue('bnumber', event.currentTarget.value)}
+					onChange={(event) => form.setFieldValue('bnumber', event.currentTarget.value)}
 					disabled
 					readOnly
 					error={form.errors.bnumber}
 					radius="sm"
 				/>
-				<Button onClick={handleSubmission} radius={'sm'}>
+				<Button
+					onClick={handleSubmission}
+					radius={'sm'}
+				>
 					Edit
 				</Button>
 			</Stack>
 		</form>
-	)
+	);
 }

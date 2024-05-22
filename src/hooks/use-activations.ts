@@ -1,45 +1,45 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Activation } from "../components/report";
+import { Activation } from '../components/report';
 import useRequest from './use-request';
 
 export function useActivations() {
-	const request = useRequest( true )
+	const request = useRequest(true);
 
-	const [searchQuery, setSearchQuery] = useState( '' );
-	const [loading, setLoading] = useState( false )
+	const [searchQuery, setSearchQuery] = useState('');
+	const [loading, setLoading] = useState(false);
 
-	const [activations, setActivations] = useState<{ data: Activation[] }>( { data: [] } )
-	const [filtered, setFiltered] = useState<Activation[]>( [] );
+	const [activations, setActivations] = useState<{ data: Activation[] }>({ data: [] });
+	const [filtered, setFiltered] = useState<Activation[]>([]);
 
-	const handleGetActivationsReport = useCallback( async () => {
+	const handleGetActivationsReport = useCallback(async () => {
 		try {
-			setLoading( true )
-			const response = await request.get( '/activations' )
-			setActivations( response.data as unknown as { data: Activation[] } )
-			setLoading( false )
-		} catch ( error ) {
+			setLoading(true);
+			const response = await request.get('/activations');
+			setActivations(response.data as unknown as { data: Activation[] });
+			setLoading(false);
+		} catch (error) {
 		} finally {
-			setLoading( false )
+			setLoading(false);
 		}
-	}, [] )
+	}, []);
 
-	useEffect( () => {
-		handleGetActivationsReport()
-	}, [] )
+	useEffect(() => {
+		handleGetActivationsReport();
+	}, []);
 
-	useEffect( () => {
-		const regex = new RegExp( searchQuery, 'i' );
-		const filtered = activations.data.filter( activation => {
+	useEffect(() => {
+		const regex = new RegExp(searchQuery, 'i');
+		const filtered = activations.data.filter((activation) => {
 			const msisdn = activation.msisdn.toLowerCase();
-			return regex.test( msisdn );
-		} );
-		setFiltered( filtered );
-	}, [searchQuery, activations] );
+			return regex.test(msisdn);
+		});
+		setFiltered(filtered);
+	}, [searchQuery, activations]);
 
 	return {
 		filtered,
 		searchQuery,
 		setSearchQuery,
-		loading
-	}
+		loading,
+	};
 }

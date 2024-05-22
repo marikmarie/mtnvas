@@ -1,33 +1,52 @@
-import { Button, Card, Text, Badge, Flex } from '@mantine/core'
-import { IconBrandSpeedtest, IconCircleCheck } from '@tabler/icons-react'
-import { Dispatch, FC, SetStateAction, memo } from 'react'
+import { Button, Card, Text, Badge, Flex } from '@mantine/core';
+import { IconBrandSpeedtest, IconCircleCheck } from '@tabler/icons-react';
+import { Dispatch, FC, SetStateAction, memo } from 'react';
 
 export const Package: FC<{
-	amount: string
-	speed: string
-	serviceCode: string
-	selectedSrvCode: string
-	setSelectedSrvCode: Dispatch<SetStateAction<string>>
+	amount: string;
+	speed: string;
+	serviceCode: string;
+	selectedSrvCode: string;
+	setSelectedSrvCode: Dispatch<SetStateAction<string>>;
 }> = memo(({ setSelectedSrvCode, serviceCode, amount, speed, selectedSrvCode }) => {
-	const badge = ['ITTH_14GB', '1778FHI4', '1778FHI1', '1778FHI2', '1778FHI3'].includes(serviceCode)
+	const badge = ['ITTH_14GB', '1778FHI4', '1778FHI1', '1778FHI2', '1778FHI3'].includes(
+		serviceCode
+	)
 		? 'bundle'
 		: ['FWA_3MBPS', 'FWA_5MBPS', 'FWA_10MBPS', 'FWA_20MBPS'].includes(serviceCode)
-		? '4g speed'
-		: '5g speed'
+			? '4g speed'
+			: '5g speed';
 
-		const selected = selectedSrvCode === serviceCode
+	const selected = selectedSrvCode === serviceCode;
 
 	return (
-		<Card w="100%" radius={'md'} withBorder>
-			<Flex justify={'space-between'} align={'center'} mb="md" gap={'lg'}>
+		<Card
+			w="100%"
+			radius={'md'}
+			withBorder
+		>
+			<Flex
+				justify={'space-between'}
+				align={'center'}
+				mb="md"
+				gap={'lg'}
+			>
 				<IconBrandSpeedtest color="orange" />
-				<Text fz="xl" ta="center" fw={600}>
+				<Text
+					fz="xl"
+					ta="center"
+					fw={600}
+				>
 					{speed}
 				</Text>
 				<Badge variant="dot">{badge}</Badge>
 			</Flex>
 
-			<Text fz="xl" ta="center" fw={500}>
+			<Text
+				fz="xl"
+				ta="center"
+				fw={500}
+			>
 				{amount}
 			</Text>
 
@@ -39,8 +58,8 @@ export const Package: FC<{
 				radius="md"
 				mt="lg"
 			>
-				{ selected ? "Package Selected" : 'Select Package'}
+				{selected ? 'Package Selected' : 'Select Package'}
 			</Button>
 		</Card>
-	)
-})
+	);
+});

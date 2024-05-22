@@ -1,100 +1,115 @@
-import { Button, Container, Paper, SimpleGrid } from '@mantine/core'
-import React from 'react'
-import Layout from '../components/Layout'
-import Signup from '../components/5g-stater-pack'
-import LoadBundle from '../components/load-bundle'
-import CheckBalance from '../components/check-balance'
-import UpdateDetails from '../components/update-details'
-import Report from '../components/report'
-import { WakanetActivation } from '../components/wakanet-activation'
-import { withAuth } from '../hocs/with-auth'
+import { Button, Container, Paper, SimpleGrid } from '@mantine/core';
+import Layout from '../components/Layout';
 
-type TAB = 'signup' | 'load-bundle' | 'check-balance' | 'update-details' | 'report' | 'wakanet-activation'
+import { WakanetActivation } from '../components/wakanet-activation';
+import { withAuth } from '../hocs/with-auth';
+import { memo, useState, useCallback, lazy } from 'react';
+import { Loadable } from '../hocs/loadable';
 
-export default React.memo(
+const Signup = Loadable(lazy(() => import('../components/5g-stater-pack')));
+const LoadBundle = Loadable(lazy(() => import('../components/load-bundle')));
+const CheckBalance = Loadable(lazy(() => import('../components/check-balance')));
+const UpdateDetails = Loadable(lazy(() => import('../components/update-details')));
+const Report = Loadable(lazy(() => import('../components/report')));
+
+type TAB =
+	| 'signup'
+	| 'load-bundle'
+	| 'check-balance'
+	| 'update-details'
+	| 'report'
+	| 'wakanet-activation';
+
+export default memo(
 	withAuth(() => {
-		const [activeTab, setActiveTab] = React.useState<TAB>('signup')
+		const [activeTab, setActiveTab] = useState<TAB>('signup');
 
-		const handleSwitchToTab = React.useCallback((tab: TAB) => {
-			setActiveTab(tab)
-		}, [])
+		const onTabSwitch = useCallback((tab: TAB) => {
+			setActiveTab(tab);
+		}, []);
 
+		const tabs = (
+			<SimpleGrid
+				cols={6}
+				breakpoints={[
+					{ maxWidth: 'md', cols: 2 },
+					{ maxWidth: 'xs', cols: 2 },
+					{ maxWidth: 'sm', cols: 2 },
+				]}
+			>
+				<Button
+					fullWidth
+					variant={activeTab === 'signup' ? 'filled' : 'light'}
+					onClick={() => onTabSwitch('signup')}
+				>
+					4G/5G WakaNet Starterpack
+				</Button>
+				<Button
+					fullWidth
+					variant={activeTab === 'wakanet-activation' ? 'filled' : 'light'}
+					onClick={() => onTabSwitch('wakanet-activation')}
+				>
+					WakaNet Router Starterpack
+				</Button>
+				<Button
+					fullWidth
+					variant={activeTab === 'load-bundle' ? 'filled' : 'light'}
+					onClick={() => onTabSwitch('load-bundle')}
+				>
+					Load Bundle
+				</Button>
+				<Button
+					fullWidth
+					variant={activeTab === 'check-balance' ? 'filled' : 'light'}
+					onClick={() => onTabSwitch('check-balance')}
+				>
+					Check Balance
+				</Button>
+				<Button
+					fullWidth
+					variant={activeTab === 'update-details' ? 'filled' : 'light'}
+					onClick={() => onTabSwitch('update-details')}
+				>
+					Update Details
+				</Button>
+				<Button
+					fullWidth
+					variant={activeTab === 'report' ? 'filled' : 'light'}
+					onClick={() => onTabSwitch('report')}
+				>
+					Activations Report
+				</Button>
+			</SimpleGrid>
+		);
 		return (
 			<Layout>
 				<Container size={1480}>
-					<Paper mt="md" py="sm">
-						<SimpleGrid
-							cols={6}
-							breakpoints={[
-								{ maxWidth: 'md', cols: 2 },
-								{ maxWidth: 'xs', cols: 2 },
-								{ maxWidth: 'sm', cols: 2 },
-							]}
-						>
-							<Button
-								fullWidth
-								variant={activeTab === 'signup' ? 'filled' : 'light'}
-								onClick={() => handleSwitchToTab('signup')}
-							>
-								4G/5G WakaNet Starterpack
-							</Button>
-							<Button
-								fullWidth
-								variant={activeTab === 'wakanet-activation' ? 'filled' : 'light'}
-								onClick={() => handleSwitchToTab('wakanet-activation')}
-							>
-								WakaNet Router Starterpack
-							</Button>
-							<Button
-								fullWidth
-								variant={activeTab === 'load-bundle' ? 'filled' : 'light'}
-								onClick={() => handleSwitchToTab('load-bundle')}
-							>
-								Load Bundle
-							</Button>
-							<Button
-								fullWidth
-								variant={activeTab === 'check-balance' ? 'filled' : 'light'}
-								onClick={() => handleSwitchToTab('check-balance')}
-							>
-								Check Balance
-							</Button>
-							<Button
-								fullWidth
-								variant={activeTab === 'update-details' ? 'filled' : 'light'}
-								onClick={() => handleSwitchToTab('update-details')}
-							>
-								Update Details
-							</Button>
-							<Button
-								fullWidth
-								variant={activeTab === 'report' ? 'filled' : 'light'}
-								onClick={() => handleSwitchToTab('report')}
-							>
-								Activations Report
-							</Button>
-						</SimpleGrid>
+					<Paper
+						mt="md"
+						py="sm"
+					>
+						{tabs}
 					</Paper>
 					{(() => {
 						switch (activeTab) {
 							case 'signup':
-								return <Signup />
+								return <Signup />;
 							case 'load-bundle':
-								return <LoadBundle />
+								return <LoadBundle />;
 							case 'check-balance':
-								return <CheckBalance />
+								return <CheckBalance />;
 							case 'update-details':
-								return <UpdateDetails />
+								return <UpdateDetails />;
 							case 'report':
-								return <Report />
+								return <Report />;
 							case 'wakanet-activation':
-								return <WakanetActivation />
+								return <WakanetActivation />;
 							default:
-								return null
+								return null;
 						}
 					})()}
 				</Container>
 			</Layout>
-		)
-	}),
-)
+		);
+	})
+);

@@ -1,122 +1,127 @@
-import { MantineReactTable, type MRT_ColumnDef } from 'mantine-react-table'
-import { memo, useMemo } from 'react'
-import { Button, Stack, TextInput } from '@mantine/core'
-import { useTable } from '../hooks/use-table'
-import { IconPlus, IconSearch } from '@tabler/icons-react'
-import { useActivations } from "../hooks/use-activations"
-import { useDataGridTable } from '../hooks/use-data-grid-table'
-import { toTitle } from '../utils/to-title'
+import { memo, useMemo } from 'react';
+import { Button, Flex, Stack, TextInput } from '@mantine/core';
+import { IconDownload, IconSearch } from '@tabler/icons-react';
+import { useActivations } from '../hooks/use-activations';
+import useRequest from '../hooks/use-request';
+import { useDataGridTable } from '../hooks/use-data-grid-table';
+import { toTitle } from '../utils/to-title';
 
 export interface Activation {
-	subscriptionId: string
-	msisdn: string
-	email: string
-	bnumber: string
-	salesAgentEmail: string
-	createdAt: string
-	status: string
+	subscriptionId: string;
+	msisdn: string;
+	email: string;
+	bnumber: string;
+	salesAgentEmail: string;
+	createdAt: string;
+	status: string;
 	activatedAt: string;
 	activatedBy: string;
 }
 
-export default memo( () => {
-	const { loading, filtered, searchQuery, setSearchQuery } = useActivations()
+export default memo(() => {
+	const { loading, filtered, searchQuery, setSearchQuery } = useActivations();
 
-	const columns = useMemo<MRT_ColumnDef<Activation>[]>(
-		() => [
-			{
-				accessorKey: 'subscriptionId',
-				header: 'SUBSCRIPTION ID',
-			},
-			{
-				accessorKey: 'msisdn',
-				header: 'MSISDN',
-			},
-			{
-				accessorKey: 'bnumber',
-				header: 'BNUMBER',
-			},
-			{
-				accessorKey: 'email',
-				header: 'EMAIL',
-			},
-			{
-				accessorKey: 'amount',
-				header: 'AMOUNT',
-			},
-			{
-				accessorKey: 'status',
-				header: 'STATUS',
-			},
-			{
-				accessorKey: 'salesAgentEmail',
-				header: 'SALES AGENT EMAIL',
-			},
-			{
-				accessorKey: 'activatedAt',
-				header: 'PERFORMED AT',
-				Cell: ( { row } ) =>
-					new Date( row.original.createdAt ).toDateString() +
-					' ' +
-					new Date( row.original.createdAt ).toLocaleTimeString(),
-			},
-			{
-				accessorKey: 'activatedBy',
-				header: 'PERFORMED BY',
-			},
-		],
-		[],
-	)
+	const request = useRequest(true);
 
-	const c = [
-		'subscriptionId',
-		'msisdn',
-		'bnumber',
-		'email',
-		'amount',
-		'status',
-		'salesAgentEmail',
-		'activatedAt',
-	].map( ( column ) => ( {
-		name: column,
-		header: column === "activatedAt" ? "PERFORMED AT" : "",
-		defaultFlex: 1,
-	} ) );
+	const columns = useMemo(
+		() =>
+			[
+				'subscriptionId',
+				'msisdn',
+				'bnumber',
+				'email',
+				'amount',
+				'status',
+				'salesAgentEmail',
+				'activatedAt',
+				'activatedBy',
+			].map((column) => {
+				if (column === 'activatedAt') {
+					return {
+						name: column,
+						header: 'PERFORMED AT',
+						defaultFlex: 1,
+						// @ts-ignore
+						render: ({ data }) => (
+							<>
+								{new Date(data['performedAt']).toLocaleDateString('en-UK')}{' '}
+								{new Date(data['performedAt']).toLocaleTimeString('en-UK')}
+							</>
+						),
+					};
+				}
+				if (column === 'activatedBy') {
+					return {
+						name: column,
+						header: 'PERFORMED BY',
+						defaultFlex: 1,
+						// @ts-ignore
+						render: ({ data }) => {
+							return <>{data['performedBy']}</>;
+						},
+					};
+				}
+				return {
+					name: column,
+					header: toTitle(column),
+					defaultFlex: 1,
+				};
+			}),
+		[]
+	);
 
-	c.push( {
-		name: 'CREATE_CREDIT_NOTE',
-		header: 'CREDIT NOTE',
-		// @ts-ignore
-		render() {
-		  return (
-			<Button
-			  radius="md"
-			  leftIcon={<IconPlus />}
-			  size="xs"
-			  fullWidth
-			  variant="outline"
-			  onClick={() => {}}
-			>
-			  Create
-			</Button>
-		  );
-		},
-		headerAlign: 'center',
-	  } );
+	const activationsReportTable = useDataGridTable({
+		columns: columns,
+		data: filtered,
+		loading,
+		mih: '70vh',
+	});
 
-	const table = useTable( filtered, columns, loading )
-	const t = useDataGridTable( { columns: c, data: filtered, loading, mih: '60vh' } )
+	const onDownload = () => {
+		request
+			.get('/activations-data', {
+				responseType: 'blob',
+				headers: {
+					Accept: 'text/csv',
+				},
+			})
+			.then((response) => {
+				const blob = new Blob([response.data], { type: 'text/csv' });
+				const anchorTag = document.createElement('a');
+				anchorTag.href = URL.createObjectURL(blob);
+				anchorTag.download = 'Activation Report.csv';
+				anchorTag.style.display = 'none';
+
+				document.body.appendChild(anchorTag);
+				anchorTag.click();
+
+				setTimeout(() => {
+					URL.revokeObjectURL(anchorTag.href);
+					document.body.removeChild(anchorTag);
+				}, 100);
+			})
+			.catch((error) => {
+				console.error('Error downloading file:', error);
+			});
+	};
 
 	return (
 		<Stack py="lg">
 			<TextInput
-				placeholder='Search by msisdn'
+				placeholder="Search by msisdn"
 				icon={<IconSearch />}
 				value={searchQuery}
-				onChange={( event ) => setSearchQuery( event.currentTarget.value )}
-			// onChange={(value) => }
+				onChange={(event) => setSearchQuery(event.currentTarget.value)}
 			/>
-			<MantineReactTable table={table} />
+			{activationsReportTable}
+			<Flex justify={'end'}>
+				<Button
+					leftIcon={<IconDownload />}
+					onClick={onDownload}
+				>
+					Download Activations Report
+				</Button>
+			</Flex>
 		</Stack>
-	)
-} )
+	);
+});
