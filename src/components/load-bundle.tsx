@@ -26,8 +26,9 @@ export default memo(() => {
 	const [selectedSrvCode, setSelectedSrvCode] = useState('');
 
 	const wakanet_5g = [
-		{ serviceCode: 'FWA_10MBPS', amount: '130000UGX', speed: '10MBPS' },
-		{ serviceCode: 'FWA_20MBPS', amount: '195000UGX', speed: '20MBPS' },
+		// Preceeded the serviceCode with a -5G to distinguish it from a similar bundle in the 4G packages. I then remove it when making a network request so that server recieves the correct serviceCode
+		{ serviceCode: 'FWA_10MBPS-5G', amount: '130000UGX', speed: '10MBPS' },
+		{ serviceCode: 'FWA_20MBPS-5G', amount: '195000UGX', speed: '20MBPS' },
 		{ serviceCode: 'FWA_40MBPS', amount: '29500UGX', speed: '40MBPS' },
 		{ serviceCode: 'FWA_60MBPS', amount: '39500UGX', speed: '60MBPS' },
 		{ serviceCode: 'FWA_80MBPS', amount: '49500UGX', speed: '80MBPS' },
@@ -38,8 +39,9 @@ export default memo(() => {
 	const wakanet_4g = [
 		{ serviceCode: 'FWA_3MBPS', amount: '55000UGX', speed: '3MBPS' },
 		{ serviceCode: 'FWA_5MBPS', amount: '85000UGX', speed: '5MBPS' },
-		{ serviceCode: 'FWA_10MBPS', amount: '130000UGX', speed: '10MBPS' },
-		{ serviceCode: 'FWA_20MBPS', amount: '195000UGX', speed: '20MBPS' },
+		// Preceeded the serviceCode with a -4G to distinguish it from a similar bundle in the 4G packages. I then remove it when making a network request so that server recieves the correct serviceCode
+		{ serviceCode: 'FWA_10MBPS-4G', amount: '130000UGX', speed: '10MBPS' },
+		{ serviceCode: 'FWA_20MBPS-4G', amount: '195000UGX', speed: '20MBPS' },
 	];
 
 	const wakanet_bundles = [
@@ -75,7 +77,10 @@ export default memo(() => {
 
 	const mutation = useMutation({
 		mutationFn: () =>
-			request.post('/load-bundle', { ...form.values, serviceCode: selectedSrvCode }),
+			request.post('/load-bundle', {
+				...form.values,
+				serviceCode: selectedSrvCode.split('-')[0], // Here, the proceeding -4G or -5G is removed so as the server recieves the correct serviceCode
+			}),
 		onSuccess: (response: AxiosResponse) => {
 			notifications.show({
 				autoClose: 5000,
