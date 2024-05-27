@@ -45,8 +45,8 @@ function Adduser(props: Props) {
 
 	const mutation = useMutation({
 		mutationFn: () => request.post('/users/add', { ...form.values }),
-		onSuccess: (response: AxiosResponse) => {
-			queryClient.invalidateQueries({
+		onSuccess: async (response: AxiosResponse) => {
+			await queryClient.invalidateQueries({
 				queryKey: ['users'],
 			});
 			notifications.show({

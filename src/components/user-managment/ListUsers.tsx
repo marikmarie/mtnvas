@@ -38,7 +38,7 @@ function ListUsers(props: Props) {
 
 	const activationMutation = useMutation({
 		mutationFn: (email: string) => request.post(`/users/${email}/activate`),
-		onSuccess: (response: AxiosResponse) => {
+		onSuccess: async (response: AxiosResponse) => {
 			notifications.show({
 				autoClose: 5000,
 				title: 'Success',
@@ -46,7 +46,7 @@ function ListUsers(props: Props) {
 				message: response.data.message,
 				color: 'green',
 			});
-			queryClient.invalidateQueries({
+			await queryClient.invalidateQueries({
 				queryKey: ['users'],
 			});
 		},
@@ -61,7 +61,7 @@ function ListUsers(props: Props) {
 	});
 	const deactivationMutation = useMutation({
 		mutationFn: (email: string) => request.post(`/users/${email}/deactivate`),
-		onSuccess: (response: AxiosResponse) => {
+		onSuccess: async (response: AxiosResponse) => {
 			notifications.show({
 				autoClose: 5000,
 				title: 'Success',
@@ -69,7 +69,7 @@ function ListUsers(props: Props) {
 				message: response.data.message,
 				color: 'green',
 			});
-			queryClient.invalidateQueries({
+			await queryClient.invalidateQueries({
 				queryKey: ['users'],
 			});
 		},
