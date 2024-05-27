@@ -103,6 +103,11 @@ export function Header() {
 				position="left"
 				title="User managment"
 				overlayProps={{ opacity: 0.5, blur: 4 }}
+				transitionProps={{
+					transition: 'pop',
+					duration: 300,
+					timingFunction: 'linear',
+				}}
 			>
 				<Center>
 					<Stack w="90vw">
