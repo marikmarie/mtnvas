@@ -223,8 +223,11 @@ export default memo(() => {
 								</Accordion.Panel>
 							</Accordion.Item>
 						</Accordion>
-						{user?.role === 'WAKA_CORP' || user?.role ? (
-							<Accordion variant="contained">
+						{user?.role === 'WAKA_CORP' ? (
+							<Accordion
+								variant="contained"
+								defaultValue={'wakanet_bundles'}
+							>
 								<Accordion.Item value="wakanet_bundles">
 									<Accordion.Control>
 										<Text

@@ -1,5 +1,5 @@
 import { Button, LoadingOverlay, Select, TextInput, ThemeIcon } from '@mantine/core';
-import { IconMail, IconLock } from '@tabler/icons-react';
+import { IconLock, IconMail } from '@tabler/icons-react';
 import { memo, useCallback } from 'react';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -71,7 +71,7 @@ function Adduser(props: Props) {
 		console.log(form.values);
 		mutation.mutate();
 		form.reset();
-	}, []);
+	}, [mutation, form]);
 
 	return (
 		<form onSubmit={form.onSubmit(onSubmit)}>
