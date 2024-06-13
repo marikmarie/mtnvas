@@ -15,6 +15,8 @@ import {
 	Stack,
 	Center,
 	Paper,
+	Image,
+	Divider,
 } from '@mantine/core';
 import { IconLogout, IconUsers } from '@tabler/icons-react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -153,7 +155,19 @@ export function Header() {
 						w="100%"
 						align={'center'}
 					>
-						<Title c="dimmed">WAKANET ROUTER | 5G PORTAL</Title>
+						<Flex
+							justify={'center'}
+							align={'center'}
+							gap="sm"
+						>
+							<Image
+								src="/Logo.png"
+								width={100}
+							/>
+							<Title c="dimmed">4G</Title>
+							<Divider orientation="vertical" />
+							<Title c="dimmed">5G PORTAL</Title>
+						</Flex>
 						<Group>
 							{user?.role === 'ADMIN' ? (
 								<Button

@@ -106,7 +106,7 @@ export default memo(() => {
 				fz="xl"
 				fw="bold"
 			>
-				Load new WakaNet bundle
+				Load new 5G bundle
 			</Text>
 
 			<form onSubmit={form.onSubmit(() => mutation.mutate())}>

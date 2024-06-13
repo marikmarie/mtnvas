@@ -75,7 +75,7 @@ export default React.memo(() => {
 			<form onSubmit={form.onSubmit(() => mutation.mutate(form.values.wakanetNumber))}>
 				<Stack mt={'sm'}>
 					<TextInput
-						label="WakaNet Number"
+						label="Router Number"
 						value={form.values.wakanetNumber}
 						onChange={(event) =>
 							form.setFieldValue('wakanetNumber', event.currentTarget.value)

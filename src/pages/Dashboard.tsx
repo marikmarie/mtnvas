@@ -42,7 +42,7 @@ export default memo(
 					variant={activeTab === 'signup' ? 'filled' : 'light'}
 					onClick={() => onTabSwitch('signup')}
 				>
-					4G/5G WakaNet Starterpack
+					4G/5G Starterpack
 				</Button>
 				<Button
 					fullWidth

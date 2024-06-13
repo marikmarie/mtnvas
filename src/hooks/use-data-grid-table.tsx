@@ -1,5 +1,5 @@
 import ReactDataGrid from '@inovua/reactdatagrid-community';
-import {useMantineTheme} from '@mantine/core';
+import { useMantineTheme } from '@mantine/core';
 
 interface Props {
 	columns: {
@@ -12,9 +12,9 @@ interface Props {
 }
 
 export function useDataGridTable(props: Props) {
-	const {columns, data, loading, mih} = props;
+	const { columns, data, loading, mih } = props;
 	const theme = useMantineTheme();
-	
+
 	return (
 		<ReactDataGrid
 			idProperty="id"
@@ -23,7 +23,7 @@ export function useDataGridTable(props: Props) {
 			showCellBorders
 			showHeader
 			loading={loading}
-			style={{minHeight: mih || '60vh'}}
+			style={{ minHeight: mih || '60vh' }}
 			pagination
 			filterable
 			allowUnsort
