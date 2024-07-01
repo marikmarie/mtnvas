@@ -47,7 +47,25 @@ function App() {
 			toggleColorScheme={toggleColorScheme}
 		>
 			<MantineProvider
-				theme={{ colorScheme, primaryColor: 'yellow', cursorType: 'pointer' }}
+				theme={{
+					colorScheme,
+					cursorType: 'pointer',
+					primaryColor: 'primary',
+					colors: {
+						primary: [
+							'#fffbe1',
+							'#fff5cc',
+							'#ffea9b',
+							'#ffdf64',
+							'#ffd538',
+							'#ffcf1c',
+							'#ffcc09',
+							'#e3b400',
+							'#c9a000',
+							'#ae8a00',
+						],
+					},
+				}}
 				withNormalizeCSS
 				withGlobalStyles
 			>

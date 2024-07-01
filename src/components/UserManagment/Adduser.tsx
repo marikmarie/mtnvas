@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import useRequest from '../../hooks/use-request';
 import { notifications } from '@mantine/notifications';
-import { customLoader } from '../custom-loader';
+import { customLoader } from '../CustomLoader';
 
 interface Props {}
 

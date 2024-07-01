@@ -6,6 +6,7 @@ export type User = {
 	email: string;
 	role: string;
 	createdAt: string;
+	category: string;
 } | null;
 
 export interface Auth {

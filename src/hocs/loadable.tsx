@@ -1,7 +1,7 @@
 import { Flex } from '@mantine/core';
 import React, { Suspense } from 'react';
 import '../loader.css';
-import { customLoader } from '../components/custom-loader';
+import { customLoader } from '../components/CustomLoader';
 
 export const Loadable = <P extends object>(WrappedComponent: React.FunctionComponent<P>) => {
 	const Component: React.FC<P> = (props) => {

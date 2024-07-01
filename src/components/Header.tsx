@@ -24,13 +24,13 @@ import { RootState } from '../app/store';
 import { IconUser } from '@tabler/icons-react';
 import { signout } from '../app/slices/auth';
 import { useNavigate } from 'react-router-dom';
-import { ActionToggle } from './action-toggle';
+import { ActionToggle } from './ActionToggle';
 import { useCallback } from 'react';
 import { ROUTES } from '../constants/routes';
 import { IconPasswordFingerprint } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
-import Adduser from './user-managment/Adduser';
-import ListUsers from './user-managment/ListUsers';
+import Adduser from './UserManagment/Adduser';
+import ListUsers from './UserManagment/ListUsers';
 
 const HEADER_HEIGHT = rem(60);
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Activation } from '../components/report';
+import { Activation } from '../components/Report';
 import useRequest from './use-request';
 
 export function useActivations() {

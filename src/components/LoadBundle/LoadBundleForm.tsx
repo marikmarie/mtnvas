@@ -1,0 +1,114 @@
+import { TextInput, Flex, Button, Loader, Text } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
+import { IconPhone } from '@tabler/icons-react';
+import { useMutation } from '@tanstack/react-query';
+import { AxiosResponse, AxiosError } from 'axios';
+import useRequest from '../../hooks/use-request';
+
+type TLoadBundleFormProps = {
+	selectedSrvCode: string;
+	amount: string;
+	speed: string;
+};
+
+export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoadBundleFormProps) {
+	const form = useForm({
+		initialValues: {
+			msisdn: '',
+			bnumber: '',
+		},
+
+		validate: {
+			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid WakaNet Number'),
+			msisdn: (val: string) =>
+				val.length > 9 ? null : 'Should be a valid custmer/agent number',
+		},
+	});
+
+	const request = useRequest(true);
+
+	const mutation = useMutation({
+		mutationFn: () =>
+			request.post('/load-bundle', {
+				...form.values,
+				serviceCode: selectedSrvCode.split('-')[0], // Here, the proceeding -4G or -5G is removed so as the server recieves the correct serviceCode
+			}),
+		onSuccess: (response: AxiosResponse) => {
+			notifications.show({
+				autoClose: 5000,
+				title: 'Success',
+				// @ts-ignore
+				message: JSON.stringify(response.data),
+				color: 'green',
+			});
+		},
+		onError: (error: AxiosError) => {
+			notifications.show({
+				autoClose: 5000,
+				title: 'FAILURE',
+				message: JSON.stringify(error.response?.data),
+				color: 'red',
+			});
+		},
+	});
+
+	return (
+		<form onSubmit={form.onSubmit(() => mutation.mutate())}>
+			<Text
+				fw={600}
+				mb="xs"
+				ta="center"
+			>{`${selectedSrvCode} - ${speed} - ${amount}`}</Text>
+			<TextInput
+				icon={<IconPhone />}
+				label="WakaNet Number"
+				mb="xs"
+				value={form.values.bnumber}
+				autoFocus
+				onChange={(event) => form.setFieldValue('bnumber', event.currentTarget.value)}
+				error={form.errors.bnumber}
+				placeholder="Forexample 2563945..."
+				withAsterisk
+			/>
+			<TextInput
+				icon={<IconPhone />}
+				label="Agent/Customer Number"
+				value={form.values.msisdn}
+				onChange={(event) => form.setFieldValue('msisdn', event.currentTarget.value)}
+				placeholder="Forexample 078..."
+				error={form.errors.msisdn}
+				withAsterisk
+			/>
+
+			<Flex
+				gap={'sm'}
+				w="100%"
+				my="xs"
+			>
+				<Button
+					fullWidth
+					radius={'md'}
+					type="submit"
+				>
+					{mutation.isLoading ? (
+						<Loader
+							color="white"
+							size={'xs'}
+						/>
+					) : (
+						'Load'
+					)}
+				</Button>
+				<Button
+					fullWidth
+					radius={'md'}
+					color="red"
+					onClick={() => form.reset()}
+				>
+					Reset
+				</Button>
+			</Flex>
+		</form>
+	);
+}

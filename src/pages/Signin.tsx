@@ -25,7 +25,7 @@ import { Auth, signin } from '../app/slices/auth';
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
-import { customLoader } from '../components/custom-loader';
+import { customLoader } from '../components/CustomLoader';
 import { notifications } from '@mantine/notifications';
 
 const useStyles = createStyles(() => ({

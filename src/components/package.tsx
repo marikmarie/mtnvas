@@ -1,6 +1,7 @@
-import { Button, Card, Text, Badge, Flex } from '@mantine/core';
-import { IconBrandSpeedtest, IconCircleCheck } from '@tabler/icons-react';
+import { Card, Text, Badge, Flex } from '@mantine/core';
+import { IconBrandSpeedtest } from '@tabler/icons-react';
 import { Dispatch, FC, SetStateAction, memo } from 'react';
+import { PkgButton } from './LoadBundle/PkgButton';
 
 export const Package: FC<{
 	amount: string;
@@ -50,16 +51,14 @@ export const Package: FC<{
 				{amount}
 			</Text>
 
-			<Button
-				leftIcon={selected ? <IconCircleCheck /> : null}
-				onClick={() => setSelectedSrvCode(serviceCode)}
-				variant={selected ? 'filled' : 'outline'}
-				fullWidth
-				radius="md"
-				mt="lg"
-			>
-				{selected ? 'Package Selected' : 'Select Package'}
-			</Button>
+			<PkgButton
+				selected={selected}
+				onSelect={() => setSelectedSrvCode(serviceCode)}
+				serviceCode={serviceCode}
+				selectedSrvCode={selectedSrvCode}
+				amount={amount}
+				speed={speed}
+			/>
 		</Card>
 	);
 });

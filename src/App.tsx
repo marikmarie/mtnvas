@@ -3,10 +3,10 @@ import { Loadable } from './hocs/loadable';
 import { lazy } from 'react';
 import { ROUTES } from './constants/routes';
 
-const Signin = Loadable(lazy(() => import('./pages/signin')));
+const Signin = Loadable(lazy(() => import('./pages/Signin')));
 const Dashboard = Loadable(lazy(() => import('./pages/Dashboard')));
 const NotFound = Loadable(lazy(() => import('./pages/404')));
-const PasswordReset = Loadable(lazy(() => import('./pages/password-reset')));
+const PasswordReset = Loadable(lazy(() => import('./pages/PasswordReset')));
 
 export default function AppRouter() {
 	return useRoutes([

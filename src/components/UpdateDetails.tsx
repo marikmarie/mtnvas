@@ -5,7 +5,7 @@ import { AxiosResponse, AxiosError } from 'axios';
 import React from 'react';
 import { useForm } from '@mantine/form';
 import { Modal } from './Modal';
-import UpdateDetailsModal from './update-details-modal';
+import UpdateDetailsModal from './UpdateDetailsModal';
 import { useDisclosure } from '@mantine/hooks';
 import { IconSearch } from '@tabler/icons-react';
 import useRequest from '../hooks/use-request';

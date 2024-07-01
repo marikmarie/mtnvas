@@ -21,10 +21,8 @@ export default memo(() => {
 	const [activations, setActivations] = useState<{ data: Data[] }>({ data: [] });
 
 	const onSelect = useCallback((data: any) => {
-		Promise.all([
-			dispatch(setSubscriptionId(data['subscriptionId'])),
-			dispatch(setServiceCode(data['serviceCode'])),
-		]);
+			dispatch(setSubscriptionId(data['subscriptionId']));
+			dispatch(setServiceCode(data['serviceCode']));
 	}, []);
 
 	const columns = ['subscriptionId', 'msisdn', 'email', 'serviceCode', 'createdAt'].map(
