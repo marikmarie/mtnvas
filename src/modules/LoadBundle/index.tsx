@@ -1,6 +1,6 @@
 import { Accordion, Paper, SimpleGrid, Stack, Text } from '@mantine/core';
 import { memo, useState } from 'react';
-import { Package } from '../Package';
+import { Package } from './components/Package';
 import { RootState } from '../../app/store';
 import { useSelector } from 'react-redux';
 

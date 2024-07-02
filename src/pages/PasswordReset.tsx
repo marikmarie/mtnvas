@@ -126,6 +126,7 @@ export default memo((props: PaperProps) => {
 						fullWidth
 						onClick={requestOTP}
 						leftIcon={<IconMail />}
+						radius="md"
 					>
 						Get OTP
 					</Button>
@@ -162,6 +163,7 @@ export default memo((props: PaperProps) => {
 					<Button
 						onClick={passwordReset}
 						mt="xl"
+						radius="md"
 						fullWidth
 					>
 						Reset Password

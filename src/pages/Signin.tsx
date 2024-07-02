@@ -163,7 +163,12 @@ export default React.memo((props: PaperProps) => {
 						>
 							Reset Password
 						</Text>
-						<Button type="submit">Sign In</Button>
+						<Button
+							type="submit"
+							radius="md"
+						>
+							Sign In
+						</Button>
 					</Stack>
 				</form>
 			</Paper>

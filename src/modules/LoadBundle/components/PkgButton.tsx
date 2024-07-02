@@ -2,7 +2,7 @@ import { Button } from '@mantine/core';
 import { IconCircleCheck } from '@tabler/icons-react';
 import { SetStateAction } from 'react';
 import { useDisclosure } from '@mantine/hooks';
-import { Modal } from '../Modal';
+import { Modal } from '../../../components/Modal';
 import LoadBundleForm from './LoadBundleForm';
 
 type TPkgButtonProps = {

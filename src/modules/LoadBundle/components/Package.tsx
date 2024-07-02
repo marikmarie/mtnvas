@@ -1,7 +1,7 @@
 import { Card, Text, Badge, Flex } from '@mantine/core';
 import { IconBrandSpeedtest } from '@tabler/icons-react';
 import { Dispatch, FC, SetStateAction, memo } from 'react';
-import { PkgButton } from './LoadBundle/PkgButton';
+import { PkgButton } from './PkgButton';
 
 export const Package: FC<{
 	amount: string;
@@ -23,7 +23,7 @@ export const Package: FC<{
 	return (
 		<Card
 			w="100%"
-			radius={'md'}
+			radius="md"
 			withBorder
 		>
 			<Flex

@@ -1,5 +1,5 @@
 import { useRoutes } from 'react-router-dom';
-import { Loadable } from './hocs/loadable';
+import { Loadable } from './hocs/Loadable';
 import { lazy } from 'react';
 import { ROUTES } from './constants/routes';
 

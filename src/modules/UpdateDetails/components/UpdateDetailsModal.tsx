@@ -4,7 +4,7 @@ import { TextInput, Button, Stack, Text } from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { notifications } from '@mantine/notifications';
 import { AxiosError, AxiosResponse } from 'axios';
-import useRequest from '../hooks/use-request';
+import useRequest from '../../../hooks/use-request';
 
 interface UpdateDetailsData {
 	subscriptionId: string;

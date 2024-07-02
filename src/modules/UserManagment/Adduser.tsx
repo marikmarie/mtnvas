@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import useRequest from '../../hooks/use-request';
 import { notifications } from '@mantine/notifications';
-import { customLoader } from '../CustomLoader';
+import { customLoader } from '../../components/CustomLoader';
 
 interface Props {}
 
@@ -161,6 +161,7 @@ function Adduser(props: Props) {
 			<Button
 				fullWidth
 				type="submit"
+				radius="md"
 				loaderPosition="left"
 				loaderProps={{
 					variant: 'dots',

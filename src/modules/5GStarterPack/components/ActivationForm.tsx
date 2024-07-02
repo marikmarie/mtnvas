@@ -3,11 +3,11 @@ import { useForm } from '@mantine/form';
 import { IconCircleCheck, IconPhone, IconRestore } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../app/store';
-import useRequest from '../../hooks/use-request';
+import { RootState } from '../../../app/store';
+import useRequest from '../../../hooks/use-request';
 import { notifications } from '@mantine/notifications';
 import { AxiosResponse, AxiosError } from 'axios';
-import { setServiceCode, setSubscriptionId } from '../../app/slices/bundle-activations';
+import { setServiceCode, setSubscriptionId } from '../../../app/slices/bundle-activations';
 
 export const Form = () => {
 	const request = useRequest(true);
@@ -113,6 +113,7 @@ export const Form = () => {
 							<Button
 								leftIcon={<IconCircleCheck />}
 								fullWidth
+								radius="md"
 								type="submit"
 								disabled={form.errors.bnumber ? true : false}
 							>
@@ -131,6 +132,7 @@ export const Form = () => {
 								color="red"
 								disabled={form.errors.bnumber ? true : false}
 								onClick={() => rejection.mutate()}
+								radius="md"
 							>
 								{rejection.isLoading ? (
 									<Loader

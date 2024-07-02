@@ -1,10 +1,10 @@
 import { memo, useMemo } from 'react';
 import { Button, Flex, Stack, TextInput } from '@mantine/core';
 import { IconDownload, IconSearch } from '@tabler/icons-react';
-import { useActivations } from '../hooks/use-activations';
-import useRequest from '../hooks/use-request';
-import { useDataGridTable } from '../hooks/use-data-grid-table';
-import { toTitle } from '../utils/to-title';
+import { useActivations } from '../../hooks/use-activations';
+import { useDataGridTable } from '../../hooks/use-data-grid-table';
+import useRequest from '../../hooks/use-request';
+import { toTitle } from '../../utils/to-title';
 
 export interface Activation {
 	subscriptionId: string;
@@ -118,6 +118,7 @@ export default memo(() => {
 				<Button
 					leftIcon={<IconDownload />}
 					onClick={onDownload}
+					radius="md"
 				>
 					Download Activations Report
 				</Button>

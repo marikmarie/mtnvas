@@ -29,8 +29,8 @@ import { useCallback } from 'react';
 import { ROUTES } from '../constants/routes';
 import { IconPasswordFingerprint } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
-import Adduser from './UserManagment/Adduser';
-import ListUsers from './UserManagment/ListUsers';
+import Adduser from '../modules/UserManagment/Adduser';
+import ListUsers from '../modules/UserManagment/ListUsers';
 
 const HEADER_HEIGHT = rem(60);
 
@@ -171,6 +171,7 @@ export function Header() {
 						<Group>
 							{user?.role === 'ADMIN' ? (
 								<Button
+									radius="md"
 									variant="light"
 									onClick={open}
 								>

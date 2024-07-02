@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Activation } from '../components/Report';
 import useRequest from './use-request';
+import { Activation } from '../modules/Reports';
 
 export function useActivations() {
 	const request = useRequest(true);

@@ -2,9 +2,9 @@ import { Stack, Flex, TextInput, Button, Loader } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconPhone } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
-import useRequest from '../hooks/use-request';
 import { notifications } from '@mantine/notifications';
 import { AxiosResponse, AxiosError } from 'axios';
+import useRequest from '../../hooks/use-request';
 
 export const WakanetActivation = () => {
 	const request = useRequest(true);
@@ -90,6 +90,7 @@ export const WakanetActivation = () => {
 						<Button
 							fullWidth
 							type="submit"
+							radius="md"
 						>
 							{activation.isLoading ? (
 								<Loader

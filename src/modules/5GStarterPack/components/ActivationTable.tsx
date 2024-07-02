@@ -1,10 +1,10 @@
 import { memo, useCallback, useEffect, useState } from 'react';
-import { Button } from '@mantine/core';
 import { useDispatch } from 'react-redux';
-import { setServiceCode, setSubscriptionId } from '../../app/slices/bundle-activations';
-import useRequest from '../../hooks/use-request';
-import { toTitle } from '../../utils/to-title';
-import { useDataGridTable } from '../../hooks/use-data-grid-table';
+import { setServiceCode, setSubscriptionId } from '../../../app/slices/bundle-activations';
+import useRequest from '../../../hooks/use-request';
+import { toTitle } from '../../../utils/to-title';
+import { useDataGridTable } from '../../../hooks/use-data-grid-table';
+import { ActionIcon } from '@mantine/core';
 import { IconCircleCheck } from '@tabler/icons-react';
 type Data = {
 	subscriptionId: string;
@@ -21,8 +21,8 @@ export default memo(() => {
 	const [activations, setActivations] = useState<{ data: Data[] }>({ data: [] });
 
 	const onSelect = useCallback((data: any) => {
-			dispatch(setSubscriptionId(data['subscriptionId']));
-			dispatch(setServiceCode(data['serviceCode']));
+		dispatch(setSubscriptionId(data['subscriptionId']));
+		dispatch(setServiceCode(data['serviceCode']));
 	}, []);
 
 	const columns = ['subscriptionId', 'msisdn', 'email', 'serviceCode', 'createdAt'].map(
@@ -56,14 +56,14 @@ export default memo(() => {
 		// @ts-ignore
 		render({ data }) {
 			return (
-				<Button
-					variant="light"
-					fullWidth
-					leftIcon={<IconCircleCheck />}
+				<ActionIcon
 					onClick={() => onSelect(data)}
+					variant="outline"
+					w="100%"
+					color="yellow"
 				>
-					Select
-				</Button>
+					<IconCircleCheck /> Select
+				</ActionIcon>
 			);
 		},
 	});

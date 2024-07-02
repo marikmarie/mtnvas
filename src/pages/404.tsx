@@ -70,6 +70,7 @@ export default function NotFound() {
 							component={Link}
 							to={'/'}
 							size="md"
+							radius="md"
 						>
 							Take me back to home page
 						</Button>

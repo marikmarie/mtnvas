@@ -5,7 +5,7 @@ import { AxiosError, AxiosResponse } from 'axios';
 import { ActionIcon, Flex, LoadingOverlay, Stack, Tooltip } from '@mantine/core';
 import { toTitle } from '../../utils/to-title';
 import { notifications } from '@mantine/notifications';
-import { customLoader } from '../CustomLoader';
+import { customLoader } from '../../components/CustomLoader';
 import { useDataGridTable } from '../../hooks/use-data-grid-table';
 import { IconCircleCheck, IconDeselect } from '@tabler/icons-react';
 

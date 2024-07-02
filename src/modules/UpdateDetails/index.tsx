@@ -4,11 +4,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosResponse, AxiosError } from 'axios';
 import React from 'react';
 import { useForm } from '@mantine/form';
-import { Modal } from './Modal';
-import UpdateDetailsModal from './UpdateDetailsModal';
+import UpdateDetailsModal from './components/UpdateDetailsModal';
 import { useDisclosure } from '@mantine/hooks';
 import { IconSearch } from '@tabler/icons-react';
-import useRequest from '../hooks/use-request';
+import { Modal } from '../../components/Modal';
+import useRequest from '../../hooks/use-request';
 
 export default React.memo(() => {
 	const request = useRequest(true);
@@ -96,6 +96,7 @@ export default React.memo(() => {
 						leftIcon={<IconSearch />}
 						type="submit"
 						variant="filled"
+						radius="md"
 					>
 						{mutation.isLoading ? (
 							<Loader

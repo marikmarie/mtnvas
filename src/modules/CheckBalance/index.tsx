@@ -2,9 +2,9 @@ import { Button, Divider, Flex, Loader, Paper, Stack, Text, TextInput } from '@m
 import { useForm } from '@mantine/form';
 import { useMutation } from '@tanstack/react-query';
 import React from 'react';
-import useRequest from '../hooks/use-request';
+import useRequest from '../../hooks/use-request';
 import { useDisclosure } from '@mantine/hooks';
-import { Modal } from './Modal';
+import { Modal } from '../../components/Modal';
 
 export default React.memo(() => {
 	const [opened, { open: openSuccess, close: closeSuccess }] = useDisclosure(false);
@@ -113,6 +113,7 @@ export default React.memo(() => {
 					<Button
 						fullWidth
 						variant="filled"
+						radius="md"
 						type="submit"
 					>
 						{mutation.isLoading ? (
@@ -127,6 +128,7 @@ export default React.memo(() => {
 					<Button
 						fullWidth
 						variant="light"
+						radius="md"
 						onClick={() => form.reset()}
 					>
 						Reset

@@ -4,7 +4,7 @@ import { notifications } from '@mantine/notifications';
 import { IconPhone } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosResponse, AxiosError } from 'axios';
-import useRequest from '../../hooks/use-request';
+import useRequest from '../../../hooks/use-request';
 
 type TLoadBundleFormProps = {
 	selectedSrvCode: string;
@@ -65,7 +65,7 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 				label="WakaNet Number"
 				mb="xs"
 				value={form.values.bnumber}
-				autoFocus
+				data-autofocus
 				onChange={(event) => form.setFieldValue('bnumber', event.currentTarget.value)}
 				error={form.errors.bnumber}
 				placeholder="Forexample 2563945..."
@@ -88,7 +88,7 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 			>
 				<Button
 					fullWidth
-					radius={'md'}
+					radius="md"
 					type="submit"
 				>
 					{mutation.isLoading ? (
@@ -102,7 +102,7 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 				</Button>
 				<Button
 					fullWidth
-					radius={'md'}
+					radius="md"
 					color="red"
 					onClick={() => form.reset()}
 				>

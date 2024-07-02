@@ -1,18 +1,18 @@
 import { Button, Container, Paper, SimpleGrid } from '@mantine/core';
 import Layout from '../components/Layout';
 
-import { WakanetActivation } from '../components/WakanetActivation';
-import { withAuth } from '../hocs/with-auth';
+import { WakanetActivation } from '../modules/WakanetActivation';
+import { withAuth } from '../hocs/With-Auth';
 import { memo, useState, useCallback, lazy } from 'react';
-import { Loadable } from '../hocs/loadable';
+import { Loadable } from '../hocs/Loadable';
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
 
-const Signup = Loadable(lazy(() => import('../components/5GStarterPack')));
-const LoadBundle = Loadable(lazy(() => import('../components/LoadBundle')));
-const CheckBalance = Loadable(lazy(() => import('../components/CheckBalance')));
-const UpdateDetails = Loadable(lazy(() => import('../components/UpdateDetails')));
-const Report = Loadable(lazy(() => import('../components/Report')));
+const Signup = Loadable(lazy(() => import('../modules/5GStarterPack')));
+const LoadBundle = Loadable(lazy(() => import('../modules/LoadBundle')));
+const CheckBalance = Loadable(lazy(() => import('../modules/CheckBalance')));
+const UpdateDetails = Loadable(lazy(() => import('../modules/UpdateDetails')));
+const Report = Loadable(lazy(() => import('../modules/Reports')));
 
 type TAB =
 	| 'signup'
@@ -46,6 +46,7 @@ export default memo(
 					fullWidth
 					variant={activeTab === 'signup' ? 'filled' : 'light'}
 					onClick={() => onTabSwitch('signup')}
+					radius="md"
 				>
 					4G/5G Starterpack
 				</Button>
@@ -54,6 +55,7 @@ export default memo(
 						fullWidth
 						variant={activeTab === 'wakanet-activation' ? 'filled' : 'light'}
 						onClick={() => onTabSwitch('wakanet-activation')}
+						radius="md"
 					>
 						WakaNet Router Starterpack
 					</Button>
@@ -63,6 +65,7 @@ export default memo(
 						fullWidth
 						variant={activeTab === 'load-bundle' ? 'filled' : 'light'}
 						onClick={() => onTabSwitch('load-bundle')}
+						radius="md"
 					>
 						Load Bundle
 					</Button>
@@ -71,6 +74,7 @@ export default memo(
 					fullWidth
 					variant={activeTab === 'check-balance' ? 'filled' : 'light'}
 					onClick={() => onTabSwitch('check-balance')}
+					radius="md"
 				>
 					Check Balance
 				</Button>
@@ -79,6 +83,7 @@ export default memo(
 						fullWidth
 						variant={activeTab === 'update-details' ? 'filled' : 'light'}
 						onClick={() => onTabSwitch('update-details')}
+						radius="md"
 					>
 						Update Details
 					</Button>
@@ -87,6 +92,7 @@ export default memo(
 					fullWidth
 					variant={activeTab === 'report' ? 'filled' : 'light'}
 					onClick={() => onTabSwitch('report')}
+					radius="md"
 				>
 					Activations Report
 				</Button>
