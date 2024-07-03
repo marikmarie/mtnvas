@@ -2,16 +2,21 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { notifications } from '@mantine/notifications';
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
+import { __prod__ } from '../utils/__prod__';
 
 export default function useRequest(requireAuth: boolean): AxiosInstance {
 	const token = useSelector((state: RootState) => state.auth.token);
 
 	const instance = !requireAuth
 		? axios.create({
-				baseURL: import.meta.env.VITE_APP_BASE_URL!,
+				baseURL: __prod__
+					? import.meta.env.VITE_APP_BASE_URL_PROD!
+					: import.meta.env.VITE_APP_BASE_URL_DEV!,
 			})
 		: axios.create({
-				baseURL: import.meta.env.VITE_APP_BASE_URL!,
+				baseURL: __prod__
+					? import.meta.env.VITE_APP_BASE_URL_PROD!
+					: import.meta.env.VITE_APP_BASE_URL_DEV!,
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},

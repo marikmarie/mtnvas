@@ -32,6 +32,7 @@ export default memo(() => {
 				'email',
 				'amount',
 				'status',
+				'serviceCode',
 				'salesAgentEmail',
 				'activatedAt',
 				'activatedBy',
