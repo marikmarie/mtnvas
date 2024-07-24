@@ -1,57 +1,59 @@
+import React from 'react';
 import { Button, Divider, Flex, Loader, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation } from '@tanstack/react-query';
-import React from 'react';
-import useRequest from '../../hooks/use-request';
 import { useDisclosure } from '@mantine/hooks';
+import useRequest from '../../hooks/use-request';
 import { Modal } from '../../components/Modal';
 
-export default React.memo(() => {
-	const [opened, { open: openSuccess, close: closeSuccess }] = useDisclosure(false);
-	const [errOpened, { open: openErr, close: closeErr }] = useDisclosure(false);
+const BalanceCheck: React.FC = () => {
+	const [successModalOpened, successModalHandlers] = useDisclosure(false);
+	const [errorModalOpened, errorModalHandlers] = useDisclosure(false);
+	const request = useRequest();
 
-	const request = useRequest(false);
 	const form = useForm({
-		initialValues: {
-			bnumber: '',
-		},
-
+		initialValues: { bnumber: '' },
 		validate: {
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid wakanetNumber'),
 		},
 	});
 
 	const mutation = useMutation({
-		mutationFn: () => request.post('/balance-detail', form.values),
-		onSuccess: () => openSuccess(),
-		onError: () => openErr(),
+		mutationFn: (data: typeof form.values) => request.post('/balance-detail', data),
+		onSuccess: successModalHandlers.open,
+		onError: errorModalHandlers.open,
 	});
 
-	const balanceSummary = mutation.data?.data.balanceSummary;
-	const balanceDetails = mutation.data?.data.balanceDetail;
+	const { balanceSummary, balanceDetail } = mutation.data?.data ?? {};
 
-	const balance =
-		balanceDetails && balanceSummary ? (
+	const renderBalance = () => {
+		if (!balanceDetail && !balanceSummary) {
+			return (
+				<Text
+					fw="bold"
+					mb="md"
+					ta="center"
+				>
+					NONE
+				</Text>
+			);
+		}
+		return (
 			<>
 				<Text ta="center">{balanceSummary}</Text>
 				<Divider my="sm" />
-				<Text ta="center">{balanceDetails}</Text>
+				<Text ta="center">{balanceDetail}</Text>
 			</>
-		) : (
-			<Text
-				fw="bold"
-				mb="md"
-				ta="center"
-			>
-				NONE
-			</Text>
 		);
+	};
+
+	const handleSubmit = form.onSubmit(() => mutation.mutate(form.values));
 
 	return (
 		<Paper py="lg">
 			<Modal
-				opened={opened}
-				close={closeSuccess}
+				opened={successModalOpened}
+				close={successModalHandlers.close}
 			>
 				<Text
 					fw="bold"
@@ -60,11 +62,12 @@ export default React.memo(() => {
 				>
 					BALANCE CHECK
 				</Text>
-				{balance}
+				{renderBalance()}
 			</Modal>
+
 			<Modal
-				opened={errOpened}
-				close={closeErr}
+				opened={errorModalOpened}
+				close={errorModalHandlers.close}
 			>
 				<Text
 					ta="center"
@@ -72,15 +75,8 @@ export default React.memo(() => {
 				>
 					Error Checking balance
 				</Text>
-				<Text>
-					{mutation.error &&
-						// @ts-ignore
-						mutation.error.response &&
-						// @ts-ignore
-						mutation.error.response.data &&
-						// @ts-ignore
-						mutation.error.response.data.message}
-				</Text>
+				{/* @ts-ignore */}
+				<Text>{mutation.error?.response?.data?.message}</Text>
 			</Modal>
 
 			<Text
@@ -90,16 +86,13 @@ export default React.memo(() => {
 			>
 				Check Customer Subscription balance
 			</Text>
-			<form onSubmit={form.onSubmit(() => mutation.mutate())}>
-				<Stack mt={'sm'}>
+
+			<form onSubmit={handleSubmit}>
+				<Stack mt="sm">
 					<TextInput
 						label="Router Number"
-						onChange={(event) =>
-							form.setFieldValue('bnumber', event.currentTarget.value)
-						}
-						error={form.errors.bnumber}
-						value={form.values.bnumber}
-						placeholder="Forexample 2563945 ..."
+						{...form.getInputProps('bnumber')}
+						placeholder="For example 2563945 ..."
 						withAsterisk
 					/>
 				</Stack>
@@ -107,19 +100,20 @@ export default React.memo(() => {
 				<Flex
 					mt="md"
 					w="100%"
-					gap={'sm'}
-					justify={'flex-end'}
+					gap="sm"
+					justify="flex-end"
 				>
 					<Button
 						fullWidth
 						variant="filled"
 						radius="md"
 						type="submit"
+						disabled={mutation.isLoading}
 					>
 						{mutation.isLoading ? (
 							<Loader
 								color="white"
-								size={'xs'}
+								size="xs"
 							/>
 						) : (
 							'Check Balance'
@@ -129,7 +123,7 @@ export default React.memo(() => {
 						fullWidth
 						variant="light"
 						radius="md"
-						onClick={() => form.reset()}
+						onClick={form.reset}
 					>
 						Reset
 					</Button>
@@ -137,4 +131,6 @@ export default React.memo(() => {
 			</form>
 		</Paper>
 	);
-});
+};
+
+export default React.memo(BalanceCheck);
