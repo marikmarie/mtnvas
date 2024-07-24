@@ -1,10 +1,10 @@
-import { Container, Flex, rem, ScrollArea } from '@mantine/core';
+import { Container, ScrollArea } from '@mantine/core';
 
-import { Header } from './Header';
 import React, { useCallback, useEffect } from 'react';
-import { useScreenWidth } from '../hooks/use-screen-width';
 import { useDispatch } from 'react-redux';
+import { useScreenWidth } from '../hooks/use-screen-width';
 import { setCollapsedValue } from '../app/slices/nav';
+import { Header } from './Header';
 
 type PageProps = {
 	children: React.ReactNode;
@@ -18,29 +18,20 @@ export default function Layout({ children }: PageProps) {
 	const effect = useCallback(() => {
 		if (screen === 'lg' || screen === 'xl') {
 			dispatch(setCollapsedValue(false));
-		} else {
-			dispatch(setCollapsedValue(true));
 		}
-	}, []);
+	}, [screen, dispatch]);
 
 	useEffect(effect, [screen]);
 
 	return (
-		<>
-			<Flex>
-				<Flex
-					justify={'center'}
-					align={'center'}
-				></Flex>
-				<ScrollArea
-					type="never"
-					h="100vh"
-					w="100vw"
-				>
-					<Header />
-					<Container size={rem(1500)}>{children}</Container>
-				</ScrollArea>
-			</Flex>
-		</>
+		<ScrollArea
+			type="scroll"
+			h="100vh"
+			w="100vw"
+			offsetScrollbars
+		>
+			<Header />
+			<Container size={1820}>{children}</Container>
+		</ScrollArea>
 	);
 }
