@@ -35,7 +35,7 @@ export default memo((props: PaperProps) => {
 		classes: { root },
 	} = useStyles();
 
-	const request = useRequest(false);
+	const request = useRequest();
 	const navigate = useNavigate();
 	const user = useSelector((state: RootState) => state.auth.user);
 
