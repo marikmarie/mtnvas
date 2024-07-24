@@ -1,45 +1,37 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import useRequest from './use-request';
-import { Activation } from '../modules/Reports';
+import { Activation } from '../modules/Reports/Activations';
+import { useQuery } from '@tanstack/react-query';
 
 export function useActivations() {
 	const request = useRequest(true);
-
 	const [searchQuery, setSearchQuery] = useState('');
-	const [loading, setLoading] = useState(false);
-
-	const [activations, setActivations] = useState<{ data: Activation[] }>({ data: [] });
 	const [filtered, setFiltered] = useState<Activation[]>([]);
 
-	const handleGetActivationsReport = useCallback(async () => {
-		try {
-			setLoading(true);
-			const response = await request.get('/activations');
-			setActivations(response.data as unknown as { data: Activation[] });
-			setLoading(false);
-		} catch (error) {
-		} finally {
-			setLoading(false);
+	const fetchActivations = async () => {
+		const response = await request.get('/activations');
+		return response.data as { data: Activation[] };
+	};
+
+	const { data: activations, isLoading } = useQuery(['activations'], fetchActivations, {
+		refetchOnWindowFocus: false,
+	});
+
+	useEffect(() => {
+		if (activations?.data) {
+			const regex = new RegExp(searchQuery, 'i');
+			const filteredData = activations.data.filter((activation) => {
+				const msisdn = activation.msisdn.toLowerCase();
+				return regex.test(msisdn);
+			});
+			setFiltered(filteredData);
 		}
-	}, []);
-
-	useEffect(() => {
-		handleGetActivationsReport();
-	}, []);
-
-	useEffect(() => {
-		const regex = new RegExp(searchQuery, 'i');
-		const filtered = activations.data.filter((activation) => {
-			const msisdn = activation.msisdn.toLowerCase();
-			return regex.test(msisdn);
-		});
-		setFiltered(filtered);
 	}, [searchQuery, activations]);
 
 	return {
 		filtered,
 		searchQuery,
 		setSearchQuery,
-		loading,
+		loading: isLoading,
 	};
 }
