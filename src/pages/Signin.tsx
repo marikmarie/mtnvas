@@ -42,7 +42,7 @@ export default React.memo((props: PaperProps) => {
 	const {
 		classes: { root },
 	} = useStyles();
-	const request = useRequest(false);
+	const request = useRequest();
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
