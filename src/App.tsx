@@ -19,7 +19,7 @@ export default function AppRouter() {
 			element: <PasswordReset />,
 		},
 		{
-			path: ROUTES.DASHRBOARD,
+			path: ROUTES.DASHBOARD,
 			element: <Dashboard />,
 		},
 		{
