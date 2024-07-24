@@ -8,15 +8,14 @@ import {
 	Menu,
 	Group,
 	Flex,
-	Title,
 	Drawer,
 	Button,
 	Text,
 	Stack,
 	Center,
 	Paper,
+	Code,
 	Image,
-	Divider,
 } from '@mantine/core';
 import { IconLogout, IconUsers } from '@tabler/icons-react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -91,11 +90,10 @@ export function Header() {
 		navigate(ROUTES.AUTH);
 	}, []);
 
-	const displayName = user?.name || 'Wakanet user';
+	const displayName = user?.email.split('@')[0] || 'Wakanet user';
 
 	const avatar = displayName[0]?.toUpperCase() || 'I';
 	const [opened, { open, close }] = useDisclosure(false);
-
 	return (
 		<>
 			<Drawer
@@ -155,19 +153,18 @@ export function Header() {
 						w="100%"
 						align={'center'}
 					>
-						<Flex
-							justify={'center'}
-							align={'center'}
-							gap="sm"
-						>
+						<Group h="100%">
 							<Image
 								src="/Logo.png"
-								width={100}
+								width={70}
 							/>
-							<Title c="dimmed">4G</Title>
-							<Divider orientation="vertical" />
-							<Title c="dimmed">5G PORTAL</Title>
-						</Flex>
+							<Code
+								sx={{ fontWeight: 700 }}
+								fz={'xl'}
+							>
+								4G | 5G PORTAL
+							</Code>
+						</Group>
 						<Group>
 							{user?.role === 'ADMIN' ? (
 								<Button
