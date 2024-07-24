@@ -1,133 +1,163 @@
-import { Button, Container, Paper, SimpleGrid } from '@mantine/core';
-import Layout from '../components/Layout';
-
-import { WakanetActivation } from '../modules/WakanetActivation';
-import { withAuth } from '../hocs/With-Auth';
-import { memo, useState, useCallback, lazy } from 'react';
-import { Loadable } from '../hocs/Loadable';
+import React, { useState, useCallback, lazy } from 'react';
+import { createStyles, Paper, SimpleGrid, Stack } from '@mantine/core';
 import { useSelector } from 'react-redux';
+import Layout from '../components/Layout';
+import { withAuth } from '../hocs/With-Auth';
+import { Loadable } from '../hocs/Loadable';
 import { RootState } from '../app/store';
+import { WakanetActivation } from '../modules/WakanetActivation';
+import {
+	IconDeviceMobile,
+	IconRouter,
+	IconEdit,
+	IconReport,
+	IconNews,
+	IconCircleCheck,
+	IconLoader,
+} from '@tabler/icons-react';
 
-const Signup = Loadable(lazy(() => import('../modules/5GStarterPack')));
-const LoadBundle = Loadable(lazy(() => import('../modules/LoadBundle')));
-const CheckBalance = Loadable(lazy(() => import('../modules/CheckBalance')));
-const UpdateDetails = Loadable(lazy(() => import('../modules/UpdateDetails')));
-const Report = Loadable(lazy(() => import('../modules/Reports')));
+// Lazy-loaded components
+const LazyComponents = {
+	Signup: Loadable(lazy(() => import('../modules/5GStarterPack'))),
+	LoadBundle: Loadable(lazy(() => import('../modules/LoadBundle'))),
+	CheckBalance: Loadable(lazy(() => import('../modules/CheckBalance'))),
+	UpdateDetails: Loadable(lazy(() => import('../modules/UpdateDetails'))),
+	ActivationsReport: Loadable(lazy(() => import('../modules/Reports/Activations'))),
+	RenewalsReport: Loadable(lazy(() => import('../modules/Reports/Renewals'))),
+};
 
-type TAB =
+type Tab =
 	| 'signup'
 	| 'load-bundle'
 	| 'check-balance'
 	| 'update-details'
-	| 'report'
+	| 'activations-report'
+	| 'renewals-report'
 	| 'wakanet-activation';
 
-export default memo(
-	withAuth(() => {
-		const [activeTab, setActiveTab] = useState<TAB>('signup');
+interface TabConfig {
+	key: Tab;
+	label: string;
+	component: React.ComponentType;
+	showForOfficeUser: boolean;
+	icon: React.ReactNode;
+}
 
-		const onTabSwitch = useCallback((tab: TAB) => {
-			setActiveTab(tab);
-		}, []);
+const tabConfigs: TabConfig[] = [
+	{
+		key: 'signup',
+		label: '4G/5G Starterpack',
+		component: LazyComponents.Signup,
+		showForOfficeUser: true,
+		icon: <IconDeviceMobile size={20} />,
+	},
+	{
+		key: 'wakanet-activation',
+		label: 'WakaNet Router Starterpack',
+		component: WakanetActivation,
+		showForOfficeUser: false,
+		icon: <IconRouter size={20} />,
+	},
+	{
+		key: 'load-bundle',
+		label: 'Load Bundle',
+		component: LazyComponents.LoadBundle,
+		showForOfficeUser: false,
+		icon: <IconLoader size={20} />,
+	},
+	{
+		key: 'check-balance',
+		label: 'Check Balance',
+		component: LazyComponents.CheckBalance,
+		showForOfficeUser: true,
+		icon: <IconCircleCheck size={20} />,
+	},
+	{
+		key: 'update-details',
+		label: 'Update Details',
+		component: LazyComponents.UpdateDetails,
+		showForOfficeUser: false,
+		icon: <IconEdit size={20} />,
+	},
+	{
+		key: 'activations-report',
+		label: 'Activations Report',
+		component: LazyComponents.ActivationsReport,
+		showForOfficeUser: true,
+		icon: <IconReport size={20} />,
+	},
+	{
+		key: 'renewals-report',
+		label: 'Renewals Report',
+		component: LazyComponents.RenewalsReport,
+		showForOfficeUser: true,
+		icon: <IconNews size={20} />,
+	},
+];
 
-		const user = useSelector((state: RootState) => state.auth.user);
-		const isOfficeUser = user?.category === 'office';
+const useStyles = createStyles(() => ({
+	root: {
+		position: 'static',
+		zIndex: 9,
+	},
+}));
 
-		const allTabs = (
-			<SimpleGrid
-				cols={isOfficeUser ? 3 : 6}
-				breakpoints={[
-					{ maxWidth: 'md', cols: 2 },
-					{ maxWidth: 'xs', cols: 2 },
-					{ maxWidth: 'sm', cols: 2 },
-				]}
-			>
-				<Button
-					fullWidth
-					variant={activeTab === 'signup' ? 'filled' : 'light'}
-					onClick={() => onTabSwitch('signup')}
-					radius="md"
-				>
-					4G/5G Starterpack
-				</Button>
-				{!isOfficeUser && (
-					<Button
-						fullWidth
-						variant={activeTab === 'wakanet-activation' ? 'filled' : 'light'}
-						onClick={() => onTabSwitch('wakanet-activation')}
-						radius="md"
-					>
-						WakaNet Router Starterpack
-					</Button>
-				)}
-				{!isOfficeUser && (
-					<Button
-						fullWidth
-						variant={activeTab === 'load-bundle' ? 'filled' : 'light'}
-						onClick={() => onTabSwitch('load-bundle')}
-						radius="md"
-					>
-						Load Bundle
-					</Button>
-				)}
-				<Button
-					fullWidth
-					variant={activeTab === 'check-balance' ? 'filled' : 'light'}
-					onClick={() => onTabSwitch('check-balance')}
-					radius="md"
-				>
-					Check Balance
-				</Button>
-				{!isOfficeUser && (
-					<Button
-						fullWidth
-						variant={activeTab === 'update-details' ? 'filled' : 'light'}
-						onClick={() => onTabSwitch('update-details')}
-						radius="md"
-					>
-						Update Details
-					</Button>
-				)}
-				<Button
-					fullWidth
-					variant={activeTab === 'report' ? 'filled' : 'light'}
-					onClick={() => onTabSwitch('report')}
-					radius="md"
-				>
-					Activations Report
-				</Button>
-			</SimpleGrid>
-		);
+const Dashboard: React.FC = () => {
+	const [activeTab, setActiveTab] = useState<Tab>('signup');
+	const user = useSelector((state: RootState) => state.auth.user);
+	const isOfficeUser = user?.category === 'office';
 
-		return (
-			<Layout>
-				<Container size={1480}>
-					<Paper
-						mt="md"
-						py="sm"
-					>
-						{allTabs}
-					</Paper>
-					{(() => {
-						switch (activeTab) {
-							case 'signup':
-								return <Signup />;
-							case 'load-bundle':
-								return <LoadBundle />;
-							case 'check-balance':
-								return <CheckBalance />;
-							case 'update-details':
-								return <UpdateDetails />;
-							case 'report':
-								return <Report />;
-							case 'wakanet-activation':
-								return <WakanetActivation />;
-							default:
-								return null;
-						}
-					})()}
-				</Container>
-			</Layout>
-		);
-	})
-);
+	const onTabSwitch = useCallback((tab: Tab) => {
+		setActiveTab(tab);
+	}, []);
+
+	const { classes } = useStyles();
+
+	const renderTabs = () => (
+		<SimpleGrid
+			mt="sm"
+			className={classes.root}
+			cols={isOfficeUser ? 3 : 7}
+			breakpoints={[
+				{ maxWidth: 'md', cols: 2 },
+				{ maxWidth: 'xs', cols: 2 },
+				{ maxWidth: 'sm', cols: 2 },
+			]}
+		>
+			{tabConfigs.map(
+				({ key, label, icon, showForOfficeUser }) =>
+					(!isOfficeUser || showForOfficeUser) && (
+						<Paper
+							key={key}
+							withBorder
+							p="sm"
+							sx={{ cursor: 'pointer' }}
+							bg={activeTab === key ? 'yellow' : 'white'}
+							c={activeTab === key ? 'white' : 'dark'}
+							onClick={() => onTabSwitch(key)}
+							radius="md"
+						>
+							<Stack
+								align="center"
+								spacing="xs"
+							>
+								{icon}
+								{label}
+							</Stack>
+						</Paper>
+					)
+			)}
+		</SimpleGrid>
+	);
+
+	const ActiveComponent = tabConfigs.find((config) => config.key === activeTab)?.component;
+
+	return (
+		<Layout>
+			{renderTabs()}
+			{ActiveComponent && <ActiveComponent />}
+		</Layout>
+	);
+};
+
+export default React.memo(withAuth(Dashboard));
