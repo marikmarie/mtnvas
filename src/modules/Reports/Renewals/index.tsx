@@ -5,15 +5,17 @@ import { useRenewals } from '../../../hooks/use-renewals';
 import useRequest from '../../../hooks/use-request';
 
 export interface Renewal {
-	subscriptionId: string;
+	requestTime: string;
+	extTransId: number;
 	msisdn: string;
-	email: string;
 	bnumber: string;
-	salesAgentEmail: string;
-	createdAt: string;
-	status: string;
-	activatedAt: string;
-	activatedBy: string;
+	serviceCode: string;
+	smsNameDetail: string;
+	amount: string;
+	ecwCode: string;
+	channel: string;
+	senderId: string;
+	duaration: string;
 }
 
 export default () => {
@@ -50,7 +52,7 @@ export default () => {
 	};
 
 	return (
-		<Stack py="lg">
+		<Stack py="sm">
 			<TextInput
 				placeholder="Search by msisdn"
 				icon={<IconSearch />}
