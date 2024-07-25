@@ -117,7 +117,7 @@ const Dashboard: React.FC = () => {
 		<SimpleGrid
 			mt="sm"
 			className={classes.root}
-			cols={isOfficeUser ? 3 : 7}
+			cols={isOfficeUser ? 4 : 7}
 			breakpoints={[
 				{ maxWidth: 'md', cols: 2 },
 				{ maxWidth: 'xs', cols: 2 },
