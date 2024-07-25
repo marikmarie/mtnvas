@@ -51,6 +51,7 @@ export default function ActivationsReportTable() {
 			}),
 		[]
 	);
+
 	const activationsReportTable = useDataGridTable({
 		columns: columns,
 		data: filtered,

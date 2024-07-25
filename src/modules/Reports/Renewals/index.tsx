@@ -1,5 +1,5 @@
-import { Button, Flex, Stack, TextInput } from '@mantine/core';
-import { IconDownload, IconSearch } from '@tabler/icons-react';
+import { Button, Flex, Stack } from '@mantine/core';
+import { IconDownload } from '@tabler/icons-react';
 import RenewalsReportTable from './RenewalsReportTable';
 import { useRenewals } from '../../../hooks/use-renewals';
 import useRequest from '../../../hooks/use-request';
@@ -57,12 +57,12 @@ export default () => {
 
 	return (
 		<Stack py="sm">
-			<TextInput
+			{/* <TextInput
 				placeholder="Search by msisdn"
 				icon={<IconSearch />}
 				value={searchQuery}
 				onChange={handleSearchChange}
-			/>
+			/> */}
 			<RenewalsReportTable />
 			<Flex justify={'end'}>
 				<Button

@@ -1,6 +1,5 @@
-import { Button, Flex, Stack, TextInput } from '@mantine/core';
-import { IconDownload, IconSearch } from '@tabler/icons-react';
-import { useActivations } from '../../../hooks/use-activations';
+import { Button, Flex, Stack } from '@mantine/core';
+import { IconDownload } from '@tabler/icons-react';
 import useRequest from '../../../hooks/use-request';
 import ActivationsReportTable from './ActivationsReportTable';
 
@@ -16,8 +15,8 @@ export interface Activation {
 	activatedBy: string;
 }
 
-export default () => {
-	const { searchQuery, setSearchQuery } = useActivations();
+export default function ActivationsReport() {
+	// const { searchQuery, setSearchQuery } = useActivations();
 
 	const request = useRequest(true);
 
@@ -51,12 +50,12 @@ export default () => {
 
 	return (
 		<Stack py="lg">
-			<TextInput
+			{/* <TextInput
 				placeholder="Search by msisdn"
 				icon={<IconSearch />}
 				value={searchQuery}
 				onChange={(event) => setSearchQuery(event.target.value)}
-			/>
+			/> */}
 			<ActivationsReportTable />
 			<Flex justify={'end'}>
 				<Button
@@ -69,4 +68,4 @@ export default () => {
 			</Flex>
 		</Stack>
 	);
-};
+}

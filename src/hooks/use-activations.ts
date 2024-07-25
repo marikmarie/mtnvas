@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import useRequest from './use-request';
 import { Activation } from '../modules/Reports/Activations';
 import { useQuery } from '@tanstack/react-query';
@@ -6,7 +6,6 @@ import { useQuery } from '@tanstack/react-query';
 export function useActivations() {
 	const request = useRequest(true);
 	const [searchQuery, setSearchQuery] = useState('');
-	const [filtered, setFiltered] = useState<Activation[]>([]);
 
 	const fetchActivations = async () => {
 		const response = await request.get('/activations');
@@ -17,22 +16,18 @@ export function useActivations() {
 		refetchOnWindowFocus: false,
 	});
 
-	useEffect(() => {
-		if (activations?.data) {
-			const regex = new RegExp(searchQuery, 'i');
-			const filteredData = activations.data.filter((activation) => {
-				const msisdn = activation.msisdn.toLowerCase();
-				return regex.test(msisdn);
-			});
-			console.log('filtered data here: ', filteredData);
+	const filteredActivations = useMemo(() => {
+		const regex = new RegExp(searchQuery, 'i');
+		return activations?.data.filter((activation) => {
+			const msisdn = activation.msisdn.toLowerCase();
+			return regex.test(msisdn);
+		});
+	}, [searchQuery, activations?.data]);
 
-			setFiltered(filteredData);
-			console.log('filtered here: ', filtered);
-		}
-	}, [searchQuery, activations]);
+	console.log('filteredActivations', filteredActivations);
 
 	return {
-		filtered,
+		filtered: filteredActivations || [],
 		searchQuery,
 		setSearchQuery,
 		loading: isLoading,
