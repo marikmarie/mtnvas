@@ -49,7 +49,6 @@ function App() {
 			<MantineProvider
 				theme={{
 					colorScheme,
-					cursorType: 'pointer',
 					primaryColor: 'primary',
 					colors: {
 						primary: [
