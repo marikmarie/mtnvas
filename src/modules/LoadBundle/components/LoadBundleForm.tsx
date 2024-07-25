@@ -1,7 +1,7 @@
-import { TextInput, Flex, Button, Loader, Text } from '@mantine/core';
+import { TextInput, Flex, Button, Loader, Text, Center } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { IconPhone } from '@tabler/icons-react';
+import { IconGauge, IconPhone } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosResponse, AxiosError } from 'axios';
 import useRequest from '../../../hooks/use-request';
@@ -55,6 +55,9 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 
 	return (
 		<form onSubmit={form.onSubmit(() => mutation.mutate())}>
+			<Center mb="xs">
+				<IconGauge />
+			</Center>
 			<Text
 				fw={600}
 				mb="xs"
