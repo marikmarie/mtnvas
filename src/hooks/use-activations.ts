@@ -24,7 +24,10 @@ export function useActivations() {
 				const msisdn = activation.msisdn.toLowerCase();
 				return regex.test(msisdn);
 			});
+			console.log('filtered data here: ', filteredData);
+
 			setFiltered(filteredData);
+			console.log('filtered here: ', filtered);
 		}
 	}, [searchQuery, activations]);
 
