@@ -8,7 +8,7 @@ export interface Activation {
 	subscriptionId: string;
 	msisdn: string;
 	email: string;
-	bnumber: string;
+	bnumber?: string;
 	salesAgentEmail: string;
 	createdAt: string;
 	status: string;
@@ -55,7 +55,7 @@ export default () => {
 				placeholder="Search by msisdn"
 				icon={<IconSearch />}
 				value={searchQuery}
-				onChange={(event) => setSearchQuery(event.currentTarget.value)}
+				onChange={(event) => setSearchQuery(event.target.value)}
 			/>
 			<ActivationsReportTable />
 			<Flex justify={'end'}>
