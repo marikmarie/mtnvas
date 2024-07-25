@@ -24,7 +24,6 @@ export default function ActivationsReportTable() {
 					return {
 						name: column,
 						header: 'PERFORMED AT',
-						defaultFlex: 1,
 						// @ts-ignore
 						render: ({ data }) => (
 							<>
@@ -38,7 +37,6 @@ export default function ActivationsReportTable() {
 					return {
 						name: column,
 						header: 'PERFORMED BY',
-						defaultFlex: 1,
 						// @ts-ignore
 						render: ({ data }) => {
 							return <>{data['performedBy']}</>;
@@ -48,6 +46,7 @@ export default function ActivationsReportTable() {
 				return {
 					name: column,
 					header: toTitle(column),
+					defaultFlex: 1,
 				};
 			}),
 		[]
