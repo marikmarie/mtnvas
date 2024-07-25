@@ -60,7 +60,7 @@ const BundleActivationsReport = () => {
 			render: ({ data }: { data: Data }) => (
 				<ActionIcon
 					onClick={() => onSelect(data)}
-					variant="outline"
+					variant="filled"
 					w="100%"
 					color="yellow"
 				>
@@ -74,7 +74,7 @@ const BundleActivationsReport = () => {
 		columns,
 		data: activations?.data || [],
 		loading: isLoading,
-		mih: '60vh',
+		mih: '50vh',
 	});
 
 	return activationsReportTable;
