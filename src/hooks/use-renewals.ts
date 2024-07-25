@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react';
-import useRequest from './use-request';
-import { Renewal } from '../modules/Reports/Renewals';
 import { useQuery } from '@tanstack/react-query';
+import { useState, useMemo } from 'react';
+import { Renewal } from '../modules/Reports/Renewals';
+import useRequest from './use-request';
 
 export function useRenewals() {
 	const request = useRequest(true);
 	const [searchQuery, setSearchQuery] = useState('');
-	const [filtered, setFiltered] = useState<Renewal[]>([]);
 
 	const fetchRenewals = async () => {
 		const response = await request.get('/renewals');
@@ -17,21 +16,30 @@ export function useRenewals() {
 		refetchOnWindowFocus: false,
 	});
 
-	useEffect(() => {
-		if (renewals?.data) {
-			const regex = new RegExp(searchQuery, 'i');
-			const filteredData = renewals.data.filter((renewal: Renewal) => {
-				const msisdn = renewal.msisdn.toLowerCase();
-				return regex.test(msisdn);
-			});
-			setFiltered(filteredData);
-		}
+	const filtered = useMemo(() => {
+		console.log('Filtering renewals', { searchQuery, renewalsData: renewals?.data });
+		if (!renewals?.data) return [];
+
+		if (!searchQuery.trim()) return renewals.data;
+
+		return renewals.data.filter((renewal: Renewal) =>
+			renewal.msisdn.toLowerCase().includes(searchQuery.trim().toLowerCase())
+		);
 	}, [searchQuery, renewals]);
 
-	return {
-		filtered,
-		searchQuery,
-		setSearchQuery,
-		loading: isLoading,
-	};
+	console.log('useRenewals hook result', { filtered, searchQuery, loading: isLoading });
+
+	const result = useMemo(
+		() => ({
+			filtered,
+			searchQuery,
+			setSearchQuery,
+			loading: isLoading,
+		}),
+		[filtered, searchQuery, isLoading]
+	);
+
+	console.log('useRenewals hook result', result);
+
+	return result;
 }
