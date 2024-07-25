@@ -46,13 +46,6 @@ export default memo(() => {
 
 	return (
 		<Paper py="lg">
-			<Text
-				fz="xl"
-				fw="bold"
-			>
-				Load new 5G bundle
-			</Text>
-
 			<Paper my={'md'}>
 				<Stack>
 					<Accordion
