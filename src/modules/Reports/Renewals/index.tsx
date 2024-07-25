@@ -20,7 +20,6 @@ export interface Renewal {
 
 export default () => {
 	const { searchQuery, setSearchQuery } = useRenewals();
-
 	const request = useRequest(true);
 
 	const onDownload = () => {
@@ -51,13 +50,18 @@ export default () => {
 			});
 	};
 
+	const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setSearchQuery(event.currentTarget.value);
+		console.log('Search query changed', event.currentTarget.value);
+	};
+
 	return (
 		<Stack py="sm">
 			<TextInput
 				placeholder="Search by msisdn"
 				icon={<IconSearch />}
 				value={searchQuery}
-				onChange={(event) => setSearchQuery(event.currentTarget.value)}
+				onChange={handleSearchChange}
 			/>
 			<RenewalsReportTable />
 			<Flex justify={'end'}>

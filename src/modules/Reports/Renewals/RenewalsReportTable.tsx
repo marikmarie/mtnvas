@@ -37,5 +37,7 @@ export default function RenewalsReportTable() {
 		mih: '70vh',
 	});
 
+	console.log('RenewalsReportTable rendering', { filteredLength: filtered.length, loading });
+
 	return renewalsReportTable;
 }
