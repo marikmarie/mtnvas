@@ -1,9 +1,8 @@
 import { Paper } from '@mantine/core';
-import React from 'react';
 import ActivationTable from './components/ActivationTable';
 import { Form } from './components/ActivationForm';
 
-export default React.memo(() => {
+export default () => {
 	return (
 		<Paper
 			py="lg"
@@ -13,4 +12,4 @@ export default React.memo(() => {
 			<Form />
 		</Paper>
 	);
-});
+};
