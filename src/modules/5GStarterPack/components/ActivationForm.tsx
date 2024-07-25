@@ -1,4 +1,4 @@
-import { Stack, Flex, Badge, TextInput, Button, Text, Loader } from '@mantine/core';
+import { Flex, Badge, TextInput, Button, Text, Loader, Paper, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconCircleCheck, IconPhone, IconRestore } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
@@ -79,72 +79,78 @@ export const Form = () => {
 		<div>
 			{subscriptionId ? (
 				<form onSubmit={form.onSubmit(() => activation.mutate())}>
-					<Stack my={'sm'}>
-						<Flex
-							justify={'start'}
-							gap="xl"
-							align={'center'}
-						>
-							<Badge
-								variant="light"
-								size="xl"
+					<Paper
+						withBorder
+						p="xs"
+						my={'sm'}
+					>
+						<Stack>
+							<Flex
+								justify={'start'}
+								gap="xl"
+								align={'center'}
 							>
-								Subscription Id
-							</Badge>
-							<Text>{subscriptionId}</Text>
-						</Flex>
-						<TextInput
-							icon={<IconPhone />}
-							label="WakaNet Number"
-							value={form.values.bnumber}
-							onChange={(event) =>
-								form.setFieldValue('bnumber', event.currentTarget.value)
-							}
-							error={form.errors.bnumber}
-							placeholder="Forexample 2563945..."
-							withAsterisk
-							w="100%"
-						/>
-						<Flex
-							justify={'start'}
-							gap="xl"
-							align={'center'}
-						>
-							<Button
-								leftIcon={<IconCircleCheck />}
-								fullWidth
-								radius="md"
-								type="submit"
-								disabled={form.errors.bnumber ? true : false}
+								<Badge
+									variant="light"
+									size="xl"
+								>
+									Subscription Id
+								</Badge>
+								<Text>{subscriptionId}</Text>
+							</Flex>
+							<TextInput
+								icon={<IconPhone />}
+								label="WakaNet Number"
+								value={form.values.bnumber}
+								onChange={(event) =>
+									form.setFieldValue('bnumber', event.currentTarget.value)
+								}
+								error={form.errors.bnumber}
+								placeholder="Forexample 2563945..."
+								withAsterisk
+								w="100%"
+							/>
+							<Flex
+								justify={'start'}
+								gap="xl"
+								align={'center'}
 							>
-								{activation.isLoading ? (
-									<Loader
-										color="white"
-										size={'xs'}
-									/>
-								) : (
-									'Activate'
-								)}
-							</Button>
-							<Button
-								leftIcon={<IconRestore stroke={2} />}
-								fullWidth
-								color="red"
-								disabled={form.errors.bnumber ? true : false}
-								onClick={() => rejection.mutate()}
-								radius="md"
-							>
-								{rejection.isLoading ? (
-									<Loader
-										color="white"
-										size={'xs'}
-									/>
-								) : (
-									'Reject'
-								)}
-							</Button>
-						</Flex>
-					</Stack>
+								<Button
+									leftIcon={<IconCircleCheck />}
+									fullWidth
+									radius="md"
+									type="submit"
+									disabled={form.errors.bnumber ? true : false}
+								>
+									{activation.isLoading ? (
+										<Loader
+											color="white"
+											size={'xs'}
+										/>
+									) : (
+										'Activate'
+									)}
+								</Button>
+								<Button
+									leftIcon={<IconRestore stroke={2} />}
+									fullWidth
+									color={'red'}
+									disabled={form.errors.bnumber ? true : false}
+									onClick={() => rejection.mutate()}
+									radius="md"
+								>
+									{rejection.isLoading ? (
+										<Loader
+											color="white"
+											size={'xs'}
+										/>
+									) : (
+										'Reject'
+									)}
+								</Button>
+							</Flex>
+						</Stack>
+					</Paper>
 				</form>
 			) : null}
 		</div>
