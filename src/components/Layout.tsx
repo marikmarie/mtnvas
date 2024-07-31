@@ -1,9 +1,6 @@
 import { Container, ScrollArea } from '@mantine/core';
 
-import React, { useCallback, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { useScreenWidth } from '../hooks/use-screen-width';
-import { setCollapsedValue } from '../app/slices/nav';
+import React from 'react';
 import { Header } from './Header';
 
 type PageProps = {
@@ -11,18 +8,6 @@ type PageProps = {
 };
 
 export default function Layout({ children }: PageProps) {
-	const dispatch = useDispatch();
-
-	const screen = useScreenWidth();
-
-	const effect = useCallback(() => {
-		if (screen === 'lg' || screen === 'xl') {
-			dispatch(setCollapsedValue(false));
-		}
-	}, [screen, dispatch]);
-
-	useEffect(effect, [screen]);
-
 	return (
 		<ScrollArea
 			type="scroll"

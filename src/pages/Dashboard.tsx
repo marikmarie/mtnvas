@@ -2,7 +2,7 @@ import React, { useState, useCallback, lazy } from 'react';
 import { createStyles, Paper, SimpleGrid, Stack } from '@mantine/core';
 import { useSelector } from 'react-redux';
 import Layout from '../components/Layout';
-import { withAuth } from '../hocs/With-Auth';
+import { withAuth } from '../hocs/WithAuth';
 import { Loadable } from '../hocs/Loadable';
 import { RootState } from '../app/store';
 import { WakanetActivation } from '../modules/WakanetActivation';
@@ -16,7 +16,6 @@ import {
 	IconLoader,
 } from '@tabler/icons-react';
 
-// Lazy-loaded components
 const LazyComponents = {
 	Signup: Loadable(lazy(() => import('../modules/5GStarterPack'))),
 	LoadBundle: Loadable(lazy(() => import('../modules/LoadBundle'))),
