@@ -1,7 +1,7 @@
 import ReactDataGrid from '@inovua/reactdatagrid-community';
 import { useMantineTheme } from '@mantine/core';
 
-interface Props {
+export function useDataGridTable(props: {
 	columns: {
 		name: string;
 		header: string;
@@ -9,9 +9,7 @@ interface Props {
 	data: any[];
 	loading: boolean;
 	mih?: string;
-}
-
-export function useDataGridTable(props: Props) {
+}) {
 	const { columns, data, loading, mih } = props;
 	const theme = useMantineTheme();
 
