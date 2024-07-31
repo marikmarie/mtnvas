@@ -1,16 +1,19 @@
 import './index.css';
 import '@inovua/reactdatagrid-community/index.css';
 import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import AppRouter from './App';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
 import store, { persistor } from './app/store';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Notifications } from '@mantine/notifications';
 import { PersistGate } from 'redux-persist/integration/react';
 import { ModalsProvider } from '@mantine/modals';
+import { signout } from './app/slices/auth';
+import { ROUTES } from './constants/routes';
+import { useIdleTimer } from 'react-idle-timer';
 
 const client = new QueryClient();
 
@@ -40,6 +43,24 @@ function App() {
 	const [colorScheme, setColorScheme] = React.useState<ColorScheme>('light');
 	const toggleColorScheme = (value?: ColorScheme) =>
 		setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
+
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
+
+	const handleLogout = useCallback(() => {
+		dispatch(signout());
+		navigate(ROUTES.AUTH);
+	}, [dispatch, navigate]);
+
+	const { start } = useIdleTimer({
+		onIdle: handleLogout,
+		timeout: 15 * 60 * 1000, // 15 minutes
+		throttle: 500,
+	});
+
+	useEffect(() => {
+		start();
+	}, [start]);
 
 	return (
 		<ColorSchemeProvider
