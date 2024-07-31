@@ -22,7 +22,7 @@ export default function ActivationsReport() {
 
 	const onDownload = () => {
 		request
-			.get('/activations-data', {
+			.get('/csv/activations', {
 				responseType: 'blob',
 				headers: {
 					Accept: 'text/csv',

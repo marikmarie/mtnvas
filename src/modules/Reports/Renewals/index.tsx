@@ -1,7 +1,6 @@
 import { Button, Flex, Stack } from '@mantine/core';
 import { IconDownload } from '@tabler/icons-react';
 import RenewalsReportTable from './RenewalsReportTable';
-import { useRenewals } from '../../../hooks/use-renewals';
 import useRequest from '../../../hooks/use-request';
 
 export interface Renewal {
@@ -19,12 +18,12 @@ export interface Renewal {
 }
 
 export default () => {
-	const { searchQuery, setSearchQuery } = useRenewals();
+	// const { searchQuery, setSearchQuery } = useRenewals();
 	const request = useRequest(true);
 
 	const onDownload = () => {
 		request
-			.get('/renewals-data', {
+			.get('/csv/renewals', {
 				responseType: 'blob',
 				headers: {
 					Accept: 'text/csv',
@@ -50,10 +49,10 @@ export default () => {
 			});
 	};
 
-	const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setSearchQuery(event.currentTarget.value);
-		console.log('Search query changed', event.currentTarget.value);
-	};
+	// const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	// 	setSearchQuery(event.currentTarget.value);
+	// 	console.log('Search query changed', event.currentTarget.value);
+	// };
 
 	return (
 		<Stack py="sm">
