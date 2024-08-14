@@ -54,7 +54,7 @@ const PackageSection = memo(
 		setSelectedSrvCode: (code: string) => void;
 	}) => (
 		<Accordion
-			variant="contained"
+			variant="filled"
 			defaultValue={title.toLowerCase().replace(' ', '_')}
 		>
 			<Accordion.Item value={title.toLowerCase().replace(' ', '_')}>

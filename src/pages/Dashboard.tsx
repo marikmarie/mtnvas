@@ -128,7 +128,7 @@ const Dashboard: React.FC = () => {
 					(!isOfficeUser || showForOfficeUser) && (
 						<Paper
 							key={key}
-							withBorder
+							shadow="md"
 							p="sm"
 							sx={{ cursor: 'pointer' }}
 							bg={activeTab === key ? 'yellow' : 'white'}
@@ -156,7 +156,14 @@ const Dashboard: React.FC = () => {
 	return (
 		<Layout>
 			{renderTabs()}
-			{ActiveComponent && <ActiveComponent />}
+			{ActiveComponent && (
+				<Paper
+					p="md"
+					shadow="xl"
+				>
+					<ActiveComponent />
+				</Paper>
+			)}
 		</Layout>
 	);
 };

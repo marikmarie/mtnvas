@@ -79,11 +79,7 @@ export const Form = () => {
 		<div>
 			{subscriptionId ? (
 				<form onSubmit={form.onSubmit(() => activation.mutate())}>
-					<Paper
-						withBorder
-						p="xs"
-						my={'sm'}
-					>
+					<Paper my={'sm'}>
 						<Stack>
 							<Flex
 								justify={'start'}
