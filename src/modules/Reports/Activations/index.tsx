@@ -30,7 +30,7 @@ export default function ActivationsReport() {
 				const blob = new Blob([response.data], { type: 'text/csv' });
 				const anchorTag = document.createElement('a');
 				anchorTag.href = URL.createObjectURL(blob);
-				anchorTag.download = 'Activation Report.csv';
+				anchorTag.download = 'StarterPack Activation Report.csv';
 				anchorTag.style.display = 'none';
 
 				document.body.appendChild(anchorTag);
@@ -55,7 +55,7 @@ export default function ActivationsReport() {
 					onClick={onDownload}
 					radius="md"
 				>
-					Download Activations Report
+					Download StarterPack Activation Report
 				</Button>
 			</Flex>
 		</Stack>

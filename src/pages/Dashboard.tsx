@@ -80,7 +80,7 @@ const tabConfigs: TabConfig[] = [
 	},
 	{
 		key: 'activations-report',
-		label: 'Activations Report',
+		label: 'StarterPack Activation Report',
 		component: LazyComponents.ActivationsReport,
 		showForOfficeUser: true,
 		icon: <IconReport size={20} />,
