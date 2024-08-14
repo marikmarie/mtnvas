@@ -39,10 +39,9 @@ export default function RenewalsReportTable() {
 		mih: '70vh',
 	});
 
-	console.log('RenewalsReportTable rendering', {
-		filteredLength: renewals.length,
-		loading: isLoading,
-	});
+	const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setSearchQuery(event.currentTarget.value);
+	};
 
 	return (
 		<Stack>
@@ -50,7 +49,7 @@ export default function RenewalsReportTable() {
 				placeholder="Search by msisdn"
 				icon={<IconSearch />}
 				value={searchQuery}
-				onChange={(event) => setSearchQuery(event.target.value)}
+				onChange={handleSearchChange}
 			/>
 			{renewalsReportTable}
 		</Stack>

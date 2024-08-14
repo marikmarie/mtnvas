@@ -61,13 +61,17 @@ export default function ActivationsReportTable() {
 		mih: '70vh',
 	});
 
+	const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setSearchQuery(event.currentTarget.value);
+	};
+
 	return (
 		<Stack>
 			<TextInput
 				placeholder="Search by msisdn"
 				icon={<IconSearch />}
 				value={searchQuery}
-				onChange={(event) => setSearchQuery(event.target.value)}
+				onChange={handleSearchChange}
 			/>
 			{activationsReportTable}
 		</Stack>
