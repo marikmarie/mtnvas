@@ -62,6 +62,7 @@ const PackageSection = memo(
 					<Text
 						fz="xl"
 						fw="bold"
+						tt="uppercase"
 					>
 						{title}
 					</Text>
