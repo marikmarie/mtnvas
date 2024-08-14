@@ -1,12 +1,24 @@
 import { useMemo } from 'react';
-import { toTitle } from '../../../utils/toTitle';
-import { useActivations } from '../../../hooks/useActivations';
-import { Stack, TextInput } from '@mantine/core';
-import { IconSearch } from '@tabler/icons-react';
 import { useDataGridTable } from '../../../hooks/useDataGridTable';
+import { toTitle } from '../../../utils/toTitle';
+import { ActionIcon, Button, Flex, Popover, Stack, TextInput } from '@mantine/core';
+import { IconCalendarTime, IconSearch } from '@tabler/icons-react';
+import { DatePicker } from '@mantine/dates';
+import { subDays } from 'date-fns';
+import useActivations from '../../../hooks/useActivations';
 
 export default function ActivationsReportTable() {
-	const { loading, filtered, searchQuery, setSearchQuery } = useActivations();
+	const {
+		isLoading,
+		activations,
+		searchQuery,
+		setSearchQuery,
+		applySearch,
+		resetSearchFilters,
+		dateRange,
+		setDateRange,
+		refetch,
+	} = useActivations();
 
 	const columns = useMemo(
 		() =>
@@ -26,8 +38,7 @@ export default function ActivationsReportTable() {
 					return {
 						name: column,
 						header: 'PERFORMED AT',
-						// @ts-ignore
-						render: ({ data }) => (
+						render: ({ data }: { data: any }) => (
 							<>
 								{new Date(data['performedAt']).toLocaleDateString('en-UK')}{' '}
 								{new Date(data['performedAt']).toLocaleTimeString('en-UK')}
@@ -39,16 +50,13 @@ export default function ActivationsReportTable() {
 					return {
 						name: column,
 						header: 'PERFORMED BY',
-						// @ts-ignore
-						render: ({ data }) => {
-							return <>{data['performedBy']}</>;
-						},
+						render: ({ data }: { data: any }) => <>{data['performedBy']}</>,
 					};
 				}
 				return {
 					name: column,
+					defaultFlex: 2,
 					header: toTitle(column),
-					defaultFlex: 1,
 				};
 			}),
 		[]
@@ -56,23 +64,79 @@ export default function ActivationsReportTable() {
 
 	const activationsReportTable = useDataGridTable({
 		columns: columns,
-		data: filtered,
-		loading,
-		mih: '70vh',
+		data: activations,
+		loading: isLoading,
+		mih: '60vh',
 	});
 
 	const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setSearchQuery(event.currentTarget.value);
 	};
 
+	const handleSearchClick = () => {
+		applySearch();
+		refetch();
+	};
+
+	const handleDateChange = (value: [Date | null, Date | null]) => {
+		setDateRange(value);
+	};
+
+	const handleResetFilters = () => {
+		resetSearchFilters();
+		refetch();
+	};
+
 	return (
 		<Stack>
-			<TextInput
-				placeholder="Search by msisdn"
-				icon={<IconSearch />}
-				value={searchQuery}
-				onChange={handleSearchChange}
-			/>
+			<Flex
+				justify={'space-between'}
+				align={'center'}
+				gap={'md'}
+			>
+				<TextInput
+					w="100%"
+					placeholder="Search by msisdn"
+					icon={<IconSearch />}
+					value={searchQuery}
+					onChange={handleSearchChange}
+				/>
+				<Popover
+					position="top"
+					withArrow
+					trapFocus
+					shadow="md"
+				>
+					<Popover.Target>
+						<ActionIcon>
+							<IconCalendarTime />
+						</ActionIcon>
+					</Popover.Target>
+					<Popover.Dropdown>
+						<DatePicker
+							type="range"
+							allowSingleDateInRange
+							maxDate={new Date()}
+							value={dateRange}
+							onChange={handleDateChange}
+							defaultDate={subDays(new Date(), 1)}
+						/>
+					</Popover.Dropdown>
+				</Popover>
+				<Flex
+					justify="space-between"
+					gap={'md'}
+					align={'center'}
+				>
+					<Button onClick={handleSearchClick}>Search</Button>
+					<Button
+						color={'red'}
+						onClick={handleResetFilters}
+					>
+						Reset
+					</Button>
+				</Flex>
+			</Flex>
 			{activationsReportTable}
 		</Stack>
 	);

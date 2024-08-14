@@ -33,7 +33,6 @@ function ListUsers(props: Props) {
 	const columns = ['name', 'email', 'role', 'status', 'category', 'createdAt'].map((column) => ({
 		name: column,
 		header: toTitle(column),
-		defaultFlex: 1,
 	}));
 
 	const activationMutation = useMutation({
@@ -125,7 +124,6 @@ function ListUsers(props: Props) {
 			);
 		},
 		headerAlign: 'center',
-		defaultFlex: 1,
 	});
 
 	const users = query?.data?.data?.data as unknown[] as any[];

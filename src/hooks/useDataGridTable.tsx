@@ -20,6 +20,7 @@ export function useDataGridTable(props: {
 			dataSource={data}
 			showCellBorders
 			showHeader
+			enableColumnAutosize={true}
 			loading={loading}
 			style={{ minHeight: mih || '60vh' }}
 			pagination

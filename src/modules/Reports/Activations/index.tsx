@@ -3,18 +3,6 @@ import { IconDownload } from '@tabler/icons-react';
 import useRequest from '../../../hooks/useRequest';
 import ActivationsReportTable from './ActivationsReportTable';
 
-export interface Activation {
-	subscriptionId: string;
-	msisdn: string;
-	email: string;
-	bnumber?: string;
-	salesAgentEmail: string;
-	createdAt: string;
-	status: string;
-	activatedAt: string;
-	activatedBy: string;
-}
-
 export default function ActivationsReport() {
 	const request = useRequest(true);
 

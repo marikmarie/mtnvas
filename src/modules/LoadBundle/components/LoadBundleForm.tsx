@@ -37,17 +37,14 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 		onSuccess: (response: AxiosResponse) => {
 			notifications.show({
 				autoClose: 5000,
-				title: 'Success',
-				// @ts-ignore
-				message: JSON.stringify(response.data),
-				color: 'green',
+				message: response.data.message,
 			});
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
 				autoClose: 5000,
-				title: 'FAILURE',
-				message: JSON.stringify(error.response?.data),
+				// @ts-ignore
+				message: error.response?.data?.message,
 				color: 'red',
 			});
 		},

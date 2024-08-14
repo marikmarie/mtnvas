@@ -27,11 +27,10 @@ const PACKAGES: Record<string, PackageData[]> = {
 		{ serviceCode: 'FWA_20MBPS-4G', amount: '195000UGX', speed: '20MBPS' },
 	],
 	booster_packs: [
-		{ serviceCode: 'Waka10PST', amount: '35000UGX', speed: '14GB' },
-		{ serviceCode: 'Waka20PST', amount: '55000UGX', speed: '25GB' },
-		{ serviceCode: 'Waka40PST', amount: '85000UGX', speed: '45GB' },
-		{ serviceCode: 'Waka85PST', amount: '170000UGX', speed: '95GB' },
-		{ serviceCode: 'Waka195PST', amount: '335000UGX', speed: '195GB' },
+		{ serviceCode: 'FWA_BST_3MBPS', amount: '1400UGX', speed: '3MBPS' },
+		{ serviceCode: 'FWA_BST_5MBPS', amount: '2500UGX', speed: '5MBPS' },
+		{ serviceCode: 'FWA_BST_10MBPS', amount: '3900UGX', speed: '100MBPS' },
+		{ serviceCode: 'FWA_BST_20MBPS', amount: '6300UGX', speed: '20MBPS' },
 	],
 	post_paid_bundles: [
 		{ serviceCode: 'Waka10PST', amount: '35000UGX', speed: '14GB' },

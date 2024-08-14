@@ -1,14 +1,24 @@
 import { useMemo } from 'react';
 import { useDataGridTable } from '../../../hooks/useDataGridTable';
 import { toTitle } from '../../../utils/toTitle';
-import { useRenewals } from '../../../hooks/useRenewals';
 import { ActionIcon, Button, Flex, Popover, Stack, TextInput } from '@mantine/core';
 import { IconCalendarTime, IconSearch } from '@tabler/icons-react';
 import { DatePicker } from '@mantine/dates';
 import { subDays } from 'date-fns';
+import useRenewals from '../../../hooks/useRenewals';
 
 export default function RenewalsReportTable() {
-	const { isLoading, renewals, searchQuery, setSearchQuery, applySearch } = useRenewals();
+	const {
+		isLoading,
+		renewals,
+		searchQuery,
+		setSearchQuery,
+		applySearch,
+		resetSearchFilters,
+		dateRange,
+		setDateRange,
+		refetch,
+	} = useRenewals();
 
 	const columns = useMemo(
 		() =>
@@ -24,13 +34,11 @@ export default function RenewalsReportTable() {
 				'channel',
 				'senderId',
 				'duaration',
-			].map((column) => {
-				return {
-					name: column,
-					header: toTitle(column),
-					defaultFlex: 1,
-				};
-			}),
+			].map((column) => ({
+				name: column,
+				header: toTitle(column),
+				defaultFlex: 1,
+			})),
 		[]
 	);
 
@@ -38,7 +46,7 @@ export default function RenewalsReportTable() {
 		columns: columns,
 		data: renewals,
 		loading: isLoading,
-		mih: '70vh',
+		mih: '60vh',
 	});
 
 	const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,6 +55,16 @@ export default function RenewalsReportTable() {
 
 	const handleSearchClick = () => {
 		applySearch();
+		refetch();
+	};
+
+	const handleDateChange = (value: [Date | null, Date | null]) => {
+		setDateRange(value);
+	};
+
+	const handleResetFilters = () => {
+		resetSearchFilters();
+		refetch();
 	};
 
 	return (
@@ -79,16 +97,25 @@ export default function RenewalsReportTable() {
 							type="range"
 							allowSingleDateInRange
 							maxDate={new Date()}
+							value={dateRange}
+							onChange={handleDateChange}
 							defaultDate={subDays(new Date(), 1)}
 						/>
 					</Popover.Dropdown>
 				</Popover>
-				<Button
-					leftIcon={<IconSearch />}
-					onClick={handleSearchClick}
+				<Flex
+					justify="space-between"
+					gap={'md'}
+					align={'center'}
 				>
-					Search
-				</Button>
+					<Button onClick={handleSearchClick}>Search</Button>
+					<Button
+						color={'red'}
+						onClick={handleResetFilters}
+					>
+						Reset
+					</Button>
+				</Flex>
 			</Flex>
 			{renewalsReportTable}
 		</Stack>
