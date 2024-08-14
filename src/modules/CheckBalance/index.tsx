@@ -3,7 +3,7 @@ import { Button, Divider, Flex, Loader, Paper, Stack, Text, TextInput } from '@m
 import { useForm } from '@mantine/form';
 import { useMutation } from '@tanstack/react-query';
 import { useDisclosure } from '@mantine/hooks';
-import useRequest from '../../hooks/use-request';
+import useRequest from '../../hooks/useRequest';
 import { Modal } from '../../components/Modal';
 
 const BalanceCheck: React.FC = () => {

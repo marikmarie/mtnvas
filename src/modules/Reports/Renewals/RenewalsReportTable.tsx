@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
-import { useDataGridTable } from '../../../hooks/use-data-grid-table';
-import { toTitle } from '../../../utils/to-title';
-import { useRenewals } from '../../../hooks/use-renewals';
+import { useDataGridTable } from '../../../hooks/useDataGridTable';
+import { toTitle } from '../../../utils/toTitle';
+import { useRenewals } from '../../../hooks/useRenewals';
+import { Stack, TextInput } from '@mantine/core';
+import { IconSearch } from '@tabler/icons-react';
 
 export default function RenewalsReportTable() {
-	const { loading, filtered } = useRenewals();
+	const { isLoading, renewals, searchQuery, setSearchQuery } = useRenewals();
 
 	const columns = useMemo(
 		() =>
@@ -32,12 +34,25 @@ export default function RenewalsReportTable() {
 
 	const renewalsReportTable = useDataGridTable({
 		columns: columns,
-		data: filtered,
-		loading,
+		data: renewals,
+		loading: isLoading,
 		mih: '70vh',
 	});
 
-	console.log('RenewalsReportTable rendering', { filteredLength: filtered.length, loading });
+	console.log('RenewalsReportTable rendering', {
+		filteredLength: renewals.length,
+		loading: isLoading,
+	});
 
-	return renewalsReportTable;
+	return (
+		<Stack>
+			<TextInput
+				placeholder="Search by msisdn"
+				icon={<IconSearch />}
+				value={searchQuery}
+				onChange={(event) => setSearchQuery(event.target.value)}
+			/>
+			{renewalsReportTable}
+		</Stack>
+	);
 }

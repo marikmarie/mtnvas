@@ -1,6 +1,6 @@
 import { Button, Flex, Stack } from '@mantine/core';
 import { IconDownload } from '@tabler/icons-react';
-import useRequest from '../../../hooks/use-request';
+import useRequest from '../../../hooks/useRequest';
 import ActivationsReportTable from './ActivationsReportTable';
 
 export interface Activation {
@@ -16,8 +16,6 @@ export interface Activation {
 }
 
 export default function ActivationsReport() {
-	// const { searchQuery, setSearchQuery } = useActivations();
-
 	const request = useRequest(true);
 
 	const onDownload = () => {
@@ -50,12 +48,6 @@ export default function ActivationsReport() {
 
 	return (
 		<Stack py="lg">
-			{/* <TextInput
-				placeholder="Search by msisdn"
-				icon={<IconSearch />}
-				value={searchQuery}
-				onChange={(event) => setSearchQuery(event.target.value)}
-			/> */}
 			<ActivationsReportTable />
 			<Flex justify={'end'}>
 				<Button

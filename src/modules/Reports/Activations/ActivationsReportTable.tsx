@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
-import { useDataGridTable } from '../../../hooks/use-data-grid-table';
-import { toTitle } from '../../../utils/to-title';
-import { useActivations } from '../../../hooks/use-activations';
+import { useDataGridTable } from '../../../hooks/useDataGridTable';
+import { toTitle } from '../../../utils/toTitle';
+import { useActivations } from '../../../hooks/useActivations';
+import { Stack, TextInput } from '@mantine/core';
+import { IconSearch } from '@tabler/icons-react';
 
 export default function ActivationsReportTable() {
-	const { loading, filtered } = useActivations();
+	const { loading, filtered, searchQuery, setSearchQuery } = useActivations();
 
 	const columns = useMemo(
 		() =>
@@ -59,5 +61,15 @@ export default function ActivationsReportTable() {
 		mih: '70vh',
 	});
 
-	return activationsReportTable;
+	return (
+		<Stack>
+			<TextInput
+				placeholder="Search by msisdn"
+				icon={<IconSearch />}
+				value={searchQuery}
+				onChange={(event) => setSearchQuery(event.target.value)}
+			/>
+			{activationsReportTable}
+		</Stack>
+	);
 }

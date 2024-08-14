@@ -11,7 +11,7 @@ import {
 	REHYDRATE,
 } from 'redux-persist';
 import authReducer from './slices/auth';
-import subIdReducer from './slices/bundle-activations';
+import subIdReducer from './slices/BundleActivations';
 
 const persistedAuthReducer = persistReducer({ key: 'auth', storage }, authReducer);
 

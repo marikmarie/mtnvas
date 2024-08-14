@@ -4,7 +4,7 @@ import { notifications } from '@mantine/notifications';
 import { IconGauge, IconPhone } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosResponse, AxiosError } from 'axios';
-import useRequest from '../../../hooks/use-request';
+import useRequest from '../../../hooks/useRequest';
 
 type TLoadBundleFormProps = {
 	selectedSrvCode: string;

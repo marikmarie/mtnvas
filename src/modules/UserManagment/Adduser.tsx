@@ -4,7 +4,7 @@ import { memo, useCallback } from 'react';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
-import useRequest from '../../hooks/use-request';
+import useRequest from '../../hooks/useRequest';
 import { notifications } from '@mantine/notifications';
 import { customLoader } from '../../components/CustomLoader';
 

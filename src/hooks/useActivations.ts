@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import useRequest from './use-request';
+import useRequest from './useRequest';
 import { Activation } from '../modules/Reports/Activations';
 import { useQuery } from '@tanstack/react-query';
 

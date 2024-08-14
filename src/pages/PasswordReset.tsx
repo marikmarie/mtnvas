@@ -14,7 +14,7 @@ import {
 } from '@mantine/core';
 import { memo, useCallback } from 'react';
 import { IconMail } from '@tabler/icons-react';
-import useRequest from '../hooks/use-request';
+import useRequest from '../hooks/useRequest';
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
 import { Link, useNavigate } from 'react-router-dom';

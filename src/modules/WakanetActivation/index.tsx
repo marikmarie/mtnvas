@@ -4,7 +4,7 @@ import { IconPhone } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { notifications } from '@mantine/notifications';
 import { AxiosResponse, AxiosError } from 'axios';
-import useRequest from '../../hooks/use-request';
+import useRequest from '../../hooks/useRequest';
 
 export const WakanetActivation = () => {
 	const request = useRequest(true);

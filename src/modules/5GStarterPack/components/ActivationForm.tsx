@@ -4,10 +4,10 @@ import { IconCircleCheck, IconPhone, IconRestore } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../app/store';
-import useRequest from '../../../hooks/use-request';
+import useRequest from '../../../hooks/useRequest';
 import { notifications } from '@mantine/notifications';
 import { AxiosResponse, AxiosError } from 'axios';
-import { setServiceCode, setSubscriptionId } from '../../../app/slices/bundle-activations';
+import { setServiceCode, setSubscriptionId } from '../../../app/slices/BundleActivations';
 
 export const Form = () => {
 	const request = useRequest(true);

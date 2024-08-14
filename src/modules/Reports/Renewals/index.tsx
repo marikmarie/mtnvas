@@ -1,7 +1,7 @@
 import { Button, Flex, Stack } from '@mantine/core';
 import { IconDownload } from '@tabler/icons-react';
 import RenewalsReportTable from './RenewalsReportTable';
-import useRequest from '../../../hooks/use-request';
+import useRequest from '../../../hooks/useRequest';
 
 export interface Renewal {
 	requestTime: string;

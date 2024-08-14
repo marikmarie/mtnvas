@@ -1,12 +1,12 @@
 import { memo } from 'react';
-import useRequest from '../../hooks/use-request';
+import useRequest from '../../hooks/useRequest';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { ActionIcon, Flex, LoadingOverlay, Stack, Tooltip } from '@mantine/core';
-import { toTitle } from '../../utils/to-title';
+import { toTitle } from '../../utils/toTitle';
 import { notifications } from '@mantine/notifications';
 import { customLoader } from '../../components/CustomLoader';
-import { useDataGridTable } from '../../hooks/use-data-grid-table';
+import { useDataGridTable } from '../../hooks/useDataGridTable';
 import { IconCircleCheck, IconDeselect } from '@tabler/icons-react';
 
 interface Props {}

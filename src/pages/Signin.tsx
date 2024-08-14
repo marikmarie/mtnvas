@@ -17,7 +17,7 @@ import {
 } from '@mantine/core';
 import { IconLock, IconMail } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
-import useRequest from '../hooks/use-request';
+import useRequest from '../hooks/useRequest';
 import { AxiosError, AxiosResponse } from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';

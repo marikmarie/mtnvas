@@ -8,7 +8,7 @@ import UpdateDetailsModal from './components/UpdateDetailsModal';
 import { useDisclosure } from '@mantine/hooks';
 import { IconSearch } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
-import useRequest from '../../hooks/use-request';
+import useRequest from '../../hooks/useRequest';
 
 export default React.memo(() => {
 	const request = useRequest(true);
