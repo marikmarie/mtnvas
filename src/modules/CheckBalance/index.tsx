@@ -39,11 +39,11 @@ const BalanceCheck: React.FC = () => {
 			);
 		}
 		return (
-			<>
+			<Stack>
 				<Text ta="center">{balanceSummary}</Text>
 				<Divider my="sm" />
 				<Text ta="center">{balanceDetail}</Text>
-			</>
+			</Stack>
 		);
 	};
 

@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import { useDataGridTable } from '../../../hooks/useDataGridTable';
 import { toTitle } from '../../../utils/toTitle';
 import { useActivations } from '../../../hooks/useActivations';
 import { Stack, TextInput } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
+import { useDataGridTable } from '../../../hooks/useDataGridTable';
 
 export default function ActivationsReportTable() {
 	const { loading, filtered, searchQuery, setSearchQuery } = useActivations();

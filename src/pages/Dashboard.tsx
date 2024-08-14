@@ -139,6 +139,7 @@ const Dashboard: React.FC = () => {
 							<Stack
 								align="center"
 								spacing="xs"
+								ta={'center'}
 								fw={'bold'}
 							>
 								{icon}

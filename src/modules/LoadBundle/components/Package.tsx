@@ -1,6 +1,6 @@
 import { Card, Text, Badge, Flex } from '@mantine/core';
 import { IconBrandSpeedtest } from '@tabler/icons-react';
-import { Dispatch, FC, SetStateAction, memo } from 'react';
+import { FC, memo } from 'react';
 import { PkgButton } from './PkgButton';
 
 export const Package: FC<{
@@ -8,7 +8,7 @@ export const Package: FC<{
 	speed: string;
 	serviceCode: string;
 	selectedSrvCode: string;
-	setSelectedSrvCode: Dispatch<SetStateAction<string>>;
+	setSelectedSrvCode: (code: string) => void;
 }> = memo(({ setSelectedSrvCode, serviceCode, amount, speed, selectedSrvCode }) => {
 	const badge = ['ITTH_14GB', '1778FHI4', '1778FHI1', '1778FHI2', '1778FHI3'].includes(
 		serviceCode
@@ -34,7 +34,6 @@ export const Package: FC<{
 			>
 				<IconBrandSpeedtest color="orange" />
 				<Text
-					fz="xl"
 					ta="center"
 					fw={600}
 				>
@@ -44,7 +43,6 @@ export const Package: FC<{
 			</Flex>
 
 			<Text
-				fz="xl"
 				ta="center"
 				fw={500}
 			>

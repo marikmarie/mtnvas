@@ -2,11 +2,13 @@ import { useMemo } from 'react';
 import { useDataGridTable } from '../../../hooks/useDataGridTable';
 import { toTitle } from '../../../utils/toTitle';
 import { useRenewals } from '../../../hooks/useRenewals';
-import { Stack, TextInput } from '@mantine/core';
-import { IconSearch } from '@tabler/icons-react';
+import { ActionIcon, Button, Flex, Popover, Stack, TextInput } from '@mantine/core';
+import { IconCalendarTime, IconSearch } from '@tabler/icons-react';
+import { DatePicker } from '@mantine/dates';
+import { subDays } from 'date-fns';
 
 export default function RenewalsReportTable() {
-	const { isLoading, renewals, searchQuery, setSearchQuery } = useRenewals();
+	const { isLoading, renewals, searchQuery, setSearchQuery, applySearch } = useRenewals();
 
 	const columns = useMemo(
 		() =>
@@ -43,14 +45,51 @@ export default function RenewalsReportTable() {
 		setSearchQuery(event.currentTarget.value);
 	};
 
+	const handleSearchClick = () => {
+		applySearch();
+	};
+
 	return (
 		<Stack>
-			<TextInput
-				placeholder="Search by msisdn"
-				icon={<IconSearch />}
-				value={searchQuery}
-				onChange={handleSearchChange}
-			/>
+			<Flex
+				justify={'space-between'}
+				align={'center'}
+				gap={'md'}
+			>
+				<TextInput
+					w="100%"
+					placeholder="Search by msisdn"
+					icon={<IconSearch />}
+					value={searchQuery}
+					onChange={handleSearchChange}
+				/>
+				<Popover
+					position="top"
+					withArrow
+					trapFocus
+					shadow="md"
+				>
+					<Popover.Target>
+						<ActionIcon>
+							<IconCalendarTime />
+						</ActionIcon>
+					</Popover.Target>
+					<Popover.Dropdown>
+						<DatePicker
+							type="range"
+							allowSingleDateInRange
+							maxDate={new Date()}
+							defaultDate={subDays(new Date(), 1)}
+						/>
+					</Popover.Dropdown>
+				</Popover>
+				<Button
+					leftIcon={<IconSearch />}
+					onClick={handleSearchClick}
+				>
+					Search
+				</Button>
+			</Flex>
 			{renewalsReportTable}
 		</Stack>
 	);

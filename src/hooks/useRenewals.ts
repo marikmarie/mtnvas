@@ -1,3 +1,4 @@
+// useRenewals.ts
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
 import useRequest from './useRequest';
@@ -7,6 +8,7 @@ const RENEWALS_QUERY_KEY = ['renewals'] as const;
 
 export const useRenewals = () => {
 	const [searchQuery, setSearchQuery] = useState('');
+	const [appliedSearchQuery, setAppliedSearchQuery] = useState('');
 	const request = useRequest(true);
 
 	const fetchRenewals = useCallback(async () => {
@@ -25,25 +27,25 @@ export const useRenewals = () => {
 	});
 
 	const filteredRenewals = useMemo(() => {
-		if (!searchQuery.trim()) return renewals;
+		if (!appliedSearchQuery.trim()) return renewals;
 
-		const regex = new RegExp(searchQuery, 'i');
+		const regex = new RegExp(appliedSearchQuery, 'i');
 		return renewals.filter((renewal) => {
-			const searchableContent = [
-				renewal.msisdn,
-				// Add other searchable fields here if needed
-			]
-				.join(' ')
-				.toLowerCase();
+			const searchableContent = [renewal.msisdn].join(' ').toLowerCase();
 
 			return regex.test(searchableContent);
 		});
-	}, [searchQuery, renewals]);
+	}, [appliedSearchQuery, renewals]);
+
+	const applySearch = () => {
+		setAppliedSearchQuery(searchQuery);
+	};
 
 	return {
 		renewals: filteredRenewals,
 		searchQuery,
 		setSearchQuery,
+		applySearch,
 		isLoading,
 		error,
 	};
