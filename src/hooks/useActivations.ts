@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
 import useRequest from './useRequest';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 
-const RENEWALS_QUERY_KEY = ['activations'] as const;
+const ACTIVATIONS_QUERY_KEY = ['activations'] as const;
+
 export interface Activation {
 	subscriptionId: string;
 	msisdn: string;
@@ -21,8 +22,12 @@ interface Options {
 	pageSize?: number;
 	from?: Date;
 	to?: Date;
-	searchTerm?: string;
+	msisdn?: string;
+	bnumber?: string;
 }
+
+const isMsisdn = (number: string): boolean => /^2567\d{8}$/.test(number);
+const isBnumber = (number: string): boolean => /^25639\d{7}$/.test(number);
 
 export default function useActivations(options: Options = {}) {
 	const [searchQuery, setSearchQuery] = useState('');
@@ -36,21 +41,34 @@ export default function useActivations(options: Options = {}) {
 		if (options.page !== undefined) queryParams.append('page', options.page.toString());
 		if (options.pageSize !== undefined)
 			queryParams.append('pageSize', options.pageSize.toString());
-		if (dateRange[0]) queryParams.append('from', format(dateRange[0], 'yyyy-MM-dd'));
-		if (dateRange[1]) queryParams.append('to', format(dateRange[1], 'yyyy-MM-dd'));
-		if (options.searchTerm || appliedSearchQuery) {
-			queryParams.append('searchTerm', options.searchTerm || appliedSearchQuery);
+		if (dateRange[0] && isValid(dateRange[0]))
+			queryParams.append('from', format(dateRange[0], 'yyyy-MM-dd'));
+		if (dateRange[1] && isValid(dateRange[1]))
+			queryParams.append('to', format(dateRange[1], 'yyyy-MM-dd'));
+
+		const searchTerm = appliedSearchQuery || options.msisdn || options.bnumber;
+		if (searchTerm) {
+			if (isMsisdn(searchTerm)) {
+				queryParams.append('msisdn', searchTerm);
+			} else if (isBnumber(searchTerm)) {
+				queryParams.append('bnumber', searchTerm);
+			}
 		}
 
 		const queryString = queryParams.toString();
 		const url = `/activations${queryString ? `?${queryString}` : ''}`;
 
-		const response = await request.get<{ data: Activation[] }>(url);
-		return response.data.data || [];
+		try {
+			const response = await request.get<{ data: Activation[] }>(url);
+			return response.data.data || [];
+		} catch (error) {
+			console.error('Error fetching activations:', error);
+			throw error;
+		}
 	}, [request, options, appliedSearchQuery, dateRange]);
 
 	const queryKey = useMemo(
-		() => [...RENEWALS_QUERY_KEY, options, appliedSearchQuery, dateRange],
+		() => [...ACTIVATIONS_QUERY_KEY, options, appliedSearchQuery, dateRange],
 		[options, appliedSearchQuery, dateRange]
 	);
 
@@ -65,18 +83,8 @@ export default function useActivations(options: Options = {}) {
 		refetchOnWindowFocus: false,
 	});
 
-	const filteredActivations = useMemo(() => {
-		if (!appliedSearchQuery.trim()) return activations;
-
-		const regex = new RegExp(appliedSearchQuery, 'i');
-		return activations.filter((activation) => {
-			const searchableContent = [activation.msisdn].join(' ').toLowerCase();
-			return regex.test(searchableContent);
-		});
-	}, [appliedSearchQuery, activations]);
-
 	const applySearch = useCallback(() => {
-		setAppliedSearchQuery(searchQuery);
+		setAppliedSearchQuery(searchQuery.trim());
 	}, [searchQuery]);
 
 	const resetSearchFilters = useCallback(() => {
@@ -86,7 +94,7 @@ export default function useActivations(options: Options = {}) {
 	}, []);
 
 	return {
-		activations: filteredActivations,
+		activations,
 		searchQuery,
 		dateRange,
 		setDateRange,

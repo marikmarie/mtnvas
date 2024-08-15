@@ -94,7 +94,7 @@ export default function RenewalsReportTable() {
 			>
 				<TextInput
 					w="100%"
-					placeholder="Search by msisdn"
+					placeholder="Search by msisdn or bnumber"
 					icon={<IconSearch />}
 					value={searchQuery}
 					onChange={handleSearchChange}

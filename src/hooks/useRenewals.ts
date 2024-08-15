@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
 import useRequest from './useRequest';
 import { Renewal } from '../modules/Reports/Renewals';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 
 const RENEWALS_QUERY_KEY = ['renewals'] as const;
 
@@ -11,8 +11,12 @@ interface Options {
 	pageSize?: number;
 	from?: Date;
 	to?: Date;
-	searchTerm?: string;
+	msisdn?: string;
+	bnumber?: string;
 }
+
+const isMsisdn = (number: string): boolean => /^2567\d{8}$/.test(number);
+const isBnumber = (number: string): boolean => /^25639\d{7}$/.test(number);
 
 export default function useRenewals(options: Options = {}) {
 	const [searchQuery, setSearchQuery] = useState('');
@@ -26,17 +30,30 @@ export default function useRenewals(options: Options = {}) {
 		if (options.page !== undefined) queryParams.append('page', options.page.toString());
 		if (options.pageSize !== undefined)
 			queryParams.append('pageSize', options.pageSize.toString());
-		if (dateRange[0]) queryParams.append('from', format(dateRange[0], 'yyyy-MM-dd'));
-		if (dateRange[1]) queryParams.append('to', format(dateRange[1], 'yyyy-MM-dd'));
-		if (options.searchTerm || appliedSearchQuery) {
-			queryParams.append('searchTerm', options.searchTerm || appliedSearchQuery);
+		if (dateRange[0] && isValid(dateRange[0]))
+			queryParams.append('from', format(dateRange[0], 'yyyy-MM-dd'));
+		if (dateRange[1] && isValid(dateRange[1]))
+			queryParams.append('to', format(dateRange[1], 'yyyy-MM-dd'));
+
+		const searchTerm = appliedSearchQuery || options.msisdn || options.bnumber;
+		if (searchTerm) {
+			if (isMsisdn(searchTerm)) {
+				queryParams.append('msisdn', searchTerm);
+			} else if (isBnumber(searchTerm)) {
+				queryParams.append('bnumber', searchTerm);
+			}
 		}
 
 		const queryString = queryParams.toString();
 		const url = `/renewals${queryString ? `?${queryString}` : ''}`;
 
-		const response = await request.get<{ data: Renewal[] }>(url);
-		return response.data.data || [];
+		try {
+			const response = await request.get<{ data: Renewal[] }>(url);
+			return response.data.data || [];
+		} catch (error) {
+			console.error('Error fetching renewals:', error);
+			throw error;
+		}
 	}, [request, options, appliedSearchQuery, dateRange]);
 
 	const queryKey = useMemo(
@@ -55,18 +72,8 @@ export default function useRenewals(options: Options = {}) {
 		refetchOnWindowFocus: false,
 	});
 
-	const filteredRenewals = useMemo(() => {
-		if (!appliedSearchQuery.trim()) return renewals;
-
-		const regex = new RegExp(appliedSearchQuery, 'i');
-		return renewals.filter((renewal) => {
-			const searchableContent = [renewal.msisdn].join(' ').toLowerCase();
-			return regex.test(searchableContent);
-		});
-	}, [appliedSearchQuery, renewals]);
-
 	const applySearch = useCallback(() => {
-		setAppliedSearchQuery(searchQuery);
+		setAppliedSearchQuery(searchQuery.trim());
 	}, [searchQuery]);
 
 	const resetSearchFilters = useCallback(() => {
@@ -76,7 +83,7 @@ export default function useRenewals(options: Options = {}) {
 	}, []);
 
 	return {
-		renewals: filteredRenewals,
+		renewals,
 		searchQuery,
 		dateRange,
 		setDateRange,
