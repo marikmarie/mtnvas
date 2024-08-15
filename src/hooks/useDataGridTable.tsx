@@ -23,7 +23,6 @@ export function useDataGridTable(props: {
 			enableColumnAutosize={true}
 			loading={loading}
 			style={{ minHeight: mih || '60vh' }}
-			pagination
 			filterable
 			allowUnsort
 			theme={theme.colorScheme === 'light' ? 'default-light' : 'dark'}
@@ -86,8 +85,8 @@ export function useDataGridTable(props: {
 			virtualized
 			virtualizeColumnsThreshold={10}
 			multiRowExpand
-			columnHeaderUserSelect={'text'}
-			columnUserSelect={'text'}
+			columnHeaderUserSelect
+			columnUserSelect
 		/>
 	);
 }

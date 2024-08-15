@@ -1,4 +1,4 @@
-import { Button, Flex, Stack } from '@mantine/core';
+import { Box, Button, Flex } from '@mantine/core';
 import { IconDownload } from '@tabler/icons-react';
 import RenewalsReportTable from './RenewalsReportTable';
 import useRequest from '../../../hooks/useRequest';
@@ -49,7 +49,7 @@ export default () => {
 	};
 
 	return (
-		<Stack py="sm">
+		<Box>
 			<RenewalsReportTable />
 			<Flex justify={'end'}>
 				<Button
@@ -60,6 +60,6 @@ export default () => {
 					Download Renewals Report
 				</Button>
 			</Flex>
-		</Stack>
+		</Box>
 	);
 };

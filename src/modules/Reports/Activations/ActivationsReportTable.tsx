@@ -1,13 +1,24 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useDataGridTable } from '../../../hooks/useDataGridTable';
 import { toTitle } from '../../../utils/toTitle';
-import { ActionIcon, Button, Flex, Popover, Stack, TextInput } from '@mantine/core';
+import {
+	ActionIcon,
+	Box,
+	Button,
+	Flex,
+	Pagination,
+	Popover,
+	Stack,
+	TextInput,
+} from '@mantine/core';
 import { IconCalendarTime, IconSearch } from '@tabler/icons-react';
 import { DatePicker } from '@mantine/dates';
 import { subDays } from 'date-fns';
 import useActivations from '../../../hooks/useActivations';
 
 export default function ActivationsReportTable() {
+	const [activePage, setPage] = useState(1);
+
 	const {
 		isLoading,
 		activations,
@@ -18,7 +29,7 @@ export default function ActivationsReportTable() {
 		dateRange,
 		setDateRange,
 		refetch,
-	} = useActivations();
+	} = useActivations({ pageSize: 15, page: activePage });
 
 	const columns = useMemo(
 		() =>
@@ -137,7 +148,15 @@ export default function ActivationsReportTable() {
 					</Button>
 				</Flex>
 			</Flex>
-			{activationsReportTable}
+			<Box>
+				{activationsReportTable}
+				<Pagination
+					total={740}
+					value={activePage}
+					onChange={setPage}
+					mt="xs"
+				/>
+			</Box>
 		</Stack>
 	);
 }

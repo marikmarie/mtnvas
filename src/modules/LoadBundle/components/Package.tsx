@@ -2,21 +2,17 @@ import { Card, Text, Badge, Flex } from '@mantine/core';
 import { IconBrandSpeedtest } from '@tabler/icons-react';
 import { FC, memo } from 'react';
 import { PkgButton } from './PkgButton';
+import { formatCurrency } from '../../../utils/currenyFormatter';
 
 export const Package: FC<{
 	amount: string;
 	speed: string;
+	type: '4G' | '5G' | 'bundle';
 	serviceCode: string;
 	selectedSrvCode: string;
 	setSelectedSrvCode: (code: string) => void;
-}> = memo(({ setSelectedSrvCode, serviceCode, amount, speed, selectedSrvCode }) => {
-	const badge = ['ITTH_14GB', '1778FHI4', '1778FHI1', '1778FHI2', '1778FHI3'].includes(
-		serviceCode
-	)
-		? 'bundle'
-		: ['FWA_3MBPS', 'FWA_5MBPS', 'FWA_10MBPS', 'FWA_20MBPS'].includes(serviceCode)
-			? '4g speed'
-			: '5g speed';
+}> = memo(({ setSelectedSrvCode, type, serviceCode, amount, speed, selectedSrvCode }) => {
+	const badge = type === 'bundle' ? 'bundle' : type === '4G' ? '4g speed' : '5g speed';
 
 	const selected = selectedSrvCode === serviceCode;
 
@@ -46,7 +42,7 @@ export const Package: FC<{
 				ta="center"
 				fw={500}
 			>
-				{amount}
+				{formatCurrency(amount)}
 			</Text>
 
 			<PkgButton

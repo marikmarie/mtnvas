@@ -8,36 +8,46 @@ interface PackageData {
 	serviceCode: string;
 	amount: string;
 	speed: string;
+	type: '4G' | '5G' | 'bundle';
 }
 
 const PACKAGES: Record<string, PackageData[]> = {
-	wakanet_5g: [
-		{ serviceCode: 'FWA_10MBPS-5G', amount: '130000UGX', speed: '10MBPS' },
-		{ serviceCode: 'FWA_20MBPS-5G', amount: '195000UGX', speed: '20MBPS' },
-		{ serviceCode: 'FWA_40MBPS', amount: '29500UGX', speed: '40MBPS' },
-		{ serviceCode: 'FWA_60MBPS', amount: '39500UGX', speed: '60MBPS' },
-		{ serviceCode: 'FWA_80MBPS', amount: '49500UGX', speed: '80MBPS' },
-		{ serviceCode: 'FWA_100MBPS', amount: '59500UGX', speed: '100MBPS' },
-		{ serviceCode: 'FWA_150MBPS', amount: '69500UGX', speed: '150MBPS' },
-	],
 	wakanet_4g: [
-		{ serviceCode: 'FWA_3MBPS', amount: '55000UGX', speed: '3MBPS' },
-		{ serviceCode: 'FWA_5MBPS', amount: '85000UGX', speed: '5MBPS' },
-		{ serviceCode: 'FWA_10MBPS-4G', amount: '130000UGX', speed: '10MBPS' },
-		{ serviceCode: 'FWA_20MBPS-4G', amount: '195000UGX', speed: '20MBPS' },
+		{ type: '4G', serviceCode: 'FWA_3MBPS', amount: '55000', speed: '3MBPS' },
+		{ type: '4G', serviceCode: 'FWA_5MBPS', amount: '85000', speed: '5MBPS' },
+		{ type: '4G', serviceCode: 'FWA_10MBPS-4G', amount: '130000', speed: '10MBPS' },
+		{ type: '4G', serviceCode: 'FWA_20MBPS-4G', amount: '195000', speed: '20MBPS' },
 	],
-	booster_packs: [
-		{ serviceCode: 'FWA_BST_3MBPS', amount: '1400UGX', speed: '3MBPS' },
-		{ serviceCode: 'FWA_BST_5MBPS', amount: '2500UGX', speed: '5MBPS' },
-		{ serviceCode: 'FWA_BST_10MBPS', amount: '3900UGX', speed: '100MBPS' },
-		{ serviceCode: 'FWA_BST_20MBPS', amount: '6300UGX', speed: '20MBPS' },
+	wakanet_5g: [
+		{ type: '5G', serviceCode: 'FWA_10MBPS-5G', amount: '130000', speed: '10MBPS' },
+		{ type: '5G', serviceCode: 'FWA_20MBPS-5G', amount: '195000', speed: '20MBPS' },
+		{ type: '5G', serviceCode: 'FWA_40MBPS', amount: '29500', speed: '40MBPS' },
+		{ type: '5G', serviceCode: 'FWA_60MBPS', amount: '39500', speed: '60MBPS' },
+		{ type: '5G', serviceCode: 'FWA_80MBPS', amount: '49500', speed: '80MBPS' },
+		{ type: '5G', serviceCode: 'FWA_100MBPS', amount: '59500', speed: '100MBPS' },
+		{ type: '5G', serviceCode: 'FWA_150MBPS', amount: '69500', speed: '150MBPS' },
+	],
+	booster_packs_4g: [
+		{ type: '4G', serviceCode: 'FWA_BST_3MBPS', amount: '1400', speed: '3MBPS' },
+		{ type: '4G', serviceCode: 'FWA_BST_5MBPS', amount: '2500', speed: '5MBPS' },
+		{ type: '4G', serviceCode: 'FWA_BST_10MBPS', amount: '3900', speed: '10MBPS' },
+		{ type: '4G', serviceCode: 'FWA_BST_20MBPS', amount: '6300', speed: '20MBPS' },
+	],
+	booster_packs_5g: [
+		{ type: '5G', serviceCode: 'FWA_BST_10MBPS', amount: '4300', speed: '10MBPS' },
+		{ type: '5G', serviceCode: 'FWA_BST_20MBPS', amount: '6500', speed: '20MBPS' },
+		{ type: '5G', serviceCode: 'FWA_BST_40MBPS', amount: '9800', speed: '40MBPS' },
+		{ type: '5G', serviceCode: 'FWA_BST_60MBPS', amount: '13100', speed: '60MBPS' },
+		{ type: '5G', serviceCode: 'FWA_BST_80MBPS', amount: '16500', speed: '80MBPS' },
+		{ type: '5G', serviceCode: 'FWA_BST_100MBPS', amount: '19800', speed: '100MBPS' },
+		{ type: '5G', serviceCode: 'FWA_BST_150MBPS', amount: '23100', speed: '150MBPS' },
 	],
 	post_paid_bundles: [
-		{ serviceCode: 'Waka10PST', amount: '35000UGX', speed: '14GB' },
-		{ serviceCode: 'Waka20PST', amount: '55000UGX', speed: '25GB' },
-		{ serviceCode: 'Waka40PST', amount: '85000UGX', speed: '45GB' },
-		{ serviceCode: 'Waka85PST', amount: '170000UGX', speed: '95GB' },
-		{ serviceCode: 'Waka195PST', amount: '335000UGX', speed: '195GB' },
+		{ type: 'bundle', serviceCode: 'Waka10PST', amount: '35000', speed: '14GB' },
+		{ type: 'bundle', serviceCode: 'Waka20PST', amount: '55000', speed: '25GB' },
+		{ type: 'bundle', serviceCode: 'Waka40PST', amount: '85000', speed: '45GB' },
+		{ type: 'bundle', serviceCode: 'Waka85PST', amount: '170000', speed: '95GB' },
+		{ type: 'bundle', serviceCode: 'Waka195PST', amount: '335000', speed: '195GB' },
 	],
 };
 
@@ -79,6 +89,7 @@ const PackageSection = memo(
 					>
 						{packages.map((srv) => (
 							<Package
+								type={srv.type}
 								key={srv.serviceCode}
 								selectedSrvCode={selectedSrvCode}
 								serviceCode={srv.serviceCode}
@@ -115,8 +126,14 @@ export default memo(() => {
 						setSelectedSrvCode={setSelectedSrvCode}
 					/>
 					<PackageSection
-						title="Booster Packs"
-						packages={PACKAGES.booster_packs}
+						title="Booster Packs 4g"
+						packages={PACKAGES.booster_packs_4g}
+						selectedSrvCode={selectedSrvCode}
+						setSelectedSrvCode={setSelectedSrvCode}
+					/>
+					<PackageSection
+						title="Booster Packs 5g"
+						packages={PACKAGES.booster_packs_5g}
 						selectedSrvCode={selectedSrvCode}
 						setSelectedSrvCode={setSelectedSrvCode}
 					/>

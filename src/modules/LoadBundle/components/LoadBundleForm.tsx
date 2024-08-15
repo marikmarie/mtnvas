@@ -5,6 +5,7 @@ import { IconGauge, IconPhone } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosResponse, AxiosError } from 'axios';
 import useRequest from '../../../hooks/useRequest';
+import { formatCurrency } from '../../../utils/currenyFormatter';
 
 type TLoadBundleFormProps = {
 	selectedSrvCode: string;
@@ -59,7 +60,7 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 				fw={600}
 				mb="xs"
 				ta="center"
-			>{`${selectedSrvCode} - ${speed} - ${amount}`}</Text>
+			>{`${selectedSrvCode} - ${speed} - ${formatCurrency(amount)}`}</Text>
 			<TextInput
 				icon={<IconPhone />}
 				label="WakaNet Number"

@@ -1,13 +1,24 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useDataGridTable } from '../../../hooks/useDataGridTable';
 import { toTitle } from '../../../utils/toTitle';
-import { ActionIcon, Button, Flex, Popover, Stack, TextInput } from '@mantine/core';
+import {
+	ActionIcon,
+	Box,
+	Button,
+	Flex,
+	Pagination,
+	Popover,
+	Stack,
+	TextInput,
+	useMantineTheme,
+} from '@mantine/core';
 import { IconCalendarTime, IconSearch } from '@tabler/icons-react';
 import { DatePicker } from '@mantine/dates';
 import { subDays } from 'date-fns';
 import useRenewals from '../../../hooks/useRenewals';
 
 export default function RenewalsReportTable() {
+	const [activePage, setPage] = useState(1);
 	const {
 		isLoading,
 		renewals,
@@ -18,7 +29,7 @@ export default function RenewalsReportTable() {
 		dateRange,
 		setDateRange,
 		refetch,
-	} = useRenewals();
+	} = useRenewals({ page: activePage, pageSize: 15 });
 
 	const columns = useMemo(
 		() =>
@@ -33,12 +44,20 @@ export default function RenewalsReportTable() {
 				'ecwCode',
 				'channel',
 				'senderId',
-				'duaration',
-			].map((column) => ({
-				name: column,
-				header: toTitle(column),
-				defaultFlex: 1,
-			})),
+			].map((column) => {
+				if (column === 'ecwCode') {
+					return {
+						name: column,
+						header: 'ECW STATUS',
+						render: ({ data }: { data: any }) => <>{data['ecwCode']}</>,
+					};
+				}
+				return {
+					name: column,
+					header: toTitle(column),
+					defaultFlex: 1,
+				};
+			}),
 		[]
 	);
 
@@ -49,23 +68,22 @@ export default function RenewalsReportTable() {
 		mih: '60vh',
 	});
 
-	const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) =>
 		setSearchQuery(event.currentTarget.value);
-	};
 
 	const handleSearchClick = () => {
 		applySearch();
 		refetch();
 	};
 
-	const handleDateChange = (value: [Date | null, Date | null]) => {
-		setDateRange(value);
-	};
+	const handleDateChange = (value: [Date | null, Date | null]) => setDateRange(value);
 
 	const handleResetFilters = () => {
 		resetSearchFilters();
 		refetch();
 	};
+
+	const theme = useMantineTheme();
 
 	return (
 		<Stack>
@@ -88,7 +106,7 @@ export default function RenewalsReportTable() {
 					shadow="md"
 				>
 					<Popover.Target>
-						<ActionIcon>
+						<ActionIcon color={theme.primaryColor}>
 							<IconCalendarTime />
 						</ActionIcon>
 					</Popover.Target>
@@ -117,7 +135,15 @@ export default function RenewalsReportTable() {
 					</Button>
 				</Flex>
 			</Flex>
-			{renewalsReportTable}
+			<Box>
+				{renewalsReportTable}
+				<Pagination
+					total={740}
+					value={activePage}
+					onChange={setPage}
+					mt="xs"
+				/>
+			</Box>
 		</Stack>
 	);
 }
