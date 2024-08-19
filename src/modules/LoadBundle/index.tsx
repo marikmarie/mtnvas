@@ -1,4 +1,4 @@
-import { Accordion, Paper, SimpleGrid, Stack, Text } from '@mantine/core';
+import { Accordion, Paper, SimpleGrid, Text } from '@mantine/core';
 import { memo, useState } from 'react';
 import { Package } from './components/Package';
 import { RootState } from '../../app/store';
@@ -15,12 +15,14 @@ const PACKAGES: Record<string, PackageData[]> = {
 	wakanet_4g: [
 		{ type: '4G', serviceCode: 'FWA_3MBPS', amount: '55000', speed: '3MBPS' },
 		{ type: '4G', serviceCode: 'FWA_5MBPS', amount: '85000', speed: '5MBPS' },
-		{ type: '4G', serviceCode: 'FWA_10MBPS-4G', amount: '130000', speed: '10MBPS' },
-		{ type: '4G', serviceCode: 'FWA_20MBPS-4G', amount: '195000', speed: '20MBPS' },
+		{ type: '4G', serviceCode: 'FWA_10MBPS', amount: '130000', speed: '10MBPS' },
+		{ type: '4G', serviceCode: 'FWA_20MBPS', amount: '195000', speed: '20MBPS' },
 	],
 	wakanet_5g: [
-		{ type: '5G', serviceCode: 'FWA_10MBPS-5G', amount: '130000', speed: '10MBPS' },
-		{ type: '5G', serviceCode: 'FWA_20MBPS-5G', amount: '195000', speed: '20MBPS' },
+		{ type: '5G', serviceCode: 'FWA_10MBPS', amount: '130000', speed: '10MBPS' },
+		{ type: '5G', serviceCode: 'FWAA_10MBPS', amount: '130000', speed: '10MBPS' },
+		{ type: '5G', serviceCode: 'FWAA_20MBPS', amount: '195000', speed: '20MBPS' },
+		{ type: '5G', serviceCode: 'FWA_20MBPS', amount: '195000', speed: '20MBPS' },
 		{ type: '5G', serviceCode: 'FWA_40MBPS', amount: '29500', speed: '40MBPS' },
 		{ type: '5G', serviceCode: 'FWA_60MBPS', amount: '39500', speed: '60MBPS' },
 		{ type: '5G', serviceCode: 'FWA_80MBPS', amount: '49500', speed: '80MBPS' },
@@ -51,18 +53,15 @@ const PACKAGES: Record<string, PackageData[]> = {
 	],
 };
 
+interface PakageSelectionProps {
+	title: string;
+	packages: PackageData[];
+	selectedSrvCode: string;
+	setSelectedSrvCode: (code: string) => void;
+}
+
 const PackageSection = memo(
-	({
-		title,
-		packages,
-		selectedSrvCode,
-		setSelectedSrvCode,
-	}: {
-		title: string;
-		packages: PackageData[];
-		selectedSrvCode: string;
-		setSelectedSrvCode: (code: string) => void;
-	}) => (
+	({ title, packages, selectedSrvCode, setSelectedSrvCode }: PakageSelectionProps) => (
 		<Accordion
 			variant="filled"
 			defaultValue={title.toLowerCase().replace(' ', '_')}
@@ -105,48 +104,46 @@ const PackageSection = memo(
 	)
 );
 
-export default memo(() => {
+export default () => {
 	const [selectedSrvCode, setSelectedSrvCode] = useState('');
 	const user = useSelector((state: RootState) => state.auth.user);
 
 	return (
 		<Paper py="lg">
 			<Paper my={'md'}>
-				<Stack>
+				<PackageSection
+					title="Wakanet 4G"
+					packages={PACKAGES.wakanet_4g}
+					selectedSrvCode={selectedSrvCode}
+					setSelectedSrvCode={setSelectedSrvCode}
+				/>
+				<PackageSection
+					title="Wakanet 5G"
+					packages={PACKAGES.wakanet_5g}
+					selectedSrvCode={selectedSrvCode}
+					setSelectedSrvCode={setSelectedSrvCode}
+				/>
+				<PackageSection
+					title="Booster Packs 4g"
+					packages={PACKAGES.booster_packs_4g}
+					selectedSrvCode={selectedSrvCode}
+					setSelectedSrvCode={setSelectedSrvCode}
+				/>
+				<PackageSection
+					title="Booster Packs 5g"
+					packages={PACKAGES.booster_packs_5g}
+					selectedSrvCode={selectedSrvCode}
+					setSelectedSrvCode={setSelectedSrvCode}
+				/>
+				{user?.role === 'WAKA_CORP' && (
 					<PackageSection
-						title="Wakanet 5G"
-						packages={PACKAGES.wakanet_5g}
+						title="PostPaid Bundles"
+						packages={PACKAGES.post_paid_bundles}
 						selectedSrvCode={selectedSrvCode}
 						setSelectedSrvCode={setSelectedSrvCode}
 					/>
-					<PackageSection
-						title="Wakanet 4G"
-						packages={PACKAGES.wakanet_4g}
-						selectedSrvCode={selectedSrvCode}
-						setSelectedSrvCode={setSelectedSrvCode}
-					/>
-					<PackageSection
-						title="Booster Packs 4g"
-						packages={PACKAGES.booster_packs_4g}
-						selectedSrvCode={selectedSrvCode}
-						setSelectedSrvCode={setSelectedSrvCode}
-					/>
-					<PackageSection
-						title="Booster Packs 5g"
-						packages={PACKAGES.booster_packs_5g}
-						selectedSrvCode={selectedSrvCode}
-						setSelectedSrvCode={setSelectedSrvCode}
-					/>
-					{user?.role === 'WAKA_CORP' && (
-						<PackageSection
-							title="PostPaid Bundles"
-							packages={PACKAGES.post_paid_bundles}
-							selectedSrvCode={selectedSrvCode}
-							setSelectedSrvCode={setSelectedSrvCode}
-						/>
-					)}
-				</Stack>
+				)}
 			</Paper>
 		</Paper>
 	);
-});
+};

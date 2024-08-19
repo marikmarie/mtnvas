@@ -33,7 +33,7 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 		mutationFn: () =>
 			request.post('/load-bundle', {
 				...form.values,
-				serviceCode: selectedSrvCode.split('-')[0], // Here, the proceeding -4G or -5G is removed so as the server recieves the correct serviceCode
+				serviceCode: selectedSrvCode, // Here, the proceeding -4G or -5G is removed so as the server recieves the correct serviceCode
 			}),
 		onSuccess: (response: AxiosResponse) => {
 			notifications.show({
