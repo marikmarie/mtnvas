@@ -51,6 +51,13 @@ const PACKAGES: Record<string, PackageData[]> = {
 		{ type: 'bundle', serviceCode: 'Waka85PST', amount: '170000', speed: '95GB' },
 		{ type: 'bundle', serviceCode: 'Waka195PST', amount: '335000', speed: '195GB' },
 	],
+	volume_bundles: [
+		{ type: 'bundle', serviceCode: 'ITTH_14GB', amount: '35000', speed: '14GB' },
+		{ type: 'bundle', serviceCode: 'ITTH_25GB', amount: '55000', speed: '25GB' },
+		{ type: 'bundle', serviceCode: 'ITTH_45GB', amount: '85000', speed: '45GB' },
+		{ type: 'bundle', serviceCode: 'ITTH_95GB', amount: '170000', speed: '95GB' },
+		{ type: 'bundle', serviceCode: 'ITTH_195GB', amount: '335000', speed: '195GB' },
+	],
 };
 
 interface PakageSelectionProps {
@@ -132,6 +139,12 @@ export default () => {
 				<PackageSection
 					title="Booster Packs 5g"
 					packages={PACKAGES.booster_packs_5g}
+					selectedSrvCode={selectedSrvCode}
+					setSelectedSrvCode={setSelectedSrvCode}
+				/>
+				<PackageSection
+					title="Wakanet Router Volume bundles"
+					packages={PACKAGES.volume_bundles}
 					selectedSrvCode={selectedSrvCode}
 					setSelectedSrvCode={setSelectedSrvCode}
 				/>
