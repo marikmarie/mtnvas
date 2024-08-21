@@ -42,6 +42,7 @@ export default function ActivationsReportTable() {
 				'status',
 				'serviceCode',
 				'salesAgentEmail',
+				'expiry',
 				'activatedAt',
 				'activatedBy',
 			].map((column) => {
@@ -107,7 +108,7 @@ export default function ActivationsReportTable() {
 			>
 				<TextInput
 					w="100%"
-					placeholder="Search by msisdn"
+					placeholder="Search by msisdn (2567... / 2567... / 07...) or bnumber (25639...)"
 					icon={<IconSearch />}
 					value={searchQuery}
 					onChange={handleSearchChange}

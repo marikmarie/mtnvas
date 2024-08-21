@@ -42,6 +42,7 @@ export default function RenewalsReportTable() {
 				'smsNameDetail',
 				'amount',
 				'ecwCode',
+				'expiry',
 				'channel',
 				'senderId',
 			].map((column) => {
@@ -50,6 +51,13 @@ export default function RenewalsReportTable() {
 						name: column,
 						header: 'ECW STATUS',
 						render: ({ data }: { data: any }) => <>{data['ecwCode']}</>,
+					};
+				}
+				if (column === 'smsNameDetail') {
+					return {
+						name: column,
+						header: 'PRODUCT NAME',
+						render: ({ data }: { data: any }) => <>{data['smsNameDetail']}</>,
 					};
 				}
 				return {
@@ -94,7 +102,7 @@ export default function RenewalsReportTable() {
 			>
 				<TextInput
 					w="100%"
-					placeholder="Search by msisdn or bnumber"
+					placeholder="Search by msisdn (2567... / 2567... / 07...) or bnumber (25639...)"
 					icon={<IconSearch />}
 					value={searchQuery}
 					onChange={handleSearchChange}
