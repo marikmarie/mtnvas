@@ -21,8 +21,8 @@ const LazyComponents = {
 	LoadBundle: Loadable(lazy(() => import('../modules/LoadBundle'))),
 	CheckBalance: Loadable(lazy(() => import('../modules/CheckBalance'))),
 	UpdateDetails: Loadable(lazy(() => import('../modules/UpdateDetails'))),
-	ActivationsReport: Loadable(lazy(() => import('../modules/Reports/Activations'))),
-	RenewalsReport: Loadable(lazy(() => import('../modules/Reports/Renewals'))),
+	ActivationsReport: Loadable(lazy(() => import('../modules/Reports/ActivationsReport'))),
+	RenewalsReport: Loadable(lazy(() => import('../modules/Reports/RenewalsReport'))),
 };
 
 type Tab =

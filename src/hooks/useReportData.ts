@@ -3,48 +3,39 @@ import { useCallback, useMemo, useState } from 'react';
 import useRequest from './useRequest';
 import { format, isValid } from 'date-fns';
 
-const ACTIVATIONS_QUERY_KEY = ['activations'] as const;
-
-export interface Activation {
-	subscriptionId: string;
-	msisdn: string;
-	email: string;
-	bnumber?: string;
-	salesAgentEmail: string;
-	createdAt: string;
-	status: string;
-	activatedAt: string;
-	activatedBy: string;
-}
-
 interface Options {
 	page?: number;
 	pageSize?: number;
-	from?: Date;
-	to?: Date;
 	msisdn?: string;
 	bnumber?: string;
+	endpoint: string;
 }
 
-const isMsisdn = (number: string): boolean => /^2567\d{8}$/.test(number);
+interface ReportItem {
+	[key: string]: any;
+}
+
+const isMsisdn = (number: string): boolean => /^(\+?2567|07)\d{8}$/.test(number);
 const isBnumber = (number: string): boolean => /^25639\d{7}$/.test(number);
 
-export default function useActivations(options: Options = {}) {
+export default function useReportData(options: Options) {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [appliedSearchQuery, setAppliedSearchQuery] = useState('');
-	const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
+	const [fromDate, setFromDate] = useState<Date | null>(new Date());
+	const [toDate, setToDate] = useState<Date | null>(null);
+	const [totalCount, setTotalCount] = useState(0);
+
 	const request = useRequest(true);
 
-	const fetchActivations = useCallback(async () => {
+	const fetchReportData = useCallback(async () => {
 		const queryParams = new URLSearchParams();
 
 		if (options.page !== undefined) queryParams.append('page', options.page.toString());
 		if (options.pageSize !== undefined)
 			queryParams.append('pageSize', options.pageSize.toString());
-		if (dateRange[0] && isValid(dateRange[0]))
-			queryParams.append('from', format(dateRange[0], 'yyyy-MM-dd'));
-		if (dateRange[1] && isValid(dateRange[1]))
-			queryParams.append('to', format(dateRange[1], 'yyyy-MM-dd'));
+		if (fromDate && isValid(fromDate))
+			queryParams.append('from', format(fromDate, 'yyyy-MM-dd'));
+		if (toDate && isValid(toDate)) queryParams.append('to', format(toDate, 'yyyy-MM-dd'));
 
 		const searchTerm = appliedSearchQuery || options.msisdn || options.bnumber;
 		if (searchTerm) {
@@ -56,30 +47,36 @@ export default function useActivations(options: Options = {}) {
 		}
 
 		const queryString = queryParams.toString();
-		const url = `/activations${queryString ? `?${queryString}` : ''}`;
+		const url = `${options.endpoint}${queryString ? `?${queryString}` : ''}`;
 
 		try {
-			const response = await request.get<{ data: Activation[] }>(url);
+			const response = await request.get<{
+				message: string;
+				statusCode: number;
+				totalcount: number;
+				data: ReportItem[];
+			}>(url);
+			setTotalCount(response.data.totalcount);
 			return response.data.data || [];
 		} catch (error) {
-			console.error('Error fetching activations:', error);
+			console.error('Error fetching report data:', error);
 			throw error;
 		}
-	}, [request, options, appliedSearchQuery, dateRange]);
+	}, [request, options, appliedSearchQuery, fromDate, toDate]);
 
 	const queryKey = useMemo(
-		() => [...ACTIVATIONS_QUERY_KEY, options, appliedSearchQuery, dateRange],
-		[options, appliedSearchQuery, dateRange]
+		() => [options.endpoint, options, appliedSearchQuery, fromDate, toDate],
+		[options, appliedSearchQuery, fromDate, toDate]
 	);
 
 	const {
-		data: activations = [],
+		data: reportItems = [],
 		isLoading,
 		error,
 		refetch,
 	} = useQuery({
 		queryKey,
-		queryFn: fetchActivations,
+		queryFn: fetchReportData,
 		refetchOnWindowFocus: false,
 	});
 
@@ -90,14 +87,18 @@ export default function useActivations(options: Options = {}) {
 	const resetSearchFilters = useCallback(() => {
 		setAppliedSearchQuery('');
 		setSearchQuery('');
-		setDateRange([null, null]);
+		setFromDate(null);
+		setToDate(null);
 	}, []);
 
 	return {
-		activations,
+		reportItems,
+		totalCount,
 		searchQuery,
-		dateRange,
-		setDateRange,
+		fromDate,
+		toDate,
+		setFromDate,
+		setToDate,
 		resetSearchFilters,
 		setSearchQuery,
 		applySearch,
