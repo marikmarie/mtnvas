@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
 import useRequest from './useRequest';
-import { format, isValid } from 'date-fns';
+import { format, isValid, startOfMonth } from 'date-fns';
 
 interface Options {
 	page?: number;
@@ -21,7 +21,7 @@ const isBnumber = (number: string): boolean => /^25639\d{7}$/.test(number);
 export default function useReportData(options: Options) {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [appliedSearchQuery, setAppliedSearchQuery] = useState('');
-	const [fromDate, setFromDate] = useState<Date | null>(new Date());
+	const [fromDate, setFromDate] = useState<Date | null>(() => startOfMonth(new Date()));
 	const [toDate, setToDate] = useState<Date | null>(null);
 	const [totalCount, setTotalCount] = useState(0);
 
@@ -87,7 +87,7 @@ export default function useReportData(options: Options) {
 	const resetSearchFilters = useCallback(() => {
 		setAppliedSearchQuery('');
 		setSearchQuery('');
-		setFromDate(null);
+		setFromDate(() => startOfMonth(new Date()));
 		setToDate(null);
 	}, []);
 
