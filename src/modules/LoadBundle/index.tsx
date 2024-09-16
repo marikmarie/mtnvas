@@ -19,10 +19,8 @@ const PACKAGES: Record<string, PackageData[]> = {
 		{ type: '4G', serviceCode: 'FWA_20MBPS', amount: '195000', speed: '20MBPS' },
 	],
 	wakanet_5g: [
-		{ type: '5G', serviceCode: 'FWA_10MBPS', amount: '130000', speed: '10MBPS' },
 		{ type: '5G', serviceCode: 'FWAA_10MBPS', amount: '130000', speed: '10MBPS' },
 		{ type: '5G', serviceCode: 'FWAA_20MBPS', amount: '195000', speed: '20MBPS' },
-		{ type: '5G', serviceCode: 'FWA_20MBPS', amount: '195000', speed: '20MBPS' },
 		{ type: '5G', serviceCode: 'FWA_40MBPS', amount: '295000', speed: '40MBPS' },
 		{ type: '5G', serviceCode: 'FWA_60MBPS', amount: '395000', speed: '60MBPS' },
 		{ type: '5G', serviceCode: 'FWA_80MBPS', amount: '495000', speed: '80MBPS' },
@@ -54,9 +52,9 @@ const PACKAGES: Record<string, PackageData[]> = {
 	volume_bundles: [
 		{ type: 'bundle', serviceCode: 'ITTH_14GB', amount: '35000', speed: '14GB' },
 		{ type: 'bundle', serviceCode: 'ITTH_25GB', amount: '55000', speed: '25GB' },
-		{ type: 'bundle', serviceCode: 'ITTH_45GB', amount: '85000', speed: '45GB' },
-		{ type: 'bundle', serviceCode: 'ITTH_95GB', amount: '170000', speed: '95GB' },
-		{ type: 'bundle', serviceCode: 'ITTH_195GB', amount: '335000', speed: '195GB' },
+		{ type: 'bundle', serviceCode: 'ITTH_45GB', amount: '85000', speed: '45GB + YoTv' },
+		{ type: 'bundle', serviceCode: 'ITTH_95GB', amount: '170000', speed: '95GB + YoTv' },
+		{ type: 'bundle', serviceCode: 'ITTH_195GB', amount: '335000', speed: '195GB + YoTv' },
 	],
 };
 

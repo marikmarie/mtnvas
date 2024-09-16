@@ -26,7 +26,6 @@ import { useNavigate } from 'react-router-dom';
 import { ActionToggle } from './ActionToggle';
 import { useCallback } from 'react';
 import { ROUTES } from '../constants/routes';
-import { IconPasswordFingerprint } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import Adduser from '../modules/UserManagment/Adduser';
 import ListUsers from '../modules/UserManagment/ListUsers';
@@ -90,7 +89,7 @@ export function Header() {
 		navigate(ROUTES.AUTH);
 	}, []);
 
-	const displayName = user?.email.split('@')[0] || 'Wakanet user';
+	const displayName = user?.email?.split('@')[0] || 'Wakanet user';
 
 	const avatar = displayName[0]?.toUpperCase() || 'I';
 	const [opened, { open, close }] = useDisclosure(false);
@@ -202,13 +201,6 @@ export function Header() {
 										icon={<IconLogout size={14} />}
 									>
 										Log out
-									</Menu.Item>
-									<Menu.Item
-										onClick={() => navigate(ROUTES.PASSWORD_RESET)}
-										color="red"
-										icon={<IconPasswordFingerprint size={14} />}
-									>
-										Reset your password
 									</Menu.Item>
 								</Menu.Dropdown>
 							</Menu>

@@ -2,14 +2,14 @@ import GeneralReportTable from './GeneralReport';
 
 export default function RenewalsReportTable() {
 	const columns = [
-		'requestTime',
 		'extTransId',
 		'msisdn',
 		'bnumber',
 		'serviceCode',
-		'smsNameDetail',
+		'package',
 		'amount',
 		'ecwCode',
+		'requestTime',
 		'expiry',
 		'channel',
 		'senderId',
@@ -17,7 +17,7 @@ export default function RenewalsReportTable() {
 
 	const customColumnRenderers = {
 		ecwCode: (data: any) => <>{data['ecwCode']}</>,
-		smsNameDetail: (data: any) => <>{data['smsNameDetail']}</>,
+		package: (data: any) => <>{data['package']}</>,
 	};
 
 	return (
