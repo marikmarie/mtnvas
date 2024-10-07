@@ -53,10 +53,7 @@ export default React.memo((props: PaperProps) => {
 		},
 
 		validate: {
-			username: (val: string) =>
-				/^\S+@gdexperts\.com$/.test(val) || /^\S+@mtn\.com$/.test(val)
-					? null
-					: 'Should be a valid MTN or GDExperts EMAIL',
+			username: (val: string) => (val.length < 0 ? null : 'Email or username is required'),
 			password: (val: string | any[]) =>
 				val.length <= 6 ? 'Password should include at least 6 characters' : null,
 		},
@@ -91,6 +88,7 @@ export default React.memo((props: PaperProps) => {
 			<Paper
 				mt="xl"
 				withBorder
+				shadow="lg"
 				p="xl"
 				{...props}
 				w={'100%'}
@@ -120,7 +118,7 @@ export default React.memo((props: PaperProps) => {
 				<form onSubmit={form.onSubmit(() => mutation.mutate())}>
 					<Stack>
 						<TextInput
-							label="Email"
+							label="Email or username"
 							icon={
 								<ThemeIcon
 									color="transparent"
@@ -129,7 +127,7 @@ export default React.memo((props: PaperProps) => {
 									<IconMail color="gray" />
 								</ThemeIcon>
 							}
-							placeholder="mail@mtn.com"
+							placeholder="Email or username"
 							value={form.values.username}
 							onChange={(event) =>
 								form.setFieldValue('username', event.currentTarget.value)
