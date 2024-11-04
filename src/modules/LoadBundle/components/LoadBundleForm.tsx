@@ -27,11 +27,11 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid WakaNet Number'),
 			msisdn: (val: string) =>
 				val.length > 9 ? null : 'Should be a valid customer/agent number',
-			email: (val: string) =>
-				/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(val)
-					? null
-					: 'Invalid email address',
-			externalTransactionId: (val: string) => (val ? null : 'Transaction ID is required'),
+			// email: (val: string) =>
+			// 	/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(val)
+			// 		? null
+			// 		: 'Invalid email address',
+			// externalTransactionId: (val: string) => (val ? null : 'Transaction ID is required'),
 		},
 	});
 
@@ -140,10 +140,14 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 					fullWidth
 					radius="md"
 					onClick={() => {
-						form.validate();
-						if (form.isValid()) mutation.mutate();
+						const validation = form.validate();
+						console.log('Validation result:', validation); // Log validation result
+						if (!validation.hasErrors) {
+							console.log('Form is valid, triggering mutation...'); // Log before mutation
+							mutation.mutate();
+						}
 					}}
-					loading={mutation.isLoading}
+					// loading={mutation.isLoading}
 				>
 					Load
 				</Button>
