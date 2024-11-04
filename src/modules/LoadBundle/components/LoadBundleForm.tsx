@@ -1,7 +1,7 @@
-import { TextInput, Flex, Button, Text, Center, Select } from '@mantine/core';
+import { TextInput, Flex, Button, Text, Center } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { IconGauge, IconPhone, IconAt, IconReceipt2 } from '@tabler/icons-react';
+import { IconGauge, IconPhone } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosResponse, AxiosError } from 'axios';
 import useRequest from '../../../hooks/useRequest';
@@ -11,26 +11,16 @@ type TLoadBundleFormProps = {
 	selectedSrvCode: string;
 	amount: string;
 	speed: string;
-	email: string | null;
-	externalTransactionId: string;
-	paymentOption: string | null;
 };
 
-export default function LoadBundleForm({
-	selectedSrvCode,
-	amount,
-	speed,
-	email,
-	externalTransactionId,
-	paymentOption,
-}: TLoadBundleFormProps) {
+export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoadBundleFormProps) {
 	const form = useForm({
 		initialValues: {
 			msisdn: '',
 			bnumber: '',
-			email: email || '',
-			externalTransactionId: externalTransactionId || '',
-			paymentOption: paymentOption || '',
+			email: '',
+			externalTransactionId: '1234',
+			paymentOption: 'MOMO',
 		},
 
 		validate: {
@@ -49,10 +39,19 @@ export default function LoadBundleForm({
 
 	const mutation = useMutation({
 		mutationFn: () =>
-			request.post('/bundle-renewal', {
-				...form.values,
-				serviceCode: selectedSrvCode,
-			}),
+			request.post(
+				'/bundle-renewal',
+				{
+					...form.values,
+					serviceCode: selectedSrvCode,
+				},
+				{
+					headers: {
+						user: '5GPortal',
+						pass: 'meyb@cH',
+					},
+				}
+			),
 		onSuccess: (response: AxiosResponse) => {
 			notifications.show({
 				autoClose: 5000,
@@ -70,7 +69,7 @@ export default function LoadBundleForm({
 	});
 
 	return (
-		<form onSubmit={form.onSubmit(() => mutation.mutate())}>
+		<form>
 			<Center mb="xs">
 				<IconGauge />
 			</Center>
@@ -102,7 +101,7 @@ export default function LoadBundleForm({
 				withAsterisk
 			/>
 
-			<TextInput
+			{/* <TextInput
 				icon={<IconAt />}
 				label="Email"
 				value={form.values.email}
@@ -130,7 +129,7 @@ export default function LoadBundleForm({
 				onChange={(value) => form.setFieldValue('paymentOption', value || '')}
 				data={[{ value: 'MOMO', label: 'MOMO' }]}
 				withAsterisk
-			/>
+			/> */}
 
 			<Flex
 				gap={'sm'}
@@ -140,7 +139,10 @@ export default function LoadBundleForm({
 				<Button
 					fullWidth
 					radius="md"
-					type="submit"
+					onClick={() => {
+						form.validate();
+						if (form.isValid()) mutation.mutate();
+					}}
 					loading={mutation.isLoading}
 				>
 					Load

@@ -53,7 +53,7 @@ export default React.memo((props: PaperProps) => {
 		},
 
 		validate: {
-			username: (val: string) => (val.length < 0 ? null : 'Email or username is required'),
+			username: (val: string) => (val.length > 0 ? null : 'Email or username is required'),
 			password: (val: string | any[]) =>
 				val.length <= 6 ? 'Password should include at least 6 characters' : null,
 		},
