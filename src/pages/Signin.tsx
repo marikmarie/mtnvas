@@ -62,6 +62,8 @@ export default React.memo((props: PaperProps) => {
 	const mutation = useMutation({
 		mutationFn: () => request.post('/login', form.values),
 		onSuccess: (res: AxiosResponse) => {
+			if (res.data.status === 401) return null;
+
 			dispatch(signin(res.data as unknown as Auth));
 			navigate('/');
 		},
