@@ -70,7 +70,7 @@ const BundleActivationsReport = () => {
 		},
 	];
 
-	const activationsReportTable = useDataGridTable({
+	const activationsReportTable = useDataGridTable<Data>({
 		columns,
 		data: activations?.data || [],
 		loading: isLoading,

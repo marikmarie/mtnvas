@@ -50,7 +50,7 @@ export const WakanetActivation = () => {
 				<Stack py={'lg'}>
 					<TextInput
 						icon={<IconPhone />}
-						label="WakaNet Number"
+						label="WakaNet 4G/5G Router Number"
 						value={form.values.bnumber}
 						onChange={(event) =>
 							form.setFieldValue('bnumber', event.currentTarget.value)

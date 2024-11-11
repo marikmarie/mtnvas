@@ -45,14 +45,14 @@ interface TabConfig {
 const tabConfigs: TabConfig[] = [
 	{
 		key: 'signup',
-		label: '4G/5G Starterpack',
+		label: '4G/5G Router Starterpack - Online payments',
 		component: LazyComponents.Signup,
 		showForOfficeUser: true,
 		icon: <IconDeviceMobile size={20} />,
 	},
 	{
 		key: 'wakanet-activation',
-		label: 'WakaNet Router Starterpack',
+		label: '4G/5G Router Starterpack - Cash payments',
 		component: WakanetActivation,
 		showForOfficeUser: false,
 		icon: <IconRouter size={20} />,
