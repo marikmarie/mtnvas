@@ -50,11 +50,11 @@ const PACKAGES: Record<string, PackageData[]> = {
 		{ type: 'bundle', serviceCode: 'Waka195PST', amount: '335000', speed: '195GB' },
 	],
 	volume_bundles: [
-		{ type: 'bundle', serviceCode: 'ITTH_14GB', amount: '35000', speed: '14GB' },
-		{ type: 'bundle', serviceCode: 'ITTH_25GB', amount: '55000', speed: '25GB' },
-		{ type: 'bundle', serviceCode: 'ITTH_45GB', amount: '85000', speed: '45GB + YoTv' },
-		{ type: 'bundle', serviceCode: 'ITTH_95GB', amount: '170000', speed: '95GB + YoTv' },
-		{ type: 'bundle', serviceCode: 'ITTH_195GB', amount: '335000', speed: '195GB + YoTv' },
+		{ type: 'bundle', serviceCode: '1778FHI5', amount: '35000', speed: '14GB' },
+		{ type: 'bundle', serviceCode: '1778FHI4', amount: '55000', speed: '25GB' },
+		{ type: 'bundle', serviceCode: '1778FHI1', amount: '85000', speed: '45GB + YoTv' },
+		{ type: 'bundle', serviceCode: '1778FHI2', amount: '170000', speed: '95GB + YoTv' },
+		{ type: 'bundle', serviceCode: '1778FHI3', amount: '335000', speed: '195GB + YoTv' },
 	],
 };
 
