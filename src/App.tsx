@@ -1,7 +1,7 @@
 import { useRoutes } from 'react-router-dom';
-import { Loadable } from './hocs/Loadable';
 import { lazy } from 'react';
 import { ROUTES } from './constants/routes';
+import { Loadable } from './hocs/Loadable';
 
 const Signin = Loadable(lazy(() => import('./pages/Signin')));
 const Dashboard = Loadable(lazy(() => import('./pages/Dashboard')));

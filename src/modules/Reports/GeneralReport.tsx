@@ -135,6 +135,7 @@ export default function GeneralReportTable({
 						maxDate={new Date()}
 						value={fromDate}
 						onChange={handleFromDateChange}
+						// @ts-ignore
 						placeholder="From date"
 						icon={<IconCalendarTime />}
 					/>
@@ -142,6 +143,7 @@ export default function GeneralReportTable({
 						maxDate={new Date()}
 						value={toDate}
 						onChange={handleToDateChange}
+						// @ts-ignore
 						placeholder="To date"
 						icon={<IconCalendarTime />}
 					/>
