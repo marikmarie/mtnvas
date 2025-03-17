@@ -33,6 +33,7 @@ export const WakanetActivation = () => {
 				message: JSON.stringify(response.data),
 				color: 'green',
 			});
+			form.reset();
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({

@@ -61,6 +61,7 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 				message: JSON.stringify(response.data),
 				color: 'green',
 			});
+			form.reset();
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({

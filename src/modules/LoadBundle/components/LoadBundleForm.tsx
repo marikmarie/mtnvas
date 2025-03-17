@@ -100,37 +100,6 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 				error={form.errors.msisdn}
 				withAsterisk
 			/>
-
-			{/* <TextInput
-				icon={<IconAt />}
-				label="Email"
-				value={form.values.email}
-				onChange={(event) => form.setFieldValue('email', event.currentTarget.value)}
-				placeholder="example@domain.com"
-				error={form.errors.email}
-			/>
-
-			<TextInput
-				icon={<IconReceipt2 />}
-				label="Transaction ID"
-				value={form.values.externalTransactionId}
-				onChange={(event) =>
-					form.setFieldValue('externalTransactionId', event.currentTarget.value)
-				}
-				placeholder="Enter transaction ID"
-				error={form.errors.externalTransactionId}
-				withAsterisk
-			/>
-
-			<Select
-				label="Payment Option"
-				placeholder="Select payment option"
-				value={form.values.paymentOption}
-				onChange={(value) => form.setFieldValue('paymentOption', value || '')}
-				data={[{ value: 'MOMO', label: 'MOMO' }]}
-				withAsterisk
-			/> */}
-
 			<Flex
 				gap={'sm'}
 				w="100%"
@@ -145,9 +114,11 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 						if (!validation.hasErrors) {
 							console.log('Form is valid, triggering mutation...'); // Log before mutation
 							mutation.mutate();
+							form.reset();
 						}
 					}}
-					// loading={mutation.isLoading}
+					disabled={mutation.isLoading}
+					loading={mutation.isLoading}
 				>
 					Load
 				</Button>

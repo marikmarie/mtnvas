@@ -56,6 +56,7 @@ function Adduser(props: Props) {
 				message: JSON.stringify(response.data),
 				color: 'green',
 			});
+			form.reset();
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({

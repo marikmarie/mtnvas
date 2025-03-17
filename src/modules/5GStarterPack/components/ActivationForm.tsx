@@ -63,6 +63,7 @@ export const Form = () => {
 				message: JSON.stringify(response.data),
 				color: 'green',
 			});
+			onReset();
 		},
 		onError: (error: AxiosError) => {
 			notifications.show({
