@@ -1,15 +1,15 @@
-import { Paper } from '@mantine/core';
+import { Box } from '@mantine/core';
 import ActivationTable from './components/ActivationTable';
 import { Form } from './components/ActivationForm';
 
 export default () => {
 	return (
-		<Paper
+		<Box
 			py="lg"
 			mt="xl"
 		>
 			<ActivationTable />
 			<Form />
-		</Paper>
+		</Box>
 	);
 };

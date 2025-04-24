@@ -6,4 +6,17 @@ export const ROUTES = {
 	UPLOAD: '/upload',
 	NOT_FOUND: '/404',
 	ALL: '*',
+	// New routes for the standalone pages
+	SIGNUP: '/signup',
+	WAKANET_ACTIVATION: '/wakanet-activation',
+	LOAD_BUNDLE: '/load-bundle',
+	CHECK_BALANCE: '/check-balance',
+	UPDATE_DETAILS: '/update-details',
+	ACTIVATIONS_REPORT: '/activations-report',
+	RENEWALS_REPORT: '/renewals-report',
+	DEALER_MANAGEMENT: {
+		ROOT: '/dealer-management',
+		ADD: '/dealer-management/add',
+		EDIT: '/dealer-management/edit/:id',
+	},
 };

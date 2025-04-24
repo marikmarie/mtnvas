@@ -11,6 +11,7 @@ import {
 	TextInput,
 	Button,
 	PinInput,
+	Stack,
 } from '@mantine/core';
 import { memo, useCallback } from 'react';
 import { IconMail } from '@tabler/icons-react';
@@ -20,19 +21,28 @@ import { RootState } from '../app/store';
 import { Link, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 
-const useStyles = createStyles(() => ({
+const useStyles = createStyles((theme) => ({
 	root: {
 		overflow: 'hidden',
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
-		height: '100vh',
+		minHeight: '100vh',
+	},
+	formContainer: {
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+		borderRadius: theme.radius.lg,
+		boxShadow: theme.shadows.lg,
+		border: `1px solid ${
+			theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[2]
+		}`,
 	},
 }));
 
 export default memo((props: PaperProps) => {
 	const {
-		classes: { root },
+		classes: { root, formContainer },
+		cx,
 	} = useStyles();
 
 	const request = useRequest();
@@ -84,10 +94,10 @@ export default memo((props: PaperProps) => {
 				size="xl"
 			>
 				<Paper
-					withBorder
-					mt="xl"
+					className={cx(formContainer, props.className)}
 					p="xl"
 					{...props}
+					w={450}
 				>
 					<Center>
 						<Image
@@ -100,74 +110,81 @@ export default memo((props: PaperProps) => {
 						c="dimmed"
 						fz={'lg'}
 						ta="center"
-						mt="md"
+						my="md"
 					>
-						Please enter your email to receive a
+						Password Reset
 					</Text>
 					<Text
 						c="dimmed"
-						fz={'lg'}
-						ta="center"
+						size="sm"
+						align="center"
+						mb="lg"
 					>
-						One Time Password
+						Enter your email to receive an OTP, then set your new password.
 					</Text>
 
-					<TextInput
-						name="email"
-						value={form.values.email}
-						label="Email"
-						type="email"
-						onChange={(event) => form.setFieldValue('email', event.currentTarget.value)}
-						placeholder="Enter email"
-					/>
-					<Button
-						my="sm"
-						variant="light"
-						fullWidth
-						onClick={requestOTP}
-						leftIcon={<IconMail />}
-						radius="md"
-					>
-						Get OTP
-					</Button>
-					<Center>
-						<PinInput
-							value={form.values.otp}
-							onChange={(value) => form.setFieldValue('otp', value)}
-							autoFocus
-							size="xl"
-							length={6}
-							oneTimeCode
+					<Stack spacing="md">
+						<TextInput
+							name="email"
+							value={form.values.email}
+							label="Email"
+							type="email"
+							onChange={(event) =>
+								form.setFieldValue('email', event.currentTarget.value)
+							}
+							placeholder="Enter email"
 						/>
-					</Center>
-					<TextInput
-						name="password"
-						value={form.values.password}
-						label="Password"
-						type="password"
-						onChange={(event) =>
-							form.setFieldValue('password', event.currentTarget.value)
-						}
-						placeholder="Enter password"
-					/>
-					<TextInput
-						name="passwordConfirm"
-						value={form.values.passwordConfirm}
-						label="Confirm Password"
-						type="password"
-						onChange={(event) =>
-							form.setFieldValue('passwordConfirm', event.currentTarget.value)
-						}
-						placeholder="Confirm Password"
-					/>
-					<Button
-						onClick={passwordReset}
-						mt="xl"
-						radius="md"
-						fullWidth
-					>
-						Reset Password
-					</Button>
+						<Button
+							my="sm"
+							variant="light"
+							fullWidth
+							onClick={requestOTP}
+							leftIcon={<IconMail size="1rem" />}
+							radius="md"
+							mt="xs"
+						>
+							Get OTP
+						</Button>
+						<Center>
+							<PinInput
+								value={form.values.otp}
+								onChange={(value) => form.setFieldValue('otp', value)}
+								autoFocus
+								size="xl"
+								length={6}
+								oneTimeCode
+							/>
+						</Center>
+						<TextInput
+							name="password"
+							value={form.values.password}
+							label="Password"
+							type="password"
+							onChange={(event) =>
+								form.setFieldValue('password', event.currentTarget.value)
+							}
+							placeholder="Enter password"
+						/>
+						<TextInput
+							name="passwordConfirm"
+							value={form.values.passwordConfirm}
+							label="Confirm Password"
+							type="password"
+							onChange={(event) =>
+								form.setFieldValue('passwordConfirm', event.currentTarget.value)
+							}
+							placeholder="Confirm Password"
+						/>
+						<Button
+							type="submit"
+							onClick={passwordReset}
+							mt="md"
+							radius="md"
+							fullWidth
+						>
+							Reset Password
+						</Button>
+					</Stack>
 					<Center mt="xs">
 						<Link to={ROUTES.AUTH}>Signin instead</Link>
 					</Center>

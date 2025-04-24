@@ -1,5 +1,4 @@
 import { Container, ScrollArea } from '@mantine/core';
-
 import React from 'react';
 import { Header } from './Header';
 
@@ -16,7 +15,12 @@ export default function Layout({ children }: PageProps) {
 			offsetScrollbars
 		>
 			<Header />
-			<Container size={1820}>{children}</Container>
+			<Container
+				size={1800}
+				py="md"
+			>
+				{children}
+			</Container>
 		</ScrollArea>
 	);
 }

@@ -11,57 +11,63 @@ const BASE_URL = __PROD__
 	? import.meta.env.VITE_APP_BASE_URL_PROD
 	: import.meta.env.VITE_APP_BASE_URL_DEV;
 
-export default function useRequest(requireAuth: boolean = false): AxiosInstance {
-	const token = useSelector((state: RootState) => state.auth.token);
+export default function useRequest( requireAuth: boolean = false ): AxiosInstance {
+	const token = useSelector( ( state: RootState ) => state.auth.token );
 
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
 	function logout() {
-		dispatch(signout());
-		navigate(ROUTES.AUTH);
+		dispatch( signout() );
+		navigate( ROUTES.AUTH );
 	}
 
-	const instance = axios.create({
+	const instance = axios.create( {
 		baseURL: BASE_URL,
 		headers: requireAuth ? { Authorization: `Bearer ${token}` } : {},
-	});
+	} );
 
 	instance.interceptors.response.use(
-		(response) => {
-			console.log('Sucess:status', response.status);
+		( response ) => {
+			if ( response.data.status === 401 ) {
+				logout();
+				notifications.show( {
+					title: 'response',
+					message: JSON.stringify( response.data.message ).replace( /"/g, '' ),
+					color: 'yellow',
+					autoClose: 5000,
+				} );
+			}
 			return response;
 		},
-		(error: AxiosError) => {
+		( error: AxiosError ) => {
 			let title = 'Error';
-			if (error.response) {
+			if ( error.response ) {
 				const status = error.response.status;
 				title = `Error ${status}`;
 				// @ts-ignore
 				const message = error.response.data?.message;
 
-				console.log('status:error ', status);
-
-				if (status === 401) {
+				if ( status === 401 ) {
 					logout();
 					title = 'Session Expired';
-					notifications.show({
+					notifications.show( {
 						title,
-						message: 'Your session has expired. Please log in again.',
+						message,
 						color: 'yellow',
 						autoClose: 5000,
-					});
+					} );
 				} else {
-					notifications.show({
+					notifications.show( {
 						title,
 						message,
 						color: 'red',
 						autoClose: 5000,
-					});
+					} );
 				}
 			}
 
-			return Promise.reject(error);
+			return Promise.reject( error );
 		}
 	);
 

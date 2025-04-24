@@ -1,4 +1,4 @@
-import { Accordion, Paper, SimpleGrid, Text } from '@mantine/core';
+import { Accordion, Paper, SimpleGrid, Text, Title, Center } from '@mantine/core';
 import { memo, useState } from 'react';
 import { Package } from './components/Package';
 import { RootState } from '../../app/store';
@@ -58,7 +58,7 @@ const PACKAGES: Record<string, PackageData[]> = {
 	],
 };
 
-interface PakageSelectionProps {
+interface PackageSelectionProps {
 	title: string;
 	packages: PackageData[];
 	selectedSrvCode: string;
@@ -66,15 +66,17 @@ interface PakageSelectionProps {
 }
 
 const PackageSection = memo(
-	({ title, packages, selectedSrvCode, setSelectedSrvCode }: PakageSelectionProps) => (
+	({ title, packages, selectedSrvCode, setSelectedSrvCode }: PackageSelectionProps) => (
 		<Accordion
-			variant="filled"
+			chevronPosition="left"
+			variant="contained"
+			mb="md"
 			defaultValue={title.toLowerCase().replace(' ', '_')}
 		>
 			<Accordion.Item value={title.toLowerCase().replace(' ', '_')}>
 				<Accordion.Control>
 					<Text
-						fz="xl"
+						fz="lg"
 						fw="bold"
 						tt="uppercase"
 					>
@@ -83,12 +85,13 @@ const PackageSection = memo(
 				</Accordion.Control>
 				<Accordion.Panel>
 					<SimpleGrid
-						cols={5}
+						cols={4}
+						spacing="lg"
+						verticalSpacing="lg"
 						breakpoints={[
-							{ maxWidth: 'lg', cols: 4 },
-							{ maxWidth: 'md', cols: 3 },
-							{ maxWidth: 'sm', cols: 2 },
-							{ maxWidth: 'xs', cols: 1 },
+							{ maxWidth: 'lg', cols: 3 },
+							{ maxWidth: 'md', cols: 2 },
+							{ maxWidth: 'sm', cols: 1 },
 						]}
 					>
 						{packages.map((srv) => (
@@ -114,47 +117,51 @@ export default () => {
 	const user = useSelector((state: RootState) => state.auth.user);
 
 	return (
-		<Paper py="lg">
-			<Paper my={'md'}>
+		<Paper
+			py="lg"
+			px="md"
+		>
+			<Center mb="xl">
+				<Title order={2}>Load Bundle</Title>
+			</Center>
+			<PackageSection
+				title="Wakanet 4G"
+				packages={PACKAGES.wakanet_4g}
+				selectedSrvCode={selectedSrvCode}
+				setSelectedSrvCode={setSelectedSrvCode}
+			/>
+			<PackageSection
+				title="Wakanet 5G"
+				packages={PACKAGES.wakanet_5g}
+				selectedSrvCode={selectedSrvCode}
+				setSelectedSrvCode={setSelectedSrvCode}
+			/>
+			<PackageSection
+				title="Booster Packs 4g"
+				packages={PACKAGES.booster_packs_4g}
+				selectedSrvCode={selectedSrvCode}
+				setSelectedSrvCode={setSelectedSrvCode}
+			/>
+			<PackageSection
+				title="Booster Packs 5g"
+				packages={PACKAGES.booster_packs_5g}
+				selectedSrvCode={selectedSrvCode}
+				setSelectedSrvCode={setSelectedSrvCode}
+			/>
+			<PackageSection
+				title="Wakanet Router Volume bundles"
+				packages={PACKAGES.volume_bundles}
+				selectedSrvCode={selectedSrvCode}
+				setSelectedSrvCode={setSelectedSrvCode}
+			/>
+			{user?.role === 'WAKA_CORP' && (
 				<PackageSection
-					title="Wakanet 4G"
-					packages={PACKAGES.wakanet_4g}
+					title="PostPaid Bundles"
+					packages={PACKAGES.post_paid_bundles}
 					selectedSrvCode={selectedSrvCode}
 					setSelectedSrvCode={setSelectedSrvCode}
 				/>
-				<PackageSection
-					title="Wakanet 5G"
-					packages={PACKAGES.wakanet_5g}
-					selectedSrvCode={selectedSrvCode}
-					setSelectedSrvCode={setSelectedSrvCode}
-				/>
-				<PackageSection
-					title="Booster Packs 4g"
-					packages={PACKAGES.booster_packs_4g}
-					selectedSrvCode={selectedSrvCode}
-					setSelectedSrvCode={setSelectedSrvCode}
-				/>
-				<PackageSection
-					title="Booster Packs 5g"
-					packages={PACKAGES.booster_packs_5g}
-					selectedSrvCode={selectedSrvCode}
-					setSelectedSrvCode={setSelectedSrvCode}
-				/>
-				<PackageSection
-					title="Wakanet Router Volume bundles"
-					packages={PACKAGES.volume_bundles}
-					selectedSrvCode={selectedSrvCode}
-					setSelectedSrvCode={setSelectedSrvCode}
-				/>
-				{user?.role === 'WAKA_CORP' && (
-					<PackageSection
-						title="PostPaid Bundles"
-						packages={PACKAGES.post_paid_bundles}
-						selectedSrvCode={selectedSrvCode}
-						setSelectedSrvCode={setSelectedSrvCode}
-					/>
-				)}
-			</Paper>
+			)}
 		</Paper>
 	);
 };

@@ -1,5 +1,5 @@
-import { Button } from '@mantine/core';
-import { IconCircleCheck } from '@tabler/icons-react';
+import { Button, rem, useMantineTheme } from '@mantine/core';
+import { IconCircleCheck, IconLoader } from '@tabler/icons-react';
 import { SetStateAction } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { Modal } from '../../../components/Modal';
@@ -23,6 +23,7 @@ export const PkgButton = ({
 	speed,
 }: TPkgButtonProps) => {
 	const [opened, { open, close }] = useDisclosure(false);
+	const theme = useMantineTheme();
 	return (
 		<>
 			<Modal
@@ -33,20 +34,24 @@ export const PkgButton = ({
 					selectedSrvCode={selectedSrvCode}
 					amount={amount}
 					speed={speed}
+					onClose={close}
 				/>
 			</Modal>
 			<Button
-				leftIcon={selected ? <IconCircleCheck /> : null}
+				leftIcon={
+					selected ? <IconCircleCheck size={rem(18)} /> : <IconLoader size={rem(18)} />
+				}
+				variant={selected ? 'filled' : 'default'}
+				color={selected ? theme.primaryColor : theme.colors.gray[6]}
+				fullWidth
+				radius="md"
+				mt="md"
 				onClick={() => {
 					onSelect(serviceCode);
 					open();
 				}}
-				variant={selected ? 'filled' : 'outline'}
-				fullWidth
-				radius="md"
-				mt="lg"
 			>
-				{selected ? 'Package Selected' : 'Select Package'}
+				{selected ? 'Proceed to Load' : 'Select Package'}
 			</Button>
 		</>
 	);

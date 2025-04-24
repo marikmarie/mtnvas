@@ -28,19 +28,28 @@ import { ROUTES } from '../constants/routes';
 import { customLoader } from '../components/CustomLoader';
 import { notifications } from '@mantine/notifications';
 
-const useStyles = createStyles(() => ({
+const useStyles = createStyles((theme) => ({
 	root: {
 		overflow: 'hidden',
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
-		height: '100vh',
+		minHeight: '100vh',
+	},
+	formContainer: {
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+		borderRadius: theme.radius.lg,
+		boxShadow: theme.shadows.lg,
+		border: `1px solid ${
+			theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[2]
+		}`,
 	},
 }));
 
 export default React.memo((props: PaperProps) => {
 	const {
-		classes: { root },
+		classes: { root, formContainer },
+		cx,
 	} = useStyles();
 	const request = useRequest();
 	const navigate = useNavigate();
@@ -88,13 +97,10 @@ export default React.memo((props: PaperProps) => {
 				zIndex={1000}
 			/>
 			<Paper
-				mt="xl"
-				withBorder
-				shadow="lg"
+				className={cx(formContainer, props.className)}
 				p="xl"
 				{...props}
-				w={'100%'}
-				sx={{ background: 'transparent' }}
+				w={400}
 			>
 				<Flex
 					align={'center'}
@@ -108,10 +114,19 @@ export default React.memo((props: PaperProps) => {
 				</Flex>
 
 				<Center>
+					<Text
+						c="dimmed"
+						size="sm"
+						align="center"
+						my="sm"
+					>
+						Welcome back! Please enter your credentials.
+					</Text>
+				</Center>
+				<Center>
 					<Title
 						c="dimmed"
 						fz={'xl'}
-						my="md"
 					>
 						Signin
 					</Title>
@@ -166,6 +181,8 @@ export default React.memo((props: PaperProps) => {
 						<Button
 							type="submit"
 							radius="md"
+							fullWidth
+							mt="md"
 						>
 							Sign In
 						</Button>
