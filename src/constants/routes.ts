@@ -14,9 +14,5 @@ export const ROUTES = {
 	UPDATE_DETAILS: '/update-details',
 	ACTIVATIONS_REPORT: '/activations-report',
 	RENEWALS_REPORT: '/renewals-report',
-	DEALER_MANAGEMENT: {
-		ROOT: '/dealer-management',
-		ADD: '/dealer-management/add',
-		EDIT: '/dealer-management/edit/:id',
-	},
+	DEALER_MANAGEMENT: '/dealer-management',
 };

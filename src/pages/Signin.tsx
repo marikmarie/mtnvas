@@ -24,7 +24,6 @@ import { useDispatch } from 'react-redux';
 import { Auth, signin } from '../app/slices/auth';
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
 import { customLoader } from '../components/CustomLoader';
 import { notifications } from '@mantine/notifications';
 
@@ -174,7 +173,7 @@ export default React.memo((props: PaperProps) => {
 						<Text
 							mt={-20}
 							component={RouterLink}
-							to={ROUTES.PASSWORD_RESET}
+							to={'/passwordReset'}
 						>
 							Reset Password
 						</Text>

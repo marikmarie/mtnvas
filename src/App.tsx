@@ -1,13 +1,12 @@
 import { useRoutes } from 'react-router-dom';
 import { lazy } from 'react';
-import { ROUTES } from './constants/routes';
 import { Loadable } from './hocs/Loadable';
 
 const Signin = Loadable(lazy(() => import('./pages/Signin')));
 const Dashboard = Loadable(lazy(() => import('./pages/Dashboard')));
 const NotFound = Loadable(lazy(() => import('./pages/404')));
 const PasswordReset = Loadable(lazy(() => import('./pages/PasswordReset')));
-
+const Signup = Loadable(lazy(() => import('./pages/Signup')));
 const WakanetActivation = Loadable(lazy(() => import('./pages/WakanetActivation')));
 const LoadBundle = Loadable(lazy(() => import('./pages/LoadBundle')));
 const CheckBalance = Loadable(lazy(() => import('./pages/CheckBalance')));
@@ -15,70 +14,55 @@ const UpdateDetails = Loadable(lazy(() => import('./pages/UpdateDetails')));
 const ActivationsReport = Loadable(lazy(() => import('./pages/ActivationsReport')));
 const RenewalsReport = Loadable(lazy(() => import('./pages/RenewalsReport')));
 const DealerManagement = Loadable(lazy(() => import('./pages/DealerManagement')));
-const AddDealer = Loadable(lazy(() => import('./pages/AddDealer')));
-const UpdateDealer = Loadable(lazy(() => import('./pages/UpdateDealer')));
 
 export default function AppRouter() {
 	return useRoutes([
 		{
-			path: ROUTES.AUTH,
+			path: '/signin',
 			element: <Signin />,
 		},
 		{
-			path: ROUTES.PASSWORD_RESET,
+			path: '/passwordReset',
 			element: <PasswordReset />,
 		},
 		{
-			path: ROUTES.DASHBOARD,
+			path: '/',
 			element: <Dashboard />,
 		},
 		{
-			path: ROUTES.SIGNUP,
-			element: <Dashboard />,
+			path: '/signup',
+			element: <Signup />,
 		},
 		{
-			path: ROUTES.WAKANET_ACTIVATION,
+			path: '/wakanet-activation',
 			element: <WakanetActivation />,
 		},
 		{
-			path: ROUTES.LOAD_BUNDLE,
+			path: '/load-bundle',
 			element: <LoadBundle />,
 		},
 		{
-			path: ROUTES.CHECK_BALANCE,
+			path: '/check-balance',
 			element: <CheckBalance />,
 		},
 		{
-			path: ROUTES.UPDATE_DETAILS,
+			path: '/update-details',
 			element: <UpdateDetails />,
 		},
 		{
-			path: ROUTES.ACTIVATIONS_REPORT,
+			path: '/activations-report',
 			element: <ActivationsReport />,
 		},
 		{
-			path: ROUTES.RENEWALS_REPORT,
+			path: '/renewals-report',
 			element: <RenewalsReport />,
 		},
 		{
-			path: ROUTES.DEALER_MANAGEMENT.ROOT,
-			children: [
-				{
-					path: '',
-					element: <DealerManagement />,
-				},
-				{
-					path: 'add',
-					element: <AddDealer />,
-				},
-				{
-					path: 'edit/:id',
-					element: <UpdateDealer />,
-				},
-			],
+			path: '/dealer-management',
+			element: <DealerManagement />,
 		},
 		{
-			path: ROUTES.ALL,
+			path: '*',
 			element: <NotFound />,
 		},
 	]);

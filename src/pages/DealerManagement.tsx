@@ -1,14 +1,71 @@
-import React from 'react';
+import { Paper, Tabs, Title } from '@mantine/core';
+import { DealerList } from '../modules/DealerManagement/DealerList';
+import { ShopList } from '../modules/DealerManagement/ShopList';
+import { ShopUsersList } from '../modules/DealerManagement/ShopUsersList';
+import { StockList } from '../modules/DealerManagement/StockList';
 import Layout from '../components/Layout';
-import { withAuth } from '../hocs/WithAuth';
-import { DealerManagementIndex } from '../modules/DealerManagement';
+import { IconBuildingStore, IconUsers, IconUserCircle, IconBox } from '@tabler/icons-react';
 
-const DealerManagement: React.FC = () => {
+export default function DealerManagement() {
 	return (
 		<Layout>
-			<DealerManagementIndex />
+			<Paper
+				p="md"
+				radius="sm"
+				withBorder
+			>
+				<Title
+					order={2}
+					mb="lg"
+				>
+					Dealer Management
+				</Title>
+
+				<Tabs defaultValue="dealers">
+					<Tabs.List mb="md">
+						<Tabs.Tab
+							value="dealers"
+							icon={<IconUsers size={14} />}
+						>
+							Dealers
+						</Tabs.Tab>
+						<Tabs.Tab
+							value="shops"
+							icon={<IconBuildingStore size={14} />}
+						>
+							Shops
+						</Tabs.Tab>
+						<Tabs.Tab
+							value="users"
+							icon={<IconUserCircle size={14} />}
+						>
+							Shop Users
+						</Tabs.Tab>
+						<Tabs.Tab
+							value="stock"
+							icon={<IconBox size={14} />}
+						>
+							Stock Management
+						</Tabs.Tab>
+					</Tabs.List>
+
+					<Tabs.Panel value="dealers">
+						<DealerList />
+					</Tabs.Panel>
+
+					<Tabs.Panel value="shops">
+						<ShopList />
+					</Tabs.Panel>
+
+					<Tabs.Panel value="users">
+						<ShopUsersList />
+					</Tabs.Panel>
+
+					<Tabs.Panel value="stock">
+						<StockList />
+					</Tabs.Panel>
+				</Tabs>
+			</Paper>
 		</Layout>
 	);
-};
-
-export default React.memo(withAuth(DealerManagement));
+}

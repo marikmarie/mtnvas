@@ -38,7 +38,6 @@ import { signout } from '../app/slices/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { ActionToggle } from './ActionToggle';
 import { useCallback, useState } from 'react';
-import { ROUTES } from '../constants/routes';
 import { useDisclosure } from '@mantine/hooks';
 import Adduser from '../modules/UserManagment/Adduser';
 import ListUsers from '../modules/UserManagment/ListUsers';
@@ -139,13 +138,13 @@ const navItems = [
 			{
 				key: 'signup',
 				label: 'Online Payments',
-				path: ROUTES.SIGNUP,
+				path: '/signup',
 				icon: <IconDeviceMobile size={16} />,
 			},
 			{
 				key: 'wakanet-activation',
 				label: 'Cash Payments',
-				path: ROUTES.WAKANET_ACTIVATION,
+				path: '/wakanet-activation',
 				icon: <IconRouter size={16} />,
 			},
 		],
@@ -157,19 +156,19 @@ const navItems = [
 			{
 				key: 'load-bundle',
 				label: 'Load Bundle',
-				path: ROUTES.LOAD_BUNDLE,
+				path: '/load-bundle',
 				icon: <IconLoader size={16} />,
 			},
 			{
 				key: 'check-balance',
 				label: 'Check Balance',
-				path: ROUTES.CHECK_BALANCE,
+				path: '/check-balance',
 				icon: <IconCircleCheck size={16} />,
 			},
 			{
 				key: 'update-details',
 				label: 'Update Details',
-				path: ROUTES.UPDATE_DETAILS,
+				path: '/update-details',
 				icon: <IconEdit size={16} />,
 			},
 		],
@@ -181,13 +180,13 @@ const navItems = [
 			{
 				key: 'activations-report',
 				label: 'StarterPack Activation Report',
-				path: ROUTES.ACTIVATIONS_REPORT,
+				path: '/activations-report',
 				icon: <IconReport size={16} />,
 			},
 			{
 				key: 'renewals-report',
 				label: 'Renewals Report',
-				path: ROUTES.RENEWALS_REPORT,
+				path: '/renewals-report',
 				icon: <IconNews size={16} />,
 			},
 		],
@@ -199,7 +198,7 @@ const navItems = [
 			{
 				key: 'dealer-management',
 				label: 'Dealer Management',
-				path: ROUTES.DEALER_MANAGEMENT.ROOT,
+				path: '/dealer-management',
 				icon: <IconBuildingStore size={16} />,
 			},
 		],
@@ -217,7 +216,7 @@ export function Header() {
 
 	const handleLogout = useCallback(() => {
 		dispatch(signout());
-		navigate(ROUTES.AUTH);
+		navigate('/signin');
 	}, []);
 
 	const displayName = user?.email?.split('@')[0] || 'Wakanet user';
@@ -342,7 +341,7 @@ export function Header() {
 						w="100%"
 						align={'center'}
 					>
-						<Link to={ROUTES.DASHBOARD}>
+						<Link to="/">
 							<Group h="100%">
 								<Image
 									src="/Logo.png"

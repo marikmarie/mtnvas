@@ -19,7 +19,6 @@ import useRequest from '../hooks/useRequest';
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
 import { Link, useNavigate } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -79,7 +78,7 @@ export default memo((props: PaperProps) => {
 			passwordConfirm: form.values.passwordConfirm,
 		});
 		if (res.data?.status !== 200) {
-			navigate(ROUTES.AUTH);
+			navigate('/signin');
 		}
 	}, [form.values.otp, form.values.email, form.values.password, form.values.passwordConfirm]);
 
@@ -186,7 +185,7 @@ export default memo((props: PaperProps) => {
 						</Button>
 					</Stack>
 					<Center mt="xs">
-						<Link to={ROUTES.AUTH}>Signin instead</Link>
+						<Link to={'/signin'}>Signin instead</Link>
 					</Center>
 				</Paper>
 			</Container>

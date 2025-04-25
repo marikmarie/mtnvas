@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../app/store';
 import { useNavigate } from 'react-router-dom';
 import { signout } from '../app/slices/auth';
-import { ROUTES } from '../constants/routes';
 import { __PROD__ } from '../utils/__prod__';
 
 const BASE_URL = __PROD__
@@ -19,7 +18,7 @@ export default function useRequest( requireAuth: boolean = false ): AxiosInstanc
 
 	function logout() {
 		dispatch( signout() );
-		navigate( ROUTES.AUTH );
+		navigate( '/signin' );
 	}
 
 	const instance = axios.create( {

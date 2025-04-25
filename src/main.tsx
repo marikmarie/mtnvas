@@ -12,7 +12,6 @@ import { Notifications } from '@mantine/notifications';
 import { PersistGate } from 'redux-persist/integration/react';
 import { ModalsProvider } from '@mantine/modals';
 import { signout } from './app/slices/auth';
-import { ROUTES } from './constants/routes';
 import { useIdleTimer } from 'react-idle-timer';
 
 const client = new QueryClient();
@@ -49,7 +48,7 @@ function App() {
 
 	const handleLogout = useCallback(() => {
 		dispatch(signout());
-		navigate(ROUTES.AUTH);
+		navigate('/signin');
 	}, [dispatch, navigate]);
 
 	const { start } = useIdleTimer({
