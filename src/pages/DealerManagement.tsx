@@ -9,18 +9,13 @@ import { IconBuildingStore, IconUsers, IconUserCircle, IconBox } from '@tabler/i
 export default function DealerManagement() {
 	return (
 		<Layout>
-			<Paper
-				p="md"
-				radius="sm"
-				withBorder
-			>
+			<Paper radius="sm">
 				<Title
 					order={2}
 					mb="lg"
 				>
 					Dealer Management
 				</Title>
-
 				<Tabs defaultValue="dealers">
 					<Tabs.List mb="md">
 						<Tabs.Tab
@@ -48,19 +43,15 @@ export default function DealerManagement() {
 							Stock Management
 						</Tabs.Tab>
 					</Tabs.List>
-
 					<Tabs.Panel value="dealers">
 						<DealerList />
 					</Tabs.Panel>
-
 					<Tabs.Panel value="shops">
 						<ShopList />
 					</Tabs.Panel>
-
 					<Tabs.Panel value="users">
 						<ShopUsersList />
 					</Tabs.Panel>
-
 					<Tabs.Panel value="stock">
 						<StockList />
 					</Tabs.Panel>

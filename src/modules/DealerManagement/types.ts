@@ -55,6 +55,7 @@ export interface Stock {
     category: 'wakanet' | 'enterprise' | 'both';
     imeiFile: string;
     quantity: number;
+    sold: number;
     createdAt: string;
 }
 
@@ -68,6 +69,39 @@ export interface StockThreshold {
     deviceName: string;
     threshold: number;
     createdAt: string;
+}
+
+export interface Imei {
+    id: string;
+    imei: string;
+    status: 'available' | 'assigned' | 'active' | 'inactive';
+    soldBy: string;
+    soldById: string;
+    date: string;
+}
+
+export interface ImeiTransfer {
+    id: string;
+    imei: string;
+    fromDealerId: string;
+    fromDealerName: string;
+    fromProductId: string;
+    fromProductName: string;
+    toDealerId: string;
+    toDealerName: string;
+    toProductId: string;
+    toProductName: string;
+    transferDate: string;
+}
+
+export interface ImeiSwap {
+    id: string;
+    oldImei: string;
+    newImei: string;
+    reason: string;
+    swappedBy: string;
+    swappedById: string;
+    swapDate: string;
 }
 
 export interface DealerModalProps {

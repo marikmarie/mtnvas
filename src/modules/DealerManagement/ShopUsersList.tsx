@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { faker } from '@faker-js/faker';
 import { ShopUser } from './types';
 
-// Generate fake shop users for demonstration
 const generateFakeShopUsers = (
 	count: number,
 	userType: 'DSA' | 'Retailer' | 'ShopAgent'
@@ -13,7 +12,7 @@ const generateFakeShopUsers = (
 		id: faker.string.uuid(),
 		name: faker.person.fullName(),
 		email: faker.internet.email(),
-		msisdn: faker.phone.number('256#########'),
+		msisdn: faker.phone.number(),
 		shopId: faker.string.uuid(),
 		shopName: faker.company.name(),
 		userType,
@@ -73,11 +72,8 @@ export function ShopUsersList() {
 					<Tabs.Tab value="retailers">Retailers</Tabs.Tab>
 					<Tabs.Tab value="agents">Shop Agents</Tabs.Tab>
 				</Tabs.List>
-
 				<Tabs.Panel value="dsa">{dsaTable}</Tabs.Panel>
-
 				<Tabs.Panel value="retailers">{retailerTable}</Tabs.Panel>
-
 				<Tabs.Panel value="agents">{agentTable}</Tabs.Panel>
 			</Tabs>
 		</Stack>

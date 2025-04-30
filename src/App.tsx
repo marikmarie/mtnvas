@@ -14,6 +14,7 @@ const UpdateDetails = Loadable(lazy(() => import('./pages/UpdateDetails')));
 const ActivationsReport = Loadable(lazy(() => import('./pages/ActivationsReport')));
 const RenewalsReport = Loadable(lazy(() => import('./pages/RenewalsReport')));
 const DealerManagement = Loadable(lazy(() => import('./pages/DealerManagement')));
+const ImeiListPage = Loadable(lazy(() => import('./pages/ImeiList')));
 
 export default function AppRouter() {
 	return useRoutes([
@@ -60,6 +61,10 @@ export default function AppRouter() {
 		{
 			path: '/dealer-management',
 			element: <DealerManagement />,
+		},
+		{
+			path: '/imei-list',
+			element: <ImeiListPage />,
 		},
 		{
 			path: '*',

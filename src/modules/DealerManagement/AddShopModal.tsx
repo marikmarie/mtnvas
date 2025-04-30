@@ -13,7 +13,7 @@ const getDealers = () => {
 };
 
 // Simulated regions
-const regions = ['Central', 'Eastern', 'Northern', 'Western', 'Southern'].map((region) => ({
+const regions = ['Central', 'Eastern', 'Northern', 'Western'].map((region) => ({
 	value: region.toLowerCase(),
 	label: region,
 }));
@@ -36,7 +36,6 @@ export function AddShopModal({ opened, onClose }: ShopModalProps) {
 
 	const handleSubmit = form.onSubmit((values) => {
 		console.log('Add shop:', values);
-		// Here you would typically make an API call to create the shop
 		onClose();
 		form.reset();
 	});

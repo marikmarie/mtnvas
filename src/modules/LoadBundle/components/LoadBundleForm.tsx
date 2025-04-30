@@ -78,11 +78,7 @@ export default function LoadBundleForm({
 	});
 
 	return (
-		<form
-			onSubmit={form.onSubmit(() => {
-				mutation.mutate();
-			})}
-		>
+		<form onSubmit={form.onSubmit(() => mutation.mutate())}>
 			<Stack>
 				<Center>
 					<IconGauge

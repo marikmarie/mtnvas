@@ -3,21 +3,19 @@ import {
 	Header as Wrapper,
 	Container,
 	rem,
-	ActionIcon,
 	Avatar,
 	Menu,
 	Group,
 	Flex,
-	Drawer,
 	Button,
 	Text,
 	Stack,
-	Center,
-	Paper,
-	Code,
-	Image,
 	Box,
-	Popover,
+	Collapse,
+	MediaQuery,
+	Burger,
+	Divider,
+	UnstyledButton,
 } from '@mantine/core';
 import {
 	IconLogout,
@@ -30,24 +28,28 @@ import {
 	IconCircleCheck,
 	IconLoader,
 	IconBuildingStore,
+	IconListDetails,
+	IconChevronDown,
+	IconUser,
 } from '@tabler/icons-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../app/store';
-import { IconUser } from '@tabler/icons-react';
 import { signout } from '../app/slices/auth';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { ActionToggle } from './ActionToggle';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
-import Adduser from '../modules/UserManagment/Adduser';
-import ListUsers from '../modules/UserManagment/ListUsers';
+import UserManagementModal from '../modules/UserManagment/UserManagementModal';
 
 const HEADER_HEIGHT = rem(60);
 
 const useStyles = createStyles((theme) => ({
 	root: {
 		position: 'sticky',
+		top: 0,
+		zIndex: 200,
 	},
+
 	inner: {
 		height: HEADER_HEIGHT,
 		display: 'flex',
@@ -55,40 +57,41 @@ const useStyles = createStyles((theme) => ({
 		alignItems: 'center',
 	},
 
+	logo: {
+		display: 'flex',
+		alignItems: 'center',
+		textDecoration: 'none',
+
+		'&:hover': {
+			textDecoration: 'none',
+		},
+	},
+
+	logoText: {
+		fontWeight: 700,
+		fontSize: rem(20),
+		color: theme.colorScheme === 'dark' ? theme.white : theme.black,
+		marginLeft: theme.spacing.xs,
+	},
+
 	links: {
 		display: 'flex',
 		gap: theme.spacing.sm,
-		[theme.fn.smallerThan('sm')]: {
+		[theme.fn.smallerThan('md')]: {
 			display: 'none',
 		},
 	},
 
 	burger: {
-		[theme.fn.largerThan('sm')]: {
+		[theme.fn.largerThan('md')]: {
 			display: 'none',
 		},
 	},
 
-	link: {
-		display: 'flex',
-		alignItems: 'center',
-		height: '100%',
-		lineHeight: 1,
-		padding: `${rem(8)} ${rem(12)}`,
-		borderRadius: theme.radius.sm,
-		textDecoration: 'none',
-		color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[7],
-		fontSize: theme.fontSizes.sm,
-		fontWeight: 500,
-
-		'&:hover': {
-			backgroundColor:
-				theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+	mobileMenu: {
+		[theme.fn.largerThan('md')]: {
+			display: 'none',
 		},
-	},
-
-	linkLabel: {
-		marginRight: rem(5),
 	},
 
 	navItem: {
@@ -97,6 +100,7 @@ const useStyles = createStyles((theme) => ({
 		fontWeight: 500,
 		cursor: 'pointer',
 		color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[7],
+		position: 'relative',
 
 		'&:hover': {
 			backgroundColor:
@@ -104,17 +108,30 @@ const useStyles = createStyles((theme) => ({
 		},
 	},
 
+	active: {
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+		fontWeight: 600,
+	},
+
 	navIcon: {
 		marginRight: theme.spacing.xs,
 		color: theme.colorScheme === 'dark' ? theme.colors.yellow[3] : theme.colors.yellow[6],
 	},
 
-	megaMenu: {
-		padding: theme.spacing.md,
-		width: rem(300),
+	dropdown: {
+		position: 'absolute',
+		top: '100%',
+		left: 0,
+		right: 0,
+		zIndex: 100,
+		borderRadius: theme.radius.sm,
+		overflow: 'hidden',
+		boxShadow: theme.shadows.md,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+		width: rem(250),
 	},
 
-	megaMenuItem: {
+	dropdownItem: {
 		display: 'flex',
 		alignItems: 'center',
 		padding: `${rem(8)} ${rem(12)}`,
@@ -128,8 +145,39 @@ const useStyles = createStyles((theme) => ({
 				theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 		},
 	},
+
+	mobileNavItem: {
+		padding: `${rem(12)} ${rem(8)}`,
+		fontWeight: 500,
+		display: 'flex',
+		alignItems: 'center',
+		width: '100%',
+		color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[7],
+
+		'&:hover': {
+			backgroundColor:
+				theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+		},
+	},
+
+	mobileSubItem: {
+		padding: `${rem(8)} ${rem(8)} ${rem(8)} ${rem(36)}`,
+		fontWeight: 400,
+	},
+
+	userButton: {
+		padding: theme.spacing.xs,
+		borderRadius: theme.radius.sm,
+		transition: 'background-color 200ms ease',
+
+		'&:hover': {
+			backgroundColor:
+				theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+		},
+	},
 }));
 
+// Navigation structure
 const navItems = [
 	{
 		label: 'Starter Packs',
@@ -137,15 +185,16 @@ const navItems = [
 		items: [
 			{
 				key: 'signup',
-				label: 'Online Payments',
+				label: 'Signup',
 				path: '/signup',
 				icon: <IconDeviceMobile size={16} />,
 			},
 			{
 				key: 'wakanet-activation',
-				label: 'Cash Payments',
+				label: 'Wakanet Activation',
 				path: '/wakanet-activation',
 				icon: <IconRouter size={16} />,
+				officeRestricted: true,
 			},
 		],
 	},
@@ -158,6 +207,7 @@ const navItems = [
 				label: 'Load Bundle',
 				path: '/load-bundle',
 				icon: <IconLoader size={16} />,
+				officeRestricted: true,
 			},
 			{
 				key: 'check-balance',
@@ -170,6 +220,7 @@ const navItems = [
 				label: 'Update Details',
 				path: '/update-details',
 				icon: <IconEdit size={16} />,
+				officeRestricted: true,
 			},
 		],
 	},
@@ -201,135 +252,226 @@ const navItems = [
 				path: '/dealer-management',
 				icon: <IconBuildingStore size={16} />,
 			},
+			{
+				key: 'imei-list',
+				label: 'IMEI List',
+				path: '/imei-list',
+				icon: <IconListDetails size={16} />,
+			},
 		],
 	},
 ];
 
 export function Header() {
-	const { classes } = useStyles();
+	const { classes, cx } = useStyles();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+	const location = useLocation();
 	const user = useSelector((state: RootState) => state.auth.user);
 	const isOfficeUser = user?.category === 'office';
+	const isAdmin = user?.role === 'ADMIN';
 
-	const [hoveredItem, setHoveredItem] = useState<number | null>(null);
+	// State for dropdown menus
+	const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+	const [mobileExpanded, setMobileExpanded] = useState<number[]>([]);
 
-	const handleLogout = useCallback(() => {
+	// Mobile menu state
+	const [mobileMenuOpened, { toggle: toggleMobileMenu, close: closeMobileMenu }] =
+		useDisclosure(false);
+
+	// User management modal state
+	const [userManagementOpened, { open: openUserManagement, close: closeUserManagement }] =
+		useDisclosure(false);
+
+	const handleLogout = () => {
 		dispatch(signout());
 		navigate('/signin');
-	}, []);
+	};
 
-	const displayName = user?.email?.split('@')[0] || 'Wakanet user';
-	const avatar = displayName[0]?.toUpperCase() || 'I';
-	const [opened, { open, close }] = useDisclosure(false);
+	const toggleMobileExpand = (index: number) => {
+		setMobileExpanded((current) =>
+			current.includes(index) ? current.filter((item) => item !== index) : [...current, index]
+		);
+	};
 
-	const renderNavItems = () => {
+	// Get user display info
+	const displayName = user?.email?.split('@')[0] || 'User';
+	const avatarLetter = displayName[0]?.toUpperCase() || 'U';
+
+	// Check if path is active
+	const isActive = (path: string) => location.pathname === path;
+
+	// Filter navigation items based on user role
+	const getFilteredItems = (items: (typeof navItems)[0]['items']) => {
+		return items.filter((item) => !item.officeRestricted || !isOfficeUser);
+	};
+
+	// Render desktop navigation
+	const renderDesktopNav = () => {
 		return navItems.map((item, index) => {
-			// Filter items based on office user status
-			const filteredItems = item.items.filter((subItem) => {
-				if (
-					subItem.key === 'wakanet-activation' ||
-					subItem.key === 'load-bundle' ||
-					subItem.key === 'update-details'
-				) {
-					return !isOfficeUser;
-				}
-				return true;
-			});
+			const filteredSubItems = getFilteredItems(item.items);
 
-			if (filteredItems.length === 0) return null;
+			if (filteredSubItems.length === 0) return null;
 
 			return (
-				<Popover
+				<Box
 					key={index}
-					position="bottom"
-					shadow="md"
-					opened={hoveredItem === index}
+					className={classes.navItem}
+					onClick={() => setOpenDropdown(openDropdown === index ? null : index)}
+					onMouseEnter={() => setOpenDropdown(index)}
+					onMouseLeave={() => setOpenDropdown(null)}
+					role="button"
+					aria-haspopup="true"
+					aria-expanded={openDropdown === index}
 				>
-					<Popover.Target>
-						<Box
-							className={classes.navItem}
-							onMouseEnter={() => setHoveredItem(index)}
-							onMouseLeave={() => setHoveredItem(null)}
-						>
-							<Group spacing="xs">
-								<span className={classes.navIcon}>{item.icon}</span>
-								{item.label}
-							</Group>
+					<Group spacing="xs">
+						<span className={classes.navIcon}>{item.icon}</span>
+						{item.label}
+						<IconChevronDown
+							size={16}
+							stroke={1.5}
+						/>
+					</Group>
+
+					{openDropdown === index && (
+						<Box className={classes.dropdown}>
+							<Stack spacing={0}>
+								{filteredSubItems.map((subItem) => (
+									<Link
+										key={subItem.key}
+										to={subItem.path}
+										className={cx(classes.dropdownItem, {
+											[classes.active]: isActive(subItem.path),
+										})}
+										onClick={() => setOpenDropdown(null)}
+									>
+										<span className={classes.navIcon}>{subItem.icon}</span>
+										{subItem.label}
+									</Link>
+								))}
+							</Stack>
 						</Box>
-					</Popover.Target>
-					<Popover.Dropdown
-						onMouseEnter={() => setHoveredItem(index)}
-						onMouseLeave={() => setHoveredItem(null)}
-						className={classes.megaMenu}
-					>
-						<Stack spacing="xs">
-							{filteredItems.map((subItem) => (
-								<Link
-									key={subItem.key}
-									to={subItem.path}
-									className={classes.megaMenuItem}
-								>
-									<span className={classes.navIcon}>{subItem.icon}</span>
-									{subItem.label}
-								</Link>
-							))}
-						</Stack>
-					</Popover.Dropdown>
-				</Popover>
+					)}
+				</Box>
 			);
 		});
 	};
 
+	// Render mobile navigation
+	const renderMobileNav = () => {
+		return (
+			<Box className={classes.mobileMenu}>
+				<MediaQuery
+					largerThan="md"
+					styles={{ display: 'none' }}
+				>
+					<Burger
+						opened={mobileMenuOpened}
+						onClick={toggleMobileMenu}
+					/>
+				</MediaQuery>
+
+				<Collapse in={mobileMenuOpened}>
+					<Stack
+						spacing={0}
+						py="md"
+					>
+						{navItems.map((category, index) => {
+							const filteredSubItems = getFilteredItems(category.items);
+							if (filteredSubItems.length === 0) return null;
+
+							const isExpanded = mobileExpanded.includes(index);
+
+							return (
+								<Box key={index}>
+									<UnstyledButton
+										className={classes.mobileNavItem}
+										onClick={() => toggleMobileExpand(index)}
+									>
+										<Group
+											position="apart"
+											w="100%"
+										>
+											<Group>
+												<span className={classes.navIcon}>
+													{category.icon}
+												</span>
+												<Text>{category.label}</Text>
+											</Group>
+											<IconChevronDown
+												size={16}
+												stroke={1.5}
+												style={{
+													transform: isExpanded
+														? 'rotate(180deg)'
+														: 'none',
+												}}
+											/>
+										</Group>
+									</UnstyledButton>
+
+									<Collapse in={isExpanded}>
+										<Stack spacing={0}>
+											{filteredSubItems.map((item) => (
+												<Link
+													key={item.key}
+													to={item.path}
+													className={cx(
+														classes.mobileNavItem,
+														classes.mobileSubItem,
+														{
+															[classes.active]: isActive(item.path),
+														}
+													)}
+													onClick={closeMobileMenu}
+												>
+													<span className={classes.navIcon}>
+														{item.icon}
+													</span>
+													{item.label}
+												</Link>
+											))}
+										</Stack>
+									</Collapse>
+									<Divider />
+								</Box>
+							);
+						})}
+
+						{isAdmin && (
+							<>
+								<Button
+									leftIcon={<IconUsers size={16} />}
+									variant="light"
+									onClick={() => {
+										openUserManagement();
+										closeMobileMenu();
+									}}
+									fullWidth
+									mt="md"
+								>
+									User Management
+								</Button>
+							</>
+						)}
+					</Stack>
+				</Collapse>
+			</Box>
+		);
+	};
+
 	return (
 		<>
-			<Drawer
-				opened={opened}
-				onClose={close}
-				size={'100%'}
-				position="left"
-				title="User managment"
-				overlayProps={{ opacity: 0.5, blur: 4 }}
-				transitionProps={{
-					transition: 'pop',
-					duration: 300,
-					timingFunction: 'linear',
-				}}
-			>
-				<Center>
-					<Stack w="90vw">
-						<Paper
-							withBorder
-							p="md"
-						>
-							<Center>
-								<IconUsers size={50} />
-							</Center>
-							<Text
-								tt="uppercase"
-								fw={'bold'}
-								fz={'lg'}
-							>
-								Add user
-							</Text>
-							<Adduser />
-						</Paper>
-						<Text
-							tt="uppercase"
-							fw={'bold'}
-							fz={'lg'}
-						>
-							View users
-						</Text>
-						<ListUsers />
-					</Stack>
-				</Center>
-			</Drawer>
+			{/* User Management Modal */}
+			<UserManagementModal
+				opened={userManagementOpened}
+				onClose={closeUserManagement}
+			/>
+
 			<Wrapper
-				withBorder
-				zIndex={1}
 				className={classes.root}
 				height={HEADER_HEIGHT}
+				withBorder
 				mb={10}
 			>
 				<Container
@@ -337,51 +479,66 @@ export function Header() {
 					fluid
 				>
 					<Flex
-						justify={'space-between'}
+						justify="space-between"
+						align="center"
 						w="100%"
-						align={'center'}
 					>
-						<Link to="/">
-							<Group h="100%">
-								<Image
-									src="/Logo.png"
-									width={70}
-								/>
-								<Code
-									sx={{ fontWeight: 700 }}
-									fz={'xl'}
-								>
-									4G | 5G PORTAL
-								</Code>
-							</Group>
-						</Link>
-
-						<Group className={classes.links}>{renderNavItems()}</Group>
-
+						{/* Logo */}
 						<Group>
-							{user?.role === 'ADMIN' ? (
-								<Button
-									radius="md"
-									variant="light"
-									onClick={open}
+							<Link
+								to="/"
+								className={classes.logo}
+							>
+								<img
+									src="/Logo.png"
+									alt="Logo"
+									width={45}
+									height={45}
+								/>
+								<Text className={classes.logoText}>4G | 5G PORTAL</Text>
+							</Link>
+						</Group>
+
+						{/* Desktop Navigation */}
+						<Group className={classes.links}>{renderDesktopNav()}</Group>
+
+						{/* Mobile Navigation */}
+						{renderMobileNav()}
+
+						{/* User Actions */}
+						<Group spacing="sm">
+							{isAdmin && (
+								<MediaQuery
+									smallerThan="md"
+									styles={{ display: 'none' }}
 								>
-									User managment
-								</Button>
-							) : null}
+									<Button
+										radius="md"
+										variant="light"
+										leftIcon={<IconUsers size={16} />}
+										onClick={openUserManagement}
+									>
+										User Management
+									</Button>
+								</MediaQuery>
+							)}
+
 							<ActionToggle />
+
 							<Menu
 								shadow="md"
 								width={200}
+								position="bottom-end"
 							>
 								<Menu.Target>
-									<ActionIcon>
+									<Box className={classes.userButton}>
 										<Avatar
 											color="cyan"
 											radius="xl"
 										>
-											{avatar}
+											{avatarLetter}
 										</Avatar>
-									</ActionIcon>
+									</Box>
 								</Menu.Target>
 
 								<Menu.Dropdown>
@@ -389,6 +546,7 @@ export function Header() {
 									<Menu.Item icon={<IconUser size={14} />}>
 										{displayName}
 									</Menu.Item>
+									<Menu.Divider />
 									<Menu.Item
 										onClick={handleLogout}
 										color="red"

@@ -31,9 +31,6 @@ const generateFakeShops = (count: number): Shop[] => {
 export function ShopList() {
 	const [shops] = useState<Shop[]>(generateFakeShops(30));
 	const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
-	const [selectedUserType, setSelectedUserType] = useState<'DSA' | 'Retailer' | 'ShopAgent'>(
-		'DSA'
-	);
 
 	// Modal states
 	const [addShopModalOpened, { open: openAddShopModal, close: closeAddShopModal }] =
@@ -41,9 +38,8 @@ export function ShopList() {
 	const [addUserModalOpened, { open: openAddUserModal, close: closeAddUserModal }] =
 		useDisclosure(false);
 
-	const handleAddUser = (shop: Shop, userType: 'DSA' | 'Retailer' | 'ShopAgent') => {
+	const handleAddShopAgent = (shop: Shop) => {
 		setSelectedShop(shop);
-		setSelectedUserType(userType);
 		openAddUserModal();
 	};
 
@@ -85,32 +81,8 @@ export function ShopList() {
 						variant="subtle"
 						size="xs"
 						p={0}
-						title="Add DSA"
-						onClick={() => handleAddUser(data, 'DSA')}
-					>
-						<IconUserPlus
-							size={16}
-							color="#228be6"
-						/>
-					</Button>
-					<Button
-						variant="subtle"
-						size="xs"
-						p={0}
-						title="Add Retailer"
-						onClick={() => handleAddUser(data, 'Retailer')}
-					>
-						<IconUserPlus
-							size={16}
-							color="#40c057"
-						/>
-					</Button>
-					<Button
-						variant="subtle"
-						size="xs"
-						p={0}
 						title="Add Shop Agent"
-						onClick={() => handleAddUser(data, 'ShopAgent')}
+						onClick={() => handleAddShopAgent(data)}
 					>
 						<IconUserPlus
 							size={16}
@@ -177,7 +149,7 @@ export function ShopList() {
 					opened={addUserModalOpened}
 					onClose={closeAddUserModal}
 					shop={selectedShop}
-					userType={selectedUserType}
+					userType="ShopAgent"
 				/>
 			)}
 		</Stack>

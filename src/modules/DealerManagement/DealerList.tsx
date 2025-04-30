@@ -1,6 +1,6 @@
 import { Button, Flex, Group, Stack, Text } from '@mantine/core';
 import { useDataGridTable } from '../../hooks/useDataGridTable';
-import { IconEdit, IconEye, IconPower, IconTrash } from '@tabler/icons-react';
+import { IconEdit, IconEye, IconPower, IconTrash, IconUserPlus } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useState } from 'react';
 import { faker } from '@faker-js/faker';
@@ -9,6 +9,7 @@ import { ViewDealerModal } from './ViewDealerModal';
 import { ConfirmationModal } from './ConfirmationModal';
 import { AddDealerModal } from './AddDealerModal';
 import { Dealer } from './types';
+import { AddDealerUserModal } from './AddDealerUserModal';
 
 // Generate fake dealers for demonstration
 const generateFakeDealers = (count: number): Dealer[] => {
@@ -17,7 +18,7 @@ const generateFakeDealers = (count: number): Dealer[] => {
 		name: faker.company.name(),
 		contactPerson: faker.person.fullName(),
 		email: faker.internet.email(),
-		phone: faker.phone.number({ style: 'national' }),
+		phone: faker.phone.number(),
 		category: faker.helpers.arrayElement(['wakanet', 'enterprise', 'both']),
 		createdAt: faker.date.past().toISOString(),
 		status: faker.helpers.arrayElement(['active', 'inactive']),
@@ -27,8 +28,8 @@ const generateFakeDealers = (count: number): Dealer[] => {
 export function DealerList() {
 	const [dealers] = useState<Dealer[]>(generateFakeDealers(50));
 	const [selectedDealer, setSelectedDealer] = useState<Dealer | null>(null);
+	const [addUserType, setAddUserType] = useState<'DSA' | 'Retailer' | null>(null);
 
-	// Modal states
 	const [addModalOpened, { open: openAddModal, close: closeAddModal }] = useDisclosure(false);
 	const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
 	const [viewModalOpened, { open: openViewModal, close: closeViewModal }] = useDisclosure(false);
@@ -59,6 +60,11 @@ export function DealerList() {
 		}
 	};
 
+	const handleAddUser = (dealer: Dealer, userType: 'DSA' | 'Retailer') => {
+		setSelectedDealer(dealer);
+		setAddUserType(userType);
+	};
+
 	const columns = [
 		{ name: 'name', header: 'Company Name', defaultFlex: 1 },
 		{ name: 'contactPerson', header: 'Contact Person', defaultFlex: 1 },
@@ -78,13 +84,39 @@ export function DealerList() {
 		{
 			name: 'actions',
 			header: 'Actions',
-			defaultFlex: 0.8,
+			defaultFlex: 1.2,
 			render: ({ data }: { data: Dealer }) => (
 				<Group
 					spacing="xs"
-					position="center"
+					position="left"
 					noWrap
 				>
+					<Button
+						variant="subtle"
+						size="xs"
+						p={0}
+						title="Add DSA"
+						onClick={() => handleAddUser(data, 'DSA')}
+					>
+						<IconUserPlus
+							size={16}
+							color="#228be6"
+						/>{' '}
+						DSA
+					</Button>
+					<Button
+						variant="subtle"
+						size="xs"
+						p={0}
+						title="Add Retailer"
+						onClick={() => handleAddUser(data, 'Retailer')}
+					>
+						<IconUserPlus
+							size={16}
+							color="#40c057"
+						/>{' '}
+						Retailer
+					</Button>
 					<Button
 						variant="subtle"
 						size="xs"
@@ -180,6 +212,15 @@ export function DealerList() {
 						dealer={selectedDealer}
 					/>
 				</>
+			)}
+
+			{selectedDealer && addUserType && (
+				<AddDealerUserModal
+					opened={!!addUserType}
+					onClose={() => setAddUserType(null)}
+					dealer={selectedDealer}
+					userType={addUserType}
+				/>
 			)}
 		</Stack>
 	);
