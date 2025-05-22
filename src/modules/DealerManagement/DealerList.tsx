@@ -11,7 +11,6 @@ import { AddDealerModal } from './AddDealerModal';
 import { Dealer } from './types';
 import { AddDealerUserModal } from './AddDealerUserModal';
 
-// Generate fake dealers for demonstration
 const generateFakeDealers = (count: number): Dealer[] => {
 	return Array.from({ length: count }, () => ({
 		id: faker.string.uuid(),
@@ -101,7 +100,7 @@ export function DealerList() {
 						<IconUserPlus
 							size={16}
 							color="#228be6"
-						/>{' '}
+						/>
 						DSA
 					</Button>
 					<Button
@@ -114,7 +113,7 @@ export function DealerList() {
 						<IconUserPlus
 							size={16}
 							color="#40c057"
-						/>{' '}
+						/>
 						Retailer
 					</Button>
 					<Button

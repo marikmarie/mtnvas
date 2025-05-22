@@ -4,7 +4,6 @@ import { StockThresholdModalProps } from './types';
 import { useForm } from '@mantine/form';
 import { faker } from '@faker-js/faker';
 
-// Simulated data for dropdowns (replace with actual API calls)
 const getDealers = () => {
 	return Array.from({ length: 10 }, () => ({
 		value: faker.string.uuid(),
@@ -12,14 +11,14 @@ const getDealers = () => {
 	}));
 };
 
-const getProducts = (category?: string) => {
+const getProducts = (_category?: string) => {
 	return Array.from({ length: 5 }, () => ({
 		value: faker.string.uuid(),
 		label: faker.commerce.productName(),
 	}));
 };
 
-const getDevices = (category?: string) => {
+const getDevices = (_category?: string) => {
 	return Array.from({ length: 3 }, () => ({
 		value: faker.string.uuid(),
 		label: faker.commerce.productName(),
