@@ -1,8 +1,8 @@
+import { faker } from '@faker-js/faker';
 import { Button, Group, Select, Stack, TextInput } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import { Modal } from '../../components/Modal';
 import { ShopModalProps } from './types';
-import { useForm } from '@mantine/form';
-import { faker } from '@faker-js/faker';
 
 // Simulated dealer data for the dropdown
 const getDealers = () => {
@@ -52,7 +52,7 @@ export function AddShopModal({ opened, onClose }: ShopModalProps) {
 						label="Shop Name"
 						placeholder="Enter shop name"
 						required
-						{...form.getInputProps('name')}
+						{...form.getInputProps('companyName')}
 					/>
 
 					<TextInput

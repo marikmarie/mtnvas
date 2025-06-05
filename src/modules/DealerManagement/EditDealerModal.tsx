@@ -1,8 +1,8 @@
 import { Button, Group, Select, Stack, TextInput } from '@mantine/core';
-import { Modal } from '../../components/Modal';
-import { DealerModalProps } from './types';
 import { useForm } from '@mantine/form';
 import { useEffect } from 'react';
+import { Modal } from '../../components/Modal';
+import { DealerModalProps } from './types';
 
 export function EditDealerModal({ opened, onClose, dealer }: DealerModalProps) {
 	const form = useForm({
@@ -51,7 +51,7 @@ export function EditDealerModal({ opened, onClose, dealer }: DealerModalProps) {
 						label="Company Name"
 						placeholder="Enter company name"
 						required
-						{...form.getInputProps('name')}
+						{...form.getInputProps('companyName')}
 					/>
 
 					<TextInput
@@ -72,7 +72,7 @@ export function EditDealerModal({ opened, onClose, dealer }: DealerModalProps) {
 						label="Phone"
 						placeholder="Enter phone number"
 						required
-						{...form.getInputProps('phone')}
+						{...form.getInputProps('msisdn')}
 					/>
 
 					<Select

@@ -1,15 +1,17 @@
-import { Button, Flex, Group, Stack, Text } from '@mantine/core';
-import { useDataGridTable } from '../../hooks/useDataGridTable';
-import { IconEdit, IconEye, IconPower, IconTrash, IconUserPlus } from '@tabler/icons-react';
-import { useDisclosure } from '@mantine/hooks';
-import { useState } from 'react';
 import { faker } from '@faker-js/faker';
-import { EditDealerModal } from './EditDealerModal';
-import { ViewDealerModal } from './ViewDealerModal';
-import { ConfirmationModal } from './ConfirmationModal';
+import { Button, Flex, Group, Stack, Text } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { IconEdit, IconEye, IconPower, IconTrash, IconUserPlus } from '@tabler/icons-react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useDataGridTable } from '../../hooks/useDataGridTable';
+import useRequest from '../../hooks/useRequest';
 import { AddDealerModal } from './AddDealerModal';
-import { Dealer } from './types';
 import { AddDealerUserModal } from './AddDealerUserModal';
+import { ConfirmationModal } from './ConfirmationModal';
+import { EditDealerModal } from './EditDealerModal';
+import { Dealer } from './types';
+import { ViewDealerModal } from './ViewDealerModal';
 
 const generateFakeDealers = (count: number): Dealer[] => {
 	return Array.from({ length: count }, () => ({
@@ -25,7 +27,7 @@ const generateFakeDealers = (count: number): Dealer[] => {
 };
 
 export function DealerList() {
-	const [dealers] = useState<Dealer[]>(generateFakeDealers(50));
+	// const [dealers] = useState<Dealer[]>(generateFakeDealers(50));
 	const [selectedDealer, setSelectedDealer] = useState<Dealer | null>(null);
 	const [addUserType, setAddUserType] = useState<'DSA' | 'Retailer' | null>(null);
 
@@ -59,20 +61,27 @@ export function DealerList() {
 		}
 	};
 
+	const request = useRequest(true);
+
+	const { data: dealers, isLoading } = useQuery({
+		queryFn: () => request.get('/dealer-groups'),
+		queryKey: ['dealers'],
+	});
+
 	const handleAddUser = (dealer: Dealer, userType: 'DSA' | 'Retailer') => {
 		setSelectedDealer(dealer);
 		setAddUserType(userType);
 	};
 
 	const columns = [
-		{ name: 'name', header: 'Company Name', defaultFlex: 1 },
-		{ name: 'contactPerson', header: 'Contact Person', defaultFlex: 1 },
-		{ name: 'email', header: 'Email', defaultFlex: 1 },
-		{ name: 'phone', header: 'Phone', defaultFlex: 1 },
-		{ name: 'category', header: 'Category', defaultFlex: 1 },
+		{ name: 'companyName', header: 'COMPANY NAME', defaultFlex: 1 },
+		{ name: 'contactPerson', header: 'CONTACT PERSON', defaultFlex: 1 },
+		{ name: 'email', header: 'EMAIL', defaultFlex: 1 },
+		{ name: 'msisdn', header: 'MSISDN', defaultFlex: 1 },
+		{ name: 'department', header: 'DEPARTMENT', defaultFlex: 1 },
 		{
 			name: 'status',
-			header: 'Status',
+			header: 'STATUS',
 			defaultFlex: 1,
 			render: ({ data }: { data: Dealer }) => (
 				<Text color={data.status === 'active' ? 'green' : 'red'}>
@@ -82,7 +91,7 @@ export function DealerList() {
 		},
 		{
 			name: 'actions',
-			header: 'Actions',
+			header: 'ACTIONS',
 			defaultFlex: 1.2,
 			render: ({ data }: { data: Dealer }) => (
 				<Group
@@ -171,10 +180,12 @@ export function DealerList() {
 		},
 	];
 
+	console.log(dealers?.data.data);
+
 	const table = useDataGridTable({
 		columns,
-		data: dealers,
-		loading: false,
+		data: dealers?.data?.data || [],
+		loading: isLoading,
 	});
 
 	return (

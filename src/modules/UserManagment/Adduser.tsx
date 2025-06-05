@@ -1,12 +1,12 @@
 import { Button, LoadingOverlay, Select, TextInput, ThemeIcon } from '@mantine/core';
-import { IconLock, IconMail } from '@tabler/icons-react';
-import { memo, useCallback } from 'react';
 import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
+import { IconLock, IconMail } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
-import useRequest from '../../hooks/useRequest';
-import { notifications } from '@mantine/notifications';
+import { memo, useCallback } from 'react';
 import { customLoader } from '../../components/CustomLoader';
+import useRequest from '../../hooks/useRequest';
 
 interface Props {}
 
@@ -93,7 +93,7 @@ function Adduser(props: Props) {
 				}
 				placeholder="Name"
 				value={form.values.name}
-				onChange={(event) => form.setFieldValue('name', event.currentTarget.value)}
+				onChange={(event) => form.setFieldValue('companyName', event.currentTarget.value)}
 				error={form.errors.name}
 			/>
 

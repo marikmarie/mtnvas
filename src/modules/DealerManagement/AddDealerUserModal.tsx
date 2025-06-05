@@ -1,7 +1,9 @@
 import { Button, Group, Stack, TextInput, Title } from '@mantine/core';
-import { Modal } from '../../components/Modal';
-import { Dealer } from './types';
 import { useForm } from '@mantine/form';
+import { useMutation } from '@tanstack/react-query';
+import { Modal } from '../../components/Modal';
+import useRequest from '../../hooks/useRequest';
+import { Dealer } from './types';
 
 interface AddDealerUserModalProps {
 	opened: boolean;
@@ -11,6 +13,8 @@ interface AddDealerUserModalProps {
 }
 
 export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDealerUserModalProps) {
+	const request = useRequest(true);
+
 	const form = useForm({
 		initialValues: {
 			name: '',
@@ -27,6 +31,14 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 				return null;
 			},
 		},
+	});
+
+	const mutation = useMutation({
+		mutationFn: () =>
+			request.post('/dealer-groups', {
+				...form.values,
+			}),
+		mutationKey: ['dealers'],
 	});
 
 	const handleSubmit = form.onSubmit((values) => {
@@ -56,7 +68,7 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 							label="Name"
 							placeholder="Enter full name"
 							required
-							{...form.getInputProps('name')}
+							{...form.getInputProps('companyName')}
 						/>
 						<TextInput
 							label="Email"

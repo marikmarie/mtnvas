@@ -1,7 +1,7 @@
 import { Button, Group, Stack, Text, TextInput, Title } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import { Modal } from '../../components/Modal';
 import { ShopUserModalProps } from './types';
-import { useForm } from '@mantine/form';
 
 export function AddShopUserModal({ opened, onClose, shop, userType }: ShopUserModalProps) {
 	const form = useForm({
@@ -60,7 +60,7 @@ export function AddShopUserModal({ opened, onClose, shop, userType }: ShopUserMo
 							label="Name"
 							placeholder="Enter full name"
 							required
-							{...form.getInputProps('name')}
+							{...form.getInputProps('companyName')}
 						/>
 
 						<TextInput
