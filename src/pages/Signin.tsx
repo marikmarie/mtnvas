@@ -1,4 +1,3 @@
-import { useForm } from '@mantine/form';
 import {
 	Button,
 	Center,
@@ -10,22 +9,21 @@ import {
 	Paper,
 	PaperProps,
 	Stack,
+	Text,
 	TextInput,
 	ThemeIcon,
-	Title,
-	Text,
 } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
 import { IconLock, IconMail } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
-import useRequest from '../hooks/useRequest';
 import { AxiosError, AxiosResponse } from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { Auth, signin } from '../app/slices/auth';
 import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { Auth, signin } from '../app/slices/auth';
 import { customLoader } from '../components/CustomLoader';
-import { notifications } from '@mantine/notifications';
+import useRequest from '../hooks/useRequest';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -98,7 +96,6 @@ export default React.memo((props: PaperProps) => {
 			<Paper
 				className={cx(formContainer, props.className)}
 				p="xl"
-				{...props}
 				w={400}
 			>
 				<Flex
@@ -121,14 +118,6 @@ export default React.memo((props: PaperProps) => {
 					>
 						Welcome back! Please enter your credentials.
 					</Text>
-				</Center>
-				<Center>
-					<Title
-						c="dimmed"
-						fz={'xl'}
-					>
-						Signin
-					</Title>
 				</Center>
 
 				<form onSubmit={form.onSubmit(() => mutation.mutate())}>
@@ -159,7 +148,6 @@ export default React.memo((props: PaperProps) => {
 							placeholder="Password"
 							label="Password"
 							type="password"
-							mb="xs"
 							icon={
 								<ThemeIcon
 									color="transparent"
@@ -170,18 +158,11 @@ export default React.memo((props: PaperProps) => {
 							}
 							error={form.errors.password}
 						/>
-						<Text
-							mt={-20}
-							component={RouterLink}
-							to={'/passwordReset'}
-						>
-							Reset Password
-						</Text>
+						<Link to={'/passwordReset'}>Re/Set Password</Link>
 						<Button
 							type="submit"
 							radius="md"
 							fullWidth
-							mt="md"
 						>
 							Sign In
 						</Button>

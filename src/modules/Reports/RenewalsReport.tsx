@@ -1,3 +1,4 @@
+import { Text } from '@mantine/core';
 import GeneralReportTable from './GeneralReport';
 
 export default function RenewalsReportTable() {
@@ -16,8 +17,8 @@ export default function RenewalsReportTable() {
 	];
 
 	const customColumnRenderers = {
-		ecwCode: (data: any) => <>{data['ecwCode']}</>,
-		package: (data: any) => <>{data['package']}</>,
+		ecwCode: (data: any) => <Text ta="center">{data['ecwCode'] || '-'}</Text>,
+		package: (data: any) => <Text ta="center">{data['package']}</Text>,
 	};
 
 	return (

@@ -1,24 +1,23 @@
-import { useForm } from '@mantine/form';
 import {
-	Paper,
-	PaperProps,
-	Image,
-	Text,
+	Button,
+	Center,
 	Container,
 	createStyles,
-	Center,
 	LoadingOverlay,
-	TextInput,
-	Button,
+	Paper,
+	PaperProps,
 	PinInput,
 	Stack,
+	Text,
+	TextInput,
 } from '@mantine/core';
-import { memo, useCallback } from 'react';
+import { useForm } from '@mantine/form';
 import { IconMail } from '@tabler/icons-react';
-import useRequest from '../hooks/useRequest';
+import { memo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '../app/store';
 import { Link, useNavigate } from 'react-router-dom';
+import { RootState } from '../app/store';
+import useRequest from '../hooks/useRequest';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -98,21 +97,6 @@ export default memo((props: PaperProps) => {
 					{...props}
 					w={450}
 				>
-					<Center>
-						<Image
-							src="/Logo.png"
-							width={100}
-						/>
-					</Center>
-
-					<Text
-						c="dimmed"
-						fz={'lg'}
-						ta="center"
-						my="md"
-					>
-						Password Reset
-					</Text>
 					<Text
 						c="dimmed"
 						size="sm"
@@ -122,7 +106,7 @@ export default memo((props: PaperProps) => {
 						Enter your email to receive an OTP, then set your new password.
 					</Text>
 
-					<Stack spacing="md">
+					<Stack spacing="sm">
 						<TextInput
 							name="email"
 							value={form.values.email}
@@ -181,7 +165,7 @@ export default memo((props: PaperProps) => {
 							radius="md"
 							fullWidth
 						>
-							Reset Password
+							Re/set Password
 						</Button>
 					</Stack>
 					<Center mt="xs">

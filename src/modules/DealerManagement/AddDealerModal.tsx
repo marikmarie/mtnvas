@@ -1,7 +1,7 @@
 import { Button, Group, Select, Stack, TextInput } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import { Modal } from '../../components/Modal';
 import { DealerModalProps } from './types';
-import { useForm } from '@mantine/form';
 
 export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 	const form = useForm({
