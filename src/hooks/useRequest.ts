@@ -1,72 +1,106 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
 import { notifications } from '@mantine/notifications';
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../app/store';
 import { useNavigate } from 'react-router-dom';
 import { signout } from '../app/slices/auth';
+import { RootState } from '../app/store';
 import { __PROD__ } from '../utils/__prod__';
 
 const BASE_URL = __PROD__
 	? import.meta.env.VITE_APP_BASE_URL_PROD
 	: import.meta.env.VITE_APP_BASE_URL_DEV;
 
-export default function useRequest( requireAuth: boolean = false ): AxiosInstance {
-	const token = useSelector( ( state: RootState ) => state.auth.token );
+interface NotificationOptions {
+	showSuccess?: boolean;
+	showError?: boolean;
+	successColor?: string;
+	errorColor?: string;
+	autoClose?: number;
+	title?: string;
+}
 
+interface ApiResponse {
+	status?: number;
+	message?: string;
+	[key: string]: any;
+}
+
+export default function useRequest(
+	requireAuth: boolean = false,
+	notificationOptions: NotificationOptions = {}
+): AxiosInstance {
+	const token = useSelector((state: RootState) => state.auth.token);
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
+	const {
+		showSuccess = true,
+		showError = true,
+		successColor = 'green',
+		errorColor = 'red',
+		autoClose = 5000,
+		title = 'Notification',
+	} = notificationOptions;
+
 	function logout() {
-		dispatch( signout() );
-		navigate( '/signin' );
+		dispatch(signout());
+		navigate('/signin');
 	}
 
-	const instance = axios.create( {
+	const instance = axios.create({
 		baseURL: BASE_URL,
 		headers: requireAuth ? { Authorization: `Bearer ${token}` } : {},
-	} );
+	});
+
+	const showNotification = (message: string, color: string, customTitle?: string) => {
+		if (!message) return;
+
+		notifications.show({
+			title: customTitle || title,
+			message:
+				typeof message === 'string' ? message : JSON.stringify(message).replace(/"/g, ''),
+			color,
+			autoClose,
+		});
+	};
 
 	instance.interceptors.response.use(
-		( response ) => {
-			if ( response.data.status === 401 ) {
+		(response: AxiosResponse<ApiResponse>) => {
+			const responseMessage = String(
+				response?.data?.status ||
+					response?.data?.message ||
+					response?.data ||
+					// @ts-ignore
+					response.message
+			);
+			if (response.data.status === 401) {
 				logout();
-				notifications.show( {
-					title: 'response',
-					message: JSON.stringify( response.data.message ).replace( /"/g, '' ),
-					color: 'yellow',
-					autoClose: 5000,
-				} );
-			}
-			return response;
-		},
-		( error: AxiosError ) => {
-			let title = 'Error';
-			if ( error.response ) {
-				const status = error.response.status;
-				title = `Error ${status}`;
-				// @ts-ignore
-				const message = error.response.data?.message;
-
-				if ( status === 401 ) {
-					logout();
-					title = 'Session Expired';
-					notifications.show( {
-						title,
-						message,
-						color: 'yellow',
-						autoClose: 5000,
-					} );
-				} else {
-					notifications.show( {
-						title,
-						message,
-						color: 'red',
-						autoClose: 5000,
-					} );
+				if (response.data.message) {
+					showNotification(responseMessage, 'yellow', 'Authentication Error');
 				}
 			}
 
-			return Promise.reject( error );
+			if (showSuccess && response.data.message) {
+				showNotification(response.data.message, successColor);
+			}
+
+			return response;
+		},
+		(error: AxiosError<ApiResponse>) => {
+			if (!showError) return Promise.reject(error);
+
+			const errorMessage = String(
+				error.response?.data?.status ||
+					error.response?.data?.message ||
+					error.response?.data ||
+					error.message
+			);
+
+			if (error.response) {
+				showNotification(errorMessage, errorColor, 'Error');
+			}
+
+			return Promise.reject(error);
 		}
 	);
 

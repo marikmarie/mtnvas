@@ -1,13 +1,11 @@
-import { Flex, Badge, TextInput, Button, Text, Loader, Paper, Stack } from '@mantine/core';
+import { Badge, Button, Flex, Loader, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconCircleCheck, IconPhone, IconRestore } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useDispatch, useSelector } from 'react-redux';
+import { setServiceCode, setSubscriptionId } from '../../../app/slices/BundleActivations';
 import { RootState } from '../../../app/store';
 import useRequest from '../../../hooks/useRequest';
-import { notifications } from '@mantine/notifications';
-import { AxiosResponse, AxiosError } from 'axios';
-import { setServiceCode, setSubscriptionId } from '../../../app/slices/BundleActivations';
 
 export const Form = () => {
 	const request = useRequest(true);
@@ -33,45 +31,19 @@ export const Form = () => {
 
 	const activation = useMutation({
 		mutationFn: () => request.post('/bundle-activations', { ...form.values, subscriptionId }),
-		onSuccess: (response: AxiosResponse) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'Success',
-				// @ts-ignore
-				message: response.data.message,
-				color: 'green',
-			});
+		onSuccess: () => {
 			onReset();
 		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'FAILURE',
-				message: JSON.stringify(error.response?.data),
-				color: 'red',
-			});
+		onError: () => {
 			onReset();
 		},
 	});
 	const rejection = useMutation({
 		mutationFn: () => request.post('/reject-activations', { ...form.values, subscriptionId }),
-		onSuccess: (response: AxiosResponse) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'Success',
-				// @ts-ignore
-				message: JSON.stringify(response.data),
-				color: 'green',
-			});
+		onSuccess: () => {
 			onReset();
 		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'FAILURE',
-				message: JSON.stringify(error.response?.data),
-				color: 'red',
-			});
+		onError: () => {
 			onReset();
 		},
 	});

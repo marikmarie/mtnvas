@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker';
 import { Button, Flex, Group, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconEdit, IconEye, IconPower, IconTrash, IconUserPlus } from '@tabler/icons-react';
@@ -13,21 +12,7 @@ import { EditDealerModal } from './EditDealerModal';
 import { Dealer } from './types';
 import { ViewDealerModal } from './ViewDealerModal';
 
-const generateFakeDealers = (count: number): Dealer[] => {
-	return Array.from({ length: count }, () => ({
-		id: faker.string.uuid(),
-		name: faker.company.name(),
-		contactPerson: faker.person.fullName(),
-		email: faker.internet.email(),
-		phone: faker.phone.number(),
-		category: faker.helpers.arrayElement(['wakanet', 'enterprise', 'both']),
-		createdAt: faker.date.past().toISOString(),
-		status: faker.helpers.arrayElement(['active', 'inactive']),
-	}));
-};
-
 export function DealerList() {
-	// const [dealers] = useState<Dealer[]>(generateFakeDealers(50));
 	const [selectedDealer, setSelectedDealer] = useState<Dealer | null>(null);
 	const [addUserType, setAddUserType] = useState<'DSA' | 'Retailer' | null>(null);
 
@@ -85,7 +70,7 @@ export function DealerList() {
 			defaultFlex: 1,
 			render: ({ data }: { data: Dealer }) => (
 				<Text color={data.status === 'active' ? 'green' : 'red'}>
-					{data.status.charAt(0).toUpperCase() + data.status.slice(1)}
+					{data.status?.charAt(0)?.toUpperCase() + data.status?.slice(1)}
 				</Text>
 			),
 		},
@@ -179,8 +164,6 @@ export function DealerList() {
 			),
 		},
 	];
-
-	console.log(dealers?.data.data);
 
 	const table = useDataGridTable({
 		columns,

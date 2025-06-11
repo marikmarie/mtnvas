@@ -1,35 +1,16 @@
 import { Button, Flex, Group, Stack, Text } from '@mantine/core';
-import { useDataGridTable } from '../../hooks/useDataGridTable';
-import { IconPower, IconUserPlus } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
+import { IconPower, IconUserPlus } from '@tabler/icons-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { faker } from '@faker-js/faker';
-import { Shop } from './types';
+import { useDataGridTable } from '../../hooks/useDataGridTable';
+import useRequest from '../../hooks/useRequest';
 import { AddShopModal } from './AddShopModal';
 import { AddShopUserModal } from './AddShopUserModal';
-
-// Generate fake shops for demonstration
-const generateFakeShops = (count: number): Shop[] => {
-	return Array.from({ length: count }, () => ({
-		id: faker.string.uuid(),
-		name: faker.company.name(),
-		location: faker.location.city(),
-		region: faker.helpers.arrayElement([
-			'central',
-			'eastern',
-			'northern',
-			'western',
-			'southern',
-		]),
-		dealerId: faker.string.uuid(),
-		dealerName: faker.company.name(),
-		status: faker.helpers.arrayElement(['pending', 'approved', 'rejected']),
-		createdAt: faker.date.past().toISOString(),
-	}));
-};
+import { Shop } from './types';
 
 export function ShopList() {
-	const [shops] = useState<Shop[]>(generateFakeShops(30));
+	const request = useRequest(true);
 	const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
 
 	// Modal states
@@ -38,32 +19,56 @@ export function ShopList() {
 	const [addUserModalOpened, { open: openAddUserModal, close: closeAddUserModal }] =
 		useDisclosure(false);
 
+	const { data: shopsData, isLoading } = useQuery({
+		queryKey: ['shops'],
+		queryFn: () => request.get('/shops'),
+	});
+
+	const approvalMutation = useMutation({
+		mutationFn: ({ shopId, status }: { shopId: string; status: 'approved' | 'rejected' }) =>
+			request.post(`/shops/${shopId}/approval?status=${status}`),
+	});
+
 	const handleAddShopAgent = (shop: Shop) => {
 		setSelectedShop(shop);
 		openAddUserModal();
 	};
 
 	const columns = [
-		{ name: 'name', header: 'Shop Name', defaultFlex: 1 },
-		{ name: 'location', header: 'Location', defaultFlex: 1 },
-		{ name: 'region', header: 'Region', defaultFlex: 1 },
-		{ name: 'dealerName', header: 'Dealer', defaultFlex: 1 },
+		{
+			name: 'shopName',
+			header: 'Shop Name',
+			defaultFlex: 1,
+			render: ({ data }: { data: Shop }) => data.shopName?.toUpperCase() || '-',
+		},
+		{
+			name: 'location',
+			header: 'Location',
+			defaultFlex: 1,
+			render: ({ data }: { data: Shop }) => data.location?.toUpperCase() || '-',
+		},
+		{
+			name: 'region',
+			header: 'Region',
+			defaultFlex: 1,
+			render: ({ data }: { data: Shop }) => data.region?.toUpperCase() || '-',
+		},
+		{
+			name: 'dealerName',
+			header: 'Dealer',
+			defaultFlex: 1,
+			render: ({ data }: { data: Shop }) => data.dealerName?.toUpperCase() || '-',
+		},
 		{
 			name: 'status',
 			header: 'Status',
 			defaultFlex: 1,
 			render: ({ data }: { data: Shop }) => (
 				<Text
-					color={
-						data.status === 'approved'
-							? 'green'
-							: data.status === 'rejected'
-								? 'red'
-								: 'orange'
-					}
+					color={data.status === 'active' ? 'green' : 'red'}
 					transform="capitalize"
 				>
-					{data.status}
+					{data.status.toUpperCase()}
 				</Text>
 			),
 		},
@@ -89,7 +94,7 @@ export function ShopList() {
 							color="#fab005"
 						/>
 					</Button>
-					{data.status === 'pending' && (
+					{data.status === 'inactive' && (
 						<Group
 							spacing="xs"
 							noWrap
@@ -99,7 +104,13 @@ export function ShopList() {
 								size="xs"
 								p={0}
 								title="Approve"
-								onClick={() => console.log('Approve shop:', data)}
+								onClick={() =>
+									approvalMutation.mutate({
+										shopId: data.shopName,
+										status: 'approved',
+									})
+								}
+								loading={approvalMutation.isLoading}
 							>
 								<IconPower
 									size={16}
@@ -111,7 +122,13 @@ export function ShopList() {
 								size="xs"
 								p={0}
 								title="Reject"
-								onClick={() => console.log('Reject shop:', data)}
+								onClick={() =>
+									approvalMutation.mutate({
+										shopId: data.shopName,
+										status: 'rejected',
+									})
+								}
+								loading={approvalMutation.isLoading}
 							>
 								<IconPower
 									size={16}
@@ -127,8 +144,8 @@ export function ShopList() {
 
 	const table = useDataGridTable({
 		columns,
-		data: shops,
-		loading: false,
+		data: shopsData?.data?.data || [],
+		loading: isLoading,
 	});
 
 	return (

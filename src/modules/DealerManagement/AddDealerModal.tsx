@@ -15,31 +15,31 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 			email: '',
 			msisdn: '',
 			department: '',
-			status: '',
 		},
 		validate: {
 			companyName: (value) => (!value ? 'Company name is required' : null),
 			contactPerson: (value) => (!value ? 'Contact person is required' : null),
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
-			msisdn: (value) => (!value ? 'MSISDN is required' : null),
+			msisdn: (value) => {
+				if (!value) return 'MSISDN is required';
+				if (!/^256\d{9}$/.test(value))
+					return 'Phone number must start with 256 followed by 9 digits';
+				return null;
+			},
 			department: (value) => (!value ? 'Department is required' : null),
-			status: (value) => (!value ? 'Status is required' : null),
 		},
 	});
 
 	const mutation = useMutation({
-		mutationFn: () =>
-			request.post('/dealer-groups', {
-				...form.values,
-			}),
+		mutationFn: () => request.post('/dealer-groups', form.values),
 		mutationKey: ['dealers'],
+		onSuccess: () => {
+			onClose();
+			form.reset();
+		},
 	});
 
-	const handleSubmit = form.onSubmit(async () => {
-		await mutation.mutateAsync();
-		onClose();
-		form.reset();
-	});
+	const handleSubmit = form.onSubmit(() => mutation.mutate());
 
 	return (
 		<Modal
@@ -72,7 +72,7 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 
 					<TextInput
 						label="Phone"
-						placeholder="Enter phone number"
+						placeholder="Enter phone number (e.g., 256123456789)"
 						required
 						{...form.getInputProps('msisdn')}
 					/>
@@ -88,17 +88,6 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 						{...form.getInputProps('department')}
 					/>
 
-					<Select
-						label="Status"
-						placeholder="Select the status"
-						required
-						data={[
-							{ value: 'active', label: 'Active' },
-							{ value: 'inactive', label: 'Inactive' },
-						]}
-						{...form.getInputProps('status')}
-					/>
-
 					<Group
 						position="right"
 						mt="md"
@@ -109,7 +98,12 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 						>
 							Cancel
 						</Button>
-						<Button type="submit">Add Dealer</Button>
+						<Button
+							type="submit"
+							loading={mutation.isLoading}
+						>
+							Add Dealer
+						</Button>
 					</Group>
 				</Stack>
 			</form>

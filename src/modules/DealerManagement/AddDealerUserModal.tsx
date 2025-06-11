@@ -1,6 +1,6 @@
 import { Button, Group, Stack, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Dealer } from './types';
@@ -14,12 +14,18 @@ interface AddDealerUserModalProps {
 
 export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDealerUserModalProps) {
 	const request = useRequest(true);
+	const queryClient = useQueryClient();
 
 	const form = useForm({
 		initialValues: {
 			name: '',
 			email: '',
 			msisdn: '',
+			username: '',
+			department: 'WAKANET',
+			category: 'CEX_PLUS',
+			role: userType.toLowerCase(),
+			location: '',
 		},
 		validate: {
 			name: (value) => (!value ? 'Name is required' : null),
@@ -30,29 +36,25 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 					return 'Phone number must start with 256 followed by 9 digits';
 				return null;
 			},
+			username: (value) => (!value ? 'Username is required' : null),
+			location: (value) => (!value ? 'Location is required' : null),
 		},
 	});
 
 	const mutation = useMutation({
 		mutationFn: () =>
-			request.post('/dealer-groups', {
+			request.post('/users', {
 				...form.values,
+				dealerGroup: dealer.name,
 			}),
-		mutationKey: ['dealers'],
+		mutationKey: ['users'],
+		onSuccess: () => {
+			onClose();
+			form.reset();
+		},
 	});
 
-	const handleSubmit = form.onSubmit((values) => {
-		const userData = {
-			...values,
-			dealerId: dealer.id,
-			dealerName: dealer.name,
-			userType,
-		};
-		console.log(`Add ${userType} to dealer:`, userData);
-		// Here you would typically make an API call to create the user for the dealer
-		onClose();
-		form.reset();
-	});
+	const handleSubmit = form.onSubmit(() => mutation.mutate());
 
 	return (
 		<Modal
@@ -68,7 +70,13 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 							label="Name"
 							placeholder="Enter full name"
 							required
-							{...form.getInputProps('companyName')}
+							{...form.getInputProps('name')}
+						/>
+						<TextInput
+							label="Username"
+							placeholder="Enter username"
+							required
+							{...form.getInputProps('username')}
 						/>
 						<TextInput
 							label="Email"
@@ -82,6 +90,12 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 							required
 							{...form.getInputProps('msisdn')}
 						/>
+						<TextInput
+							label="Location"
+							placeholder="Enter location"
+							required
+							{...form.getInputProps('location')}
+						/>
 						<Group
 							position="right"
 							mt="md"
@@ -92,7 +106,12 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 							>
 								Cancel
 							</Button>
-							<Button type="submit">Add {userType}</Button>
+							<Button
+								type="submit"
+								loading={mutation.isLoading}
+							>
+								Add {userType}
+							</Button>
 						</Group>
 					</Stack>
 				</form>

@@ -25,8 +25,8 @@ export function AddShopUserModal({ opened, onClose, shop, userType }: ShopUserMo
 	const handleSubmit = form.onSubmit((values) => {
 		const userData = {
 			...values,
-			shopId: shop.id,
-			shopName: shop.name,
+			shopId: shop.shopName,
+			shopName: shop.shopName,
 			userType,
 		};
 		console.log(`Add ${userType}:`, userData);
@@ -51,7 +51,7 @@ export function AddShopUserModal({ opened, onClose, shop, userType }: ShopUserMo
 					size="sm"
 					color="dimmed"
 				>
-					Adding {userType} to shop: {shop.name}
+					Adding {userType} to shop: {shop.shopName}
 				</Text>
 
 				<form onSubmit={handleSubmit}>

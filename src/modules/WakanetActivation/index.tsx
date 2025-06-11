@@ -1,9 +1,7 @@
-import { Stack, Flex, TextInput, Button, Loader } from '@mantine/core';
+import { Button, Flex, Loader, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconPhone } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
-import { notifications } from '@mantine/notifications';
-import { AxiosResponse, AxiosError } from 'axios';
 import useRequest from '../../hooks/useRequest';
 
 export const WakanetActivation = () => {
@@ -25,23 +23,8 @@ export const WakanetActivation = () => {
 
 	const activation = useMutation({
 		mutationFn: () => request.post('/wakanet-activation', form.values),
-		onSuccess: (response: AxiosResponse) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'Success',
-				// @ts-ignore
-				message: JSON.stringify(response.data),
-				color: 'green',
-			});
+		onSuccess: () => {
 			form.reset();
-		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'FAILURE',
-				message: JSON.stringify(error.response?.data),
-				color: 'red',
-			});
 		},
 	});
 

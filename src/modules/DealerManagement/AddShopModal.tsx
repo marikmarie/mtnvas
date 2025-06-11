@@ -1,42 +1,48 @@
-import { faker } from '@faker-js/faker';
 import { Button, Group, Select, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useMutation } from '@tanstack/react-query';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../app/store';
 import { Modal } from '../../components/Modal';
+import useRequest from '../../hooks/useRequest';
 import { ShopModalProps } from './types';
 
-// Simulated dealer data for the dropdown
-const getDealers = () => {
-	return Array.from({ length: 10 }, () => ({
-		value: faker.string.uuid(),
-		label: faker.company.name(),
-	}));
-};
-
-// Simulated regions
 const regions = ['Central', 'Eastern', 'Northern', 'Western'].map((region) => ({
 	value: region.toLowerCase(),
 	label: region,
 }));
 
 export function AddShopModal({ opened, onClose }: ShopModalProps) {
+	const request = useRequest(true);
+	const user = useSelector((state: RootState) => state.auth.user);
+
 	const form = useForm({
 		initialValues: {
-			name: '',
+			shopName: '',
 			location: '',
 			region: '',
-			dealerId: '',
+			dealerName: '',
+			status: 'active',
 		},
 		validate: {
-			name: (value) => (!value ? 'Shop name is required' : null),
+			shopName: (value) => (!value ? 'Shop name is required' : null),
 			location: (value) => (!value ? 'Location is required' : null),
 			region: (value) => (!value ? 'Region is required' : null),
-			dealerId: (value) => (!value ? 'Dealer is required' : null),
+			dealerName: (value) => (!value ? 'Dealer is required' : null),
 		},
 	});
 
-	const handleSubmit = form.onSubmit((values) => {
-		console.log('Add shop:', values);
-		onClose();
+	const mutation = useMutation({
+		mutationFn: () =>
+			request.post('/shops', {
+				...form.values,
+				createdBy: user?.email,
+				createdAt: new Date().toISOString(),
+			}),
+	});
+
+	const handleSubmit = form.onSubmit(() => {
+		mutation.mutate();
 		form.reset();
 	});
 
@@ -52,7 +58,7 @@ export function AddShopModal({ opened, onClose }: ShopModalProps) {
 						label="Shop Name"
 						placeholder="Enter shop name"
 						required
-						{...form.getInputProps('companyName')}
+						{...form.getInputProps('shopName')}
 					/>
 
 					<TextInput
@@ -70,14 +76,11 @@ export function AddShopModal({ opened, onClose }: ShopModalProps) {
 						{...form.getInputProps('region')}
 					/>
 
-					<Select
-						label="Dealer"
-						placeholder="Select dealer"
+					<TextInput
+						label="Dealer Name"
+						placeholder="Enter dealer name"
 						required
-						data={getDealers()}
-						searchable
-						nothingFound="No dealers found"
-						{...form.getInputProps('dealerId')}
+						{...form.getInputProps('dealerName')}
 					/>
 
 					<Group
@@ -90,7 +93,12 @@ export function AddShopModal({ opened, onClose }: ShopModalProps) {
 						>
 							Cancel
 						</Button>
-						<Button type="submit">Add Shop</Button>
+						<Button
+							type="submit"
+							loading={mutation.isLoading}
+						>
+							Add Shop
+						</Button>
 					</Group>
 				</Stack>
 			</form>

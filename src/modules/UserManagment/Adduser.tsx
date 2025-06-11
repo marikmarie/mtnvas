@@ -1,9 +1,7 @@
 import { Button, LoadingOverlay, Select, TextInput, ThemeIcon } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
 import { IconLock, IconMail } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AxiosError, AxiosResponse } from 'axios';
 import { memo, useCallback } from 'react';
 import { customLoader } from '../../components/CustomLoader';
 import useRequest from '../../hooks/useRequest';
@@ -45,27 +43,11 @@ function Adduser(props: Props) {
 
 	const mutation = useMutation({
 		mutationFn: () => request.post('/users/add', { ...form.values }),
-		onSuccess: async (response: AxiosResponse) => {
-			await queryClient.invalidateQueries({
-				queryKey: ['users'],
-			});
-			notifications.show({
-				autoClose: 5000,
-				title: 'Success',
-				// @ts-ignore
-				message: JSON.stringify(response.data),
-				color: 'green',
-			});
+		mutationKey: ['users'],
+		onSuccess: async () => {
 			form.reset();
 		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'FAILURE',
-				message: JSON.stringify(error.response?.data),
-				color: 'red',
-			});
-		},
+		onError: () => {},
 	});
 
 	const onSubmit = useCallback(() => {

@@ -14,10 +14,9 @@ import {
 	ThemeIcon,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
 import { IconLock, IconMail } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
@@ -68,18 +67,8 @@ export default React.memo((props: PaperProps) => {
 	const mutation = useMutation({
 		mutationFn: () => request.post('/login', form.values),
 		onSuccess: (res: AxiosResponse) => {
-			if (res.data.status === 401) return null;
-
 			dispatch(signin(res.data as unknown as Auth));
 			navigate('/');
-		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'FAILURE',
-				message: JSON.stringify(error.response?.data),
-				color: 'red',
-			});
 		},
 	});
 
@@ -163,6 +152,7 @@ export default React.memo((props: PaperProps) => {
 							type="submit"
 							radius="md"
 							fullWidth
+							loading={mutation.isLoading}
 						>
 							Sign In
 						</Button>

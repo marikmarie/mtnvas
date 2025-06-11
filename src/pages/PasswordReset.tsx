@@ -13,10 +13,9 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconMail } from '@tabler/icons-react';
+import { useMutation } from '@tanstack/react-query';
 import { memo, useCallback } from 'react';
-import { useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import { RootState } from '../app/store';
+import { Link } from 'react-router-dom';
 import useRequest from '../hooks/useRequest';
 
 const useStyles = createStyles((theme) => ({
@@ -44,47 +43,56 @@ export default memo((props: PaperProps) => {
 	} = useStyles();
 
 	const request = useRequest();
-	const navigate = useNavigate();
-	const user = useSelector((state: RootState) => state.auth.user);
 
 	const form = useForm({
 		initialValues: {
-			email: user?.email || '',
+			msisdn: '',
+			otp: '',
 			password: '',
 			passwordConfirm: '',
-			otp: '',
 		},
 		validate: {
-			email: (val: string) => (!val ? 'Please enter email' : null),
-			otp: (val: string) => (val.length !== 6 ? 'OTP must be 6 characters' : null),
-			password: (val: string) => (!val ? 'Please enter email' : null),
-			passwordConfirm: (val: string) =>
-				val.length !== 6 ? 'OTP must be 6 characters' : null,
+			msisdn: (value) => {
+				if (!value) return 'Phone number is required';
+				if (!/^256\d{9}$/.test(value))
+					return 'Phone number must start with 256 followed by 9 digits';
+				return null;
+			},
+			otp: (value) => (value.length !== 6 ? 'OTP must be 6 characters' : null),
+			password: (value) => (!value ? 'Password is required' : null),
+			passwordConfirm: (value): string | null =>
+				value !== form.values.password ? 'Passwords do not match' : null,
 		},
 	});
 
-	const requestOTP = useCallback(async () => {
-		await request.post(`/request-otp`, {
-			email: form.values.email || user?.email,
-		});
-	}, [form.values.email]);
+	const requestOTPMutation = useMutation({
+		mutationFn: () => request.post(`/request-otp?msisdn=${form.values.msisdn}`),
+	});
 
-	const passwordReset = useCallback(async () => {
-		const res = await request.post(`/password-reset`, {
-			otp: form.values.otp,
-			email: form.values.email,
-			password: form.values.password,
-			passwordConfirm: form.values.passwordConfirm,
-		});
-		if (res.data?.status !== 200) {
-			navigate('/signin');
-		}
-	}, [form.values.otp, form.values.email, form.values.password, form.values.passwordConfirm]);
+	const passwordResetMutation = useMutation({
+		mutationFn: () =>
+			request.post('/password-reset', {
+				otp: form.values.otp,
+				msisdn: form.values.msisdn,
+				password: form.values.password,
+				passwordConfirm: form.values.passwordConfirm,
+			}),
+	});
+
+	const requestOTP = useCallback(() => {
+		if (form.validateField('msisdn').hasError) return;
+		requestOTPMutation.mutate();
+	}, [form.values.msisdn]);
+
+	const handlePasswordReset = useCallback(() => {
+		if (form.validate().hasErrors) return;
+		passwordResetMutation.mutate();
+	}, [form.values]);
 
 	return (
 		<>
 			<LoadingOverlay
-				visible={false}
+				visible={requestOTPMutation.isLoading || passwordResetMutation.isLoading}
 				zIndex={9999}
 			/>
 			<Container
@@ -103,19 +111,19 @@ export default memo((props: PaperProps) => {
 						align="center"
 						mb="lg"
 					>
-						Enter your email to receive an OTP, then set your new password.
+						Enter your phone number to receive an OTP, then set your new password.
 					</Text>
 
 					<Stack spacing="sm">
 						<TextInput
-							name="email"
-							value={form.values.email}
-							label="Email"
-							type="email"
+							name="msisdn"
+							value={form.values.msisdn}
+							label="Phone Number"
 							onChange={(event) =>
-								form.setFieldValue('email', event.currentTarget.value)
+								form.setFieldValue('msisdn', event.currentTarget.value)
 							}
-							placeholder="Enter email"
+							placeholder="Enter phone number (e.g., 256123456789)"
+							error={form.errors.msisdn}
 						/>
 						<Button
 							my="sm"
@@ -125,6 +133,7 @@ export default memo((props: PaperProps) => {
 							leftIcon={<IconMail size="1rem" />}
 							radius="md"
 							mt="xs"
+							loading={requestOTPMutation.isLoading}
 						>
 							Get OTP
 						</Button>
@@ -136,6 +145,7 @@ export default memo((props: PaperProps) => {
 								size="xl"
 								length={6}
 								oneTimeCode
+								error={!!form.errors.otp}
 							/>
 						</Center>
 						<TextInput
@@ -147,6 +157,7 @@ export default memo((props: PaperProps) => {
 								form.setFieldValue('password', event.currentTarget.value)
 							}
 							placeholder="Enter password"
+							error={form.errors.password}
 						/>
 						<TextInput
 							name="passwordConfirm"
@@ -157,13 +168,15 @@ export default memo((props: PaperProps) => {
 								form.setFieldValue('passwordConfirm', event.currentTarget.value)
 							}
 							placeholder="Confirm Password"
+							error={form.errors.passwordConfirm}
 						/>
 						<Button
 							type="submit"
-							onClick={passwordReset}
+							onClick={handlePasswordReset}
 							mt="md"
 							radius="md"
 							fullWidth
+							loading={passwordResetMutation.isLoading}
 						>
 							Re/set Password
 						</Button>

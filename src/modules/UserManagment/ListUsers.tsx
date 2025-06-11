@@ -1,13 +1,11 @@
-import { memo } from 'react';
-import useRequest from '../../hooks/useRequest';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AxiosError, AxiosResponse } from 'axios';
 import { ActionIcon, Flex, LoadingOverlay, Stack, Tooltip } from '@mantine/core';
-import { toTitle } from '../../utils/toTitle';
-import { notifications } from '@mantine/notifications';
+import { IconCircleCheck, IconDeselect } from '@tabler/icons-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { memo } from 'react';
 import { customLoader } from '../../components/CustomLoader';
 import { useDataGridTable } from '../../hooks/useDataGridTable';
-import { IconCircleCheck, IconDeselect } from '@tabler/icons-react';
+import useRequest from '../../hooks/useRequest';
+import { toTitle } from '../../utils/toTitle';
 
 interface Props {}
 
@@ -17,17 +15,14 @@ function ListUsers(props: Props) {
 	const queryClient = useQueryClient();
 
 	const query = useQuery({
-		queryFn: () => request.get('/users'),
+		queryFn: () =>
+			request.post('/users', {
+				page: 1,
+				pageSize: 100,
+				from: new Date().toISOString().split('T')[0],
+				to: new Date().toISOString().split('T')[0],
+			}),
 		queryKey: ['users'],
-		onSuccess: (_: AxiosResponse) => {},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'FAILURE',
-				message: JSON.stringify(error.response?.data),
-				color: 'red',
-			});
-		},
 	});
 
 	const columns = ['name', 'email', 'role', 'status', 'category', 'createdAt'].map((column) => ({
@@ -36,50 +31,13 @@ function ListUsers(props: Props) {
 	}));
 
 	const activationMutation = useMutation({
-		mutationFn: (email: string) => request.post(`/users/${email}/activate`),
-		onSuccess: async (response: AxiosResponse) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'Success',
-				// @ts-ignore
-				message: response.data.message,
-				color: 'green',
-			});
-			await queryClient.invalidateQueries({
-				queryKey: ['users'],
-			});
-		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'FAILURE',
-				message: JSON.stringify(error.response?.data),
-				color: 'red',
-			});
-		},
+		mutationFn: (email: string) => request.post(`/users/${email}/approval?status=active`),
+		mutationKey: ['users'],
 	});
+
 	const deactivationMutation = useMutation({
-		mutationFn: (email: string) => request.post(`/users/${email}/deactivate`),
-		onSuccess: async (response: AxiosResponse) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'Success',
-				// @ts-ignore
-				message: response.data.message,
-				color: 'green',
-			});
-			await queryClient.invalidateQueries({
-				queryKey: ['users'],
-			});
-		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'FAILURE',
-				message: JSON.stringify(error.response?.data),
-				color: 'red',
-			});
-		},
+		mutationFn: (email: string) => request.post(`/users/${email}/approval?status=inactive`),
+		mutationKey: ['users'],
 	});
 
 	columns.push({
@@ -103,6 +61,7 @@ function ListUsers(props: Props) {
 							variant="outline"
 							w="100%"
 							color="green"
+							loading={activationMutation.isLoading}
 						>
 							<IconCircleCheck />
 						</ActionIcon>
@@ -116,6 +75,7 @@ function ListUsers(props: Props) {
 							variant="outline"
 							w="100%"
 							color="red"
+							loading={deactivationMutation.isLoading}
 						>
 							<IconDeselect />
 						</ActionIcon>

@@ -1,9 +1,7 @@
-import React from 'react';
+import { Button, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { TextInput, Button, Stack, Text } from '@mantine/core';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { notifications } from '@mantine/notifications';
-import { AxiosError, AxiosResponse } from 'axios';
+import { useMutation } from '@tanstack/react-query';
+import React from 'react';
 import useRequest from '../../../hooks/useRequest';
 
 interface UpdateDetailsData {
@@ -44,33 +42,10 @@ export default function UpdateDetailsModal({ detail }: DetailsProp) {
 		},
 	});
 
-	const queryClient = useQueryClient();
-
 	const mutation = useMutation({
 		mutationKey: ['details'],
 		mutationFn: (data: UpdateDetailsData) =>
 			request.put(`/customers`, data).then((res) => res.data),
-		onSuccess: (response: AxiosResponse) => {
-			queryClient.invalidateQueries({
-				queryKey: ['details'],
-			});
-			notifications.show({
-				autoClose: 5000,
-				title: 'Success',
-				// @ts-ignore
-				message: JSON.stringify(response.data),
-				color: 'green',
-			});
-			form.reset();
-		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 5000,
-				title: 'FAILURE',
-				message: JSON.stringify(error.response?.data),
-				color: 'red',
-			});
-		},
 	});
 
 	const handleSubmission = (event: React.FormEvent) => {
