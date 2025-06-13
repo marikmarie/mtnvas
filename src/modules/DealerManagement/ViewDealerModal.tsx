@@ -1,12 +1,16 @@
-import { Button, Group, Stack, Text, Divider, Badge, Flex, Box, Title } from '@mantine/core';
-import { Modal } from '../../components/Modal';
-import { DealerModalProps } from './types';
+import { Badge, Box, Button, Divider, Flex, Group, Stack, Text, Title } from '@mantine/core';
 import { IconBuilding, IconCalendar, IconMail, IconPhone, IconUser } from '@tabler/icons-react';
+import { Modal } from '../../components/Modal';
+import { Dealer } from './types';
 
-export function ViewDealerModal({ opened, onClose, dealer }: DealerModalProps) {
-	if (!dealer) return null;
+interface ViewDealerModalProps {
+	opened: boolean;
+	onClose: () => void;
+	dealer: Dealer;
+}
 
-	const formatDate = (dateString: string | number | Date) => {
+export function ViewDealerModal({ opened, onClose, dealer }: ViewDealerModalProps) {
+	const formatDate = (dateString: string) => {
 		const date = new Date(dateString);
 		return date.toLocaleDateString(undefined, {
 			year: 'numeric',
@@ -97,16 +101,7 @@ export function ViewDealerModal({ opened, onClose, dealer }: DealerModalProps) {
 						gap="md"
 					>
 						<IconBuilding size={18} />
-						<Text weight={500}>
-							Category:{' '}
-							<Text
-								span
-								color="dimmed"
-								transform="capitalize"
-							>
-								{dealer.category}
-							</Text>
-						</Text>
+						<Text weight={500}>Category: {dealer.category}</Text>
 					</Flex>
 
 					<Flex
@@ -114,29 +109,20 @@ export function ViewDealerModal({ opened, onClose, dealer }: DealerModalProps) {
 						gap="md"
 					>
 						<IconCalendar size={18} />
-						<Text weight={500}>
-							Registered:{' '}
-							<Text
-								span
-								color="dimmed"
-							>
-								{formatDate(dealer.createdAt)}
-							</Text>
-						</Text>
+						<Text>Created: {formatDate(dealer.createdAt)}</Text>
 					</Flex>
 				</Stack>
 
 				<Group
 					position="right"
-					mt="xl"
+					mt="md"
 				>
 					<Button
-						variant="outline"
+						variant="subtle"
 						onClick={onClose}
 					>
 						Close
 					</Button>
-					<Button>Edit Details</Button>
 				</Group>
 			</Stack>
 		</Modal>

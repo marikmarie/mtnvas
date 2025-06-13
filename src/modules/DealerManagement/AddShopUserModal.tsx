@@ -1,43 +1,74 @@
-import { Button, Group, Stack, Text, TextInput, Title } from '@mantine/core';
+import { Button, Group, Select, Stack, Text, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
-import { ShopUserModalProps } from './types';
+import useRequest from '../../hooks/useRequest';
+import { Dealer } from './types';
 
-export function AddShopUserModal({ opened, onClose, shop, userType }: ShopUserModalProps) {
-	const form = useForm({
+interface Shop {
+	id: string;
+	name: string;
+}
+
+interface AddShopUserModalProps {
+	opened: boolean;
+	onClose: () => void;
+	dealer: Dealer;
+	shops: Shop[];
+}
+
+interface ShopUserFormValues {
+	firstName: string;
+	lastName: string;
+	email: string;
+	phone: string;
+	shopId: string;
+	role: string;
+}
+
+export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUserModalProps) {
+	const request = useRequest(true);
+	const queryClient = useQueryClient();
+
+	const form = useForm<ShopUserFormValues>({
 		initialValues: {
-			name: '',
+			firstName: '',
+			lastName: '',
 			email: '',
-			msisdn: '',
+			phone: '',
+			shopId: '',
+			role: 'shop_user',
 		},
 		validate: {
-			name: (value) => (!value ? 'Name is required' : null),
-			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
-			msisdn: (value) => {
-				if (!value) return 'Phone number is required';
-				if (!/^256\d{9}$/.test(value))
-					return 'Phone number must start with 256 followed by 9 digits';
-				return null;
-			},
+			firstName: (value) => (!value ? 'First name is required' : null),
+			lastName: (value) => (!value ? 'Last name is required' : null),
+			email: (value) => (!value ? 'Email is required' : null),
+			phone: (value) => (!value ? 'Phone number is required' : null),
+			shopId: (value) => (!value ? 'Shop is required' : null),
 		},
 	});
 
-	const handleSubmit = form.onSubmit((values) => {
-		const userData = {
-			...values,
-			shopId: shop.shopName,
-			shopName: shop.shopName,
-			userType,
-		};
-		console.log(`Add ${userType}:`, userData);
-		// Here you would typically make an API call to create the user
-		// The endpoint would be different based on userType
-		// e.g., /api/shops/${shop.id}/dsa for DSA
-		// or /api/shops/${shop.id}/retailer for Retailer
-		// or /api/shops/${shop.id}/agent for Shop Agent
-		onClose();
-		form.reset();
+	const mutation = useMutation({
+		mutationFn: (values: ShopUserFormValues) => {
+			return request.post(`/dealer-groups/${dealer.id}/users`, values);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['dealer', dealer.id] });
+			onClose();
+			form.reset();
+		},
 	});
+
+	const handleSubmit = (values: ShopUserFormValues) => {
+		mutation.mutate(values);
+	};
+
+	const shopOptions = shops.map((shop) => ({
+		value: shop.id,
+		label: shop.name,
+	}));
+
+	const selectedShop = shops.find((s) => s.id === form.values.shopId);
 
 	return (
 		<Modal
@@ -46,35 +77,50 @@ export function AddShopUserModal({ opened, onClose, shop, userType }: ShopUserMo
 			size="md"
 		>
 			<Stack>
-				<Title order={3}>Add {userType}</Title>
+				<Title order={3}>Add User</Title>
 				<Text
 					size="sm"
 					color="dimmed"
 				>
-					Adding {userType} to shop: {shop.shopName}
+					Adding user to shop: {selectedShop?.name || 'Select a shop'}
 				</Text>
 
-				<form onSubmit={handleSubmit}>
-					<Stack>
+				<form onSubmit={form.onSubmit(handleSubmit)}>
+					<Stack spacing="md">
 						<TextInput
-							label="Name"
-							placeholder="Enter full name"
+							label="First Name"
+							placeholder="Enter first name"
 							required
-							{...form.getInputProps('companyName')}
+							{...form.getInputProps('firstName')}
+						/>
+
+						<TextInput
+							label="Last Name"
+							placeholder="Enter last name"
+							required
+							{...form.getInputProps('lastName')}
 						/>
 
 						<TextInput
 							label="Email"
-							placeholder="Enter email address"
+							placeholder="Enter email"
 							required
 							{...form.getInputProps('email')}
 						/>
 
 						<TextInput
 							label="Phone Number"
-							placeholder="Enter phone number (e.g., 256123456789)"
+							placeholder="Enter phone number"
 							required
-							{...form.getInputProps('msisdn')}
+							{...form.getInputProps('phone')}
+						/>
+
+						<Select
+							label="Shop"
+							placeholder="Select shop"
+							required
+							data={shopOptions}
+							{...form.getInputProps('shopId')}
 						/>
 
 						<Group
@@ -87,7 +133,12 @@ export function AddShopUserModal({ opened, onClose, shop, userType }: ShopUserMo
 							>
 								Cancel
 							</Button>
-							<Button type="submit">Add {userType}</Button>
+							<Button
+								type="submit"
+								loading={mutation.isLoading}
+							>
+								Add User
+							</Button>
 						</Group>
 					</Stack>
 				</form>

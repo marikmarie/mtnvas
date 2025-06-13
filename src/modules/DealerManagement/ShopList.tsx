@@ -159,14 +159,38 @@ export function ShopList() {
 			<AddShopModal
 				opened={addShopModalOpened}
 				onClose={closeAddShopModal}
+				dealer={{
+					id: '',
+					name: '',
+					contactPerson: '',
+					email: '',
+					phone: '',
+					category: 'wakanet',
+					createdAt: '',
+					status: 'active',
+				}}
 			/>
 
 			{selectedShop && (
 				<AddShopUserModal
 					opened={addUserModalOpened}
 					onClose={closeAddUserModal}
-					shop={selectedShop}
-					userType="ShopAgent"
+					dealer={{
+						id: selectedShop.dealerName,
+						name: selectedShop.dealerName,
+						contactPerson: '',
+						email: '',
+						phone: '',
+						category: 'wakanet',
+						createdAt: '',
+						status: 'active',
+					}}
+					shops={[
+						{
+							id: selectedShop.shopName,
+							name: selectedShop.shopName,
+						},
+					]}
 				/>
 			)}
 		</Stack>

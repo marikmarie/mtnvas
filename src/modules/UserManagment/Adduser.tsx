@@ -1,7 +1,7 @@
 import { Button, LoadingOverlay, Select, TextInput, ThemeIcon } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconLock, IconMail } from '@tabler/icons-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { memo, useCallback } from 'react';
 import { customLoader } from '../../components/CustomLoader';
 import useRequest from '../../hooks/useRequest';
@@ -12,8 +12,6 @@ function Adduser(props: Props) {
 	const {} = props;
 
 	const request = useRequest(true);
-	const queryClient = useQueryClient();
-
 	const form = useForm({
 		initialValues: {
 			name: '',

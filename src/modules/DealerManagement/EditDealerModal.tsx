@@ -1,43 +1,58 @@
 import { Button, Group, Select, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
-import { DealerModalProps } from './types';
+import useRequest from '../../hooks/useRequest';
+import { Dealer } from './types';
 
-export function EditDealerModal({ opened, onClose, dealer }: DealerModalProps) {
-	const form = useForm({
+interface EditDealerModalProps {
+	opened: boolean;
+	onClose: () => void;
+	dealer: Dealer;
+}
+
+interface DealerFormValues {
+	name: string;
+	contactPerson: string;
+	email: string;
+	phone: string;
+	category: 'wakanet' | 'enterprise' | 'both';
+}
+
+export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProps) {
+	const request = useRequest(true);
+	const queryClient = useQueryClient();
+
+	const form = useForm<DealerFormValues>({
 		initialValues: {
-			name: '',
-			contactPerson: '',
-			email: '',
-			phone: '',
-			category: '',
+			name: dealer.name,
+			contactPerson: dealer.contactPerson,
+			email: dealer.email,
+			phone: dealer.phone,
+			category: dealer.category,
 		},
 		validate: {
-			name: (value) => (!value ? 'Company name is required' : null),
+			name: (value) => (!value ? 'Dealer name is required' : null),
 			contactPerson: (value) => (!value ? 'Contact person is required' : null),
-			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+			email: (value) => (!value ? 'Email is required' : null),
 			phone: (value) => (!value ? 'Phone number is required' : null),
 			category: (value) => (!value ? 'Category is required' : null),
 		},
 	});
 
-	useEffect(() => {
-		if (dealer) {
-			form.setValues({
-				name: dealer.name,
-				contactPerson: dealer.contactPerson,
-				email: dealer.email,
-				phone: dealer.phone,
-				category: dealer.category,
-			});
-		}
-	}, [dealer]);
-
-	const handleSubmit = form.onSubmit((values) => {
-		console.log('Update dealer:', values);
-		onClose();
+	const mutation = useMutation({
+		mutationFn: (values: DealerFormValues) => {
+			return request.put(`/dealer-groups/${dealer.id}`, values);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['dealer', dealer.id] });
+			onClose();
+		},
 	});
+
+	const handleSubmit = (values: DealerFormValues) => {
+		mutation.mutate(values);
+	};
 
 	return (
 		<Modal
@@ -45,13 +60,13 @@ export function EditDealerModal({ opened, onClose, dealer }: DealerModalProps) {
 			close={onClose}
 			size="md"
 		>
-			<form onSubmit={handleSubmit}>
-				<Stack>
+			<form onSubmit={form.onSubmit(handleSubmit)}>
+				<Stack spacing="md">
 					<TextInput
-						label="Company Name"
-						placeholder="Enter company name"
+						label="Dealer Name"
+						placeholder="Enter dealer name"
 						required
-						{...form.getInputProps('companyName')}
+						{...form.getInputProps('name')}
 					/>
 
 					<TextInput
@@ -63,21 +78,21 @@ export function EditDealerModal({ opened, onClose, dealer }: DealerModalProps) {
 
 					<TextInput
 						label="Email"
-						placeholder="Enter email address"
+						placeholder="Enter email"
 						required
 						{...form.getInputProps('email')}
 					/>
 
 					<TextInput
-						label="Phone"
+						label="Phone Number"
 						placeholder="Enter phone number"
 						required
-						{...form.getInputProps('msisdn')}
+						{...form.getInputProps('phone')}
 					/>
 
 					<Select
 						label="Category"
-						placeholder="Select dealer category"
+						placeholder="Select category"
 						required
 						data={[
 							{ value: 'wakanet', label: 'Wakanet' },
@@ -97,7 +112,12 @@ export function EditDealerModal({ opened, onClose, dealer }: DealerModalProps) {
 						>
 							Cancel
 						</Button>
-						<Button type="submit">Update Dealer</Button>
+						<Button
+							type="submit"
+							loading={mutation.isLoading}
+						>
+							Save Changes
+						</Button>
 					</Group>
 				</Stack>
 			</form>

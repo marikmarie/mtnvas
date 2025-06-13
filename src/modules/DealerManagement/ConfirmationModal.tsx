@@ -1,5 +1,7 @@
 import { Button, Group, Stack, Text } from '@mantine/core';
+import { useMutation } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
+import useRequest from '../../hooks/useRequest';
 import { Dealer } from './types';
 
 interface ConfirmationModalProps {
@@ -10,6 +12,22 @@ interface ConfirmationModalProps {
 }
 
 export function ConfirmationModal({ opened, onClose, action, dealer }: ConfirmationModalProps) {
+	const request = useRequest(true);
+
+	const mutation = useMutation({
+		mutationFn: () => {
+			if (action === 'delete') {
+				return request.delete(`/dealer-groups/${dealer.id}`);
+			}
+			return request.post(`/dealer-groups/${dealer.id}/status`, {
+				status: action === 'activate' ? 'active' : 'inactive',
+			});
+		},
+		onSuccess: () => {
+			onClose();
+		},
+	});
+
 	const getActionColor = () => {
 		switch (action) {
 			case 'activate':
@@ -36,9 +54,7 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 	};
 
 	const handleConfirm = () => {
-		console.log(`Confirmed ${action} for dealer:`, dealer);
-		// Here you would typically make an API call to perform the action
-		onClose();
+		mutation.mutate();
 	};
 
 	return (
@@ -79,6 +95,7 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 					<Button
 						color={getActionColor()}
 						onClick={handleConfirm}
+						loading={mutation.isLoading}
 					>
 						{action.charAt(0).toUpperCase() + action.slice(1)}
 					</Button>

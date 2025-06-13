@@ -1,37 +1,22 @@
 import { Button, Flex, Stack, Text } from '@mantine/core';
-import { useDataGridTable } from '../../hooks/useDataGridTable';
 import { useDisclosure } from '@mantine/hooks';
-import { useState } from 'react';
-import { faker } from '@faker-js/faker';
-import { Stock } from './types';
+import { useQuery } from '@tanstack/react-query';
+import { useDataGridTable } from '../../hooks/useDataGridTable';
+import useRequest from '../../hooks/useRequest';
 import { AddStockModal } from './AddStockModal';
 import { SetStockThresholdModal } from './SetStockThresholdModal';
-
-// Generate fake stock data for demonstration
-const generateFakeStock = (count: number): Stock[] => {
-	return Array.from({ length: count }, () => ({
-		id: faker.string.uuid(),
-		dealerId: faker.string.uuid(),
-		dealerName: faker.company.name(),
-		productId: faker.string.uuid(),
-		productName: faker.commerce.productName(),
-		deviceId: faker.string.uuid(),
-		deviceName: faker.commerce.productName(),
-		category: faker.helpers.arrayElement(['wakanet', 'enterprise', 'both']),
-		imeiFile: faker.system.filePath(),
-		quantity: faker.number.int({ min: 100, max: 1000 }),
-		sold: faker.number.int({ min: 10, max: 70 }),
-		createdAt: faker.date.past().toISOString(),
-	}));
-};
+import { Stock } from './types';
 
 export function StockList() {
-	const [stock] = useState<Stock[]>(generateFakeStock(30));
-
-	// Modal states
+	const request = useRequest(true);
 	const [addModalOpened, { open: openAddModal, close: closeAddModal }] = useDisclosure(false);
 	const [thresholdModalOpened, { open: openThresholdModal, close: closeThresholdModal }] =
 		useDisclosure(false);
+
+	const { data: stockData, isLoading } = useQuery({
+		queryKey: ['stocks'],
+		queryFn: () => request.get('/stocks'),
+	});
 
 	const columns = [
 		{ name: 'dealerName', header: 'Dealer', defaultFlex: 1 },
@@ -66,8 +51,8 @@ export function StockList() {
 
 	const table = useDataGridTable({
 		columns,
-		data: stock,
-		loading: false,
+		data: stockData?.data?.data || [],
+		loading: isLoading,
 	});
 
 	return (

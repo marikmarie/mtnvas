@@ -1,141 +1,101 @@
-import { useState, useEffect } from 'react';
-import { Modal, Button, Stack, TextInput, Text, Group } from '@mantine/core';
-import { faker } from '@faker-js/faker';
-import { Imei } from './types';
-import { showNotification } from '@mantine/notifications';
+import { Button, Group, Stack, TextInput, Textarea } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Modal } from '../../components/Modal';
+import useRequest from '../../hooks/useRequest';
 
 interface ImeiSwapModalProps {
 	opened: boolean;
 	onClose: () => void;
-	imei: Imei | null;
-	onSwap: (data: any) => Promise<void>;
+	oldImei: string;
 }
 
-const fakeAvailableImeis = Array.from({ length: 20 }, () => faker.phone.imei());
-const fakeActiveImeis = Array.from({ length: 10 }, () => faker.phone.imei());
+interface ImeiSwapFormValues {
+	newImei: string;
+	reason: string;
+}
 
-export function ImeiSwapModal({ opened, onClose, imei, onSwap }: ImeiSwapModalProps) {
-	const [oldImei, setOldImei] = useState('');
-	const [newImei, setNewImei] = useState('');
-	const [reason, setReason] = useState('');
-	const [checkResult, setCheckResult] = useState<string | null>(null);
-	const [checking, setChecking] = useState(false);
-	const [loading, setLoading] = useState(false);
+export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) {
+	const request = useRequest(true);
+	const queryClient = useQueryClient();
 
-	useEffect(() => {
-		setOldImei(imei?.imei || '');
-		setNewImei('');
-		setReason('');
-		setCheckResult(null);
-		setChecking(false);
-		setLoading(false);
-	}, [opened, imei]);
+	const form = useForm<ImeiSwapFormValues>({
+		initialValues: {
+			newImei: '',
+			reason: '',
+		},
+		validate: {
+			newImei: (value) => (!value ? 'New IMEI is required' : null),
+			reason: (value) => (!value ? 'Reason is required' : null),
+		},
+	});
 
-	const handleCheck = async () => {
-		setChecking(true);
-		setTimeout(() => {
-			if (!fakeAvailableImeis.includes(newImei)) {
-				setCheckResult('IMEI not available');
-			} else if (!fakeActiveImeis.includes(newImei)) {
-				setCheckResult('IMEI is available but not active');
-			} else {
-				setCheckResult('IMEI is available and active');
-			}
-			setChecking(false);
-		}, 800);
-	};
-
-	const handleSubmit = async () => {
-		setLoading(true);
-		try {
-			const response = await fetch('/api/imei/swap', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					oldImei,
-					newImei,
-					reason,
-				}),
+	const mutation = useMutation({
+		mutationFn: (values: ImeiSwapFormValues) => {
+			return request.post('/imei-swaps', {
+				oldImei,
+				...values,
 			});
-			if (!response.ok) throw new Error('Swap failed');
-			showNotification({
-				color: 'green',
-				title: 'Success',
-				message: 'IMEI swapped successfully!',
-			});
-			await onSwap({ oldImei, newImei, reason });
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['imeis'] });
 			onClose();
-		} catch (e: any) {
-			showNotification({ color: 'red', title: 'Error', message: e.message || 'Swap failed' });
-		} finally {
-			setLoading(false);
-		}
+			form.reset();
+		},
+	});
+
+	const handleSubmit = (values: ImeiSwapFormValues) => {
+		mutation.mutate(values);
 	};
 
 	return (
 		<Modal
 			opened={opened}
-			onClose={onClose}
-			title={`IMEI Swap${imei ? `: ${imei.imei}` : ''}`}
-			centered
+			close={onClose}
+			size="md"
 		>
-			<Stack>
-				<TextInput
-					label="Old IMEI"
-					placeholder="Enter old IMEI"
-					value={oldImei}
-					onChange={(e) => setOldImei(e.target.value)}
-				/>
-				<Group
-					align="end"
-					spacing="xs"
-				>
+			<form onSubmit={form.onSubmit(handleSubmit)}>
+				<Stack spacing="md">
+					<TextInput
+						label="Old IMEI"
+						value={oldImei}
+						disabled
+					/>
+
 					<TextInput
 						label="New IMEI"
 						placeholder="Enter new IMEI"
-						value={newImei}
-						onChange={(e) => setNewImei(e.target.value)}
-						style={{ flex: 1 }}
+						required
+						{...form.getInputProps('newImei')}
 					/>
-					<Button
-						onClick={handleCheck}
-						loading={checking}
-						disabled={!newImei}
-						variant="outline"
+
+					<Textarea
+						label="Reason for Swap"
+						placeholder="Enter reason for swapping IMEI"
+						required
+						minRows={3}
+						{...form.getInputProps('reason')}
+					/>
+
+					<Group
+						position="right"
+						mt="md"
 					>
-						Check
-					</Button>
-				</Group>
-				{checkResult && (
-					<Text
-						color={checkResult.includes('not') ? 'red' : 'green'}
-						size="sm"
-					>
-						{checkResult}
-					</Text>
-				)}
-				<TextInput
-					label="Reason for Swap"
-					placeholder="Enter reason"
-					value={reason}
-					onChange={(e) => setReason(e.target.value)}
-				/>
-				<Button
-					mt="md"
-					onClick={handleSubmit}
-					loading={loading}
-					disabled={
-						!(
-							oldImei &&
-							newImei &&
-							reason &&
-							checkResult === 'IMEI is available and active'
-						)
-					}
-				>
-					Swap
-				</Button>
-			</Stack>
+						<Button
+							variant="subtle"
+							onClick={onClose}
+						>
+							Cancel
+						</Button>
+						<Button
+							type="submit"
+							loading={mutation.isLoading}
+						>
+							Swap IMEI
+						</Button>
+					</Group>
+				</Stack>
+			</form>
 		</Modal>
 	);
 }

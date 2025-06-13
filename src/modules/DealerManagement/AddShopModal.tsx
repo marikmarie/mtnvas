@@ -1,50 +1,53 @@
-import { Button, Group, Select, Stack, TextInput } from '@mantine/core';
+import { Button, Group, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation } from '@tanstack/react-query';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../app/store';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { ShopModalProps } from './types';
+import { Dealer } from './types';
 
-const regions = ['Central', 'Eastern', 'Northern', 'Western'].map((region) => ({
-	value: region.toLowerCase(),
-	label: region,
-}));
+interface AddShopModalProps {
+	opened: boolean;
+	onClose: () => void;
+	dealer: Dealer;
+}
 
-export function AddShopModal({ opened, onClose }: ShopModalProps) {
+interface ShopFormValues {
+	name: string;
+	address: string;
+	phone: string;
+}
+
+export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 	const request = useRequest(true);
-	const user = useSelector((state: RootState) => state.auth.user);
+	const queryClient = useQueryClient();
 
-	const form = useForm({
+	const form = useForm<ShopFormValues>({
 		initialValues: {
-			shopName: '',
-			location: '',
-			region: '',
-			dealerName: '',
-			status: 'active',
+			name: '',
+			address: '',
+			phone: '',
 		},
 		validate: {
-			shopName: (value) => (!value ? 'Shop name is required' : null),
-			location: (value) => (!value ? 'Location is required' : null),
-			region: (value) => (!value ? 'Region is required' : null),
-			dealerName: (value) => (!value ? 'Dealer is required' : null),
+			name: (value) => (!value ? 'Shop name is required' : null),
+			address: (value) => (!value ? 'Address is required' : null),
+			phone: (value) => (!value ? 'Phone number is required' : null),
 		},
 	});
 
 	const mutation = useMutation({
-		mutationFn: () =>
-			request.post('/shops', {
-				...form.values,
-				createdBy: user?.email,
-				createdAt: new Date().toISOString(),
-			}),
+		mutationFn: (values: ShopFormValues) => {
+			return request.post(`/dealer-groups/${dealer.id}/shops`, values);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['dealer', dealer.id] });
+			onClose();
+			form.reset();
+		},
 	});
 
-	const handleSubmit = form.onSubmit(() => {
-		mutation.mutate();
-		form.reset();
-	});
+	const handleSubmit = (values: ShopFormValues) => {
+		mutation.mutate(values);
+	};
 
 	return (
 		<Modal
@@ -52,35 +55,27 @@ export function AddShopModal({ opened, onClose }: ShopModalProps) {
 			close={onClose}
 			size="md"
 		>
-			<form onSubmit={handleSubmit}>
-				<Stack>
+			<form onSubmit={form.onSubmit(handleSubmit)}>
+				<Stack spacing="md">
 					<TextInput
 						label="Shop Name"
 						placeholder="Enter shop name"
 						required
-						{...form.getInputProps('shopName')}
+						{...form.getInputProps('name')}
 					/>
 
 					<TextInput
-						label="Location"
-						placeholder="Enter shop location"
+						label="Address"
+						placeholder="Enter shop address"
 						required
-						{...form.getInputProps('location')}
-					/>
-
-					<Select
-						label="Region"
-						placeholder="Select region"
-						required
-						data={regions}
-						{...form.getInputProps('region')}
+						{...form.getInputProps('address')}
 					/>
 
 					<TextInput
-						label="Dealer Name"
-						placeholder="Enter dealer name"
+						label="Phone Number"
+						placeholder="Enter phone number"
 						required
-						{...form.getInputProps('dealerName')}
+						{...form.getInputProps('phone')}
 					/>
 
 					<Group

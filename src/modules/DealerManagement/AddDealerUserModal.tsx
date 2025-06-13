@@ -1,6 +1,6 @@
 import { Button, Group, Stack, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Dealer } from './types';
@@ -14,7 +14,6 @@ interface AddDealerUserModalProps {
 
 export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDealerUserModalProps) {
 	const request = useRequest(true);
-	const queryClient = useQueryClient();
 
 	const form = useForm({
 		initialValues: {

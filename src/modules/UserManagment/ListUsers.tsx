@@ -1,6 +1,6 @@
 import { ActionIcon, Flex, LoadingOverlay, Stack, Tooltip } from '@mantine/core';
 import { IconCircleCheck, IconDeselect } from '@tabler/icons-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { memo } from 'react';
 import { customLoader } from '../../components/CustomLoader';
 import { useDataGridTable } from '../../hooks/useDataGridTable';
@@ -12,7 +12,6 @@ interface Props {}
 function ListUsers(props: Props) {
 	const {} = props;
 	const request = useRequest(true);
-	const queryClient = useQueryClient();
 
 	const query = useQuery({
 		queryFn: () =>

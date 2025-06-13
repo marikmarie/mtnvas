@@ -1,31 +1,28 @@
 import { Button, Group, NumberInput, Select, Stack, Title } from '@mantine/core';
-import { Modal } from '../../components/Modal';
-import { StockThresholdModalProps } from './types';
 import { useForm } from '@mantine/form';
-import { faker } from '@faker-js/faker';
-
-const getDealers = () => {
-	return Array.from({ length: 10 }, () => ({
-		value: faker.string.uuid(),
-		label: faker.company.name(),
-	}));
-};
-
-const getProducts = (_category?: string) => {
-	return Array.from({ length: 5 }, () => ({
-		value: faker.string.uuid(),
-		label: faker.commerce.productName(),
-	}));
-};
-
-const getDevices = (_category?: string) => {
-	return Array.from({ length: 3 }, () => ({
-		value: faker.string.uuid(),
-		label: faker.commerce.productName(),
-	}));
-};
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Modal } from '../../components/Modal';
+import useRequest from '../../hooks/useRequest';
+import { StockThresholdModalProps } from './types';
 
 export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalProps) {
+	const request = useRequest(true);
+
+	const { data: dealers } = useQuery({
+		queryKey: ['dealers/list'],
+		queryFn: () => request.get('/dealers/list'),
+	});
+
+	const { data: products } = useQuery({
+		queryKey: ['products'],
+		queryFn: () => request.get('/products'),
+	});
+
+	const { data: devices } = useQuery({
+		queryKey: ['devices'],
+		queryFn: () => request.get('/devices'),
+	});
+
 	const form = useForm({
 		initialValues: {
 			dealerId: '',
@@ -47,12 +44,15 @@ export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalP
 		},
 	});
 
-	const handleSubmit = form.onSubmit((values) => {
-		console.log('Set threshold:', values);
-		// Here you would typically make an API call to set the threshold
-		onClose();
-		form.reset();
+	const mutation = useMutation({
+		mutationFn: (values: typeof form.values) => request.post('/stock-thresholds', values),
+		onSuccess: () => {
+			onClose();
+			form.reset();
+		},
 	});
+
+	const handleSubmit = form.onSubmit((values) => mutation.mutate(values));
 
 	return (
 		<Modal
@@ -69,7 +69,7 @@ export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalP
 							label="Dealer"
 							placeholder="Select dealer"
 							required
-							data={getDealers()}
+							data={dealers?.data?.data || []}
 							searchable
 							nothingFound="No dealers found"
 							{...form.getInputProps('dealerId')}
@@ -91,7 +91,7 @@ export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalP
 							label="Product"
 							placeholder="Select product"
 							required
-							data={getProducts(form.values.category)}
+							data={products?.data?.data || []}
 							searchable
 							nothingFound="No products found"
 							disabled={!form.values.category}
@@ -102,7 +102,7 @@ export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalP
 							label="Device"
 							placeholder="Select device"
 							required
-							data={getDevices(form.values.category)}
+							data={devices?.data?.data || []}
 							searchable
 							nothingFound="No devices found"
 							disabled={!form.values.category}
@@ -127,7 +127,12 @@ export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalP
 							>
 								Cancel
 							</Button>
-							<Button type="submit">Set Threshold</Button>
+							<Button
+								type="submit"
+								loading={mutation.isLoading}
+							>
+								Set Threshold
+							</Button>
 						</Group>
 					</Stack>
 				</form>

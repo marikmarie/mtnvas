@@ -1,32 +1,28 @@
 import { Button, FileInput, Group, Select, Stack, Title } from '@mantine/core';
-import { Modal } from '../../components/Modal';
-import { StockModalProps } from './types';
 import { useForm } from '@mantine/form';
-import { faker } from '@faker-js/faker';
-
-// Simulated data for dropdowns (replace with actual API calls)
-const getDealers = () => {
-	return Array.from({ length: 10 }, () => ({
-		value: faker.string.uuid(),
-		label: faker.company.name(),
-	}));
-};
-
-const getProducts = (_category?: string) => {
-	return Array.from({ length: 5 }, () => ({
-		value: faker.string.uuid(),
-		label: faker.commerce.productName(),
-	}));
-};
-
-const getDevices = (_category?: string) => {
-	return Array.from({ length: 3 }, () => ({
-		value: faker.string.uuid(),
-		label: faker.commerce.productName(),
-	}));
-};
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Modal } from '../../components/Modal';
+import useRequest from '../../hooks/useRequest';
+import { StockModalProps } from './types';
 
 export function AddStockModal({ opened, onClose }: StockModalProps) {
+	const request = useRequest(true);
+
+	const { data: dealers } = useQuery({
+		queryKey: ['dealers/list'],
+		queryFn: () => request.get('/dealers/list'),
+	});
+
+	const { data: products } = useQuery({
+		queryKey: ['products'],
+		queryFn: () => request.get('/products'),
+	});
+
+	const { data: devices } = useQuery({
+		queryKey: ['devices'],
+		queryFn: () => request.get('/devices'),
+	});
+
 	const form = useForm({
 		initialValues: {
 			dealerId: '',
@@ -44,12 +40,27 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 		},
 	});
 
+	const mutation = useMutation({
+		mutationFn: (formData: FormData) =>
+			request.post('/stocks', formData, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			}),
+		onSuccess: () => {
+			onClose();
+			form.reset();
+		},
+	});
+
 	const handleSubmit = form.onSubmit((values) => {
-		console.log('Add stock:', values);
-		// Here you would typically make an API call to add the stock
-		// The IMEI file would be uploaded to the server
-		onClose();
-		form.reset();
+		const formData = new FormData();
+		Object.entries(values).forEach(([key, value]) => {
+			if (value !== null) {
+				formData.append(key, value);
+			}
+		});
+		mutation.mutate(formData);
 	});
 
 	return (
@@ -67,7 +78,7 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 							label="Dealer"
 							placeholder="Select dealer"
 							required
-							data={getDealers()}
+							data={dealers?.data?.data || []}
 							searchable
 							nothingFound="No dealers found"
 							{...form.getInputProps('dealerId')}
@@ -89,7 +100,7 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 							label="Product"
 							placeholder="Select product"
 							required
-							data={getProducts(form.values.category)}
+							data={products?.data?.data || []}
 							searchable
 							nothingFound="No products found"
 							disabled={!form.values.category}
@@ -100,7 +111,7 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 							label="Device"
 							placeholder="Select device"
 							required
-							data={getDevices(form.values.category)}
+							data={devices?.data?.data || []}
 							searchable
 							nothingFound="No devices found"
 							disabled={!form.values.category}
@@ -109,8 +120,7 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 
 						<FileInput
 							label="IMEI File"
-							// @ts-ignore
-							placeholder="Upload IMEI file"
+							description="Upload IMEI file"
 							accept=".csv,.xlsx,.xls"
 							required
 							{...form.getInputProps('imeiFile')}
@@ -126,7 +136,12 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 							>
 								Cancel
 							</Button>
-							<Button type="submit">Add Stock</Button>
+							<Button
+								type="submit"
+								loading={mutation.isLoading}
+							>
+								Add Stock
+							</Button>
 						</Group>
 					</Stack>
 				</form>
