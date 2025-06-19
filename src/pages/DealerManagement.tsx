@@ -1,10 +1,10 @@
 import { Paper, Tabs, Title } from '@mantine/core';
+import { IconBox, IconBuildingStore, IconUserCircle, IconUsers } from '@tabler/icons-react';
+import Layout from '../components/Layout';
 import { DealerList } from '../modules/DealerManagement/DealerList';
 import { ShopList } from '../modules/DealerManagement/ShopList';
 import { ShopUsersList } from '../modules/DealerManagement/ShopUsersList';
 import { StockList } from '../modules/DealerManagement/StockList';
-import Layout from '../components/Layout';
-import { IconBuildingStore, IconUsers, IconUserCircle, IconBox } from '@tabler/icons-react';
 
 export default function DealerManagement() {
 	return (
@@ -50,7 +50,7 @@ export default function DealerManagement() {
 						<ShopList />
 					</Tabs.Panel>
 					<Tabs.Panel value="users">
-						<ShopUsersList />
+						<ShopUsersList shop={undefined} />
 					</Tabs.Panel>
 					<Tabs.Panel value="stock">
 						<StockList />

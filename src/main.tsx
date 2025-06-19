@@ -1,18 +1,18 @@
-import './index.css';
 import '@inovua/reactdatagrid-community/index.css';
 import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
+import { Notifications } from '@mantine/notifications';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import AppRouter from './App';
-import { BrowserRouter, useNavigate } from 'react-router-dom';
-import store, { persistor } from './app/store';
-import { Provider, useDispatch } from 'react-redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Notifications } from '@mantine/notifications';
-import { PersistGate } from 'redux-persist/integration/react';
-import { ModalsProvider } from '@mantine/modals';
-import { signout } from './app/slices/auth';
 import { useIdleTimer } from 'react-idle-timer';
+import { Provider, useDispatch } from 'react-redux';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
+import { PersistGate } from 'redux-persist/integration/react';
+import AppRouter from './App';
+import { signout } from './app/slices/auth';
+import store, { persistor } from './app/store';
+import './index.css';
 
 const client = new QueryClient();
 
@@ -53,7 +53,7 @@ function App() {
 
 	const { start } = useIdleTimer({
 		onIdle: handleLogout,
-		timeout: 15 * 60 * 1000, // 15 minutes
+		timeout: 15 * 60 * 1000,
 		throttle: 500,
 	});
 

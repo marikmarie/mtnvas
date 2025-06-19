@@ -1,4 +1,4 @@
-import { Button, Flex, Group, Stack, Text } from '@mantine/core';
+import { Button, Group, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -6,7 +6,7 @@ import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { ImeiSwapModal } from './ImeiSwapModal';
 import { ImeiTransferModal } from './ImeiTransferModal';
-import { Imei } from './types';
+import { Dealer, Imei } from './types';
 
 export function ImeiList() {
 	const request = useRequest(true);
@@ -20,31 +20,22 @@ export function ImeiList() {
 		queryFn: () => request.get('/imeis'),
 	});
 
+	const { data: dealersData } = useQuery({
+		queryKey: ['dealers'],
+		queryFn: () => request.get('/dealers'),
+	});
+
 	const handleOpenTransfer = (imei: Imei) => {
-		setSelectedImei(imei);
-		openTransferModal();
-	};
-
-	const handleOpenSwap = (imei: Imei) => {
-		setSelectedImei(imei);
-		openSwapModal();
-	};
-
-	const handleTransfer = async (transferData: any) => {
-		try {
-			await request.post('/imeis/transfer', transferData);
-			closeTransferModal();
-		} catch (error) {
-			console.error('Transfer failed:', error);
+		if (imei?.imei) {
+			setSelectedImei(imei);
+			openTransferModal();
 		}
 	};
 
-	const handleSwap = async (swapData: any) => {
-		try {
-			await request.post('/imeis/swap', swapData);
-			closeSwapModal();
-		} catch (error) {
-			console.error('Swap failed:', error);
+	const handleOpenSwap = (imei: Imei) => {
+		if (imei?.imei) {
+			setSelectedImei(imei);
+			openSwapModal();
 		}
 	};
 
@@ -120,19 +111,20 @@ export function ImeiList() {
 
 	return (
 		<Stack>
-			<Flex justify="flex-end">{/* Add any additional actions here if needed */}</Flex>
 			{table}
 			<ImeiTransferModal
 				opened={transferModalOpened}
 				onClose={closeTransferModal}
-				imei={selectedImei}
-				onTransfer={handleTransfer}
+				imei={selectedImei?.imei || ''}
+				fromDealer={
+					dealersData?.data?.data?.find((d: Dealer) => d.id === selectedImei!.soldById)!
+				}
+				dealers={dealersData?.data?.data || []}
 			/>
 			<ImeiSwapModal
 				opened={swapModalOpened}
 				onClose={closeSwapModal}
-				imei={selectedImei}
-				onSwap={handleSwap}
+				oldImei={selectedImei?.imei || ''}
 			/>
 		</Stack>
 	);

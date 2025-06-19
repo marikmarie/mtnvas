@@ -43,7 +43,7 @@ export function ImeiTransferModal({
 		mutationFn: (values: ImeiTransferFormValues) => {
 			return request.post('/imei-transfers', {
 				imei,
-				fromDealerId: fromDealer.id,
+				fromDealerId: fromDealer?.id,
 				...values,
 			});
 		},
@@ -59,10 +59,10 @@ export function ImeiTransferModal({
 	};
 
 	const dealerOptions = dealers
-		.filter((dealer) => dealer.id !== fromDealer.id)
+		.filter((dealer) => dealer?.id !== fromDealer?.id)
 		.map((dealer) => ({
-			value: dealer.id,
-			label: dealer.name,
+			value: dealer?.id,
+			label: dealer?.name,
 		}));
 
 	return (
@@ -81,7 +81,7 @@ export function ImeiTransferModal({
 
 					<TextInput
 						label="From Dealer"
-						value={fromDealer.name}
+						value={fromDealer?.name}
 						disabled
 					/>
 

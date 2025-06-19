@@ -26,8 +26,8 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 	const request = useRequest(true);
 
 	const { data: users, isLoading } = useQuery({
-		queryFn: () => request.get(`/shops/${shop.shopName}/users`),
-		queryKey: ['shop-users', shop.shopName],
+		queryFn: () => request.get(`/shops/${shop?.shopName}/users`),
+		queryKey: ['shop-users', shop?.shopName],
 	});
 
 	const handleAction = (user: ShopUser, action: 'activate' | 'deactivate' | 'delete') => {
@@ -103,8 +103,8 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 				opened={addModalOpened}
 				onClose={closeAddModal}
 				dealer={{
-					id: shop.dealerName,
-					name: shop.dealerName,
+					id: shop?.dealerName,
+					name: shop?.dealerName,
 					contactPerson: '',
 					email: '',
 					phone: '',
@@ -114,8 +114,8 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 				}}
 				shops={[
 					{
-						id: shop.shopName,
-						name: shop.shopName,
+						id: shop?.shopName,
+						name: shop?.shopName,
 					},
 				]}
 			/>
@@ -126,8 +126,8 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 					onClose={closeConfirmModal}
 					action={confirmAction}
 					dealer={{
-						id: shop.dealerName,
-						name: shop.dealerName,
+						id: shop?.dealerName,
+						name: shop?.dealerName,
 						contactPerson: '',
 						email: '',
 						phone: '',
