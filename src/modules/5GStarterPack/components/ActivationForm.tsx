@@ -17,6 +17,7 @@ export const Form = () => {
 		initialValues: {
 			bnumber: '',
 			subscriptionId: '',
+			imei: '',
 		},
 		validate: {
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid wakanetNumber'),
@@ -73,6 +74,18 @@ export const Form = () => {
 								value={form.values.bnumber}
 								onChange={(event) =>
 									form.setFieldValue('bnumber', event.currentTarget.value)
+								}
+								error={form.errors.bnumber}
+								placeholder="Forexample 2563945..."
+								withAsterisk
+								w="100%"
+							/>
+							<TextInput
+								icon={<IconPhone />}
+								label="WakaNet Number"
+								value={form.values.bnumber}
+								onChange={(event) =>
+									form.setFieldValue('imei', event.currentTarget.value)
 								}
 								error={form.errors.bnumber}
 								placeholder="Forexample 2563945..."

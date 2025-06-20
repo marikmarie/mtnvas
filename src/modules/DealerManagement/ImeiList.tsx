@@ -117,7 +117,7 @@ export function ImeiList() {
 				onClose={closeTransferModal}
 				imei={selectedImei?.imei || ''}
 				fromDealer={
-					dealersData?.data?.data?.find((d: Dealer) => d.id === selectedImei!.soldById)!
+					dealersData?.data?.data?.find((d: Dealer) => d.id === selectedImei?.soldById)!
 				}
 				dealers={dealersData?.data?.data || []}
 			/>

@@ -306,25 +306,3 @@ Response: {
   }
 }
 ```
-
-## Notes for Backend Implementation:
-
-1. All endpoints should follow RESTful conventions
-2. Implement proper error handling with appropriate HTTP status codes
-3. Include pagination for list endpoints (limit, offset)
-4. Implement proper validation for all payloads
-5. Include proper authentication and authorization checks
-6. All responses should follow the standard format:
-    ```typescript
-    {
-    	status: number;
-    	message: string;
-    	data: T;
-    }
-    ```
-7. File upload endpoints should handle multipart/form-data
-8. Implement proper rate limiting
-9. Include proper logging for all operations
-10. Implement proper data validation and sanitization
-
-This report covers all the API endpoints needed for the dealer management module. The frontend code is already structured to work with these endpoints, and implementing them as specified will ensure smooth integration with the existing frontend codebase.
