@@ -1,13 +1,13 @@
-import { Flex, Badge, TextInput, Button, Text, Loader, Paper, Stack } from '@mantine/core';
+import { Badge, Button, Flex, Loader, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
 import { IconCircleCheck, IconPhone, IconRestore } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
+import { AxiosError, AxiosResponse } from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
+import { setServiceCode, setSubscriptionId } from '../../../app/slices/BundleActivations';
 import { RootState } from '../../../app/store';
 import useRequest from '../../../hooks/useRequest';
-import { notifications } from '@mantine/notifications';
-import { AxiosResponse, AxiosError } from 'axios';
-import { setServiceCode, setSubscriptionId } from '../../../app/slices/BundleActivations';
 
 export const Form = () => {
 	const request = useRequest(true);
@@ -19,9 +19,11 @@ export const Form = () => {
 		initialValues: {
 			bnumber: '',
 			subscriptionId: '',
+			imei: '',
 		},
 		validate: {
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid wakanetNumber'),
+			imei: (val: string) => (val.length > 0 ? null : 'Should be a valid imei'),
 		},
 	});
 
@@ -104,6 +106,18 @@ export const Form = () => {
 								}
 								error={form.errors.bnumber}
 								placeholder="Forexample 2563945..."
+								withAsterisk
+								w="100%"
+							/>
+							<TextInput
+								icon={<IconPhone />}
+								label="IMEI"
+								value={form.values.imei}
+								onChange={(event) =>
+									form.setFieldValue('imei', event.currentTarget.value)
+								}
+								error={form.errors.imei}
+								placeholder="Emter IMEI..."
 								withAsterisk
 								w="100%"
 							/>

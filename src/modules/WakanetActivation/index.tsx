@@ -1,9 +1,9 @@
-import { Stack, Flex, TextInput, Button, Loader } from '@mantine/core';
+import { Button, Flex, Loader, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconPhone } from '@tabler/icons-react';
-import { useMutation } from '@tanstack/react-query';
 import { notifications } from '@mantine/notifications';
-import { AxiosResponse, AxiosError } from 'axios';
+import { IconPhone, IconTextPlus } from '@tabler/icons-react';
+import { useMutation } from '@tanstack/react-query';
+import { AxiosError, AxiosResponse } from 'axios';
 import useRequest from '../../hooks/useRequest';
 
 export const WakanetActivation = () => {
@@ -15,11 +15,13 @@ export const WakanetActivation = () => {
 			bnumber: '',
 			msisdn: '',
 			email: '',
+			imei: '',
 		},
 		validate: {
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid wakanetNumber'),
 			msisdn: (val: string) => (val.length > 9 ? null : 'Should be a valid msisdn'),
 			email: (val: string) => (emailRegex.test(val) ? null : 'Should be a valid email'),
+			imei: (val: string) => (val.length > 0 ? null : 'Should be a valid imei'),
 		},
 	});
 
@@ -80,6 +82,16 @@ export const WakanetActivation = () => {
 						onChange={(event) => form.setFieldValue('email', event.currentTarget.value)}
 						error={form.errors.email}
 						placeholder="first.last@mtn.com"
+						withAsterisk
+						w="100%"
+					/>
+					<TextInput
+						icon={<IconTextPlus />}
+						label="IMEI"
+						value={form.values.imei}
+						onChange={(event) => form.setFieldValue('imei', event.currentTarget.value)}
+						error={form.errors.imei}
+						placeholder="Enter Imei"
 						withAsterisk
 						w="100%"
 					/>
