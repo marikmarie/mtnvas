@@ -1,15 +1,12 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
 import { notifications } from '@mantine/notifications';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../app/store';
 import { useNavigate } from 'react-router-dom';
 import { signout } from '../app/slices/auth';
+import { RootState } from '../app/store';
 import { ROUTES } from '../constants/routes';
-import { __PROD__ } from '../utils/__prod__';
 
-const BASE_URL = __PROD__
-	? import.meta.env.VITE_APP_BASE_URL_PROD
-	: import.meta.env.VITE_APP_BASE_URL_DEV;
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL;
 
 export default function useRequest(requireAuth: boolean = false): AxiosInstance {
 	const token = useSelector((state: RootState) => state.auth.token);

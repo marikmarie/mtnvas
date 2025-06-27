@@ -1,20 +1,20 @@
-import React, { useState, useCallback, lazy } from 'react';
 import { createStyles, Paper, SimpleGrid, Stack } from '@mantine/core';
+import {
+	IconCircleCheck,
+	IconDeviceMobile,
+	IconEdit,
+	IconLoader,
+	IconNews,
+	IconReport,
+	IconRouter,
+} from '@tabler/icons-react';
+import React, { lazy, useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { RootState } from '../app/store';
 import Layout from '../components/Layout';
 import { withAuth } from '../hocs/WithAuth';
-import { Loadable } from '../hocs/Loadable';
-import { RootState } from '../app/store';
+import { Loadable } from '../hocs/loadable';
 import { WakanetActivation } from '../modules/WakanetActivation';
-import {
-	IconDeviceMobile,
-	IconRouter,
-	IconEdit,
-	IconReport,
-	IconNews,
-	IconCircleCheck,
-	IconLoader,
-} from '@tabler/icons-react';
 
 const LazyComponents = {
 	Signup: Loadable(lazy(() => import('../modules/5GStarterPack'))),
