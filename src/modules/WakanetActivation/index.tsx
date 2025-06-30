@@ -74,7 +74,7 @@ export const WakanetActivation = () => {
 						value={form.values.imei}
 						onChange={(event) => form.setFieldValue('imei', event.currentTarget.value)}
 						error={form.errors.imei}
-						placeholder="Enter IMEI"
+						placeholder="Enter Imei"
 						withAsterisk
 						w="100%"
 					/>

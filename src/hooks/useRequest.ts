@@ -4,11 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { signout } from '../app/slices/auth';
 import { RootState } from '../app/store';
-import { __PROD__ } from '../utils/__prod__';
 
-const BASE_URL = __PROD__
-	? import.meta.env.VITE_APP_BASE_URL_PROD
-	: import.meta.env.VITE_APP_BASE_URL_DEV;
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL;
 
 interface NotificationOptions {
 	showSuccess?: boolean;

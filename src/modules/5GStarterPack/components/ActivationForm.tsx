@@ -21,6 +21,7 @@ export const Form = () => {
 		},
 		validate: {
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid wakanetNumber'),
+			imei: (val: string) => (val.length > 0 ? null : 'Should be a valid imei'),
 		},
 	});
 
@@ -89,6 +90,14 @@ export const Form = () => {
 								}
 								error={form.errors.bnumber}
 								placeholder="Forexample 2563945..."
+								// @ts-ignore
+								label="IMEI"
+								value={form.values.imei}
+								onChange={(event) =>
+									form.setFieldValue('imei', event.currentTarget.value)
+								}
+								error={form.errors.imei}
+								placeholder="Emter IMEI..."
 								withAsterisk
 								w="100%"
 							/>
