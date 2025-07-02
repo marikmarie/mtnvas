@@ -48,8 +48,6 @@ export const PkgButton = ({
 				fullWidth
 				radius="md"
 				mt="lg"
-				disabled={user?.role !== 'WAKA_CORP'}
-				loading={user?.role !== 'WAKA_CORP'}
 			>
 				{selected ? 'Package Selected' : 'Select Package'}
 			</Button>
