@@ -2,8 +2,6 @@ import { Button } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconCircleCheck } from '@tabler/icons-react';
 import { SetStateAction } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../app/store';
 import { Modal } from '../../../components/Modal';
 import LoadBundleForm from './LoadBundleForm';
 
@@ -25,7 +23,6 @@ export const PkgButton = ({
 	speed,
 }: TPkgButtonProps) => {
 	const [opened, { open, close }] = useDisclosure(false);
-	const user = useSelector((state: RootState) => state.auth.user);
 	return (
 		<>
 			<Modal
