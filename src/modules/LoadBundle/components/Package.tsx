@@ -1,8 +1,8 @@
-import { Card, Text, Badge, Flex } from '@mantine/core';
+import { Badge, Card, Flex, Text } from '@mantine/core';
 import { IconBrandSpeedtest } from '@tabler/icons-react';
 import { FC, memo } from 'react';
-import { PkgButton } from './PkgButton';
 import { formatCurrency } from '../../../utils/currenyFormatter';
+import { PkgButton } from './PkgButton';
 
 export const Package: FC<{
 	amount: string;
@@ -10,9 +10,13 @@ export const Package: FC<{
 	type: '4G' | '5G' | 'bundle';
 	serviceCode: string;
 	selectedSrvCode: string;
+	volume?: string;
 	setSelectedSrvCode: (code: string) => void;
-}> = memo(({ setSelectedSrvCode, type, serviceCode, amount, speed, selectedSrvCode }) => {
-	const badge = type === 'bundle' ? 'bundle' : type === '4G' ? '4g speed' : '5g speed';
+}> = memo(({ setSelectedSrvCode, type, serviceCode, amount, speed, selectedSrvCode, volume }) => {
+	const isVolume = !!volume;
+	const badge = isVolume ? 'volume bundle' : 'speed bundle';
+
+	const displayValue = isVolume ? volume : speed;
 
 	const selected = selectedSrvCode === serviceCode;
 
@@ -28,12 +32,16 @@ export const Package: FC<{
 				mb="md"
 				gap={'lg'}
 			>
-				<IconBrandSpeedtest color="orange" />
+				{type === '4G' ? (
+					<IconBrandSpeedtest color="orange" />
+				) : (
+					<IconBrandSpeedtest color="orange" />
+				)}
 				<Text
 					ta="center"
 					fw={600}
 				>
-					{speed}
+					{displayValue}
 				</Text>
 				<Badge variant="dot">{badge}</Badge>
 			</Flex>

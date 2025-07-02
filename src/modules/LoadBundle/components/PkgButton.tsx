@@ -1,7 +1,9 @@
 import { Button } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { IconCircleCheck } from '@tabler/icons-react';
 import { SetStateAction } from 'react';
-import { useDisclosure } from '@mantine/hooks';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../app/store';
 import { Modal } from '../../../components/Modal';
 import LoadBundleForm from './LoadBundleForm';
 
@@ -23,6 +25,7 @@ export const PkgButton = ({
 	speed,
 }: TPkgButtonProps) => {
 	const [opened, { open, close }] = useDisclosure(false);
+	const user = useSelector((state: RootState) => state.auth.user);
 	return (
 		<>
 			<Modal
@@ -45,6 +48,8 @@ export const PkgButton = ({
 				fullWidth
 				radius="md"
 				mt="lg"
+				disabled={user?.role !== 'WAKA_CORP'}
+				loading={user?.role !== 'WAKA_CORP'}
 			>
 				{selected ? 'Package Selected' : 'Select Package'}
 			</Button>
