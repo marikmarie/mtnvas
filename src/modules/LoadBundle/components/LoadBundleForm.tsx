@@ -1,9 +1,9 @@
-import { TextInput, Flex, Button, Text, Center } from '@mantine/core';
+import { Button, Center, Flex, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconGauge, IconPhone } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
-import { AxiosResponse, AxiosError } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import useRequest from '../../../hooks/useRequest';
 import { formatCurrency } from '../../../utils/currenyFormatter';
 
@@ -18,20 +18,18 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 		initialValues: {
 			msisdn: '',
 			bnumber: '',
-			email: '',
+			sponsorEmail: '',
+			beneficiaryEmail: '',
 			externalTransactionId: '1234',
 			paymentOption: 'MOMO',
+			redirectLink: '',
 		},
 
 		validate: {
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid WakaNet Number'),
 			msisdn: (val: string) =>
 				val.length > 9 ? null : 'Should be a valid customer/agent number',
-			// email: (val: string) =>
-			// 	/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(val)
-			// 		? null
-			// 		: 'Invalid email address',
-			// externalTransactionId: (val: string) => (val ? null : 'Transaction ID is required'),
+			// sponsorEmail and beneficiaryEmail are optional, so no validation
 		},
 	});
 
@@ -42,8 +40,14 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 			request.post(
 				'/bundle-renewal',
 				{
-					...form.values,
+					msisdn: form.values.msisdn,
+					bnumber: form.values.bnumber,
+					sponsorEmail: form.values.sponsorEmail || null,
+					beneficiaryEmail: form.values.beneficiaryEmail || null,
+					externalTransactionId: form.values.externalTransactionId,
 					serviceCode: selectedSrvCode,
+					paymentOption: form.values.paymentOption,
+					redirectLink: form.values.redirectLink || null,
 				},
 				{
 					headers: {
@@ -99,6 +103,21 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 				placeholder="For example 078..."
 				error={form.errors.msisdn}
 				withAsterisk
+			/>
+
+			<TextInput
+				label="Sponsor Email (optional)"
+				value={form.values.sponsorEmail}
+				onChange={(event) => form.setFieldValue('sponsorEmail', event.currentTarget.value)}
+				placeholder="e.g. sarah.buteraba@mtn.com"
+			/>
+			<TextInput
+				label="Beneficiary Email (optional)"
+				value={form.values.beneficiaryEmail}
+				onChange={(event) =>
+					form.setFieldValue('beneficiaryEmail', event.currentTarget.value)
+				}
+				placeholder="e.g. sarah.buteraba@mtn.com"
 			/>
 			<Flex
 				gap={'sm'}
