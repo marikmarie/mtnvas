@@ -18,9 +18,9 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 		initialValues: {
 			msisdn: '',
 			bnumber: '',
-			sponsorEmail: '',
-			beneficiaryEmail: '',
-			externalTransactionId: '1234',
+			sponsorEmail: null,
+			beneficiaryEmail: null,
+			externalTransactionId: '',
 			paymentOption: 'MOMO',
 			redirectLink: '',
 		},
@@ -29,7 +29,6 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid WakaNet Number'),
 			msisdn: (val: string) =>
 				val.length > 9 ? null : 'Should be a valid customer/agent number',
-			// sponsorEmail and beneficiaryEmail are optional, so no validation
 		},
 	});
 
@@ -42,8 +41,8 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 				{
 					msisdn: form.values.msisdn,
 					bnumber: form.values.bnumber,
-					sponsorEmail: form.values.sponsorEmail || null,
-					beneficiaryEmail: form.values.beneficiaryEmail || null,
+					sponsorEmail: null,
+					beneficiaryEmail: null,
 					externalTransactionId: form.values.externalTransactionId,
 					serviceCode: selectedSrvCode,
 					paymentOption: form.values.paymentOption,
@@ -105,20 +104,6 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 				withAsterisk
 			/>
 
-			<TextInput
-				label="Sponsor Email (optional)"
-				value={form.values.sponsorEmail}
-				onChange={(event) => form.setFieldValue('sponsorEmail', event.currentTarget.value)}
-				placeholder="e.g. sarah.buteraba@mtn.com"
-			/>
-			<TextInput
-				label="Beneficiary Email (optional)"
-				value={form.values.beneficiaryEmail}
-				onChange={(event) =>
-					form.setFieldValue('beneficiaryEmail', event.currentTarget.value)
-				}
-				placeholder="e.g. sarah.buteraba@mtn.com"
-			/>
 			<Flex
 				gap={'sm'}
 				w="100%"
@@ -129,11 +114,15 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 					radius="md"
 					onClick={() => {
 						const validation = form.validate();
-						console.log('Validation result:', validation); // Log validation result
 						if (!validation.hasErrors) {
-							console.log('Form is valid, triggering mutation...'); // Log before mutation
-							mutation.mutate();
-							form.reset();
+							const randomId = Math.floor(
+								1000000000 + Math.random() * 9000000000
+							).toString();
+							form.setFieldValue('externalTransactionId', randomId);
+							setTimeout(() => {
+								mutation.mutate();
+								form.reset();
+							}, 0);
 						}
 					}}
 					disabled={mutation.isLoading}
