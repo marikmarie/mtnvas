@@ -87,7 +87,9 @@ export default function LoadBundleForm({
 				fw={600}
 				mb="xs"
 				ta="center"
-			>{`${selectedSrvCode} - ${speed ? speed : volume} - ${formatCurrency(amount)}`}</Text>
+			>
+				{`${selectedSrvCode} - ${speed ? speed : volume} - ${formatCurrency(amount)}`}
+			</Text>
 
 			<TextInput
 				icon={<IconPhone color="#FFD600" />}
