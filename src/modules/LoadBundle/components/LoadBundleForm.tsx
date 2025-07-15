@@ -10,10 +10,16 @@ import { formatCurrency } from '../../../utils/currenyFormatter';
 type TLoadBundleFormProps = {
 	selectedSrvCode: string;
 	amount: string;
-	speed: string;
+	speed?: string;
+	volume?: string;
 };
 
-export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoadBundleFormProps) {
+export default function LoadBundleForm({
+	selectedSrvCode,
+	amount,
+	speed,
+	volume,
+}: TLoadBundleFormProps) {
 	const form = useForm({
 		initialValues: {
 			msisdn: '',
@@ -81,7 +87,7 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 				fw={600}
 				mb="xs"
 				ta="center"
-			>{`${selectedSrvCode} - ${speed} - ${formatCurrency(amount)}`}</Text>
+			>{`${selectedSrvCode} - ${speed ? speed : volume} - ${formatCurrency(amount)}`}</Text>
 
 			<TextInput
 				icon={<IconPhone color="#FFD600" />}

@@ -87,14 +87,6 @@ export const Package: FC<{
 				>
 					<Text
 						size="xs"
-						color="gray.7"
-						weight={500}
-						style={{ letterSpacing: 0.5 }}
-					>
-						Service Code:
-					</Text>
-					<Text
-						size="xs"
 						color="dark.7"
 						weight={700}
 						style={{ fontFamily: 'monospace' }}
@@ -161,6 +153,7 @@ export const Package: FC<{
 					selectedSrvCode={selectedSrvCode}
 					amount={amount}
 					speed={speed || ''}
+					volume={volume || ''}
 				/>
 			</Stack>
 		</Card>
