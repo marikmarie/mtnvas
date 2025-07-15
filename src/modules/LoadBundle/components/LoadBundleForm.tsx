@@ -23,20 +23,17 @@ export default function LoadBundleForm({
 		initialValues: {
 			msisdn: '',
 			bnumber: '',
-			email: '',
-			externalTransactionId: '1234',
+			sponsorEmail: null,
+			beneficiaryEmail: null,
+			externalTransactionId: '',
 			paymentOption: 'MOMO',
+			redirectLink: '',
 		},
 
 		validate: {
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid WakaNet Number'),
 			msisdn: (val: string) =>
 				val.length > 9 ? null : 'Should be a valid customer/agent number',
-			// email: (val: string) =>
-			// 	/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(val)
-			// 		? null
-			// 		: 'Invalid email address',
-			// externalTransactionId: (val: string) => (val ? null : 'Transaction ID is required'),
 		},
 	});
 
@@ -47,8 +44,14 @@ export default function LoadBundleForm({
 			request.post(
 				'/bundle-renewal',
 				{
-					...form.values,
+					msisdn: form.values.msisdn,
+					bnumber: form.values.bnumber,
+					sponsorEmail: null,
+					beneficiaryEmail: null,
+					externalTransactionId: form.values.externalTransactionId,
 					serviceCode: selectedSrvCode,
+					paymentOption: form.values.paymentOption,
+					redirectLink: form.values.redirectLink || null,
 				},
 				{
 					headers: {
@@ -122,6 +125,51 @@ export default function LoadBundleForm({
 					</Button>
 				</Flex>
 			</Stack>
+			<TextInput
+				icon={<IconPhone />}
+				label="Agent/Customer Number"
+				value={form.values.msisdn}
+				onChange={(event) => form.setFieldValue('msisdn', event.currentTarget.value)}
+				placeholder="For example 078..."
+				error={form.errors.msisdn}
+				withAsterisk
+			/>
+
+			<Flex
+				gap={'sm'}
+				w="100%"
+				my="xs"
+			>
+				<Button
+					fullWidth
+					radius="md"
+					onClick={() => {
+						const validation = form.validate();
+						if (!validation.hasErrors) {
+							const randomId = Math.floor(
+								1000000000 + Math.random() * 9000000000
+							).toString();
+							form.setFieldValue('externalTransactionId', randomId);
+							setTimeout(() => {
+								mutation.mutate();
+								form.reset();
+							}, 0);
+						}
+					}}
+					disabled={mutation.isLoading}
+					loading={mutation.isLoading}
+				>
+					Load
+				</Button>
+				<Button
+					fullWidth
+					radius="md"
+					color="red"
+					onClick={() => form.reset()}
+				>
+					Reset
+				</Button>
+			</Flex>
 		</form>
 	);
 }

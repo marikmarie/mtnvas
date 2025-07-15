@@ -1,24 +1,32 @@
-import { Accordion, Paper, SimpleGrid, Text, Title, Center } from '@mantine/core';
+import { Accordion, Center, Paper, SimpleGrid, Text, Title } from '@mantine/core';
 import { memo, useState } from 'react';
-import { Package } from './components/Package';
-import { RootState } from '../../app/store';
 import { useSelector } from 'react-redux';
+import { RootState } from '../../app/store';
+import { Package } from './components/Package';
 
 interface PackageData {
 	serviceCode: string;
 	amount: string;
-	speed: string;
+	speed?: string;
 	type: '4G' | '5G' | 'bundle';
+	volume?: string;
 }
 
 const PACKAGES: Record<string, PackageData[]> = {
-	wakanet_4g: [
+	wakanetSpeed4G: [
 		{ type: '4G', serviceCode: 'FWA_3MBPS', amount: '55000', speed: '3MBPS' },
 		{ type: '4G', serviceCode: 'FWA_5MBPS', amount: '85000', speed: '5MBPS' },
 		{ type: '4G', serviceCode: 'FWA_10MBPS', amount: '130000', speed: '10MBPS' },
 		{ type: '4G', serviceCode: 'FWA_20MBPS', amount: '195000', speed: '20MBPS' },
 	],
-	wakanet_5g: [
+	wakanetVolume4G: [
+		{ type: '4G', serviceCode: 'FWA_50GB_4G_HOME', amount: '55000', volume: '50GB' },
+		{ type: '4G', serviceCode: 'FWA_100GB_4G_HOME', amount: '85000', volume: '100GB' },
+		{ type: '4G', serviceCode: 'FWA_160GB_4G_HOME', amount: '130000', volume: '160GB' },
+		{ type: '4G', serviceCode: 'FWA_300GB_4G_HOME', amount: '195000', volume: '300GB' },
+		{ type: '4G', serviceCode: 'FWA_900GB_4G_HOME', amount: '295000', volume: '900GB' },
+	],
+	wakanet5G: [
 		{ type: '5G', serviceCode: 'FWAA_10MBPS', amount: '130000', speed: '10MBPS' },
 		{ type: '5G', serviceCode: 'FWAA_20MBPS', amount: '195000', speed: '20MBPS' },
 		{ type: '5G', serviceCode: 'FWA_40MBPS', amount: '295000', speed: '40MBPS' },
@@ -27,13 +35,13 @@ const PACKAGES: Record<string, PackageData[]> = {
 		{ type: '5G', serviceCode: 'FWA_100MBPS', amount: '595000', speed: '100MBPS' },
 		{ type: '5G', serviceCode: 'FWA_150MBPS', amount: '695000', speed: '150MBPS' },
 	],
-	booster_packs_4g: [
+	boosterPacks4G: [
 		{ type: '4G', serviceCode: 'FWA_BST_3MBPS', amount: '1400', speed: '3MBPS' },
 		{ type: '4G', serviceCode: 'FWA_BST_5MBPS', amount: '2500', speed: '5MBPS' },
 		{ type: '4G', serviceCode: 'FWA_BST_10MBPS', amount: '3900', speed: '10MBPS' },
 		{ type: '4G', serviceCode: 'FWA_BST_20MBPS', amount: '6300', speed: '20MBPS' },
 	],
-	booster_packs_5g: [
+	boosterPacks5G: [
 		{ type: '5G', serviceCode: 'FWAA_BST_10MBPS', amount: '4300', speed: '10MBPS' },
 		{ type: '5G', serviceCode: 'FWAA_BST_20MBPS', amount: '6500', speed: '20MBPS' },
 		{ type: '5G', serviceCode: 'FWAA_BST_40MBPS', amount: '9800', speed: '40MBPS' },
@@ -42,19 +50,19 @@ const PACKAGES: Record<string, PackageData[]> = {
 		{ type: '5G', serviceCode: 'FWAA_BST_100MBPS', amount: '19800', speed: '100MBPS' },
 		{ type: '5G', serviceCode: 'FWAA_BST_150MBPS', amount: '23100', speed: '150MBPS' },
 	],
-	post_paid_bundles: [
-		{ type: 'bundle', serviceCode: 'Waka10PST', amount: '35000', speed: '14GB' },
-		{ type: 'bundle', serviceCode: 'Waka20PST', amount: '55000', speed: '25GB' },
-		{ type: 'bundle', serviceCode: 'Waka40PST', amount: '85000', speed: '45GB' },
-		{ type: 'bundle', serviceCode: 'Waka85PST', amount: '170000', speed: '95GB' },
-		{ type: 'bundle', serviceCode: 'Waka195PST', amount: '335000', speed: '195GB' },
+	postPaidBundles: [
+		{ type: 'bundle', serviceCode: 'Waka10PST', amount: '35000', volume: '14GB' },
+		{ type: 'bundle', serviceCode: 'Waka20PST', amount: '55000', volume: '25GB' },
+		{ type: 'bundle', serviceCode: 'Waka40PST', amount: '85000', volume: '45GB' },
+		{ type: 'bundle', serviceCode: 'Waka85PST', amount: '170000', volume: '95GB' },
+		{ type: 'bundle', serviceCode: 'Waka195PST', amount: '335000', volume: '195GB' },
 	],
-	volume_bundles: [
-		{ type: 'bundle', serviceCode: '1778FHI5', amount: '35000', speed: '14GB' },
-		{ type: 'bundle', serviceCode: '1778FHI4', amount: '55000', speed: '25GB' },
-		{ type: 'bundle', serviceCode: '1778FHI1', amount: '85000', speed: '45GB + YoTv' },
-		{ type: 'bundle', serviceCode: '1778FHI2', amount: '170000', speed: '95GB + YoTv' },
-		{ type: 'bundle', serviceCode: '1778FHI3', amount: '335000', speed: '195GB + YoTv' },
+	volumeBundles: [
+		{ type: 'bundle', serviceCode: '1778FHI5', amount: '35000', volume: '14GB' },
+		{ type: 'bundle', serviceCode: '1778FHI4', amount: '55000', volume: '25GB' },
+		{ type: 'bundle', serviceCode: '1778FHI1', amount: '85000', volume: '45GB + YoTv' },
+		{ type: 'bundle', serviceCode: '1778FHI2', amount: '170000', volume: '95GB + YoTv' },
+		{ type: 'bundle', serviceCode: '1778FHI3', amount: '335000', volume: '195GB + YoTv' },
 	],
 };
 
@@ -102,7 +110,8 @@ const PackageSection = memo(
 								serviceCode={srv.serviceCode}
 								setSelectedSrvCode={setSelectedSrvCode}
 								amount={srv.amount}
-								speed={srv.speed}
+								speed={srv.speed || ''}
+								volume={srv.volume || ''}
 							/>
 						))}
 					</SimpleGrid>
@@ -125,39 +134,45 @@ export default () => {
 				<Title order={2}>Load Bundle</Title>
 			</Center>
 			<PackageSection
-				title="Wakanet 4G"
-				packages={PACKAGES.wakanet_4g}
+				title="Wakanet speed 4G"
+				packages={PACKAGES.wakanetSpeed4G}
+				selectedSrvCode={selectedSrvCode}
+				setSelectedSrvCode={setSelectedSrvCode}
+			/>
+			<PackageSection
+				title="Wakanet volume 4G"
+				packages={PACKAGES.wakanetVolume4G}
 				selectedSrvCode={selectedSrvCode}
 				setSelectedSrvCode={setSelectedSrvCode}
 			/>
 			<PackageSection
 				title="Wakanet 5G"
-				packages={PACKAGES.wakanet_5g}
+				packages={PACKAGES.wakanet5G}
 				selectedSrvCode={selectedSrvCode}
 				setSelectedSrvCode={setSelectedSrvCode}
 			/>
 			<PackageSection
 				title="Booster Packs 4g"
-				packages={PACKAGES.booster_packs_4g}
+				packages={PACKAGES.boosterPacks4G}
 				selectedSrvCode={selectedSrvCode}
 				setSelectedSrvCode={setSelectedSrvCode}
 			/>
 			<PackageSection
 				title="Booster Packs 5g"
-				packages={PACKAGES.booster_packs_5g}
+				packages={PACKAGES.boosterPacks5G}
 				selectedSrvCode={selectedSrvCode}
 				setSelectedSrvCode={setSelectedSrvCode}
 			/>
 			<PackageSection
 				title="Wakanet Router Volume bundles"
-				packages={PACKAGES.volume_bundles}
+				packages={PACKAGES.volumeBundles}
 				selectedSrvCode={selectedSrvCode}
 				setSelectedSrvCode={setSelectedSrvCode}
 			/>
 			{user?.role === 'WAKA_CORP' && (
 				<PackageSection
 					title="PostPaid Bundles"
-					packages={PACKAGES.post_paid_bundles}
+					packages={PACKAGES.postPaidBundles}
 					selectedSrvCode={selectedSrvCode}
 					setSelectedSrvCode={setSelectedSrvCode}
 				/>

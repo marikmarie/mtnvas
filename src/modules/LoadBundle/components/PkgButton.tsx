@@ -1,7 +1,7 @@
 import { Button, rem, useMantineTheme } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { IconCircleCheck, IconLoader } from '@tabler/icons-react';
 import { SetStateAction } from 'react';
-import { useDisclosure } from '@mantine/hooks';
 import { Modal } from '../../../components/Modal';
 import LoadBundleForm from './LoadBundleForm';
 

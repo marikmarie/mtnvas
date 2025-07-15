@@ -1,18 +1,8 @@
-import {
-	Card,
-	Text,
-	Badge,
-	Flex,
-	Stack,
-	Group,
-	ThemeIcon,
-	rem,
-	useMantineTheme,
-} from '@mantine/core';
-import { IconBrandSpeedtest, IconMoneybag } from '@tabler/icons-react';
+import { Badge, Card, Flex, Text, useMantineTheme } from '@mantine/core';
+import { IconBrandSpeedtest } from '@tabler/icons-react';
 import { FC, memo } from 'react';
-import { PkgButton } from './PkgButton';
 import { formatCurrency } from '../../../utils/currenyFormatter';
+import { PkgButton } from './PkgButton';
 
 export const Package: FC<{
 	amount: string;
@@ -20,11 +10,13 @@ export const Package: FC<{
 	type: '4G' | '5G' | 'bundle';
 	serviceCode: string;
 	selectedSrvCode: string;
+	volume?: string;
 	setSelectedSrvCode: (code: string) => void;
-}> = memo(({ setSelectedSrvCode, type, serviceCode, amount, speed, selectedSrvCode }) => {
-	const badgeLabel =
-		type === 'bundle' ? 'Volume Bundle' : type === '4G' ? '4G Speed' : '5G Speed';
-	const badgeColor = type === 'bundle' ? 'violet' : type === '4G' ? 'blue' : 'green';
+}> = memo(({ setSelectedSrvCode, type, serviceCode, amount, speed, selectedSrvCode, volume }) => {
+	const isVolume = !!volume;
+	const badge = isVolume ? 'volume bundle' : 'speed bundle';
+
+	const displayValue = isVolume ? volume : speed;
 
 	const selected = selectedSrvCode === serviceCode;
 	const theme = useMantineTheme();
@@ -37,61 +29,32 @@ export const Package: FC<{
 			shadow={selected ? 'lg' : 'sm'}
 			style={{ border: selected ? `2px solid ${theme.primaryColor}` : undefined }}
 		>
-			<Stack spacing="sm">
-				<Group position="apart">
-					<Badge
-						color={badgeColor}
-						variant="light"
-					>
-						{badgeLabel}
-					</Badge>
-					<Badge
-						color="gray"
-						variant="outline"
-					>
-						{serviceCode}
-					</Badge>
-				</Group>
-				<Flex
-					align="center"
-					gap="xs"
+			<Flex
+				justify={'space-between'}
+				align={'center'}
+				mb="md"
+				gap={'lg'}
+			>
+				{type === '4G' ? (
+					<IconBrandSpeedtest color="orange" />
+				) : (
+					<IconBrandSpeedtest color="orange" />
+				)}
+				<Text
+					ta="center"
+					fw={600}
 				>
-					<ThemeIcon
-						color={theme.primaryColor}
-						variant="light"
-						size="lg"
-						radius="md"
-					>
-						<IconBrandSpeedtest size={rem(20)} />
-					</ThemeIcon>
-					<Text
-						fw={600}
-						size="lg"
-					>
-						{speed}
-					</Text>
-				</Flex>
-				<Flex
-					align="center"
-					justify="center"
-					gap="xs"
-				>
-					<ThemeIcon
-						color={theme.colors.yellow[6]}
-						variant="outline"
-						size="lg"
-						radius="md"
-					>
-						<IconMoneybag size={rem(20)} />
-					</ThemeIcon>
-					<Text
-						fw={500}
-						size="md"
-					>
-						{formatCurrency(amount)}
-					</Text>
-				</Flex>
-			</Stack>
+					{displayValue}
+				</Text>
+				<Badge variant="dot">{badge}</Badge>
+			</Flex>
+
+			<Text
+				ta="center"
+				fw={500}
+			>
+				{formatCurrency(amount)}
+			</Text>
 
 			<PkgButton
 				selected={selected}
