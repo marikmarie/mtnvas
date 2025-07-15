@@ -81,7 +81,7 @@ export default function LoadBundleForm({
 	return (
 		<form>
 			<Center mb="xs">
-				<IconGauge color="#FFD600" />
+				<IconGauge color="#ffcc08" />
 			</Center>
 			<Text
 				fw={600}
