@@ -1,4 +1,4 @@
-import { Badge, Card, Flex, Text, useMantineTheme } from '@mantine/core';
+import { Badge, Card, Flex, Text } from '@mantine/core';
 import { IconBrandSpeedtest } from '@tabler/icons-react';
 import { FC, memo } from 'react';
 import { formatCurrency } from '../../../utils/currenyFormatter';
@@ -19,15 +19,12 @@ export const Package: FC<{
 	const displayValue = isVolume ? volume : speed;
 
 	const selected = selectedSrvCode === serviceCode;
-	const theme = useMantineTheme();
 
 	return (
 		<Card
 			w="100%"
 			radius="md"
 			withBorder
-			shadow={selected ? 'lg' : 'sm'}
-			style={{ border: selected ? `2px solid ${theme.primaryColor}` : undefined }}
 		>
 			<Flex
 				justify={'space-between'}

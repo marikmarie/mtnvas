@@ -1,4 +1,4 @@
-import { Accordion, Center, Paper, SimpleGrid, Text, Title } from '@mantine/core';
+import { Accordion, Paper, SimpleGrid, Text } from '@mantine/core';
 import { memo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../app/store';
@@ -66,7 +66,7 @@ const PACKAGES: Record<string, PackageData[]> = {
 	],
 };
 
-interface PackageSelectionProps {
+interface PakageSelectionProps {
 	title: string;
 	packages: PackageData[];
 	selectedSrvCode: string;
@@ -74,17 +74,15 @@ interface PackageSelectionProps {
 }
 
 const PackageSection = memo(
-	({ title, packages, selectedSrvCode, setSelectedSrvCode }: PackageSelectionProps) => (
+	({ title, packages, selectedSrvCode, setSelectedSrvCode }: PakageSelectionProps) => (
 		<Accordion
-			chevronPosition="left"
-			variant="contained"
-			mb="md"
+			variant="filled"
 			defaultValue={title.toLowerCase().replace(' ', '_')}
 		>
 			<Accordion.Item value={title.toLowerCase().replace(' ', '_')}>
 				<Accordion.Control>
 					<Text
-						fz="lg"
+						fz="xl"
 						fw="bold"
 						tt="uppercase"
 					>
@@ -93,13 +91,12 @@ const PackageSection = memo(
 				</Accordion.Control>
 				<Accordion.Panel>
 					<SimpleGrid
-						cols={4}
-						spacing="lg"
-						verticalSpacing="lg"
+						cols={5}
 						breakpoints={[
-							{ maxWidth: 'lg', cols: 3 },
-							{ maxWidth: 'md', cols: 2 },
-							{ maxWidth: 'sm', cols: 1 },
+							{ maxWidth: 'lg', cols: 4 },
+							{ maxWidth: 'md', cols: 3 },
+							{ maxWidth: 'sm', cols: 2 },
+							{ maxWidth: 'xs', cols: 1 },
 						]}
 					>
 						{packages.map((srv) => (
@@ -126,57 +123,53 @@ export default () => {
 	const user = useSelector((state: RootState) => state.auth.user);
 
 	return (
-		<Paper
-			py="lg"
-			px="md"
-		>
-			<Center mb="xl">
-				<Title order={2}>Load Bundle</Title>
-			</Center>
-			<PackageSection
-				title="Wakanet speed 4G"
-				packages={PACKAGES.wakanetSpeed4G}
-				selectedSrvCode={selectedSrvCode}
-				setSelectedSrvCode={setSelectedSrvCode}
-			/>
-			<PackageSection
-				title="Wakanet volume 4G"
-				packages={PACKAGES.wakanetVolume4G}
-				selectedSrvCode={selectedSrvCode}
-				setSelectedSrvCode={setSelectedSrvCode}
-			/>
-			<PackageSection
-				title="Wakanet 5G"
-				packages={PACKAGES.wakanet5G}
-				selectedSrvCode={selectedSrvCode}
-				setSelectedSrvCode={setSelectedSrvCode}
-			/>
-			<PackageSection
-				title="Booster Packs 4g"
-				packages={PACKAGES.boosterPacks4G}
-				selectedSrvCode={selectedSrvCode}
-				setSelectedSrvCode={setSelectedSrvCode}
-			/>
-			<PackageSection
-				title="Booster Packs 5g"
-				packages={PACKAGES.boosterPacks5G}
-				selectedSrvCode={selectedSrvCode}
-				setSelectedSrvCode={setSelectedSrvCode}
-			/>
-			<PackageSection
-				title="Wakanet Router Volume bundles"
-				packages={PACKAGES.volumeBundles}
-				selectedSrvCode={selectedSrvCode}
-				setSelectedSrvCode={setSelectedSrvCode}
-			/>
-			{user?.role === 'WAKA_CORP' && (
+		<Paper py="lg">
+			<Paper my={'md'}>
 				<PackageSection
-					title="PostPaid Bundles"
-					packages={PACKAGES.postPaidBundles}
+					title="Wakanet speed 4G"
+					packages={PACKAGES.wakanetSpeed4G}
 					selectedSrvCode={selectedSrvCode}
 					setSelectedSrvCode={setSelectedSrvCode}
 				/>
-			)}
+				<PackageSection
+					title="Wakanet volume 4G"
+					packages={PACKAGES.wakanetVolume4G}
+					selectedSrvCode={selectedSrvCode}
+					setSelectedSrvCode={setSelectedSrvCode}
+				/>
+				<PackageSection
+					title="Wakanet 5G"
+					packages={PACKAGES.wakanet5G}
+					selectedSrvCode={selectedSrvCode}
+					setSelectedSrvCode={setSelectedSrvCode}
+				/>
+				<PackageSection
+					title="Booster Packs 4g"
+					packages={PACKAGES.boosterPacks4G}
+					selectedSrvCode={selectedSrvCode}
+					setSelectedSrvCode={setSelectedSrvCode}
+				/>
+				<PackageSection
+					title="Booster Packs 5g"
+					packages={PACKAGES.boosterPacks5G}
+					selectedSrvCode={selectedSrvCode}
+					setSelectedSrvCode={setSelectedSrvCode}
+				/>
+				<PackageSection
+					title="Wakanet Router Volume bundles"
+					packages={PACKAGES.volumeBundles}
+					selectedSrvCode={selectedSrvCode}
+					setSelectedSrvCode={setSelectedSrvCode}
+				/>
+				{user?.role === 'WAKA_CORP' && (
+					<PackageSection
+						title="PostPaid Bundles"
+						packages={PACKAGES.postPaidBundles}
+						selectedSrvCode={selectedSrvCode}
+						setSelectedSrvCode={setSelectedSrvCode}
+					/>
+				)}
+			</Paper>
 		</Paper>
 	);
 };
