@@ -1,5 +1,21 @@
-import { Accordion, Paper, SimpleGrid, Text } from '@mantine/core';
-import { memo, useState } from 'react';
+import {
+	Accordion,
+	Group,
+	SimpleGrid,
+	Stack,
+	Text,
+	ThemeIcon,
+	Title,
+	useMantineTheme,
+} from '@mantine/core';
+import {
+	IconBrandSpeedtest,
+	IconDatabase,
+	IconPackage,
+	IconRocket,
+	IconWifi,
+} from '@tabler/icons-react';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../app/store';
 import { Package } from './components/Package';
@@ -66,110 +82,451 @@ const PACKAGES: Record<string, PackageData[]> = {
 	],
 };
 
-interface PakageSelectionProps {
-	title: string;
-	packages: PackageData[];
-	selectedSrvCode: string;
-	setSelectedSrvCode: (code: string) => void;
-}
-
-const PackageSection = memo(
-	({ title, packages, selectedSrvCode, setSelectedSrvCode }: PakageSelectionProps) => (
-		<Accordion
-			variant="filled"
-			defaultValue={title.toLowerCase().replace(' ', '_')}
-		>
-			<Accordion.Item value={title.toLowerCase().replace(' ', '_')}>
-				<Accordion.Control>
-					<Text
-						fz="xl"
-						fw="bold"
-						tt="uppercase"
-					>
-						{title}
-					</Text>
-				</Accordion.Control>
-				<Accordion.Panel>
-					<SimpleGrid
-						cols={5}
-						breakpoints={[
-							{ maxWidth: 'lg', cols: 4 },
-							{ maxWidth: 'md', cols: 3 },
-							{ maxWidth: 'sm', cols: 2 },
-							{ maxWidth: 'xs', cols: 1 },
-						]}
-					>
-						{packages.map((srv) => (
-							<Package
-								type={srv.type}
-								key={srv.serviceCode}
-								selectedSrvCode={selectedSrvCode}
-								serviceCode={srv.serviceCode}
-								setSelectedSrvCode={setSelectedSrvCode}
-								amount={srv.amount}
-								speed={srv.speed || ''}
-								volume={srv.volume || ''}
-							/>
-						))}
-					</SimpleGrid>
-				</Accordion.Panel>
-			</Accordion.Item>
-		</Accordion>
-	)
-);
-
 export default () => {
 	const [selectedSrvCode, setSelectedSrvCode] = useState('');
 	const user = useSelector((state: RootState) => state.auth.user);
+	const theme = useMantineTheme();
+
+	console.log(theme.colors.yellow);
+
+	const getAccordionIcon = (type: string) => {
+		switch (type) {
+			case '4G-speed':
+				return (
+					<IconBrandSpeedtest
+						size={20}
+						color="#FFD600"
+					/>
+				);
+			case '4G-volume':
+				return (
+					<IconDatabase
+						size={20}
+						color="#FFD600"
+					/>
+				);
+			case '5G':
+				return (
+					<IconRocket
+						size={20}
+						color="#FFD600"
+					/>
+				);
+			case 'booster':
+				return (
+					<IconWifi
+						size={20}
+						color="#FFD600"
+					/>
+				);
+			case 'bundle':
+				return (
+					<IconPackage
+						size={20}
+						color="#FFD600"
+					/>
+				);
+			default:
+				return (
+					<IconWifi
+						size={20}
+						color="#FFD600"
+					/>
+				);
+		}
+	};
 
 	return (
-		<Paper py="lg">
-			<Paper my={'md'}>
-				<PackageSection
-					title="Wakanet speed 4G"
-					packages={PACKAGES.wakanetSpeed4G}
-					selectedSrvCode={selectedSrvCode}
-					setSelectedSrvCode={setSelectedSrvCode}
-				/>
-				<PackageSection
-					title="Wakanet volume 4G"
-					packages={PACKAGES.wakanetVolume4G}
-					selectedSrvCode={selectedSrvCode}
-					setSelectedSrvCode={setSelectedSrvCode}
-				/>
-				<PackageSection
-					title="Wakanet 5G"
-					packages={PACKAGES.wakanet5G}
-					selectedSrvCode={selectedSrvCode}
-					setSelectedSrvCode={setSelectedSrvCode}
-				/>
-				<PackageSection
-					title="Booster Packs 4g"
-					packages={PACKAGES.boosterPacks4G}
-					selectedSrvCode={selectedSrvCode}
-					setSelectedSrvCode={setSelectedSrvCode}
-				/>
-				<PackageSection
-					title="Booster Packs 5g"
-					packages={PACKAGES.boosterPacks5G}
-					selectedSrvCode={selectedSrvCode}
-					setSelectedSrvCode={setSelectedSrvCode}
-				/>
-				<PackageSection
-					title="Wakanet Router Volume bundles"
-					packages={PACKAGES.volumeBundles}
-					selectedSrvCode={selectedSrvCode}
-					setSelectedSrvCode={setSelectedSrvCode}
-				/>
+		<Stack spacing="xl">
+			<Accordion
+				multiple
+				defaultValue={['wakanetSpeed4G']}
+				radius="lg"
+				chevronPosition="right"
+				styles={{
+					item: {
+						marginBottom: '1rem',
+						overflow: 'hidden',
+						borderColor: '0 2px 8px rgba(0, 0, 0, 0.1)',
+					},
+					control: {
+						'&:hover': {
+							background: theme.colors.yellow[1],
+						},
+						'&[data-active]': {
+							background: '#FFCC08',
+							color: '#795548',
+						},
+					},
+					content: {
+						padding: '1.5rem',
+					},
+					chevron: {
+						'&[data-rotate]': {
+							transform: 'rotate(180deg)',
+						},
+					},
+				}}
+			>
+				<Accordion.Item value="wakanetSpeed4G">
+					<Accordion.Control>
+						<Group
+							spacing="md"
+							noWrap
+						>
+							<ThemeIcon
+								variant="light"
+								color="yellow"
+								size="md"
+								radius="md"
+							>
+								{getAccordionIcon('4G-speed')}
+							</ThemeIcon>
+							<Stack spacing={2}>
+								<Title
+									order={4}
+									color="inherit"
+								>
+									4G Speed Packages
+								</Title>
+								<Text
+									size="xs"
+									color="dimmed"
+								>
+									High-speed internet plans
+								</Text>
+							</Stack>
+						</Group>
+					</Accordion.Control>
+					<Accordion.Panel>
+						<SimpleGrid
+							cols={5}
+							spacing="md"
+							breakpoints={[
+								{ maxWidth: 'md', cols: 3 },
+								{ maxWidth: 'sm', cols: 1 },
+							]}
+						>
+							{PACKAGES.wakanetSpeed4G.map((srv) => (
+								<Package
+									key={srv.serviceCode}
+									{...srv}
+									selectedSrvCode={selectedSrvCode}
+									setSelectedSrvCode={setSelectedSrvCode}
+								/>
+							))}
+						</SimpleGrid>
+					</Accordion.Panel>
+				</Accordion.Item>
+
+				<Accordion.Item value="wakanetVolume4G">
+					<Accordion.Control>
+						<Group
+							spacing="md"
+							noWrap
+						>
+							<ThemeIcon
+								variant="light"
+								color="yellow"
+								size="md"
+								radius="md"
+							>
+								{getAccordionIcon('4G-volume')}
+							</ThemeIcon>
+							<Stack spacing={2}>
+								<Title
+									order={4}
+									color="inherit"
+								>
+									4G Volume Packages
+								</Title>
+								<Text
+									size="xs"
+									color="dimmed"
+								>
+									Data volume-based plans
+								</Text>
+							</Stack>
+						</Group>
+					</Accordion.Control>
+					<Accordion.Panel>
+						<SimpleGrid
+							cols={5}
+							spacing="md"
+							breakpoints={[
+								{ maxWidth: 'md', cols: 2 },
+								{ maxWidth: 'sm', cols: 1 },
+							]}
+						>
+							{PACKAGES.wakanetVolume4G.map((srv) => (
+								<Package
+									key={srv.serviceCode}
+									{...srv}
+									selectedSrvCode={selectedSrvCode}
+									setSelectedSrvCode={setSelectedSrvCode}
+								/>
+							))}
+						</SimpleGrid>
+					</Accordion.Panel>
+				</Accordion.Item>
+
+				<Accordion.Item value="wakanet5G">
+					<Accordion.Control>
+						<Group
+							spacing="md"
+							noWrap
+						>
+							<ThemeIcon
+								variant="light"
+								color="yellow"
+								size="md"
+								radius="md"
+							>
+								{getAccordionIcon('5G')}
+							</ThemeIcon>
+							<Stack spacing={2}>
+								<Title
+									order={4}
+									color="inherit"
+								>
+									5G Packages
+								</Title>
+								<Text
+									size="xs"
+									color="dimmed"
+								>
+									Ultra-fast 5G network plans
+								</Text>
+							</Stack>
+						</Group>
+					</Accordion.Control>
+					<Accordion.Panel>
+						<SimpleGrid
+							cols={5}
+							spacing="md"
+							breakpoints={[
+								{ maxWidth: 'md', cols: 2 },
+								{ maxWidth: 'sm', cols: 1 },
+							]}
+						>
+							{PACKAGES.wakanet5G.map((srv) => (
+								<Package
+									key={srv.serviceCode}
+									{...srv}
+									selectedSrvCode={selectedSrvCode}
+									setSelectedSrvCode={setSelectedSrvCode}
+								/>
+							))}
+						</SimpleGrid>
+					</Accordion.Panel>
+				</Accordion.Item>
+
+				<Accordion.Item value="boosterPacks4G">
+					<Accordion.Control>
+						<Group
+							spacing="md"
+							noWrap
+						>
+							<ThemeIcon
+								variant="light"
+								color="yellow"
+								size="md"
+								radius="md"
+							>
+								{getAccordionIcon('booster')}
+							</ThemeIcon>
+							<Stack spacing={2}>
+								<Title
+									order={4}
+									color="inherit"
+								>
+									4G Booster Packs
+								</Title>
+								<Text
+									size="xs"
+									color="dimmed"
+								>
+									Speed boost add-ons
+								</Text>
+							</Stack>
+						</Group>
+					</Accordion.Control>
+					<Accordion.Panel>
+						<SimpleGrid
+							cols={5}
+							spacing="md"
+							breakpoints={[
+								{ maxWidth: 'md', cols: 2 },
+								{ maxWidth: 'sm', cols: 1 },
+							]}
+						>
+							{PACKAGES.boosterPacks4G.map((srv) => (
+								<Package
+									key={srv.serviceCode}
+									{...srv}
+									selectedSrvCode={selectedSrvCode}
+									setSelectedSrvCode={setSelectedSrvCode}
+								/>
+							))}
+						</SimpleGrid>
+					</Accordion.Panel>
+				</Accordion.Item>
+
+				<Accordion.Item value="boosterPacks5G">
+					<Accordion.Control>
+						<Group
+							spacing="md"
+							noWrap
+						>
+							<ThemeIcon
+								variant="light"
+								color="yellow"
+								size="md"
+								radius="md"
+							>
+								{getAccordionIcon('booster')}
+							</ThemeIcon>
+							<Stack spacing={2}>
+								<Title
+									order={4}
+									color="inherit"
+								>
+									5G Booster Packs
+								</Title>
+								<Text
+									size="xs"
+									color="dimmed"
+								>
+									5G speed boost add-ons
+								</Text>
+							</Stack>
+						</Group>
+					</Accordion.Control>
+					<Accordion.Panel>
+						<SimpleGrid
+							cols={5}
+							spacing="md"
+							breakpoints={[
+								{ maxWidth: 'md', cols: 2 },
+								{ maxWidth: 'sm', cols: 1 },
+							]}
+						>
+							{PACKAGES.boosterPacks5G.map((srv) => (
+								<Package
+									key={srv.serviceCode}
+									{...srv}
+									selectedSrvCode={selectedSrvCode}
+									setSelectedSrvCode={setSelectedSrvCode}
+								/>
+							))}
+						</SimpleGrid>
+					</Accordion.Panel>
+				</Accordion.Item>
+
+				<Accordion.Item value="postPaidBundles">
+					<Accordion.Control>
+						<Group
+							spacing="md"
+							noWrap
+						>
+							<ThemeIcon
+								variant="light"
+								color="yellow"
+								size="md"
+								radius="md"
+							>
+								{getAccordionIcon('bundle')}
+							</ThemeIcon>
+							<Stack spacing={2}>
+								<Title
+									order={4}
+									color="inherit"
+								>
+									Post-Paid Bundles
+								</Title>
+								<Text
+									size="xs"
+									color="dimmed"
+								>
+									Monthly subscription plans
+								</Text>
+							</Stack>
+						</Group>
+					</Accordion.Control>
+					<Accordion.Panel>
+						<SimpleGrid
+							cols={5}
+							spacing="md"
+							breakpoints={[
+								{ maxWidth: 'md', cols: 3 },
+								{ maxWidth: 'sm', cols: 2 },
+							]}
+						>
+							{PACKAGES.postPaidBundles.map((srv) => (
+								<Package
+									key={srv.serviceCode}
+									{...srv}
+									selectedSrvCode={selectedSrvCode}
+									setSelectedSrvCode={setSelectedSrvCode}
+								/>
+							))}
+						</SimpleGrid>
+					</Accordion.Panel>
+				</Accordion.Item>
+
 				{user?.role === 'WAKA_CORP' && (
-					<PackageSection
-						title="PostPaid Bundles"
-						packages={PACKAGES.postPaidBundles}
-						selectedSrvCode={selectedSrvCode}
-						setSelectedSrvCode={setSelectedSrvCode}
-					/>
+					<Accordion.Item value="volumeBundles">
+						<Accordion.Control>
+							<Group
+								spacing="md"
+								noWrap
+							>
+								<ThemeIcon
+									variant="light"
+									color="yellow"
+									size="md"
+									radius="md"
+								>
+									{getAccordionIcon('bundle')}
+								</ThemeIcon>
+								<Stack spacing={2}>
+									<Title
+										order={4}
+										color="inherit"
+									>
+										Volume Bundles
+									</Title>
+									<Text
+										size="xs"
+										color="dimmed"
+									>
+										Corporate volume plans
+									</Text>
+								</Stack>
+							</Group>
+						</Accordion.Control>
+						<Accordion.Panel>
+							<SimpleGrid
+								cols={3}
+								spacing="md"
+								breakpoints={[
+									{ maxWidth: 'md', cols: 2 },
+									{ maxWidth: 'sm', cols: 1 },
+								]}
+							>
+								{PACKAGES.volumeBundles.map((srv) => (
+									<Package
+										key={srv.serviceCode}
+										{...srv}
+										selectedSrvCode={selectedSrvCode}
+										setSelectedSrvCode={setSelectedSrvCode}
+									/>
+								))}
+							</SimpleGrid>
+						</Accordion.Panel>
+					</Accordion.Item>
 				)}
-			</Paper>
-		</Paper>
+			</Accordion>
+		</Stack>
 	);
 };

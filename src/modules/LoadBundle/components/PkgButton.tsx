@@ -1,6 +1,6 @@
-import { Button } from '@mantine/core';
+import { Button, Text as MantineText } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconCircleCheck } from '@tabler/icons-react';
+import { IconArrowRight, IconCircleCheck } from '@tabler/icons-react';
 import { SetStateAction } from 'react';
 import { Modal } from '../../../components/Modal';
 import LoadBundleForm from './LoadBundleForm';
@@ -23,31 +23,55 @@ export const PkgButton = ({
 	speed,
 }: TPkgButtonProps) => {
 	const [opened, { open, close }] = useDisclosure(false);
+
 	return (
 		<>
+			<Button
+				leftIcon={
+					selected ? (
+						<IconCircleCheck
+							size={18}
+							color="#FFD600"
+						/>
+					) : (
+						<IconArrowRight
+							size={18}
+							color="#FFD600"
+						/>
+					)
+				}
+				onClick={() => {
+					onSelect(serviceCode);
+					open();
+				}}
+				variant={selected ? 'filled' : 'light'}
+				color={selected ? 'yellow' : 'gray'}
+				fullWidth
+				radius="md"
+				size="md"
+				style={{
+					fontWeight: 600,
+					transition: 'all 0.2s ease',
+				}}
+			>
+				<MantineText
+					size="sm"
+					weight={600}
+				>
+					{selected ? 'Selected' : 'Select Plan'}
+				</MantineText>
+			</Button>
+
 			<Modal
 				opened={opened}
 				close={close}
 			>
 				<LoadBundleForm
-					selectedSrvCode={selectedSrvCode}
+					selectedSrvCode={selectedSrvCode || serviceCode}
 					amount={amount}
 					speed={speed}
 				/>
 			</Modal>
-			<Button
-				leftIcon={selected ? <IconCircleCheck /> : null}
-				onClick={() => {
-					onSelect(serviceCode);
-					open();
-				}}
-				variant={selected ? 'filled' : 'outline'}
-				fullWidth
-				radius="md"
-				mt="lg"
-			>
-				{selected ? 'Package Selected' : 'Select Package'}
-			</Button>
 		</>
 	);
 };

@@ -59,6 +59,7 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 			notifications.show({
 				autoClose: 5000,
 				message: response.data.message,
+				color: 'yellow',
 			});
 		},
 		onError: (error: AxiosError) => {
@@ -74,7 +75,7 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 	return (
 		<form>
 			<Center mb="xs">
-				<IconGauge />
+				<IconGauge color="#FFD600" />
 			</Center>
 			<Text
 				fw={600}
@@ -83,7 +84,7 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 			>{`${selectedSrvCode} - ${speed} - ${formatCurrency(amount)}`}</Text>
 
 			<TextInput
-				icon={<IconPhone />}
+				icon={<IconPhone color="#FFD600" />}
 				label="WakaNet Number"
 				mb="xs"
 				value={form.values.bnumber}
@@ -95,7 +96,7 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 			/>
 
 			<TextInput
-				icon={<IconPhone />}
+				icon={<IconPhone color="#FFD600" />}
 				label="Agent/Customer Number"
 				value={form.values.msisdn}
 				onChange={(event) => form.setFieldValue('msisdn', event.currentTarget.value)}
@@ -112,6 +113,7 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 				<Button
 					fullWidth
 					radius="md"
+					color="yellow"
 					onClick={() => {
 						const validation = form.validate();
 						if (!validation.hasErrors) {
@@ -133,7 +135,8 @@ export default function LoadBundleForm({ selectedSrvCode, amount, speed }: TLoad
 				<Button
 					fullWidth
 					radius="md"
-					color="red"
+					color="yellow"
+					variant="outline"
 					onClick={() => form.reset()}
 				>
 					Reset

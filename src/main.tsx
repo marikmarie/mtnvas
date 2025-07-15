@@ -73,15 +73,15 @@ function App() {
 					colors: {
 						primary: [
 							'#fffbe1',
-							'#fff5cc',
-							'#ffea9b',
+							'#fff5cb',
+							'#ffea9a',
 							'#ffdf64',
 							'#ffd538',
 							'#ffcf1c',
-							'#ffcc09',
+							'#ffcc08',
 							'#e3b400',
-							'#c9a000',
-							'#ae8a00',
+							'#caa000',
+							'#ae8900',
 						],
 					},
 				}}
