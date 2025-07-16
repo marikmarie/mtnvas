@@ -187,7 +187,7 @@ export default () => {
 									order={4}
 									color="inherit"
 								>
-									4G Speed Packages
+									WAKANET SPEED 4G BUNDLES
 								</Title>
 								<Text
 									size="xs"
@@ -238,7 +238,7 @@ export default () => {
 									order={4}
 									color="inherit"
 								>
-									4G Volume Packages
+									WAKANET VOLUME 4G BUNDLES
 								</Title>
 								<Text
 									size="xs"
@@ -289,7 +289,7 @@ export default () => {
 									order={4}
 									color="inherit"
 								>
-									5G Packages
+									WAKANET SPEED 5G BUNDLES
 								</Title>
 								<Text
 									size="xs"
@@ -340,7 +340,7 @@ export default () => {
 									order={4}
 									color="inherit"
 								>
-									4G Booster Packs
+									4G BOOSTER PACKS
 								</Title>
 								<Text
 									size="xs"
@@ -391,7 +391,7 @@ export default () => {
 									order={4}
 									color="inherit"
 								>
-									5G Booster Packs
+									5G BOOSTER PACKS
 								</Title>
 								<Text
 									size="xs"
@@ -442,7 +442,7 @@ export default () => {
 									order={4}
 									color="inherit"
 								>
-									Post-Paid Bundles
+									POST PAID BUNDLES
 								</Title>
 								<Text
 									size="xs"
@@ -474,7 +474,7 @@ export default () => {
 					</Accordion.Panel>
 				</Accordion.Item>
 
-				{user?.role === 'WAKA_CORP' && (
+				{user?.role !== 'WAKA_CORP' && (
 					<Accordion.Item value="volumeBundles">
 						<Accordion.Control>
 							<Group
@@ -494,7 +494,7 @@ export default () => {
 										order={4}
 										color="inherit"
 									>
-										Volume Bundles
+										VOLUME BUNDLES
 									</Title>
 									<Text
 										size="xs"
@@ -507,10 +507,10 @@ export default () => {
 						</Accordion.Control>
 						<Accordion.Panel>
 							<SimpleGrid
-								cols={3}
+								cols={5}
 								spacing="md"
 								breakpoints={[
-									{ maxWidth: 'md', cols: 2 },
+									{ maxWidth: 'md', cols: 3 },
 									{ maxWidth: 'sm', cols: 1 },
 								]}
 							>
