@@ -1,13 +1,18 @@
 import {
 	Accordion,
+	Box,
+	Button,
 	Group,
+	Select,
 	SimpleGrid,
 	Stack,
 	Text,
+	TextInput,
 	ThemeIcon,
 	Title,
 	useMantineTheme,
 } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import {
 	IconBrandSpeedtest,
 	IconDatabase,
@@ -18,6 +23,7 @@ import {
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../app/store';
+import useRequest from '../../hooks/useRequest';
 import { Package } from './components/Package';
 
 interface PackageData {
@@ -84,8 +90,88 @@ const PACKAGES: Record<string, PackageData[]> = {
 
 export default () => {
 	const [selectedSrvCode, setSelectedSrvCode] = useState('');
+	const [eligibleServiceCodes, setEligibleServiceCodes] = useState<string[] | null>(null);
+	const [loading, setLoading] = useState(false);
 	const user = useSelector((state: RootState) => state.auth.user);
 	const theme = useMantineTheme();
+
+	const request = useRequest(true);
+
+	const form = useForm({
+		initialValues: {
+			bnumber: '',
+			packageCategory: '',
+		},
+		validate: {
+			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid account number'),
+		},
+	});
+
+	const handleEligibilityCheck = async () => {
+		setLoading(true);
+		try {
+			const res = await request.post(
+				'/fwa/fetch-packages',
+				{
+					packageCategory: form.values.packageCategory,
+					accountNumber: form.values.bnumber,
+				},
+				{
+					headers: { 'Content-Type': 'application/json' },
+				}
+			);
+			const data = res.data?.data;
+			let eligibleCodes: string[] = [];
+			if (data) {
+				const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+				if (parsed.PackageCategories) {
+					parsed.PackageCategories.forEach((cat: any) => {
+						if (cat.Packages) {
+							cat.Packages.forEach((pkg: any) => {
+								if (pkg.ServiceCode) eligibleCodes.push(pkg.ServiceCode);
+							});
+						}
+					});
+				}
+			}
+			setEligibleServiceCodes(eligibleCodes);
+		} catch (e) {
+			setEligibleServiceCodes([]);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const filterPackages = (pkgs: PackageData[]) => {
+		if (!eligibleServiceCodes) return pkgs;
+		return pkgs.filter((pkg) => eligibleServiceCodes.includes(pkg.serviceCode));
+	};
+
+	const packageCategoryOptions = [
+		{ value: '', label: 'All Categories' },
+		{ value: 'WAKANET_ROUTER_SPEED', label: 'WakaNet Router Speed Bundles' },
+		{ value: 'WAKANET_ROUTER_SPEED_BOOSTER', label: 'WakaNet Router Speed Booster Bundles' },
+		{ value: 'WAKANET_ROUTER_FREEDOM', label: 'WakaNet Router Freedom Bundles' },
+		{ value: 'WAKANET_ROUTER_VOLUME', label: 'WakaNet Router Volume Bundles' },
+		{ value: 'WAKANET_5G_SPEED', label: 'WakaNet 5G Speed Bundles' },
+		{ value: 'WAKANET_5G_SPEED_BOOSTER', label: 'WakaNet 5G Speed Booster Bundles' },
+		{ value: 'WAKANET_5G_FREEDOM', label: 'WakaNet 5G Freedom Bundles' },
+		{ value: 'WAKANET_5G_VOLUME', label: 'WakaNet 5G Volume Bundles' },
+		{ value: 'BUSINESS_INTERNET_4G_SPEED', label: 'Business Internet 4G Speed Bundles' },
+		{
+			value: 'BUSINESS_INTERNET_4G_SPEED_BOOSTER',
+			label: 'Business Internet 4G Speed Booster Bundles',
+		},
+		{ value: 'BUSINESS_INTERNET_4G_FREEDOM', label: 'Business Internet 4G Freedom Bundles' },
+		{ value: 'BUSINESS_INTERNET_4G_VOLUME', label: 'Business Internet 4G Volume Bundles' },
+		{ value: 'BUSINESS_INTERNET_5G_SPEED', label: 'Business Internet 5G Speed Bundles' },
+		{
+			value: 'BUSINESS_INTERNET_5G_SPEED_BOOSTER',
+			label: 'Business Internet 5G Speed Booster Bundles',
+		},
+		{ value: 'BUSINESS_INTERNET_5G_FREEDOM', label: 'Business Internet 5G Freedom Bundles' },
+		{ value: 'BUSINESS_INTERNET_5G_VOLUME', label: 'Business Internet 5G Volume Bundles' },
+	];
 
 	const getAccordionIcon = (type: string) => {
 		switch (type) {
@@ -136,6 +222,37 @@ export default () => {
 
 	return (
 		<Stack spacing="xl">
+			<Box
+				mb="md"
+				p="md"
+				style={{ background: theme.colors.yellow[0], borderRadius: 8 }}
+			>
+				<form
+					onSubmit={form.onSubmit(handleEligibilityCheck)}
+					style={{ display: 'flex', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}
+				>
+					<TextInput
+						label="Account Number (bnumber)"
+						placeholder="e.g. 256393011001"
+						{...form.getInputProps('bnumber')}
+						required
+					/>
+					<Select
+						label="Package Category (optional)"
+						placeholder="Select category"
+						data={packageCategoryOptions}
+						{...form.getInputProps('packageCategory')}
+						width={'100%'}
+					/>
+					<Button
+						type="submit"
+						loading={loading}
+						color="yellow"
+					>
+						Load packages
+					</Button>
+				</form>
+			</Box>
 			<Accordion
 				multiple
 				defaultValue={['wakanetSpeed4G']}
@@ -205,7 +322,7 @@ export default () => {
 								{ maxWidth: 'sm', cols: 1 },
 							]}
 						>
-							{PACKAGES.wakanetSpeed4G.map((srv) => (
+							{filterPackages(PACKAGES.wakanetSpeed4G).map((srv) => (
 								<Package
 									key={srv.serviceCode}
 									{...srv}
@@ -256,7 +373,7 @@ export default () => {
 								{ maxWidth: 'sm', cols: 1 },
 							]}
 						>
-							{PACKAGES.wakanetVolume4G.map((srv) => (
+							{filterPackages(PACKAGES.wakanetVolume4G).map((srv) => (
 								<Package
 									key={srv.serviceCode}
 									{...srv}
@@ -307,7 +424,7 @@ export default () => {
 								{ maxWidth: 'sm', cols: 1 },
 							]}
 						>
-							{PACKAGES.wakanet5G.map((srv) => (
+							{filterPackages(PACKAGES.wakanet5G).map((srv) => (
 								<Package
 									key={srv.serviceCode}
 									{...srv}
@@ -358,7 +475,7 @@ export default () => {
 								{ maxWidth: 'sm', cols: 1 },
 							]}
 						>
-							{PACKAGES.boosterPacks4G.map((srv) => (
+							{filterPackages(PACKAGES.boosterPacks4G).map((srv) => (
 								<Package
 									key={srv.serviceCode}
 									{...srv}
@@ -409,7 +526,7 @@ export default () => {
 								{ maxWidth: 'sm', cols: 1 },
 							]}
 						>
-							{PACKAGES.boosterPacks5G.map((srv) => (
+							{filterPackages(PACKAGES.boosterPacks5G).map((srv) => (
 								<Package
 									key={srv.serviceCode}
 									{...srv}
@@ -460,7 +577,7 @@ export default () => {
 								{ maxWidth: 'sm', cols: 1 },
 							]}
 						>
-							{PACKAGES.postPaidBundles.map((srv) => (
+							{filterPackages(PACKAGES.postPaidBundles).map((srv) => (
 								<Package
 									key={srv.serviceCode}
 									{...srv}
@@ -512,7 +629,7 @@ export default () => {
 									{ maxWidth: 'sm', cols: 1 },
 								]}
 							>
-								{PACKAGES.volumeBundles.map((srv) => (
+								{filterPackages(PACKAGES.volumeBundles).map((srv) => (
 									<Package
 										key={srv.serviceCode}
 										{...srv}
