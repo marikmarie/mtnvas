@@ -87,8 +87,6 @@ export default () => {
 	const user = useSelector((state: RootState) => state.auth.user);
 	const theme = useMantineTheme();
 
-	console.log(theme.colors.yellow);
-
 	const getAccordionIcon = (type: string) => {
 		switch (type) {
 			case '4G-speed':
@@ -459,7 +457,7 @@ export default () => {
 							spacing="md"
 							breakpoints={[
 								{ maxWidth: 'md', cols: 3 },
-								{ maxWidth: 'sm', cols: 2 },
+								{ maxWidth: 'sm', cols: 1 },
 							]}
 						>
 							{PACKAGES.postPaidBundles.map((srv) => (

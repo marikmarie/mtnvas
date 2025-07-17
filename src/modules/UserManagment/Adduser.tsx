@@ -49,7 +49,6 @@ function Adduser(props: Props) {
 	});
 
 	const onSubmit = useCallback(() => {
-		console.log(form.values);
 		mutation.mutate();
 		form.reset();
 	}, [mutation, form]);
