@@ -41,7 +41,6 @@ type SanitizedCategory = {
 	packages: SanitizedPackage[];
 };
 
-// Helper: Map category name to display name and type
 const CATEGORY_MAP: Record<string, { displayName: string; type: '4G' | '5G' | 'bundle' }> = {
 	WAKANET_ROUTER_SPEED: { displayName: 'WakaNet Router Speed Bundles', type: '4G' },
 	WAKANET_ROUTER_SPEED_BOOSTER: {
