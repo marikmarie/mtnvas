@@ -21,78 +21,113 @@ import {
 	IconWifi,
 } from '@tabler/icons-react';
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../app/store';
 import useRequest from '../../hooks/useRequest';
 import { Package } from './components/Package';
 
-interface PackageData {
+// Add types for sanitized package and category
+type SanitizedPackage = {
+	type: '4G' | '5G' | 'bundle';
 	serviceCode: string;
 	amount: string;
 	speed?: string;
-	type: '4G' | '5G' | 'bundle';
 	volume?: string;
+	name: string;
+	description: string;
+};
+type SanitizedCategory = {
+	name: string;
+	displayName: string;
+	type: '4G' | '5G' | 'bundle';
+	packages: SanitizedPackage[];
+};
+
+// Helper: Map category name to display name and type
+const CATEGORY_MAP: Record<string, { displayName: string; type: '4G' | '5G' | 'bundle' }> = {
+	WAKANET_ROUTER_SPEED: { displayName: 'WakaNet Router Speed Bundles', type: '4G' },
+	WAKANET_ROUTER_SPEED_BOOSTER: {
+		displayName: 'WakaNet Router Speed Booster Bundles',
+		type: '4G',
+	},
+	WAKANET_ROUTER_FREEDOM: { displayName: 'WakaNet Router Freedom Bundles', type: '4G' },
+	WAKANET_ROUTER_VOLUME: { displayName: 'WakaNet Router Volume Bundles', type: '4G' },
+	WAKANET_5G_SPEED: { displayName: 'WakaNet 5G Speed Bundles', type: '5G' },
+	WAKANET_5G_SPEED_BOOSTER: { displayName: 'WakaNet 5G Speed Booster Bundles', type: '5G' },
+	WAKANET_5G_FREEDOM: { displayName: 'WakaNet 5G Freedom Bundles', type: '5G' },
+	WAKANET_5G_VOLUME: { displayName: 'WakaNet 5G Volume Bundles', type: '5G' },
+	BUSINESS_INTERNET_4G_SPEED: { displayName: 'Business Internet 4G Speed Bundles', type: '4G' },
+	BUSINESS_INTERNET_4G_SPEED_BOOSTER: {
+		displayName: 'Business Internet 4G Speed Booster Bundles',
+		type: '4G',
+	},
+	BUSINESS_INTERNET_4G_FREEDOM: {
+		displayName: 'Business Internet 4G Freedom Bundles',
+		type: '4G',
+	},
+	BUSINESS_INTERNET_4G_VOLUME: { displayName: 'Business Internet 4G Volume Bundles', type: '4G' },
+	BUSINESS_INTERNET_5G_SPEED: { displayName: 'Business Internet 5G Speed Bundles', type: '5G' },
+	BUSINESS_INTERNET_5G_SPEED_BOOSTER: {
+		displayName: 'Business Internet 5G Speed Booster Bundles',
+		type: '5G',
+	},
+	BUSINESS_INTERNET_5G_FREEDOM: {
+		displayName: 'Business Internet 5G Freedom Bundles',
+		type: '5G',
+	},
+	BUSINESS_INTERNET_5G_VOLUME: { displayName: 'Business Internet 5G Volume Bundles', type: '5G' },
+};
+
+// Helper: Extract speed (e.g., '10Mbps') from string
+function extractSpeed(str: string): string | undefined {
+	const match = str.match(/(\d+\s?Mbps)/i);
+	return match ? match[1].replace(/\s+/g, '') : undefined;
+}
+// Helper: Extract volume (e.g., '50GB') from string
+function extractVolume(str: string): string | undefined {
+	const match = str.match(/(\d+\s?GB)/i);
+	return match ? match[1].replace(/\s+/g, '') : undefined;
+}
+function deduceType(category: string, name: string): '4G' | '5G' | 'bundle' {
+	if (/5g/i.test(category) || /5g/i.test(name)) return '5G';
+	if (/4g/i.test(category) || /4g/i.test(name)) return '4G';
+	if (/bundle/i.test(name) || /bundle/i.test(category)) return 'bundle';
+	return 'bundle';
 }
 
-const PACKAGES: Record<string, PackageData[]> = {
-	wakanetSpeed4G: [
-		{ type: '4G', serviceCode: 'FWA_3MBPS', amount: '55000', speed: '3MBPS' },
-		{ type: '4G', serviceCode: 'FWA_5MBPS', amount: '85000', speed: '5MBPS' },
-		{ type: '4G', serviceCode: 'FWA_10MBPS', amount: '130000', speed: '10MBPS' },
-		{ type: '4G', serviceCode: 'FWA_20MBPS', amount: '195000', speed: '20MBPS' },
-	],
-	wakanetVolume4G: [
-		{ type: '4G', serviceCode: 'FWA_50GB_4G_HOME', amount: '55000', volume: '50GB' },
-		{ type: '4G', serviceCode: 'FWA_100GB_4G_HOME', amount: '85000', volume: '100GB' },
-		{ type: '4G', serviceCode: 'FWA_160GB_4G_HOME', amount: '130000', volume: '160GB' },
-		{ type: '4G', serviceCode: 'FWA_300GB_4G_HOME', amount: '195000', volume: '300GB' },
-		{ type: '4G', serviceCode: 'FWA_900GB_4G_HOME', amount: '295000', volume: '900GB' },
-	],
-	wakanet5G: [
-		{ type: '5G', serviceCode: 'FWAA_10MBPS', amount: '130000', speed: '10MBPS' },
-		{ type: '5G', serviceCode: 'FWAA_20MBPS', amount: '195000', speed: '20MBPS' },
-		{ type: '5G', serviceCode: 'FWA_40MBPS', amount: '295000', speed: '40MBPS' },
-		{ type: '5G', serviceCode: 'FWA_60MBPS', amount: '395000', speed: '60MBPS' },
-		{ type: '5G', serviceCode: 'FWA_80MBPS', amount: '495000', speed: '80MBPS' },
-		{ type: '5G', serviceCode: 'FWA_100MBPS', amount: '595000', speed: '100MBPS' },
-		{ type: '5G', serviceCode: 'FWA_150MBPS', amount: '695000', speed: '150MBPS' },
-	],
-	boosterPacks4G: [
-		{ type: '4G', serviceCode: 'FWA_BST_3MBPS', amount: '1400', speed: '3MBPS' },
-		{ type: '4G', serviceCode: 'FWA_BST_5MBPS', amount: '2500', speed: '5MBPS' },
-		{ type: '4G', serviceCode: 'FWA_BST_10MBPS', amount: '3900', speed: '10MBPS' },
-		{ type: '4G', serviceCode: 'FWA_BST_20MBPS', amount: '6300', speed: '20MBPS' },
-	],
-	boosterPacks5G: [
-		{ type: '5G', serviceCode: 'FWAA_BST_10MBPS', amount: '4300', speed: '10MBPS' },
-		{ type: '5G', serviceCode: 'FWAA_BST_20MBPS', amount: '6500', speed: '20MBPS' },
-		{ type: '5G', serviceCode: 'FWAA_BST_40MBPS', amount: '9800', speed: '40MBPS' },
-		{ type: '5G', serviceCode: 'FWAA_BST_60MBPS', amount: '13100', speed: '60MBPS' },
-		{ type: '5G', serviceCode: 'FWAA_BST_80MBPS', amount: '16500', speed: '80MBPS' },
-		{ type: '5G', serviceCode: 'FWAA_BST_100MBPS', amount: '19800', speed: '100MBPS' },
-		{ type: '5G', serviceCode: 'FWAA_BST_150MBPS', amount: '23100', speed: '150MBPS' },
-	],
-	postPaidBundles: [
-		{ type: 'bundle', serviceCode: 'Waka10PST', amount: '35000', volume: '14GB' },
-		{ type: 'bundle', serviceCode: 'Waka20PST', amount: '55000', volume: '25GB' },
-		{ type: 'bundle', serviceCode: 'Waka40PST', amount: '85000', volume: '45GB' },
-		{ type: 'bundle', serviceCode: 'Waka85PST', amount: '170000', volume: '95GB' },
-		{ type: 'bundle', serviceCode: 'Waka195PST', amount: '335000', volume: '195GB' },
-	],
-	volumeBundles: [
-		{ type: 'bundle', serviceCode: '1778FHI5', amount: '35000', volume: '14GB' },
-		{ type: 'bundle', serviceCode: '1778FHI4', amount: '55000', volume: '25GB' },
-		{ type: 'bundle', serviceCode: '1778FHI1', amount: '85000', volume: '45GB + YoTv' },
-		{ type: 'bundle', serviceCode: '1778FHI2', amount: '170000', volume: '95GB + YoTv' },
-		{ type: 'bundle', serviceCode: '1778FHI3', amount: '335000', volume: '195GB + YoTv' },
-	],
-};
+// Sanitize server response
+function sanitizePackages(raw: any): SanitizedCategory[] {
+	if (!raw?.PackageCategories) return [];
+	return raw.PackageCategories.map((cat: any) => {
+		const catInfo = CATEGORY_MAP[cat.Name] || {
+			displayName: cat.Name,
+			type: deduceType(cat.Name, ''),
+		};
+		const packages: SanitizedPackage[] = (cat.Packages || []).map((pkg: any) => {
+			const speed = extractSpeed(pkg.Name) || extractSpeed(pkg.Description);
+			const volume = extractVolume(pkg.Name) || extractVolume(pkg.Description);
+			const type = catInfo.type || deduceType(cat.Name, pkg.Name);
+			return {
+				type,
+				serviceCode: pkg.ServiceCode,
+				amount: String(pkg.Amount),
+				speed,
+				volume,
+				name: pkg.Name,
+				description: pkg.Description,
+			};
+		});
+		return {
+			name: cat.Name,
+			displayName: catInfo.displayName,
+			type: catInfo.type,
+			packages,
+		};
+	});
+}
 
 export default () => {
 	const [selectedSrvCode, setSelectedSrvCode] = useState('');
-	const [eligibleServiceCodes, setEligibleServiceCodes] = useState<string[] | null>(null);
+	const [sanitizedCategories, setSanitizedCategories] = useState<SanitizedCategory[]>([]);
 	const [loading, setLoading] = useState(false);
-	const user = useSelector((state: RootState) => state.auth.user);
 	const theme = useMantineTheme();
 
 	const request = useRequest(true);
@@ -121,57 +156,14 @@ export default () => {
 				}
 			);
 			const data = res.data?.data;
-			let eligibleCodes: string[] = [];
-			if (data) {
-				const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-				if (parsed.PackageCategories) {
-					parsed.PackageCategories.forEach((cat: any) => {
-						if (cat.Packages) {
-							cat.Packages.forEach((pkg: any) => {
-								if (pkg.ServiceCode) eligibleCodes.push(pkg.ServiceCode);
-							});
-						}
-					});
-				}
-			}
-			setEligibleServiceCodes(eligibleCodes);
+			const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+			setSanitizedCategories(sanitizePackages(parsed));
 		} catch (e) {
-			setEligibleServiceCodes([]);
+			setSanitizedCategories([]);
 		} finally {
 			setLoading(false);
 		}
 	};
-
-	const filterPackages = (pkgs: PackageData[]) => {
-		if (!eligibleServiceCodes) return pkgs;
-		return pkgs.filter((pkg) => eligibleServiceCodes.includes(pkg.serviceCode));
-	};
-
-	const packageCategoryOptions = [
-		{ value: '', label: 'All Categories' },
-		{ value: 'WAKANET_ROUTER_SPEED', label: 'WakaNet Router Speed Bundles' },
-		{ value: 'WAKANET_ROUTER_SPEED_BOOSTER', label: 'WakaNet Router Speed Booster Bundles' },
-		{ value: 'WAKANET_ROUTER_FREEDOM', label: 'WakaNet Router Freedom Bundles' },
-		{ value: 'WAKANET_ROUTER_VOLUME', label: 'WakaNet Router Volume Bundles' },
-		{ value: 'WAKANET_5G_SPEED', label: 'WakaNet 5G Speed Bundles' },
-		{ value: 'WAKANET_5G_SPEED_BOOSTER', label: 'WakaNet 5G Speed Booster Bundles' },
-		{ value: 'WAKANET_5G_FREEDOM', label: 'WakaNet 5G Freedom Bundles' },
-		{ value: 'WAKANET_5G_VOLUME', label: 'WakaNet 5G Volume Bundles' },
-		{ value: 'BUSINESS_INTERNET_4G_SPEED', label: 'Business Internet 4G Speed Bundles' },
-		{
-			value: 'BUSINESS_INTERNET_4G_SPEED_BOOSTER',
-			label: 'Business Internet 4G Speed Booster Bundles',
-		},
-		{ value: 'BUSINESS_INTERNET_4G_FREEDOM', label: 'Business Internet 4G Freedom Bundles' },
-		{ value: 'BUSINESS_INTERNET_4G_VOLUME', label: 'Business Internet 4G Volume Bundles' },
-		{ value: 'BUSINESS_INTERNET_5G_SPEED', label: 'Business Internet 5G Speed Bundles' },
-		{
-			value: 'BUSINESS_INTERNET_5G_SPEED_BOOSTER',
-			label: 'Business Internet 5G Speed Booster Bundles',
-		},
-		{ value: 'BUSINESS_INTERNET_5G_FREEDOM', label: 'Business Internet 5G Freedom Bundles' },
-		{ value: 'BUSINESS_INTERNET_5G_VOLUME', label: 'Business Internet 5G Volume Bundles' },
-	];
 
 	const getAccordionIcon = (type: string) => {
 		switch (type) {
@@ -220,6 +212,7 @@ export default () => {
 		}
 	};
 
+	// UI rendering
 	return (
 		<Stack spacing="xl">
 			<Box
@@ -240,7 +233,10 @@ export default () => {
 					<Select
 						label="Package Category (optional)"
 						placeholder="Select category"
-						data={packageCategoryOptions}
+						data={Object.keys(CATEGORY_MAP).map((key) => ({
+							value: key,
+							label: CATEGORY_MAP[key].displayName,
+						}))}
 						{...form.getInputProps('packageCategory')}
 						width={'100%'}
 					/>
@@ -255,7 +251,6 @@ export default () => {
 			</Box>
 			<Accordion
 				multiple
-				defaultValue={['wakanetSpeed4G']}
 				radius="lg"
 				chevronPosition="right"
 				styles={{
@@ -283,314 +278,11 @@ export default () => {
 					},
 				}}
 			>
-				<Accordion.Item value="wakanetSpeed4G">
-					<Accordion.Control>
-						<Group
-							spacing="md"
-							noWrap
-						>
-							<ThemeIcon
-								variant="light"
-								color="yellow"
-								size="md"
-								radius="md"
-							>
-								{getAccordionIcon('4G-speed')}
-							</ThemeIcon>
-							<Stack spacing={2}>
-								<Title
-									order={4}
-									color="inherit"
-								>
-									WAKANET SPEED 4G BUNDLES
-								</Title>
-								<Text
-									size="xs"
-									color="dimmed"
-								>
-									High-speed internet plans
-								</Text>
-							</Stack>
-						</Group>
-					</Accordion.Control>
-					<Accordion.Panel>
-						<SimpleGrid
-							cols={5}
-							spacing="md"
-							breakpoints={[
-								{ maxWidth: 'md', cols: 3 },
-								{ maxWidth: 'sm', cols: 1 },
-							]}
-						>
-							{filterPackages(PACKAGES.wakanetSpeed4G).map((srv) => (
-								<Package
-									key={srv.serviceCode}
-									{...srv}
-									selectedSrvCode={selectedSrvCode}
-									setSelectedSrvCode={setSelectedSrvCode}
-								/>
-							))}
-						</SimpleGrid>
-					</Accordion.Panel>
-				</Accordion.Item>
-
-				<Accordion.Item value="wakanetVolume4G">
-					<Accordion.Control>
-						<Group
-							spacing="md"
-							noWrap
-						>
-							<ThemeIcon
-								variant="light"
-								color="yellow"
-								size="md"
-								radius="md"
-							>
-								{getAccordionIcon('4G-volume')}
-							</ThemeIcon>
-							<Stack spacing={2}>
-								<Title
-									order={4}
-									color="inherit"
-								>
-									WAKANET VOLUME 4G BUNDLES
-								</Title>
-								<Text
-									size="xs"
-									color="dimmed"
-								>
-									Data volume-based plans
-								</Text>
-							</Stack>
-						</Group>
-					</Accordion.Control>
-					<Accordion.Panel>
-						<SimpleGrid
-							cols={5}
-							spacing="md"
-							breakpoints={[
-								{ maxWidth: 'md', cols: 2 },
-								{ maxWidth: 'sm', cols: 1 },
-							]}
-						>
-							{filterPackages(PACKAGES.wakanetVolume4G).map((srv) => (
-								<Package
-									key={srv.serviceCode}
-									{...srv}
-									selectedSrvCode={selectedSrvCode}
-									setSelectedSrvCode={setSelectedSrvCode}
-								/>
-							))}
-						</SimpleGrid>
-					</Accordion.Panel>
-				</Accordion.Item>
-
-				<Accordion.Item value="wakanet5G">
-					<Accordion.Control>
-						<Group
-							spacing="md"
-							noWrap
-						>
-							<ThemeIcon
-								variant="light"
-								color="yellow"
-								size="md"
-								radius="md"
-							>
-								{getAccordionIcon('5G')}
-							</ThemeIcon>
-							<Stack spacing={2}>
-								<Title
-									order={4}
-									color="inherit"
-								>
-									WAKANET SPEED 5G BUNDLES
-								</Title>
-								<Text
-									size="xs"
-									color="dimmed"
-								>
-									Ultra-fast 5G network plans
-								</Text>
-							</Stack>
-						</Group>
-					</Accordion.Control>
-					<Accordion.Panel>
-						<SimpleGrid
-							cols={5}
-							spacing="md"
-							breakpoints={[
-								{ maxWidth: 'md', cols: 2 },
-								{ maxWidth: 'sm', cols: 1 },
-							]}
-						>
-							{filterPackages(PACKAGES.wakanet5G).map((srv) => (
-								<Package
-									key={srv.serviceCode}
-									{...srv}
-									selectedSrvCode={selectedSrvCode}
-									setSelectedSrvCode={setSelectedSrvCode}
-								/>
-							))}
-						</SimpleGrid>
-					</Accordion.Panel>
-				</Accordion.Item>
-
-				<Accordion.Item value="boosterPacks4G">
-					<Accordion.Control>
-						<Group
-							spacing="md"
-							noWrap
-						>
-							<ThemeIcon
-								variant="light"
-								color="yellow"
-								size="md"
-								radius="md"
-							>
-								{getAccordionIcon('booster')}
-							</ThemeIcon>
-							<Stack spacing={2}>
-								<Title
-									order={4}
-									color="inherit"
-								>
-									4G BOOSTER PACKS
-								</Title>
-								<Text
-									size="xs"
-									color="dimmed"
-								>
-									Speed boost add-ons
-								</Text>
-							</Stack>
-						</Group>
-					</Accordion.Control>
-					<Accordion.Panel>
-						<SimpleGrid
-							cols={5}
-							spacing="md"
-							breakpoints={[
-								{ maxWidth: 'md', cols: 2 },
-								{ maxWidth: 'sm', cols: 1 },
-							]}
-						>
-							{filterPackages(PACKAGES.boosterPacks4G).map((srv) => (
-								<Package
-									key={srv.serviceCode}
-									{...srv}
-									selectedSrvCode={selectedSrvCode}
-									setSelectedSrvCode={setSelectedSrvCode}
-								/>
-							))}
-						</SimpleGrid>
-					</Accordion.Panel>
-				</Accordion.Item>
-
-				<Accordion.Item value="boosterPacks5G">
-					<Accordion.Control>
-						<Group
-							spacing="md"
-							noWrap
-						>
-							<ThemeIcon
-								variant="light"
-								color="yellow"
-								size="md"
-								radius="md"
-							>
-								{getAccordionIcon('booster')}
-							</ThemeIcon>
-							<Stack spacing={2}>
-								<Title
-									order={4}
-									color="inherit"
-								>
-									5G BOOSTER PACKS
-								</Title>
-								<Text
-									size="xs"
-									color="dimmed"
-								>
-									5G speed boost add-ons
-								</Text>
-							</Stack>
-						</Group>
-					</Accordion.Control>
-					<Accordion.Panel>
-						<SimpleGrid
-							cols={5}
-							spacing="md"
-							breakpoints={[
-								{ maxWidth: 'md', cols: 2 },
-								{ maxWidth: 'sm', cols: 1 },
-							]}
-						>
-							{filterPackages(PACKAGES.boosterPacks5G).map((srv) => (
-								<Package
-									key={srv.serviceCode}
-									{...srv}
-									selectedSrvCode={selectedSrvCode}
-									setSelectedSrvCode={setSelectedSrvCode}
-								/>
-							))}
-						</SimpleGrid>
-					</Accordion.Panel>
-				</Accordion.Item>
-
-				<Accordion.Item value="postPaidBundles">
-					<Accordion.Control>
-						<Group
-							spacing="md"
-							noWrap
-						>
-							<ThemeIcon
-								variant="light"
-								color="yellow"
-								size="md"
-								radius="md"
-							>
-								{getAccordionIcon('bundle')}
-							</ThemeIcon>
-							<Stack spacing={2}>
-								<Title
-									order={4}
-									color="inherit"
-								>
-									POST PAID BUNDLES
-								</Title>
-								<Text
-									size="xs"
-									color="dimmed"
-								>
-									Monthly subscription plans
-								</Text>
-							</Stack>
-						</Group>
-					</Accordion.Control>
-					<Accordion.Panel>
-						<SimpleGrid
-							cols={5}
-							spacing="md"
-							breakpoints={[
-								{ maxWidth: 'md', cols: 3 },
-								{ maxWidth: 'sm', cols: 1 },
-							]}
-						>
-							{filterPackages(PACKAGES.postPaidBundles).map((srv) => (
-								<Package
-									key={srv.serviceCode}
-									{...srv}
-									selectedSrvCode={selectedSrvCode}
-									setSelectedSrvCode={setSelectedSrvCode}
-								/>
-							))}
-						</SimpleGrid>
-					</Accordion.Panel>
-				</Accordion.Item>
-
-				{user?.role !== 'WAKA_CORP' && (
-					<Accordion.Item value="volumeBundles">
+				{sanitizedCategories.map((cat) => (
+					<Accordion.Item
+						value={cat.name}
+						key={cat.name}
+					>
 						<Accordion.Control>
 							<Group
 								spacing="md"
@@ -602,20 +294,32 @@ export default () => {
 									size="md"
 									radius="md"
 								>
-									{getAccordionIcon('bundle')}
+									{getAccordionIcon(
+										cat.type === '4G'
+											? cat.displayName.toLowerCase().includes('volume')
+												? '4G-volume'
+												: '4G-speed'
+											: cat.type === '5G'
+												? '5G'
+												: 'bundle'
+									)}
 								</ThemeIcon>
 								<Stack spacing={2}>
 									<Title
 										order={4}
 										color="inherit"
 									>
-										VOLUME BUNDLES
+										{cat.displayName}
 									</Title>
 									<Text
 										size="xs"
 										color="dimmed"
 									>
-										Corporate volume plans
+										{cat.type === '4G'
+											? '4G plans'
+											: cat.type === '5G'
+												? '5G plans'
+												: 'Bundle plans'}
 									</Text>
 								</Stack>
 							</Group>
@@ -629,7 +333,7 @@ export default () => {
 									{ maxWidth: 'sm', cols: 1 },
 								]}
 							>
-								{filterPackages(PACKAGES.volumeBundles).map((srv) => (
+								{cat.packages.map((srv) => (
 									<Package
 										key={srv.serviceCode}
 										{...srv}
@@ -640,7 +344,7 @@ export default () => {
 							</SimpleGrid>
 						</Accordion.Panel>
 					</Accordion.Item>
-				)}
+				))}
 			</Accordion>
 		</Stack>
 	);
