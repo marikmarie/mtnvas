@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { lazy } from 'react';
 import Layout from '../components/Layout';
+import { Loadable } from '../hocs/loadable';
 import { withAuth } from '../hocs/WithAuth';
-import { lazy } from 'react';
-import { Loadable } from '../hocs/Loadable';
 
 const CheckBalanceModule = Loadable(lazy(() => import('../modules/CheckBalance')));
 

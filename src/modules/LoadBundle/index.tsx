@@ -211,7 +211,6 @@ export default () => {
 		}
 	};
 
-	// UI rendering
 	return (
 		<Stack spacing="xl">
 			<Box
