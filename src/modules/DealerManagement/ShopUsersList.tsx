@@ -10,7 +10,7 @@ import { ConfirmationModal } from './ConfirmationModal';
 import { Shop, ShopUser } from './types';
 
 interface ShopUsersListProps {
-	shop: Shop;
+	shop: Shop | undefined;
 }
 
 export function ShopUsersList({ shop }: ShopUsersListProps) {
@@ -103,8 +103,8 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 				opened={addModalOpened}
 				onClose={closeAddModal}
 				dealer={{
-					id: shop?.dealerName,
-					name: shop?.dealerName,
+					id: shop?.dealerName!,
+					name: shop?.dealerName!,
 					contactPerson: '',
 					email: '',
 					phone: '',
@@ -114,8 +114,8 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 				}}
 				shops={[
 					{
-						id: shop?.shopName,
-						name: shop?.shopName,
+						id: shop?.shopName!,
+						name: shop?.shopName!,
 					},
 				]}
 			/>
@@ -126,8 +126,8 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 					onClose={closeConfirmModal}
 					action={confirmAction}
 					dealer={{
-						id: shop?.dealerName,
-						name: shop?.dealerName,
+						id: shop?.dealerName!,
+						name: shop?.dealerName!,
 						contactPerson: '',
 						email: '',
 						phone: '',
