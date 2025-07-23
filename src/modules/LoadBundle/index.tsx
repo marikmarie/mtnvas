@@ -3,9 +3,11 @@ import {
 	Box,
 	Button,
 	Group,
+	Paper,
 	Select,
 	SimpleGrid,
 	Stack,
+	Table,
 	Text,
 	TextInput,
 	ThemeIcon,
@@ -13,13 +15,7 @@ import {
 	useMantineTheme,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import {
-	IconBrandSpeedtest,
-	IconDatabase,
-	IconPackage,
-	IconRocket,
-	IconWifi,
-} from '@tabler/icons-react';
+import { IconBrandSpeedtest, IconDatabase, IconPackage, IconWifi } from '@tabler/icons-react';
 import { useState } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { Package } from './components/Package';
@@ -33,12 +29,25 @@ type SanitizedPackage = {
 	volume?: string;
 	name: string;
 	description: string;
+	duration: number;
+	offerType: string;
+	discount: number;
+	installationFee: number;
 };
+
 type SanitizedCategory = {
 	name: string;
 	displayName: string;
 	type: '4G' | '5G' | 'bundle';
 	packages: SanitizedPackage[];
+};
+
+type PreviousSubscription = {
+	subscriptionDate: string;
+	msisdn: string;
+	accountNumber: string;
+	serviceCode: string;
+	amount: number;
 };
 
 const CATEGORY_MAP: Record<string, { displayName: string; type: '4G' | '5G' | 'bundle' }> = {
@@ -80,11 +89,13 @@ function extractSpeed(str: string): string | undefined {
 	const match = str.match(/(\d+\s?Mbps)/i);
 	return match ? match[1].replace(/\s+/g, '') : undefined;
 }
+
 // Helper: Extract volume (e.g., '50GB') from string
 function extractVolume(str: string): string | undefined {
 	const match = str.match(/(\d+\s?GB)/i);
 	return match ? match[1].replace(/\s+/g, '') : undefined;
 }
+
 function deduceType(category: string, name: string): '4G' | '5G' | 'bundle' {
 	if (/5g/i.test(category) || /5g/i.test(name)) return '5G';
 	if (/4g/i.test(category) || /4g/i.test(name)) return '4G';
@@ -93,42 +104,52 @@ function deduceType(category: string, name: string): '4G' | '5G' | 'bundle' {
 }
 
 // Sanitize server response
-function sanitizePackages(raw: any): SanitizedCategory[] {
-	if (!raw?.PackageCategories) return [];
-	return raw.PackageCategories.map((cat: any) => {
-		const catInfo = CATEGORY_MAP[cat.Name] || {
-			displayName: cat.Name,
-			type: deduceType(cat.Name, ''),
+function sanitizePackages(raw: any): {
+	categories: SanitizedCategory[];
+	subscriptions: PreviousSubscription[];
+} {
+	const categories = (raw?.packageCategories || []).map((cat: any) => {
+		const catInfo = CATEGORY_MAP[cat.name] || {
+			displayName: cat.name,
+			type: deduceType(cat.name, ''),
 		};
-		const packages: SanitizedPackage[] = (cat.Packages || []).map((pkg: any) => {
-			const speed = extractSpeed(pkg.Name) || extractSpeed(pkg.Description);
-			const volume = extractVolume(pkg.Name) || extractVolume(pkg.Description);
-			const type = catInfo.type || deduceType(cat.Name, pkg.Name);
+		const packages: SanitizedPackage[] = (cat.packages || []).map((pkg: any) => {
+			const speed = extractSpeed(pkg.name) || extractSpeed(pkg.description);
+			const volume = extractVolume(pkg.name) || extractVolume(pkg.description);
+			const type = catInfo.type || deduceType(cat.name, pkg.name);
 			return {
 				type,
-				serviceCode: pkg.ServiceCode,
-				amount: String(pkg.Amount),
+				serviceCode: pkg.serviceCode,
+				amount: String(pkg.amount),
 				speed,
 				volume,
-				name: pkg.Name,
-				description: pkg.Description,
+				name: pkg.name,
+				description: pkg.description,
+				duration: pkg.duration || 0,
+				offerType: pkg.offerType || '',
+				discount: pkg.discount || 0,
+				installationFee: pkg.installationFee || 0,
 			};
 		});
 		return {
-			name: cat.Name,
+			name: cat.name,
 			displayName: catInfo.displayName,
 			type: catInfo.type,
 			packages,
 		};
 	});
+
+	const subscriptions = raw?.previousSubscriptions || [];
+
+	return { categories, subscriptions };
 }
 
 export default () => {
 	const [selectedSrvCode, setSelectedSrvCode] = useState('');
 	const [sanitizedCategories, setSanitizedCategories] = useState<SanitizedCategory[]>([]);
+	const [previousSubscriptions, setPreviousSubscriptions] = useState<PreviousSubscription[]>([]);
 	const [loading, setLoading] = useState(false);
 	const theme = useMantineTheme();
-
 	const request = useRequest(true);
 
 	const form = useForm({
@@ -156,33 +177,29 @@ export default () => {
 			);
 			const data = res.data?.data;
 			const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-			setSanitizedCategories(sanitizePackages(parsed));
+			const { categories, subscriptions } = sanitizePackages(parsed);
+			setSanitizedCategories(categories);
+			setPreviousSubscriptions(subscriptions);
 		} catch (e) {
 			setSanitizedCategories([]);
+			setPreviousSubscriptions([]);
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	const getAccordionIcon = (type: string) => {
-		switch (type) {
-			case '4G-speed':
+	const getAccordionIcon = (offerType: string) => {
+		switch (offerType?.toLowerCase()) {
+			case 'speed':
 				return (
 					<IconBrandSpeedtest
 						size={20}
 						color="#FFD600"
 					/>
 				);
-			case '4G-volume':
+			case 'volume':
 				return (
 					<IconDatabase
-						size={20}
-						color="#FFD600"
-					/>
-				);
-			case '5G':
-				return (
-					<IconRocket
 						size={20}
 						color="#FFD600"
 					/>
@@ -194,16 +211,9 @@ export default () => {
 						color="#FFD600"
 					/>
 				);
-			case 'bundle':
-				return (
-					<IconPackage
-						size={20}
-						color="#FFD600"
-					/>
-				);
 			default:
 				return (
-					<IconWifi
+					<IconPackage
 						size={20}
 						color="#FFD600"
 					/>
@@ -247,6 +257,48 @@ export default () => {
 					</Button>
 				</form>
 			</Box>
+
+			{previousSubscriptions.length > 0 && (
+				<Paper
+					p="lg"
+					shadow="sm"
+					radius="lg"
+					mb="xl"
+				>
+					<Title
+						order={3}
+						mb="md"
+						color="dark"
+					>
+						Previous Subscriptions
+					</Title>
+					<Table
+						striped
+						highlightOnHover
+						fontSize="sm"
+					>
+						<thead>
+							<tr>
+								<th>Date</th>
+								<th>MSISDN</th>
+								<th>Service Code</th>
+								<th>Amount (UGX)</th>
+							</tr>
+						</thead>
+						<tbody>
+							{previousSubscriptions.map((sub, index) => (
+								<tr key={index}>
+									<td>{new Date(sub.subscriptionDate).toLocaleDateString()}</td>
+									<td>{sub.msisdn}</td>
+									<td>{sub.serviceCode}</td>
+									<td>{sub.amount.toLocaleString()}</td>
+								</tr>
+							))}
+						</tbody>
+					</Table>
+				</Paper>
+			)}
+
 			<Accordion
 				multiple
 				radius="lg"
@@ -292,15 +344,7 @@ export default () => {
 									size="md"
 									radius="md"
 								>
-									{getAccordionIcon(
-										cat.type === '4G'
-											? cat.displayName.toLowerCase().includes('volume')
-												? '4G-volume'
-												: '4G-speed'
-											: cat.type === '5G'
-												? '5G'
-												: 'bundle'
-									)}
+									{getAccordionIcon(cat.packages[0]?.offerType || 'bundle')}
 								</ThemeIcon>
 								<Stack spacing={2}>
 									<Title
@@ -313,11 +357,15 @@ export default () => {
 										size="xs"
 										color="dimmed"
 									>
-										{cat.type === '4G'
-											? '4G plans'
-											: cat.type === '5G'
-												? '5G plans'
-												: 'Bundle plans'}
+										{cat.packages[0]?.offerType === 'SPEED'
+											? 'Speed bundles'
+											: cat.packages[0]?.offerType === 'VOLUME'
+												? 'Volume bundles'
+												: cat.type === '4G'
+													? '4G plans'
+													: cat.type === '5G'
+														? '5G plans'
+														: 'Bundle plans'}
 									</Text>
 								</Stack>
 							</Group>
