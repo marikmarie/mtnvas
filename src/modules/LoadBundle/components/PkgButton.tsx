@@ -11,6 +11,7 @@ type TPkgButtonProps = {
 	serviceCode: string;
 	selectedSrvCode: string;
 	amount: string;
+	bnumber: string;
 	speed?: string;
 	volume?: string;
 };
@@ -23,6 +24,7 @@ export const PkgButton = ({
 	amount,
 	speed,
 	volume,
+	bnumber,
 }: TPkgButtonProps) => {
 	const [opened, { open, close }] = useDisclosure(false);
 
@@ -73,6 +75,7 @@ export const PkgButton = ({
 					amount={amount}
 					speed={speed}
 					volume={volume}
+					bnumber={bnumber}
 				/>
 			</Modal>
 		</>

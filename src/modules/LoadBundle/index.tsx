@@ -20,7 +20,6 @@ import { useState } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { Package } from './components/Package';
 
-// Add types for sanitized package and category
 type SanitizedPackage = {
 	type: '4G' | '5G' | 'bundle';
 	serviceCode: string;
@@ -84,13 +83,11 @@ const CATEGORY_MAP: Record<string, { displayName: string; type: '4G' | '5G' | 'b
 	BUSINESS_INTERNET_5G_VOLUME: { displayName: 'Business Internet 5G Volume Bundles', type: '5G' },
 };
 
-// Helper: Extract speed (e.g., '10Mbps') from string
 function extractSpeed(str: string): string | undefined {
 	const match = str.match(/(\d+\s?Mbps)/i);
 	return match ? match[1].replace(/\s+/g, '') : undefined;
 }
 
-// Helper: Extract volume (e.g., '50GB') from string
 function extractVolume(str: string): string | undefined {
 	const match = str.match(/(\d+\s?GB)/i);
 	return match ? match[1].replace(/\s+/g, '') : undefined;
@@ -383,6 +380,7 @@ export default () => {
 									<Package
 										key={srv.serviceCode}
 										{...srv}
+										bnumber={form.values.bnumber}
 										selectedSrvCode={selectedSrvCode}
 										setSelectedSrvCode={setSelectedSrvCode}
 									/>

@@ -10,6 +10,7 @@ import { formatCurrency } from '../../../utils/currenyFormatter';
 type TLoadBundleFormProps = {
 	selectedSrvCode: string;
 	amount: string;
+	bnumber: string;
 	speed?: string;
 	volume?: string;
 };
@@ -19,11 +20,12 @@ export default function LoadBundleForm({
 	amount,
 	speed,
 	volume,
+	bnumber,
 }: TLoadBundleFormProps) {
 	const form = useForm({
 		initialValues: {
 			msisdn: '',
-			bnumber: '',
+			bnumber: bnumber,
 			sponsorEmail: null,
 			beneficiaryEmail: null,
 			externalTransactionId: '',
