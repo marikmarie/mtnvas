@@ -9,6 +9,7 @@ export default function ActivationsReportTable() {
 		'amount',
 		'status',
 		'serviceCode',
+		'paymentMode',
 		'salesAgentEmail',
 		'activatedAt',
 		'expiry',

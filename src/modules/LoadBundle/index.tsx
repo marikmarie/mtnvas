@@ -244,6 +244,7 @@ export default () => {
 						}))}
 						{...form.getInputProps('packageCategory')}
 						width={'100%'}
+						defaultValue={''}
 					/>
 					<Button
 						type="submit"

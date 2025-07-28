@@ -13,6 +13,7 @@ export default function RenewalsReportTable() {
 		'requestTime',
 		'expiry',
 		'channel',
+		'paymentMode',
 		'senderId',
 	];
 
