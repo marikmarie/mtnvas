@@ -32,7 +32,7 @@ import {
 	IconUser,
 	IconUsers,
 } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { signout } from '../app/slices/auth';
@@ -124,6 +124,7 @@ const useStyles = createStyles((theme) => ({
 			// transform: 'translateY(-1px)',
 			boxShadow: theme.shadows.sm,
 		},
+		userSelect: 'none',
 	},
 
 	navItemActive: {
@@ -396,6 +397,17 @@ export function Header() {
 		);
 	};
 
+	useEffect(() => {
+		const handleClickOutside = () => {
+			setOpenDropdown(null);
+		};
+
+		document.addEventListener('click', handleClickOutside);
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+		};
+	}, []);
+
 	// Get user display info
 	const displayName = user?.email?.split('@')[0] || 'User';
 	const avatarLetter = displayName[0]?.toUpperCase() || 'U';
@@ -430,9 +442,10 @@ export function Header() {
 				<Box
 					key={index}
 					className={cx(classes.navItem, { [classes.navItemActive]: isItemActive })}
-					onClick={() => setOpenDropdown(openDropdown === index ? null : index)}
-					onMouseEnter={() => setOpenDropdown(index)}
-					onMouseLeave={() => setOpenDropdown(null)}
+					onClick={(e) => {
+						e.stopPropagation(); // prevent bubbling in case it's nested in a link or another handler
+						setOpenDropdown(openDropdown === index ? null : index);
+					}}
 					role="button"
 					aria-haspopup="true"
 					aria-expanded={openDropdown === index}
