@@ -51,6 +51,13 @@ export default function GeneralReportTable({
 						render: ({ data }: { data: any }) => customColumnRenderers[column](data),
 					};
 				}
+				if (column === 'upcc_desc') {
+					return {
+						name: column,
+						header: 'Status',
+						render: ({ data }: { data: any }) => customColumnRenderers[column](data),
+					};
+				}
 				return {
 					name: column,
 					header: toTitle(column),
