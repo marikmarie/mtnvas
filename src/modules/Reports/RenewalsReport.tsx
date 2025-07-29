@@ -10,6 +10,7 @@ export default function RenewalsReportTable() {
 		'package',
 		'amount',
 		'ecwCode',
+		'upcc_desc',
 		'requestTime',
 		'expiry',
 		'channel',
