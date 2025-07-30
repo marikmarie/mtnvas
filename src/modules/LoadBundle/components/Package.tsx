@@ -13,6 +13,7 @@ export const Package: FC<{
 	bnumber: string;
 	volume?: string;
 	setSelectedSrvCode: (code: string) => void;
+	categoryName: string;
 }> = memo(
 	({
 		setSelectedSrvCode,
@@ -23,6 +24,7 @@ export const Package: FC<{
 		selectedSrvCode,
 		volume,
 		bnumber,
+		categoryName,
 	}) => {
 		const isVolume = !!volume;
 		const badge = isVolume ? 'Volume' : 'Speed';
@@ -166,6 +168,7 @@ export const Package: FC<{
 						amount={amount}
 						speed={speed || ''}
 						volume={volume || ''}
+						categoryName={categoryName}
 					/>
 				</Stack>
 			</Card>

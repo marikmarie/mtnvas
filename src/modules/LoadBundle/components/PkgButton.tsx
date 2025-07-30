@@ -14,6 +14,7 @@ type TPkgButtonProps = {
 	bnumber: string;
 	speed?: string;
 	volume?: string;
+	categoryName: string;
 };
 
 export const PkgButton = ({
@@ -25,6 +26,7 @@ export const PkgButton = ({
 	speed,
 	volume,
 	bnumber,
+	categoryName,
 }: TPkgButtonProps) => {
 	const [opened, { open, close }] = useDisclosure(false);
 
@@ -76,6 +78,7 @@ export const PkgButton = ({
 					speed={speed}
 					volume={volume}
 					bnumber={bnumber}
+					categoryName={categoryName}
 				/>
 			</Modal>
 		</>

@@ -384,6 +384,7 @@ export default () => {
 										bnumber={form.values.bnumber}
 										selectedSrvCode={selectedSrvCode}
 										setSelectedSrvCode={setSelectedSrvCode}
+										categoryName={cat.name}
 									/>
 								))}
 							</SimpleGrid>

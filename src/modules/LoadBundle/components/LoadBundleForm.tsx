@@ -1,4 +1,4 @@
-import { Button, Center, Flex, Text, TextInput } from '@mantine/core';
+import { Button, Center, Flex, Text, TextInput, Select } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconGauge, IconPhone } from '@tabler/icons-react';
@@ -13,6 +13,7 @@ type TLoadBundleFormProps = {
 	bnumber: string;
 	speed?: string;
 	volume?: string;
+	categoryName: string;
 };
 
 export default function LoadBundleForm({
@@ -21,6 +22,7 @@ export default function LoadBundleForm({
 	speed,
 	volume,
 	bnumber,
+	categoryName,
 }: TLoadBundleFormProps) {
 	const form = useForm({
 		initialValues: {
@@ -29,7 +31,7 @@ export default function LoadBundleForm({
 			sponsorEmail: null,
 			beneficiaryEmail: null,
 			externalTransactionId: '',
-			paymentOption: 'MOMO',
+			paymentOption: 'MOMO' as 'MOMO' | 'AIRTIME',
 			redirectLink: '',
 		},
 
@@ -114,6 +116,22 @@ export default function LoadBundleForm({
 				error={form.errors.msisdn}
 				withAsterisk
 			/>
+
+			{categoryName === 'WAKANET_ROUTER_SPEED' && (
+				<Select
+					label="Payment Option"
+					data={[
+						{ value: 'MOMO', label: 'Mobile Money (MOMO)' },
+						{ value: 'AIRTIME', label: 'Airtime' },
+					]}
+					value={form.values.paymentOption}
+					onChange={(value) =>
+						form.setFieldValue('paymentOption', value as 'MOMO' | 'AIRTIME')
+					}
+					mb="xs"
+					withAsterisk
+				/>
+			)}
 
 			<Flex
 				gap={'sm'}
