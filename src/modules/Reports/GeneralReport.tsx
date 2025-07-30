@@ -1,12 +1,12 @@
+import { Button, Flex, Pagination, SimpleGrid, Stack, TextInput } from '@mantine/core';
+import { DatePickerInput } from '@mantine/dates';
+import { IconCalendarTime, IconDownload, IconSearch } from '@tabler/icons-react';
 import React, { useMemo } from 'react';
 import { useDataGridTable } from '../../hooks/useDataGridTable';
-import { toTitle } from '../../utils/toTitle';
-import { Button, Flex, Pagination, SimpleGrid, Stack, TextInput } from '@mantine/core';
-import { IconCalendarTime, IconDownload, IconSearch } from '@tabler/icons-react';
-import { DatePickerInput } from '@mantine/dates';
-import { getPaginations } from '../../utils/getPaginations';
-import useRequest from '../../hooks/useRequest';
 import useReportData from '../../hooks/useReportData';
+import useRequest from '../../hooks/useRequest';
+import { getPaginations } from '../../utils/getPaginations';
+import { toTitle } from '../../utils/toTitle';
 
 interface GeneralReportTableProps {
 	endpoint: string;
