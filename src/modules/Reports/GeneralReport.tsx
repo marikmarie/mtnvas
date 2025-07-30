@@ -55,7 +55,7 @@ export default function GeneralReportTable({
 					return {
 						name: column,
 						header: 'Status',
-						render: ({ data }: { data: any }) => customColumnRenderers[column](data),
+						render: ({ data }: { data: any }) => data.upcc_desc,
 					};
 				}
 				return {

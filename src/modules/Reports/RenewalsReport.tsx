@@ -1,4 +1,3 @@
-import { Text } from '@mantine/core';
 import GeneralReportTable from './GeneralReport';
 
 export default function RenewalsReportTable() {
@@ -9,7 +8,6 @@ export default function RenewalsReportTable() {
 		'serviceCode',
 		'package',
 		'amount',
-		'ecwCode',
 		'upcc_desc',
 		'requestTime',
 		'expiry',
@@ -18,16 +16,10 @@ export default function RenewalsReportTable() {
 		'senderId',
 	];
 
-	const customColumnRenderers = {
-		ecwCode: (data: any) => <Text ta="center">{data['ecwCode'] || '-'}</Text>,
-		package: (data: any) => <Text ta="center">{data['package']}</Text>,
-	};
-
 	return (
 		<GeneralReportTable
 			endpoint="/renewals"
 			columns={columns}
-			customColumnRenderers={customColumnRenderers}
 			downloadEndpoint="/csv/renewals"
 			downloadFileName="Renewals Report.csv"
 		/>
