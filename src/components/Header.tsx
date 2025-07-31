@@ -31,6 +31,7 @@ import {
 	IconRouter,
 	IconUser,
 	IconUsers,
+	IconUsersGroup,
 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -359,6 +360,18 @@ const navItems = [
 				label: 'Renewals Report',
 				path: '/renewals-report',
 				icon: <IconNews size={16} />,
+			},
+		],
+	},
+	{
+		label: 'Dealers',
+		icon: <IconUsersGroup size={20} />,
+		items: [
+			{
+				key: 'dealer-management',
+				label: 'Dealer Management',
+				path: '/dealer-management',
+				icon: <IconUsersGroup size={16} />,
 			},
 		],
 	},
