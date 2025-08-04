@@ -73,6 +73,7 @@ export const PkgButton = ({
 				close={close}
 			>
 				<LoadBundleForm
+					onClose={close}
 					selectedSrvCode={selectedSrvCode || serviceCode}
 					amount={amount}
 					speed={speed}

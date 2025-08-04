@@ -4,7 +4,6 @@ import {
 	Button,
 	Group,
 	Paper,
-	Select,
 	SimpleGrid,
 	Stack,
 	Table,
@@ -234,17 +233,6 @@ export default () => {
 						placeholder="e.g. 256393011001"
 						{...form.getInputProps('bnumber')}
 						required
-					/>
-					<Select
-						label="Package Category (optional)"
-						placeholder="Select category"
-						data={Object.keys(CATEGORY_MAP).map((key) => ({
-							value: key,
-							label: CATEGORY_MAP[key].displayName,
-						}))}
-						{...form.getInputProps('packageCategory')}
-						width={'100%'}
-						defaultValue={''}
 					/>
 					<Button
 						type="submit"
