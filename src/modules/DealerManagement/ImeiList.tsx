@@ -45,11 +45,6 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	searchSection: {
-		backgroundColor: theme.white,
-		padding: theme.spacing.lg,
-		borderRadius: theme.radius.md,
-		boxShadow: theme.shadows.xs,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		marginBottom: theme.spacing.lg,
 	},
 
@@ -61,17 +56,13 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	card: {
-		backgroundColor: theme.white,
-		borderRadius: theme.radius.md,
-		boxShadow: theme.shadows.sm,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		transition: 'all 0.2s ease',
 		cursor: 'pointer',
 
 		'&:hover': {
 			transform: 'translateY(-2px)',
 			boxShadow: theme.shadows.md,
-			borderColor: theme.colors.blue[3],
+			borderColor: theme.colors.yellow[3],
 		},
 	},
 
@@ -179,7 +170,7 @@ export function ImeiList() {
 			case 'available':
 				return 'green';
 			case 'active':
-				return 'blue';
+				return 'yellow';
 			case 'assigned':
 				return 'orange';
 			case 'inactive':

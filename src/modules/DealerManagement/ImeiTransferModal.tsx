@@ -10,7 +10,6 @@ import {
 	ThemeIcon,
 	Alert,
 	Paper,
-	Badge
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -20,7 +19,7 @@ import {
 	IconBuilding,
 	IconBox,
 	IconAlertCircle,
-	IconArrowRight
+	IconArrowRight,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
@@ -113,7 +112,7 @@ const useStyles = createStyles((theme) => ({
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
-		margin: theme.spacing.md 0,
+		margin: theme.spacing.md,
 		color: theme.colors.blue[6],
 	},
 
@@ -191,9 +190,6 @@ export function ImeiTransferModal({
 			opened={opened}
 			close={onClose}
 			size="lg"
-			classNames={{
-				content: classes.modalContent,
-			}}
 		>
 			{/* Enhanced Header */}
 			<div className={classes.header}>
@@ -207,10 +203,16 @@ export function ImeiTransferModal({
 						<IconTransfer size={20} />
 					</ThemeIcon>
 					<div>
-						<Title order={3} size="h4">
+						<Title
+							order={3}
+							size="h4"
+						>
 							Transfer IMEI
 						</Title>
-						<Text color="dimmed" size="sm">
+						<Text
+							color="dimmed"
+							size="sm"
+						>
 							Move IMEI from one dealer to another
 						</Text>
 					</div>
@@ -221,11 +223,17 @@ export function ImeiTransferModal({
 			<div className={classes.formSection}>
 				{/* Transfer Information */}
 				<div className={classes.transferInfo}>
-					<Text size="sm" weight={500} color="dimmed" mb="xs">
+					<Text
+						size="sm"
+						weight={500}
+						color="dimmed"
+						mb="xs"
+					>
 						Transfer Details
 					</Text>
 					<Text size="sm">
-						You are about to transfer IMEI <strong>{imei}</strong> to a different dealer.
+						You are about to transfer IMEI <strong>{imei}</strong> to a different
+						dealer.
 					</Text>
 				</div>
 
@@ -244,7 +252,12 @@ export function ImeiTransferModal({
 					<Stack spacing="lg">
 						{/* IMEI Display */}
 						<div className={classes.formGroup}>
-							<Text size="sm" weight={500} color="dimmed" mb="xs">
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
 								IMEI to Transfer
 							</Text>
 							<div className={classes.inputWrapper}>
@@ -252,7 +265,12 @@ export function ImeiTransferModal({
 									label="IMEI Number"
 									value={imei}
 									disabled
-									icon={<IconDeviceMobile size={16} className={classes.inputIcon} />}
+									icon={
+										<IconDeviceMobile
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
 									className={classes.imeiDisplay}
 									radius="md"
 								/>
@@ -261,7 +279,12 @@ export function ImeiTransferModal({
 
 						{/* Transfer Details */}
 						<div className={classes.formGroup}>
-							<Text size="sm" weight={500} color="dimmed" mb="xs">
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
 								Transfer Details
 							</Text>
 
@@ -271,7 +294,12 @@ export function ImeiTransferModal({
 									label="From Dealer"
 									value={fromDealer?.name}
 									disabled
-									icon={<IconBuilding size={16} className={classes.inputIcon} />}
+									icon={
+										<IconBuilding
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
 									className={classes.dealerInfo}
 									radius="md"
 								/>
@@ -289,7 +317,12 @@ export function ImeiTransferModal({
 										label="To Dealer"
 										placeholder="Select target dealer"
 										required
-										icon={<IconBuilding size={16} className={classes.inputIcon} />}
+										icon={
+											<IconBuilding
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
 										data={dealerOptions}
 										{...form.getInputProps('toDealerId')}
 										radius="md"
@@ -300,7 +333,12 @@ export function ImeiTransferModal({
 										label="To Product"
 										placeholder="Select target product"
 										required
-										icon={<IconBox size={16} className={classes.inputIcon} />}
+										icon={
+											<IconBox
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
 										data={[
 											{ value: 'product1', label: 'Product 1' },
 											{ value: 'product2', label: 'Product 2' },
@@ -314,12 +352,21 @@ export function ImeiTransferModal({
 
 							{/* Selected Dealer Info */}
 							{selectedToDealer && (
-								<Paper className={classes.dealerInfo} shadow="xs">
-									<Text size="sm" weight={500} color="dimmed" mb="xs">
+								<Paper
+									className={classes.dealerInfo}
+									shadow="xs"
+								>
+									<Text
+										size="sm"
+										weight={500}
+										color="dimmed"
+										mb="xs"
+									>
 										Target Dealer Information
 									</Text>
 									<Text size="sm">
-										<strong>{selectedToDealer.name}</strong> • {selectedToDealer.category}
+										<strong>{selectedToDealer.name}</strong> •{' '}
+										{selectedToDealer.category}
 									</Text>
 								</Paper>
 							)}
@@ -330,7 +377,10 @@ export function ImeiTransferModal({
 
 			{/* Enhanced Actions */}
 			<div className={classes.actions}>
-				<Group position="right" spacing="md">
+				<Group
+					position="right"
+					spacing="md"
+				>
 					<Button
 						variant="subtle"
 						onClick={onClose}
@@ -344,7 +394,7 @@ export function ImeiTransferModal({
 						leftIcon={<IconTransfer size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={form.onSubmit(handleSubmit)}
+						onClick={() => form.onSubmit(handleSubmit)}
 					>
 						Transfer IMEI
 					</Button>

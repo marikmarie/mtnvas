@@ -9,8 +9,6 @@ import {
 	createStyles,
 	ThemeIcon,
 	Alert,
-	Paper,
-	Badge
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -19,7 +17,7 @@ import {
 	IconDeviceMobile,
 	IconFileText,
 	IconAlertCircle,
-	IconArrowRight
+	IconArrowRight,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
@@ -99,7 +97,7 @@ const useStyles = createStyles((theme) => ({
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
-		margin: theme.spacing.md 0,
+		margin: theme.spacing.md,
 		color: theme.colors.blue[6],
 	},
 
@@ -155,9 +153,6 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 			opened={opened}
 			close={onClose}
 			size="lg"
-			classNames={{
-				content: classes.modalContent,
-			}}
 		>
 			{/* Enhanced Header */}
 			<div className={classes.header}>
@@ -171,10 +166,16 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 						<IconRefresh size={20} />
 					</ThemeIcon>
 					<div>
-						<Title order={3} size="h4">
+						<Title
+							order={3}
+							size="h4"
+						>
 							Swap IMEI
 						</Title>
-						<Text color="dimmed" size="sm">
+						<Text
+							color="dimmed"
+							size="sm"
+						>
 							Replace an existing IMEI with a new one
 						</Text>
 					</div>
@@ -185,7 +186,12 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 			<div className={classes.formSection}>
 				{/* IMEI Information */}
 				<div className={classes.imeiInfo}>
-					<Text size="sm" weight={500} color="dimmed" mb="xs">
+					<Text
+						size="sm"
+						weight={500}
+						color="dimmed"
+						mb="xs"
+					>
 						IMEI Swap Details
 					</Text>
 					<Text size="sm">
@@ -208,7 +214,12 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 					<Stack spacing="lg">
 						{/* IMEI Swap */}
 						<div className={classes.formGroup}>
-							<Text size="sm" weight={500} color="dimmed" mb="xs">
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
 								IMEI Swap
 							</Text>
 
@@ -218,7 +229,12 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 									label="Current IMEI"
 									value={oldImei}
 									disabled
-									icon={<IconDeviceMobile size={16} className={classes.inputIcon} />}
+									icon={
+										<IconDeviceMobile
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
 									className={classes.imeiDisplay}
 									radius="md"
 								/>
@@ -235,7 +251,12 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 									label="New IMEI"
 									placeholder="Enter new IMEI number"
 									required
-									icon={<IconDeviceMobile size={16} className={classes.inputIcon} />}
+									icon={
+										<IconDeviceMobile
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
 									{...form.getInputProps('newImei')}
 									radius="md"
 								/>
@@ -244,7 +265,12 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 
 						{/* Reason for Swap */}
 						<div className={classes.formGroup}>
-							<Text size="sm" weight={500} color="dimmed" mb="xs">
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
 								Swap Reason
 							</Text>
 							<div className={classes.inputWrapper}>
@@ -253,7 +279,12 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 									placeholder="Enter detailed reason for swapping IMEI (e.g., device malfunction, upgrade, etc.)"
 									required
 									minRows={3}
-									icon={<IconFileText size={16} className={classes.inputIcon} />}
+									icon={
+										<IconFileText
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
 									{...form.getInputProps('reason')}
 									radius="md"
 								/>
@@ -265,7 +296,10 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 
 			{/* Enhanced Actions */}
 			<div className={classes.actions}>
-				<Group position="right" spacing="md">
+				<Group
+					position="right"
+					spacing="md"
+				>
 					<Button
 						variant="subtle"
 						onClick={onClose}
@@ -279,7 +313,7 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 						leftIcon={<IconRefresh size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={form.onSubmit(handleSubmit)}
+						onClick={() => form.onSubmit(handleSubmit)}
 					>
 						Swap IMEI
 					</Button>
