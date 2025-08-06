@@ -50,11 +50,6 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	searchSection: {
-		backgroundColor: theme.white,
-		padding: theme.spacing.lg,
-		borderRadius: theme.radius.md,
-		boxShadow: theme.shadows.xs,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		marginBottom: theme.spacing.lg,
 	},
 
@@ -66,9 +61,7 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	card: {
-		backgroundColor: theme.white,
 		borderRadius: theme.radius.md,
-		boxShadow: theme.shadows.sm,
 		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		transition: 'all 0.2s ease',
 		cursor: 'pointer',
@@ -76,7 +69,7 @@ const useStyles = createStyles((theme) => ({
 		'&:hover': {
 			transform: 'translateY(-2px)',
 			boxShadow: theme.shadows.md,
-			borderColor: theme.colors.blue[3],
+			borderColor: theme.colors.yellow[3],
 		},
 	},
 
@@ -191,13 +184,13 @@ export function DealerList() {
 	}, [dealers?.data?.data, searchTerm, statusFilter, categoryFilter]);
 
 	const getStatusColor = (status: string) => {
-		return status === 'active' ? 'green' : 'red';
+		return status === 'active' ? 'yellow' : 'red';
 	};
 
 	const getCategoryColor = (category: string) => {
 		switch (category?.toLowerCase()) {
 			case 'wakanet':
-				return 'blue';
+				return 'yellow';
 			case 'enterprise':
 				return 'purple';
 			case 'both':
@@ -389,7 +382,9 @@ export function DealerList() {
 												<Menu.Item
 													icon={<IconPower size={16} />}
 													color={
-														dealer.status === 'active' ? 'red' : 'green'
+														dealer.status === 'active'
+															? 'red'
+															: 'yellow'
 													}
 													onClick={(e) => {
 														e.stopPropagation();

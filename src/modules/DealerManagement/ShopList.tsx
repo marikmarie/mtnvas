@@ -34,7 +34,7 @@ import { useState, useMemo } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { AddShopModal } from './AddShopModal';
 import { AddShopUserModal } from './AddShopUserModal';
-import { Shop } from './types';
+import { Dealer, Shop } from './types';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -46,11 +46,6 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	searchSection: {
-		backgroundColor: theme.white,
-		padding: theme.spacing.lg,
-		borderRadius: theme.radius.md,
-		boxShadow: theme.shadows.xs,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		marginBottom: theme.spacing.lg,
 	},
 
@@ -62,9 +57,7 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	card: {
-		backgroundColor: theme.white,
 		borderRadius: theme.radius.md,
-		boxShadow: theme.shadows.sm,
 		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		transition: 'all 0.2s ease',
 		cursor: 'pointer',
@@ -72,7 +65,7 @@ const useStyles = createStyles((theme) => ({
 		'&:hover': {
 			transform: 'translateY(-2px)',
 			boxShadow: theme.shadows.md,
-			borderColor: theme.colors.blue[3],
+			borderColor: theme.colors.yellow[3],
 		},
 	},
 
@@ -177,7 +170,7 @@ export function ShopList() {
 	}, [shopsData?.data?.data]);
 
 	const getStatusColor = (status: string) => {
-		return status === 'active' ? 'green' : 'red';
+		return status === 'active' ? 'yellow' : 'red';
 	};
 
 	const getStatusIcon = (status: string) => {
@@ -333,7 +326,7 @@ export function ShopList() {
 														<Menu.Divider />
 														<Menu.Item
 															icon={<IconCheck size={16} />}
-															color="green"
+															color="yellow"
 															onClick={() =>
 																approvalMutation.mutate({
 																	shopId: shop.shopName,
@@ -421,7 +414,7 @@ export function ShopList() {
 											<div className={classes.approvalButtons}>
 												<Tooltip label="Approve">
 													<ActionIcon
-														color="green"
+														color="yellow"
 														variant="light"
 														size="sm"
 														onClick={() =>
@@ -465,32 +458,36 @@ export function ShopList() {
 			<AddShopModal
 				opened={addShopModalOpened}
 				onClose={closeAddShopModal}
-				dealer={{
-					id: '',
-					name: '',
-					contactPerson: '',
-					email: '',
-					phone: '',
-					category: 'wakanet',
-					createdAt: '',
-					status: 'active',
-				}}
-			/>
-
-			{selectedShop && (
-				<AddShopUserModal
-					opened={addUserModalOpened}
-					onClose={closeAddUserModal}
-					dealer={{
-						id: selectedShop.dealerName,
-						name: selectedShop.dealerName,
+				dealer={
+					{
+						id: '',
+						name: '',
 						contactPerson: '',
 						email: '',
 						phone: '',
 						category: 'wakanet',
 						createdAt: '',
 						status: 'active',
-					}}
+					} as Dealer
+				}
+			/>
+
+			{selectedShop && (
+				<AddShopUserModal
+					opened={addUserModalOpened}
+					onClose={closeAddUserModal}
+					dealer={
+						{
+							id: selectedShop.dealerName,
+							name: selectedShop.dealerName,
+							contactPerson: '',
+							email: '',
+							phone: '',
+							category: 'wakanet',
+							createdAt: '',
+							status: 'active',
+						} as Dealer
+					}
 					shops={[
 						{
 							id: selectedShop.shopName,

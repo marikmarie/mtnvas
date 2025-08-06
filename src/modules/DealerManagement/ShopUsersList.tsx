@@ -36,7 +36,7 @@ import { useState, useMemo } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { AddShopUserModal } from './AddShopUserModal';
 import { ConfirmationModal } from './ConfirmationModal';
-import { Shop, ShopUser } from './types';
+import { Dealer, Shop, ShopUser } from './types';
 
 interface ShopUsersListProps {
 	shop: Shop | undefined;
@@ -52,11 +52,6 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	searchSection: {
-		backgroundColor: theme.white,
-		padding: theme.spacing.lg,
-		borderRadius: theme.radius.md,
-		boxShadow: theme.shadows.xs,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		marginBottom: theme.spacing.lg,
 	},
 
@@ -68,17 +63,13 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	card: {
-		backgroundColor: theme.white,
-		borderRadius: theme.radius.md,
-		boxShadow: theme.shadows.sm,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		transition: 'all 0.2s ease',
 		cursor: 'pointer',
 
 		'&:hover': {
 			transform: 'translateY(-2px)',
 			boxShadow: theme.shadows.md,
-			borderColor: theme.colors.blue[3],
+			borderColor: theme.colors.yellow[3],
 		},
 	},
 
@@ -178,7 +169,7 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 	}, [users?.data, searchTerm, statusFilter, roleFilter]);
 
 	const getStatusColor = (status: string) => {
-		return status === 'active' ? 'green' : 'red';
+		return status === 'active' ? 'yellow' : 'red';
 	};
 
 	const getStatusIcon = (status: string) => {
@@ -188,7 +179,7 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 	const getRoleColor = (role: string) => {
 		switch (role?.toLowerCase()) {
 			case 'dsa':
-				return 'blue';
+				return 'yellow';
 			case 'retailer':
 				return 'green';
 			case 'shopagent':
@@ -216,7 +207,7 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 			<Alert
 				icon={<IconAlertCircle size={16} />}
 				title="No Shop Selected"
-				color="blue"
+				color="yellow"
 				className={classes.noShopAlert}
 			>
 				Please select a shop from the Shops tab to view and manage its users.
@@ -364,7 +355,7 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 												<Menu.Item
 													icon={<IconPower size={16} />}
 													color={
-														user.status === 'active' ? 'red' : 'green'
+														user.status === 'active' ? 'red' : 'yellow'
 													}
 													onClick={() =>
 														handleAction(
@@ -466,16 +457,18 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 			<AddShopUserModal
 				opened={addModalOpened}
 				onClose={closeAddModal}
-				dealer={{
-					id: shop?.dealerName!,
-					name: shop?.dealerName!,
-					contactPerson: '',
-					email: '',
-					phone: '',
-					category: 'wakanet',
-					createdAt: '',
-					status: 'active',
-				}}
+				dealer={
+					{
+						id: shop?.dealerName!,
+						name: shop?.dealerName!,
+						contactPerson: '',
+						email: '',
+						phone: '',
+						category: 'wakanet',
+						createdAt: '',
+						status: 'active',
+					} as Dealer
+				}
 				shops={[
 					{
 						id: shop?.shopName!,
@@ -489,16 +482,18 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 					opened={confirmModalOpened}
 					onClose={closeConfirmModal}
 					action={confirmAction}
-					dealer={{
-						id: shop?.dealerName!,
-						name: shop?.dealerName!,
-						contactPerson: '',
-						email: '',
-						phone: '',
-						category: 'wakanet',
-						createdAt: '',
-						status: 'active',
-					}}
+					dealer={
+						{
+							id: shop?.dealerName!,
+							name: shop?.dealerName!,
+							contactPerson: '',
+							email: '',
+							phone: '',
+							category: 'wakanet',
+							createdAt: '',
+							status: 'active',
+						} as Dealer
+					}
 				/>
 			)}
 		</div>
