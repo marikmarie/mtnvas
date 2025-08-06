@@ -1,6 +1,27 @@
-import { Button, Group, Stack, TextInput, Title } from '@mantine/core';
+import {
+	Button,
+	Group,
+	Stack,
+	TextInput,
+	Title,
+	Text,
+	createStyles,
+	ThemeIcon,
+	Alert,
+	Select,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation } from '@tanstack/react-query';
+import {
+	IconUserPlus,
+	IconUser,
+	IconMail,
+	IconPhone,
+	IconMapPin,
+	IconBuilding,
+	IconShield,
+	IconAlertCircle,
+} from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Dealer } from './types';
@@ -12,7 +33,83 @@ interface AddDealerUserModalProps {
 	userType: 'DSA' | 'Retailer';
 }
 
+const useStyles = createStyles((theme) => ({
+	modalContent: {
+		padding: 0,
+	},
+
+	header: {
+		padding: theme.spacing.lg,
+		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+	},
+
+	headerContent: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.md,
+	},
+
+	formSection: {
+		padding: theme.spacing.lg,
+	},
+
+	formGroup: {
+		marginBottom: theme.spacing.md,
+	},
+
+	formRow: {
+		display: 'grid',
+		gridTemplateColumns: '1fr 1fr',
+		gap: theme.spacing.md,
+
+		[theme.fn.smallerThan('sm')]: {
+			gridTemplateColumns: '1fr',
+		},
+	},
+
+	inputWrapper: {
+		position: 'relative',
+	},
+
+	inputIcon: {
+		color: theme.colors.gray[5],
+	},
+
+	actions: {
+		padding: theme.spacing.lg,
+		borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+	},
+
+	submitButton: {
+		transition: 'all 0.2s ease',
+
+		'&:hover': {
+			transform: 'translateY(-1px)',
+			boxShadow: theme.shadows.md,
+		},
+	},
+
+	errorAlert: {
+		marginBottom: theme.spacing.md,
+	},
+
+	dealerInfo: {
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		borderRadius: theme.radius.md,
+		padding: theme.spacing.md,
+		marginBottom: theme.spacing.lg,
+	},
+
+	userTypeBadge: {
+		marginTop: theme.spacing.xs,
+	},
+}));
+
 export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDealerUserModalProps) {
+	const { classes } = useStyles();
 	const request = useRequest(true);
 
 	const form = useForm({
@@ -55,66 +152,268 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 
 	const handleSubmit = form.onSubmit(() => mutation.mutate());
 
+	const hasErrors = Object.keys(form.errors).length > 0;
+
+	const getUserTypeColor = (type: string) => {
+		return type === 'DSA' ? 'blue' : 'green';
+	};
+
 	return (
 		<Modal
 			opened={opened}
 			close={onClose}
-			size="md"
+			size="lg"
+			classNames={{
+				content: classes.modalContent,
+			}}
 		>
-			<Stack>
-				<Title order={3}>Add {userType}</Title>
-				<form onSubmit={handleSubmit}>
-					<Stack>
-						<TextInput
-							label="Name"
-							placeholder="Enter full name"
-							required
-							{...form.getInputProps('name')}
-						/>
-						<TextInput
-							label="Username"
-							placeholder="Enter username"
-							required
-							{...form.getInputProps('username')}
-						/>
-						<TextInput
-							label="Email"
-							placeholder="Enter email address"
-							required
-							{...form.getInputProps('email')}
-						/>
-						<TextInput
-							label="Phone Number"
-							placeholder="Enter phone number (e.g., 256123456789)"
-							required
-							{...form.getInputProps('msisdn')}
-						/>
-						<TextInput
-							label="Location"
-							placeholder="Enter location"
-							required
-							{...form.getInputProps('location')}
-						/>
-						<Group
-							position="right"
-							mt="md"
+			{/* Enhanced Header */}
+			<div className={classes.header}>
+				<div className={classes.headerContent}>
+					<ThemeIcon
+						size={40}
+						radius="md"
+						variant="light"
+						color={getUserTypeColor(userType)}
+					>
+						<IconUserPlus size={20} />
+					</ThemeIcon>
+					<div>
+						<Title
+							order={3}
+							size="h4"
 						>
-							<Button
-								variant="subtle"
-								onClick={onClose}
+							Add {userType}
+						</Title>
+						<Text
+							color="dimmed"
+							size="sm"
+						>
+							Create a new {userType} account for {dealer.name}
+						</Text>
+					</div>
+				</div>
+			</div>
+
+			{/* Form Section */}
+			<div className={classes.formSection}>
+				{/* Dealer Information */}
+				<div className={classes.dealerInfo}>
+					<Text
+						size="sm"
+						weight={500}
+						color="dimmed"
+						mb="xs"
+					>
+						Parent Dealer
+					</Text>
+					<Text weight={600}>{dealer.name}</Text>
+					<Text
+						size="sm"
+						color="dimmed"
+						className={classes.userTypeBadge}
+					>
+						User Type: <strong>{userType}</strong>
+					</Text>
+				</div>
+
+				{hasErrors && (
+					<Alert
+						icon={<IconAlertCircle size={16} />}
+						title="Please fix the following errors"
+						color="red"
+						className={classes.errorAlert}
+					>
+						Please correct the highlighted fields before submitting.
+					</Alert>
+				)}
+
+				<form onSubmit={handleSubmit}>
+					<Stack spacing="lg">
+						{/* Personal Information */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
 							>
-								Cancel
-							</Button>
-							<Button
-								type="submit"
-								loading={mutation.isLoading}
+								Personal Information
+							</Text>
+							<div className={classes.formRow}>
+								<div className={classes.inputWrapper}>
+									<TextInput
+										label="Full Name"
+										placeholder="Enter full name"
+										required
+										icon={
+											<IconUser
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										{...form.getInputProps('name')}
+										radius="md"
+									/>
+								</div>
+								<div className={classes.inputWrapper}>
+									<TextInput
+										label="Username"
+										placeholder="Enter username"
+										required
+										icon={
+											<IconUser
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										{...form.getInputProps('username')}
+										radius="md"
+									/>
+								</div>
+							</div>
+						</div>
+
+						{/* Contact Information */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
 							>
-								Add {userType}
-							</Button>
-						</Group>
+								Contact Information
+							</Text>
+							<div className={classes.formRow}>
+								<div className={classes.inputWrapper}>
+									<TextInput
+										label="Email Address"
+										placeholder="Enter email address"
+										required
+										icon={
+											<IconMail
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										{...form.getInputProps('email')}
+										radius="md"
+									/>
+								</div>
+								<div className={classes.inputWrapper}>
+									<TextInput
+										label="Phone Number"
+										placeholder="Enter phone number (e.g., 256123456789)"
+										required
+										icon={
+											<IconPhone
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										{...form.getInputProps('msisdn')}
+										radius="md"
+									/>
+								</div>
+							</div>
+						</div>
+
+						{/* Location and Role */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								Assignment Details
+							</Text>
+							<div className={classes.formRow}>
+								<div className={classes.inputWrapper}>
+									<TextInput
+										label="Location"
+										placeholder="Enter location"
+										required
+										icon={
+											<IconMapPin
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										{...form.getInputProps('location')}
+										radius="md"
+									/>
+								</div>
+								<div className={classes.inputWrapper}>
+									<Select
+										label="Department"
+										placeholder="Select department"
+										required
+										icon={
+											<IconBuilding
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										data={[
+											{ value: 'WAKANET', label: 'WakaNet' },
+											{ value: 'ENTERPRISE', label: 'Enterprise' },
+										]}
+										{...form.getInputProps('department')}
+										radius="md"
+									/>
+								</div>
+							</div>
+							<div className={classes.inputWrapper}>
+								<Select
+									label="Category"
+									placeholder="Select category"
+									required
+									icon={
+										<IconShield
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
+									data={[
+										{ value: 'CEX_PLUS', label: 'CEX Plus' },
+										{ value: 'CEX_BASIC', label: 'CEX Basic' },
+										{ value: 'CEX_PREMIUM', label: 'CEX Premium' },
+									]}
+									{...form.getInputProps('category')}
+									radius="md"
+								/>
+							</div>
+						</div>
 					</Stack>
 				</form>
-			</Stack>
+			</div>
+
+			{/* Enhanced Actions */}
+			<div className={classes.actions}>
+				<Group
+					position="right"
+					spacing="md"
+				>
+					<Button
+						variant="subtle"
+						onClick={onClose}
+						radius="md"
+					>
+						Cancel
+					</Button>
+					<Button
+						type="submit"
+						loading={mutation.isLoading}
+						leftIcon={<IconUserPlus size={16} />}
+						className={classes.submitButton}
+						radius="md"
+						onClick={handleSubmit}
+					>
+						Add {userType}
+					</Button>
+				</Group>
+			</div>
 		</Modal>
 	);
 }

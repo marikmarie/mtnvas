@@ -1,6 +1,30 @@
-import { Button, Group, Select, Stack, TextInput } from '@mantine/core';
+import { 
+	Button, 
+	Group, 
+	Select, 
+	Stack, 
+	TextInput, 
+	Title, 
+	Text, 
+	Divider, 
+	createStyles,
+	ThemeIcon,
+	Paper,
+	Alert,
+	Badge
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { 
+	IconBuilding, 
+	IconUser, 
+	IconMail, 
+	IconPhone, 
+	IconCategory,
+	IconEdit,
+	IconAlertCircle,
+	IconCheck
+} from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Dealer } from './types';
@@ -19,7 +43,82 @@ interface DealerFormValues {
 	category: 'wakanet' | 'enterprise' | 'both';
 }
 
+const useStyles = createStyles((theme) => ({
+	modalContent: {
+		padding: 0,
+	},
+	
+	header: {
+		padding: theme.spacing.lg,
+		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+	},
+	
+	headerContent: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.md,
+	},
+	
+	dealerInfo: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.sm,
+		marginTop: theme.spacing.xs,
+	},
+	
+	formSection: {
+		padding: theme.spacing.lg,
+	},
+	
+	formGroup: {
+		marginBottom: theme.spacing.md,
+	},
+	
+	formRow: {
+		display: 'grid',
+		gridTemplateColumns: '1fr 1fr',
+		gap: theme.spacing.md,
+		
+		[theme.fn.smallerThan('sm')]: {
+			gridTemplateColumns: '1fr',
+		},
+	},
+	
+	inputWrapper: {
+		position: 'relative',
+	},
+	
+	inputIcon: {
+		color: theme.colors.gray[5],
+	},
+	
+	actions: {
+		padding: theme.spacing.lg,
+		borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+	},
+	
+	submitButton: {
+		transition: 'all 0.2s ease',
+		
+		'&:hover': {
+			transform: 'translateY(-1px)',
+			boxShadow: theme.shadows.md,
+		},
+	},
+	
+	errorAlert: {
+		marginBottom: theme.spacing.md,
+	},
+	
+	statusBadge: {
+		fontWeight: 600,
+	},
+}));
+
 export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProps) {
+	const { classes } = useStyles();
 	const request = useRequest(true);
 	const queryClient = useQueryClient();
 
@@ -54,73 +153,187 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 		mutation.mutate(values);
 	};
 
+	const hasErrors = Object.keys(form.errors).length > 0;
+
+	const getStatusColor = (status: string) => {
+		return status === 'active' ? 'green' : 'red';
+	};
+
+	const getCategoryColor = (category: string) => {
+		switch (category?.toLowerCase()) {
+			case 'wakanet': return 'blue';
+			case 'enterprise': return 'purple';
+			case 'both': return 'orange';
+			default: return 'gray';
+		}
+	};
+
 	return (
 		<Modal
 			opened={opened}
 			close={onClose}
-			size="md"
+			size="lg"
+			classNames={{
+				content: classes.modalContent,
+			}}
 		>
-			<form onSubmit={form.onSubmit(handleSubmit)}>
-				<Stack spacing="md">
-					<TextInput
-						label="Dealer Name"
-						placeholder="Enter dealer name"
-						required
-						{...form.getInputProps('name')}
-					/>
-
-					<TextInput
-						label="Contact Person"
-						placeholder="Enter contact person name"
-						required
-						{...form.getInputProps('contactPerson')}
-					/>
-
-					<TextInput
-						label="Email"
-						placeholder="Enter email"
-						required
-						{...form.getInputProps('email')}
-					/>
-
-					<TextInput
-						label="Phone Number"
-						placeholder="Enter phone number"
-						required
-						{...form.getInputProps('phone')}
-					/>
-
-					<Select
-						label="Category"
-						placeholder="Select category"
-						required
-						data={[
-							{ value: 'wakanet', label: 'Wakanet' },
-							{ value: 'enterprise', label: 'Enterprise' },
-							{ value: 'both', label: 'Both' },
-						]}
-						{...form.getInputProps('category')}
-					/>
-
-					<Group
-						position="right"
-						mt="md"
+			{/* Enhanced Header */}
+			<div className={classes.header}>
+				<div className={classes.headerContent}>
+					<ThemeIcon 
+						size={40} 
+						radius="md" 
+						variant="light"
+						color="blue"
 					>
-						<Button
-							variant="subtle"
-							onClick={onClose}
-						>
-							Cancel
-						</Button>
-						<Button
-							type="submit"
-							loading={mutation.isLoading}
-						>
-							Save Changes
-						</Button>
-					</Group>
-				</Stack>
-			</form>
+						<IconEdit size={20} />
+					</ThemeIcon>
+					<div>
+						<Title order={3} size="h4">
+							Edit Dealer
+						</Title>
+						<Text color="dimmed" size="sm">
+							Update dealer information and settings
+						</Text>
+						<div className={classes.dealerInfo}>
+							<Badge 
+								color={getStatusColor(dealer.status)}
+								variant="light"
+								size="sm"
+								className={classes.statusBadge}
+							>
+								{dealer.status?.charAt(0)?.toUpperCase() + dealer.status?.slice(1)}
+							</Badge>
+							<Badge 
+								color={getCategoryColor(dealer.category)}
+								variant="light"
+								size="sm"
+							>
+								{dealer.category?.charAt(0)?.toUpperCase() + dealer.category?.slice(1)}
+							</Badge>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{/* Form Section */}
+			<div className={classes.formSection}>
+				{hasErrors && (
+					<Alert 
+						icon={<IconAlertCircle size={16} />} 
+						title="Please fix the following errors" 
+						color="red"
+						className={classes.errorAlert}
+					>
+						Please correct the highlighted fields before submitting.
+					</Alert>
+				)}
+
+				<form onSubmit={form.onSubmit(handleSubmit)}>
+					<Stack spacing="lg">
+						{/* Company Information */}
+						<div className={classes.formGroup}>
+							<Text size="sm" weight={500} color="dimmed" mb="xs">
+								Company Information
+							</Text>
+							<div className={classes.inputWrapper}>
+								<TextInput
+									label="Dealer Name"
+									placeholder="Enter dealer name"
+									required
+									icon={<IconBuilding size={16} className={classes.inputIcon} />}
+									{...form.getInputProps('name')}
+									radius="md"
+								/>
+							</div>
+						</div>
+
+						{/* Contact Information */}
+						<div className={classes.formGroup}>
+							<Text size="sm" weight={500} color="dimmed" mb="xs">
+								Contact Information
+							</Text>
+							<div className={classes.formRow}>
+								<div className={classes.inputWrapper}>
+									<TextInput
+										label="Contact Person"
+										placeholder="Enter contact person name"
+										required
+										icon={<IconUser size={16} className={classes.inputIcon} />}
+										{...form.getInputProps('contactPerson')}
+										radius="md"
+									/>
+								</div>
+								<div className={classes.inputWrapper}>
+									<TextInput
+										label="Email Address"
+										placeholder="Enter email address"
+										required
+										icon={<IconMail size={16} className={classes.inputIcon} />}
+										{...form.getInputProps('email')}
+										radius="md"
+									/>
+								</div>
+							</div>
+							<div className={classes.inputWrapper}>
+								<TextInput
+									label="Phone Number"
+									placeholder="Enter phone number"
+									required
+									icon={<IconPhone size={16} className={classes.inputIcon} />}
+									{...form.getInputProps('phone')}
+									radius="md"
+								/>
+							</div>
+						</div>
+
+						{/* Category Selection */}
+						<div className={classes.formGroup}>
+							<Text size="sm" weight={500} color="dimmed" mb="xs">
+								Category Assignment
+							</Text>
+							<div className={classes.inputWrapper}>
+								<Select
+									label="Category"
+									placeholder="Select category"
+									required
+									icon={<IconCategory size={16} className={classes.inputIcon} />}
+									data={[
+										{ value: 'wakanet', label: 'WakaNet' },
+										{ value: 'enterprise', label: 'Enterprise' },
+										{ value: 'both', label: 'Both' },
+									]}
+									{...form.getInputProps('category')}
+									radius="md"
+								/>
+							</div>
+						</div>
+					</Stack>
+				</form>
+			</div>
+
+			{/* Enhanced Actions */}
+			<div className={classes.actions}>
+				<Group position="right" spacing="md">
+					<Button
+						variant="subtle"
+						onClick={onClose}
+						radius="md"
+					>
+						Cancel
+					</Button>
+					<Button
+						type="submit"
+						loading={mutation.isLoading}
+						leftIcon={<IconCheck size={16} />}
+						className={classes.submitButton}
+						radius="md"
+						onClick={form.onSubmit(handleSubmit)}
+					>
+						Save Changes
+					</Button>
+				</Group>
+			</div>
 		</Modal>
 	);
 }
