@@ -7,6 +7,9 @@ export interface Dealer {
 	category: 'wakanet' | 'enterprise' | 'both';
 	createdAt: string;
 	status: 'active' | 'inactive';
+	department: 'wakanet' | 'enterprise' | 'both';
+	msisdn: string;
+	companyName: string;
 }
 
 export interface Shop {

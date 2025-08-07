@@ -22,6 +22,7 @@ import { useDisclosure, useViewportSize } from '@mantine/hooks';
 import {
 	IconChevronDown,
 	IconCircleCheck,
+	IconCode,
 	IconDeviceMobile,
 	IconEdit,
 	IconLoader,
@@ -31,6 +32,7 @@ import {
 	IconRouter,
 	IconUser,
 	IconUsers,
+	IconUsersGroup,
 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -362,18 +364,24 @@ const navItems = [
 			},
 		],
 	},
-	// {
-	// 	label: 'Dealers',
-	// 	icon: <IconUsersGroup size={20} />,
-	// 	items: [
-	// 		{
-	// 			key: 'dealer-management',
-	// 			label: 'Dealer Management',
-	// 			path: '/dealer-management',
-	// 			icon: <IconUsersGroup size={16} />,
-	// 		},
-	// 	],
-	// },
+	{
+		label: 'Dealer',
+		icon: <IconUsersGroup size={20} />,
+		items: [
+			{
+				key: 'dealer-management',
+				label: 'Dealer Management',
+				path: '/dealer-management',
+				icon: <IconReport size={16} />,
+			},
+			{
+				key: 'imei-list',
+				label: 'IMEI List',
+				path: '/imei-list',
+				icon: <IconCode size={16} />,
+			},
+		],
+	},
 ];
 
 export function Header() {

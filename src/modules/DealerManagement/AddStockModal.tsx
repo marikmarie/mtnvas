@@ -1,11 +1,118 @@
-import { Button, FileInput, Group, Select, Stack, Title } from '@mantine/core';
+import {
+	Button,
+	FileInput,
+	Group,
+	Select,
+	Stack,
+	Title,
+	Text,
+	createStyles,
+	ThemeIcon,
+	Alert,
+	Paper,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+	IconBox,
+	IconBuilding,
+	IconCategory,
+	IconDeviceMobile,
+	IconUpload,
+	IconAlertCircle,
+	IconPlus,
+} from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { StockModalProps } from './types';
 
+const useStyles = createStyles((theme) => ({
+	modalContent: {
+		padding: 0,
+	},
+
+	header: {
+		padding: theme.spacing.lg,
+		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+	},
+
+	headerContent: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.md,
+	},
+
+	formSection: {
+		padding: theme.spacing.lg,
+	},
+
+	formGroup: {
+		marginBottom: theme.spacing.md,
+	},
+
+	formRow: {
+		display: 'grid',
+		gridTemplateColumns: '1fr 1fr',
+		gap: theme.spacing.md,
+
+		[theme.fn.smallerThan('sm')]: {
+			gridTemplateColumns: '1fr',
+		},
+	},
+
+	inputWrapper: {
+		position: 'relative',
+	},
+
+	inputIcon: {
+		color: theme.colors.gray[5],
+	},
+
+	actions: {
+		padding: theme.spacing.lg,
+		borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+	},
+
+	submitButton: {
+		transition: 'all 0.2s ease',
+
+		'&:hover': {
+			transform: 'translateY(-1px)',
+			boxShadow: theme.shadows.md,
+		},
+	},
+
+	errorAlert: {
+		marginBottom: theme.spacing.md,
+	},
+
+	infoCard: {
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		borderRadius: theme.radius.md,
+		padding: theme.spacing.md,
+		marginBottom: theme.spacing.lg,
+	},
+
+	fileInput: {
+		border: `2px dashed ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
+		borderRadius: theme.radius.md,
+		padding: theme.spacing.lg,
+		textAlign: 'center',
+		transition: 'all 0.2s ease',
+
+		'&:hover': {
+			borderColor: theme.colors.blue[4],
+			backgroundColor:
+				theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.blue[0],
+		},
+	},
+}));
+
 export function AddStockModal({ opened, onClose }: StockModalProps) {
+	const { classes } = useStyles();
 	const request = useRequest(true);
 
 	const { data: dealers } = useQuery({
@@ -63,89 +170,240 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 		mutation.mutate(formData);
 	});
 
+	const hasErrors = Object.keys(form.errors).length > 0;
+
 	return (
 		<Modal
 			opened={opened}
 			close={onClose}
-			size="md"
+			size="lg"
+			classNames={{
+				content: classes.modalContent,
+			}}
 		>
-			<Stack>
-				<Title order={3}>Add Stock</Title>
+			{/* Enhanced Header */}
+			<div className={classes.header}>
+				<div className={classes.headerContent}>
+					<ThemeIcon
+						size={40}
+						radius="md"
+						variant="light"
+						color="orange"
+					>
+						<IconPlus size={20} />
+					</ThemeIcon>
+					<div>
+						<Title
+							order={3}
+							size="h4"
+						>
+							Add Stock
+						</Title>
+						<Text
+							color="dimmed"
+							size="sm"
+						>
+							Add new inventory items with IMEI data
+						</Text>
+					</div>
+				</div>
+			</div>
+
+			{/* Form Section */}
+			<div className={classes.formSection}>
+				{/* Information Card */}
+				<Paper
+					className={classes.infoCard}
+					shadow="xs"
+				>
+					<Text
+						size="sm"
+						weight={500}
+						color="dimmed"
+						mb="xs"
+					>
+						Stock Information
+					</Text>
+					<Text size="sm">
+						Upload IMEI data to add new stock items. Supported formats: CSV, XLSX, XLS
+					</Text>
+				</Paper>
+
+				{hasErrors && (
+					<Alert
+						icon={<IconAlertCircle size={16} />}
+						title="Please fix the following errors"
+						color="red"
+						className={classes.errorAlert}
+					>
+						Please correct the highlighted fields before submitting.
+					</Alert>
+				)}
 
 				<form onSubmit={handleSubmit}>
-					<Stack>
-						<Select
-							label="Dealer"
-							placeholder="Select dealer"
-							required
-							data={dealers?.data?.data || []}
-							searchable
-							nothingFound="No dealers found"
-							{...form.getInputProps('dealerId')}
-						/>
-
-						<Select
-							label="Category"
-							placeholder="Select category"
-							required
-							data={[
-								{ value: 'wakanet', label: 'Wakanet' },
-								{ value: 'enterprise', label: 'Enterprise' },
-								{ value: 'both', label: 'Both' },
-							]}
-							{...form.getInputProps('category')}
-						/>
-
-						<Select
-							label="Product"
-							placeholder="Select product"
-							required
-							data={products?.data?.data || []}
-							searchable
-							nothingFound="No products found"
-							disabled={!form.values.category}
-							{...form.getInputProps('productId')}
-						/>
-
-						<Select
-							label="Device"
-							placeholder="Select device"
-							required
-							data={devices?.data?.data || []}
-							searchable
-							nothingFound="No devices found"
-							disabled={!form.values.category}
-							{...form.getInputProps('deviceId')}
-						/>
-
-						<FileInput
-							label="IMEI File"
-							description="Upload IMEI file"
-							accept=".csv,.xlsx,.xls"
-							required
-							{...form.getInputProps('imeiFile')}
-						/>
-
-						<Group
-							position="right"
-							mt="md"
-						>
-							<Button
-								variant="subtle"
-								onClick={onClose}
+					<Stack spacing="lg">
+						{/* Dealer and Category Selection */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
 							>
-								Cancel
-							</Button>
-							<Button
-								type="submit"
-								loading={mutation.isLoading}
+								Dealer Assignment
+							</Text>
+							<div className={classes.formRow}>
+								<div className={classes.inputWrapper}>
+									<Select
+										label="Dealer"
+										placeholder="Select dealer"
+										required
+										icon={
+											<IconBuilding
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										data={dealers?.data?.data || []}
+										searchable
+										nothingFound="No dealers found"
+										{...form.getInputProps('dealerId')}
+										radius="md"
+									/>
+								</div>
+								<div className={classes.inputWrapper}>
+									<Select
+										label="Category"
+										placeholder="Select category"
+										required
+										icon={
+											<IconCategory
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										data={[
+											{ value: 'wakanet', label: 'WakaNet' },
+											{ value: 'enterprise', label: 'Enterprise' },
+											{ value: 'both', label: 'Both' },
+										]}
+										{...form.getInputProps('category')}
+										radius="md"
+									/>
+								</div>
+							</div>
+						</div>
+
+						{/* Product and Device Selection */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
 							>
-								Add Stock
-							</Button>
-						</Group>
+								Product Details
+							</Text>
+							<div className={classes.formRow}>
+								<div className={classes.inputWrapper}>
+									<Select
+										label="Product"
+										placeholder="Select product"
+										required
+										icon={
+											<IconBox
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										data={products?.data?.data || []}
+										searchable
+										nothingFound="No products found"
+										disabled={!form.values.category}
+										{...form.getInputProps('productId')}
+										radius="md"
+									/>
+								</div>
+								<div className={classes.inputWrapper}>
+									<Select
+										label="Device"
+										placeholder="Select device"
+										required
+										icon={
+											<IconDeviceMobile
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										data={devices?.data?.data || []}
+										searchable
+										nothingFound="No devices found"
+										disabled={!form.values.category}
+										{...form.getInputProps('deviceId')}
+										radius="md"
+									/>
+								</div>
+							</div>
+						</div>
+
+						{/* File Upload */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								IMEI Data Upload
+							</Text>
+							<div className={classes.inputWrapper}>
+								<FileInput
+									label="IMEI File"
+									description="Upload IMEI file (CSV, XLSX, XLS)"
+									accept=".csv,.xlsx,.xls"
+									required
+									icon={
+										<IconUpload
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
+									placeholder="Click to upload or drag and drop"
+									className={classes.fileInput}
+									{...form.getInputProps('imeiFile')}
+									radius="md"
+								/>
+							</div>
+						</div>
 					</Stack>
 				</form>
-			</Stack>
+			</div>
+
+			{/* Enhanced Actions */}
+			<div className={classes.actions}>
+				<Group
+					position="right"
+					spacing="md"
+				>
+					<Button
+						variant="subtle"
+						onClick={onClose}
+						radius="md"
+					>
+						Cancel
+					</Button>
+					<Button
+						type="submit"
+						loading={mutation.isLoading}
+						leftIcon={<IconPlus size={16} />}
+						className={classes.submitButton}
+						radius="md"
+						onClick={handleSubmit}
+					>
+						Add Stock
+					</Button>
+				</Group>
+			</div>
 		</Modal>
 	);
 }

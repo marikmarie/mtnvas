@@ -1,9 +1,37 @@
-import { Button, Flex, Group, Stack, Text } from '@mantine/core';
+import {
+	Button,
+	Group,
+	Stack,
+	Text,
+	Card,
+	TextInput,
+	Select,
+	Badge,
+	ActionIcon,
+	createStyles,
+	Grid,
+	ThemeIcon,
+	Menu,
+	Title,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconEdit, IconEye, IconPower, IconTrash, IconUserPlus } from '@tabler/icons-react';
+import {
+	IconEdit,
+	IconEye,
+	IconPower,
+	IconTrash,
+	IconUserPlus,
+	IconSearch,
+	IconFilter,
+	IconPlus,
+	IconDotsVertical,
+	IconBuilding,
+	IconMail,
+	IconPhone,
+	IconUser,
+} from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
-import { useDataGridTable } from '../../hooks/useDataGridTable';
+import { useState, useMemo } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { AddDealerModal } from './AddDealerModal';
 import { AddDealerUserModal } from './AddDealerUserModal';
@@ -12,9 +40,87 @@ import { EditDealerModal } from './EditDealerModal';
 import { Dealer } from './types';
 import { ViewDealerModal } from './ViewDealerModal';
 
+const useStyles = createStyles((theme) => ({
+	root: {
+		padding: 0,
+	},
+
+	header: {
+		marginBottom: theme.spacing.lg,
+	},
+
+	searchSection: {
+		marginBottom: theme.spacing.lg,
+	},
+
+	searchRow: {
+		display: 'flex',
+		gap: theme.spacing.md,
+		alignItems: 'flex-end',
+		flexWrap: 'wrap',
+	},
+
+	card: {
+		borderRadius: theme.radius.md,
+		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		transition: 'all 0.2s ease',
+		cursor: 'pointer',
+
+		'&:hover': {
+			transform: 'translateY(-2px)',
+			boxShadow: theme.shadows.md,
+			borderColor: theme.colors.yellow[3],
+		},
+	},
+
+	cardHeader: {
+		padding: theme.spacing.md,
+		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+	},
+
+	cardBody: {
+		padding: theme.spacing.md,
+	},
+
+	cardFooter: {
+		padding: theme.spacing.md,
+		borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+	},
+
+	infoRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.xs,
+		marginBottom: theme.spacing.xs,
+	},
+
+	statusBadge: {
+		fontWeight: 600,
+	},
+
+	actionButton: {
+		transition: 'all 0.2s ease',
+
+		'&:hover': {
+			transform: 'scale(1.05)',
+		},
+	},
+
+	emptyState: {
+		textAlign: 'center',
+		padding: theme.spacing.xl,
+		color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
+	},
+}));
+
 export function DealerList() {
+	const { classes } = useStyles();
 	const [selectedDealer, setSelectedDealer] = useState<Dealer | null>(null);
 	const [addUserType, setAddUserType] = useState<'DSA' | 'Retailer' | null>(null);
+	const [searchTerm, setSearchTerm] = useState('');
+	const [statusFilter, setStatusFilter] = useState<string>('all');
+	const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
 	const [addModalOpened, { open: openAddModal, close: closeAddModal }] = useDisclosure(false);
 	const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
@@ -58,127 +164,327 @@ export function DealerList() {
 		setAddUserType(userType);
 	};
 
-	const columns = [
-		{ name: 'companyName', header: 'COMPANY NAME', defaultFlex: 1 },
-		{ name: 'contactPerson', header: 'CONTACT PERSON', defaultFlex: 1 },
-		{ name: 'email', header: 'EMAIL', defaultFlex: 1 },
-		{ name: 'msisdn', header: 'MSISDN', defaultFlex: 1 },
-		{ name: 'department', header: 'DEPARTMENT', defaultFlex: 1 },
-		{
-			name: 'status',
-			header: 'STATUS',
-			defaultFlex: 1,
-			render: ({ data }: { data: Dealer }) => (
-				<Text color={data.status === 'active' ? 'green' : 'red'}>
-					{data.status?.charAt(0)?.toUpperCase() + data.status?.slice(1)}
-				</Text>
-			),
-		},
-		{
-			name: 'actions',
-			header: 'ACTIONS',
-			defaultFlex: 1.2,
-			render: ({ data }: { data: Dealer }) => (
-				<Group
-					spacing="xs"
-					position="left"
-					noWrap
-				>
-					<Button
-						variant="subtle"
-						size="xs"
-						p={0}
-						title="Add DSA"
-						onClick={() => handleAddUser(data, 'DSA')}
-					>
-						<IconUserPlus
-							size={16}
-							color="#228be6"
-						/>
-						DSA
-					</Button>
-					<Button
-						variant="subtle"
-						size="xs"
-						p={0}
-						title="Add Retailer"
-						onClick={() => handleAddUser(data, 'Retailer')}
-					>
-						<IconUserPlus
-							size={16}
-							color="#40c057"
-						/>
-						Retailer
-					</Button>
-					<Button
-						variant="subtle"
-						size="xs"
-						p={0}
-						title="View Details"
-						onClick={() => handleAction(data, 'view')}
-					>
-						<IconEye
-							size={16}
-							color="#228be6"
-						/>
-					</Button>
-					<Button
-						variant="subtle"
-						size="xs"
-						p={0}
-						title="Edit"
-						onClick={() => handleAction(data, 'edit')}
-					>
-						<IconEdit
-							size={16}
-							color="#40c057"
-						/>
-					</Button>
-					<Button
-						variant="subtle"
-						size="xs"
-						p={0}
-						title={data.status === 'active' ? 'Deactivate' : 'Activate'}
-						onClick={() =>
-							handleAction(data, data.status === 'active' ? 'deactivate' : 'activate')
-						}
-					>
-						<IconPower
-							size={16}
-							color={data.status === 'active' ? '#fa5252' : '#40c057'}
-						/>
-					</Button>
-					<Button
-						variant="subtle"
-						size="xs"
-						p={0}
-						title="Delete"
-						onClick={() => handleAction(data, 'delete')}
-					>
-						<IconTrash
-							size={16}
-							color="#fa5252"
-						/>
-					</Button>
-				</Group>
-			),
-		},
-	];
+	// Filter and search logic
+	const filteredDealers = useMemo(() => {
+		if (!dealers?.data?.data) return [];
 
-	const table = useDataGridTable({
-		columns,
-		data: dealers?.data?.data || [],
-		loading: isLoading,
-	});
+		return dealers.data.data.filter((dealer: Dealer) => {
+			const matchesSearch =
+				dealer.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				dealer.contactPerson?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				dealer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				dealer.msisdn?.includes(searchTerm);
+
+			const matchesStatus = statusFilter === 'all' || dealer.status === statusFilter;
+			const matchesCategory =
+				categoryFilter === 'all' || dealer.department === categoryFilter;
+
+			return matchesSearch && matchesStatus && matchesCategory;
+		});
+	}, [dealers?.data?.data, searchTerm, statusFilter, categoryFilter]);
+
+	const getStatusColor = (status: string) => {
+		return status === 'active' ? 'yellow' : 'red';
+	};
+
+	const getCategoryColor = (category: string) => {
+		switch (category?.toLowerCase()) {
+			case 'wakanet':
+				return 'yellow';
+			case 'enterprise':
+				return 'purple';
+			case 'both':
+				return 'orange';
+			default:
+				return 'gray';
+		}
+	};
 
 	return (
-		<Stack>
-			<Flex justify="flex-end">
-				<Button onClick={openAddModal}>Add New Dealer</Button>
-			</Flex>
+		<div className={classes.root}>
+			{/* Enhanced Header */}
+			<div className={classes.header}>
+				<Group
+					position="apart"
+					mb="md"
+				>
+					<div>
+						<Title
+							order={3}
+							mb="xs"
+						>
+							Dealers
+						</Title>
+						<Text
+							color="dimmed"
+							size="sm"
+						>
+							Manage your dealer network and partnerships
+						</Text>
+					</div>
+					<Button
+						leftIcon={<IconPlus size={16} />}
+						onClick={openAddModal}
+						size="md"
+						radius="md"
+					>
+						Add New Dealer
+					</Button>
+				</Group>
+			</div>
 
-			{table}
+			{/* Search and Filter Section */}
+			<div className={classes.searchSection}>
+				<div className={classes.searchRow}>
+					<TextInput
+						placeholder="Search dealers..."
+						icon={<IconSearch size={16} />}
+						value={searchTerm}
+						onChange={(e) => setSearchTerm(e.currentTarget.value)}
+						style={{ flex: 1, minWidth: 250 }}
+					/>
+					<Select
+						placeholder="Filter by status"
+						data={[
+							{ value: 'all', label: 'All Status' },
+							{ value: 'active', label: 'Active' },
+							{ value: 'inactive', label: 'Inactive' },
+						]}
+						value={statusFilter}
+						onChange={(value) => setStatusFilter(value || 'all')}
+						icon={<IconFilter size={16} />}
+						style={{ minWidth: 150 }}
+					/>
+					<Select
+						placeholder="Filter by category"
+						data={[
+							{ value: 'all', label: 'All Categories' },
+							{ value: 'wakanet', label: 'WakaNet' },
+							{ value: 'enterprise', label: 'Enterprise' },
+							{ value: 'both', label: 'Both' },
+						]}
+						value={categoryFilter}
+						onChange={(value) => setCategoryFilter(value || 'all')}
+						icon={<IconFilter size={16} />}
+						style={{ minWidth: 150 }}
+					/>
+				</div>
+			</div>
 
+			{/* Enhanced Card Grid */}
+			{isLoading ? (
+				<Text
+					align="center"
+					py="xl"
+				>
+					Loading dealers...
+				</Text>
+			) : filteredDealers.length === 0 ? (
+				<div className={classes.emptyState}>
+					<IconBuilding
+						size={48}
+						color="gray"
+					/>
+					<Text
+						size="lg"
+						mt="md"
+					>
+						No dealers found
+					</Text>
+					<Text
+						size="sm"
+						color="dimmed"
+					>
+						Try adjusting your search or filters
+					</Text>
+				</div>
+			) : (
+				<Grid>
+					{filteredDealers.map((dealer: Dealer) => (
+						<Grid.Col
+							key={dealer.id}
+							xs={12}
+							sm={6}
+							lg={4}
+						>
+							<Card
+								className={classes.card}
+								onClick={() => handleAction(dealer, 'view')}
+							>
+								<Card.Section className={classes.cardHeader}>
+									<Group position="apart">
+										<Group spacing="xs">
+											<ThemeIcon
+												size="md"
+												radius="md"
+												variant="light"
+												color={getCategoryColor(dealer.department)}
+											>
+												<IconBuilding size={16} />
+											</ThemeIcon>
+											<Text
+												weight={600}
+												size="sm"
+												lineClamp={1}
+											>
+												{dealer.companyName}
+											</Text>
+										</Group>
+										<Menu>
+											<Menu.Target>
+												<ActionIcon
+													variant="subtle"
+													size="sm"
+													onClick={(e) => e.stopPropagation()}
+												>
+													<IconDotsVertical size={16} />
+												</ActionIcon>
+											</Menu.Target>
+											<Menu.Dropdown>
+												<Menu.Item
+													icon={<IconEye size={16} />}
+													onClick={(e) => {
+														e.stopPropagation();
+														handleAction(dealer, 'view');
+													}}
+												>
+													View Details
+												</Menu.Item>
+												<Menu.Item
+													icon={<IconEdit size={16} />}
+													onClick={(e) => {
+														e.stopPropagation();
+														handleAction(dealer, 'edit');
+													}}
+												>
+													Edit
+												</Menu.Item>
+												<Menu.Divider />
+												<Menu.Item
+													icon={<IconUserPlus size={16} />}
+													onClick={(e) => {
+														e.stopPropagation();
+														handleAddUser(dealer, 'DSA');
+													}}
+												>
+													Add DSA
+												</Menu.Item>
+												<Menu.Item
+													icon={<IconUserPlus size={16} />}
+													onClick={(e) => {
+														e.stopPropagation();
+														handleAddUser(dealer, 'Retailer');
+													}}
+												>
+													Add Retailer
+												</Menu.Item>
+												<Menu.Divider />
+												<Menu.Item
+													icon={<IconPower size={16} />}
+													color={
+														dealer.status === 'active'
+															? 'red'
+															: 'yellow'
+													}
+													onClick={(e) => {
+														e.stopPropagation();
+														handleAction(
+															dealer,
+															dealer.status === 'active'
+																? 'deactivate'
+																: 'activate'
+														);
+													}}
+												>
+													{dealer.status === 'active'
+														? 'Deactivate'
+														: 'Activate'}
+												</Menu.Item>
+												<Menu.Item
+													icon={<IconTrash size={16} />}
+													color="red"
+													onClick={(e) => {
+														e.stopPropagation();
+														handleAction(dealer, 'delete');
+													}}
+												>
+													Delete
+												</Menu.Item>
+											</Menu.Dropdown>
+										</Menu>
+									</Group>
+								</Card.Section>
+
+								<Card.Section className={classes.cardBody}>
+									<Stack spacing="xs">
+										<div className={classes.infoRow}>
+											<IconUser
+												size={14}
+												color="gray"
+											/>
+											<Text
+												size="sm"
+												color="dimmed"
+											>
+												{dealer.contactPerson}
+											</Text>
+										</div>
+										<div className={classes.infoRow}>
+											<IconMail
+												size={14}
+												color="gray"
+											/>
+											<Text
+												size="sm"
+												color="dimmed"
+												lineClamp={1}
+											>
+												{dealer.email}
+											</Text>
+										</div>
+										<div className={classes.infoRow}>
+											<IconPhone
+												size={14}
+												color="gray"
+											/>
+											<Text
+												size="sm"
+												color="dimmed"
+											>
+												{dealer.msisdn}
+											</Text>
+										</div>
+									</Stack>
+								</Card.Section>
+
+								<Card.Section className={classes.cardFooter}>
+									<Group position="apart">
+										<Badge
+											color={getStatusColor(dealer.status)}
+											variant="filled"
+											size="sm"
+											className={classes.statusBadge}
+										>
+											{dealer.status?.charAt(0)?.toUpperCase() +
+												dealer.status?.slice(1)}
+										</Badge>
+										<Badge
+											color={getCategoryColor(dealer.department)}
+											variant="light"
+											size="sm"
+										>
+											{dealer.department?.charAt(0)?.toUpperCase() +
+												dealer.department?.slice(1)}
+										</Badge>
+									</Group>
+								</Card.Section>
+							</Card>
+						</Grid.Col>
+					))}
+				</Grid>
+			)}
+
+			{/* Modals */}
 			<AddDealerModal
 				opened={addModalOpened}
 				onClose={closeAddModal}
@@ -215,6 +521,6 @@ export function DealerList() {
 					userType={addUserType}
 				/>
 			)}
-		</Stack>
+		</div>
 	);
 }
