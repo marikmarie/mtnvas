@@ -1,4 +1,4 @@
-import { Tabs, Title, Text, Group, Container, createStyles, ThemeIcon, Badge } from '@mantine/core';
+import { Tabs, Title, Text, Group, createStyles, ThemeIcon, Badge } from '@mantine/core';
 import {
 	IconBox,
 	IconBuildingStore,
@@ -16,7 +16,6 @@ const useStyles = createStyles((theme) => ({
 	root: {
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
 		minHeight: '100vh',
-		padding: theme.spacing.md,
 	},
 
 	header: {
@@ -111,165 +110,160 @@ export default function DealerManagement() {
 	return (
 		<Layout>
 			<div className={classes.root}>
-				<Container
-					size={1920}
-					p={0}
-				>
-					{/* Enhanced Header */}
-					<div className={classes.header}>
-						<div className={classes.headerContent}>
-							<div className={classes.titleSection}>
-								<Group
-									spacing="md"
-									align="center"
+				{/* Enhanced Header */}
+				<div className={classes.header}>
+					<div className={classes.headerContent}>
+						<div className={classes.titleSection}>
+							<Group
+								spacing="md"
+								align="center"
+							>
+								<ThemeIcon
+									size={48}
+									radius="md"
+									variant="light"
+									color="yellow"
 								>
-									<ThemeIcon
-										size={48}
-										radius="md"
-										variant="light"
-										color="yellow"
+									<IconSettings size={24} />
+								</ThemeIcon>
+								<div>
+									<Title
+										order={1}
+										size="h2"
 									>
-										<IconSettings size={24} />
-									</ThemeIcon>
-									<div>
-										<Title
-											order={1}
-											size="h2"
-										>
-											Dealer Management
-										</Title>
-										<Text
-											className={classes.subtitle}
-											size="sm"
-										>
-											Manage dealers, shops, users, and inventory across your
-											network
-										</Text>
-									</div>
-								</Group>
-							</div>
+										Dealer Management
+									</Title>
+									<Text
+										className={classes.subtitle}
+										size="sm"
+									>
+										Manage dealers, shops, users, and inventory across your
+										network
+									</Text>
+								</div>
+							</Group>
+						</div>
 
-							{/* Quick Stats */}
-							<div className={classes.statsGroup}>
-								<div className={classes.statCard}>
-									<Badge
-										color="yellow"
-										variant="light"
-										size="sm"
-										mb="xs"
-									>
-										Active Dealers
-									</Badge>
-									<Text
-										size="xl"
-										weight={700}
-										color="yellow"
-									>
-										24
-									</Text>
-								</div>
-								<div className={classes.statCard}>
-									<Badge
-										color="green"
-										variant="light"
-										size="sm"
-										mb="xs"
-									>
-										Total Shops
-									</Badge>
-									<Text
-										size="xl"
-										weight={700}
-										color="green"
-									>
-										156
-									</Text>
-								</div>
-								<div className={classes.statCard}>
-									<Badge
-										color="orange"
-										variant="light"
-										size="sm"
-										mb="xs"
-									>
-										In Stock
-									</Badge>
-									<Text
-										size="xl"
-										weight={700}
-										color="orange"
-									>
-										1,234
-									</Text>
-								</div>
+						{/* Quick Stats */}
+						<div className={classes.statsGroup}>
+							<div className={classes.statCard}>
+								<Badge
+									color="yellow"
+									variant="light"
+									size="sm"
+									mb="xs"
+								>
+									Active Dealers
+								</Badge>
+								<Text
+									size="xl"
+									weight={700}
+									color="yellow"
+								>
+									24
+								</Text>
+							</div>
+							<div className={classes.statCard}>
+								<Badge
+									color="green"
+									variant="light"
+									size="sm"
+									mb="xs"
+								>
+									Total Shops
+								</Badge>
+								<Text
+									size="xl"
+									weight={700}
+									color="green"
+								>
+									156
+								</Text>
+							</div>
+							<div className={classes.statCard}>
+								<Badge
+									color="orange"
+									variant="light"
+									size="sm"
+									mb="xs"
+								>
+									In Stock
+								</Badge>
+								<Text
+									size="xl"
+									weight={700}
+									color="orange"
+								>
+									1,234
+								</Text>
 							</div>
 						</div>
 					</div>
+				</div>
 
-					{/* Enhanced Content Card */}
-					<div className={classes.contentCard}>
-						<Tabs
-							defaultValue="dealers"
-							variant="pills"
-						>
-							<Tabs.List className={classes.tabsList}>
-								<Tabs.Tab
-									value="dealers"
-									icon={<IconUsers size={16} />}
-									className={classes.tab}
-								>
-									Dealers
-								</Tabs.Tab>
-								<Tabs.Tab
-									value="shops"
-									icon={<IconBuildingStore size={16} />}
-									className={classes.tab}
-								>
-									Shops
-								</Tabs.Tab>
-								<Tabs.Tab
-									value="users"
-									icon={<IconUserCircle size={16} />}
-									className={classes.tab}
-								>
-									Shop Users
-								</Tabs.Tab>
-								<Tabs.Tab
-									value="stock"
-									icon={<IconBox size={16} />}
-									className={classes.tab}
-								>
-									Stock Management
-								</Tabs.Tab>
-							</Tabs.List>
-
-							<Tabs.Panel
+				{/* Enhanced Content Card */}
+				<div className={classes.contentCard}>
+					<Tabs
+						defaultValue="dealers"
+						variant="pills"
+					>
+						<Tabs.List className={classes.tabsList}>
+							<Tabs.Tab
 								value="dealers"
-								className={classes.tabPanel}
+								icon={<IconUsers size={16} />}
+								className={classes.tab}
 							>
-								<DealerList />
-							</Tabs.Panel>
-							<Tabs.Panel
+								Dealers
+							</Tabs.Tab>
+							<Tabs.Tab
 								value="shops"
-								className={classes.tabPanel}
+								icon={<IconBuildingStore size={16} />}
+								className={classes.tab}
 							>
-								<ShopList />
-							</Tabs.Panel>
-							<Tabs.Panel
+								Shops
+							</Tabs.Tab>
+							<Tabs.Tab
 								value="users"
-								className={classes.tabPanel}
+								icon={<IconUserCircle size={16} />}
+								className={classes.tab}
 							>
-								<ShopUsersList shop={undefined} />
-							</Tabs.Panel>
-							<Tabs.Panel
+								Shop Users
+							</Tabs.Tab>
+							<Tabs.Tab
 								value="stock"
-								className={classes.tabPanel}
+								icon={<IconBox size={16} />}
+								className={classes.tab}
 							>
-								<StockList />
-							</Tabs.Panel>
-						</Tabs>
-					</div>
-				</Container>
+								Stock Management
+							</Tabs.Tab>
+						</Tabs.List>
+
+						<Tabs.Panel
+							value="dealers"
+							className={classes.tabPanel}
+						>
+							<DealerList />
+						</Tabs.Panel>
+						<Tabs.Panel
+							value="shops"
+							className={classes.tabPanel}
+						>
+							<ShopList />
+						</Tabs.Panel>
+						<Tabs.Panel
+							value="users"
+							className={classes.tabPanel}
+						>
+							<ShopUsersList shop={undefined} />
+						</Tabs.Panel>
+						<Tabs.Panel
+							value="stock"
+							className={classes.tabPanel}
+						>
+							<StockList />
+						</Tabs.Panel>
+					</Tabs>
+				</div>
 			</div>
 		</Layout>
 	);

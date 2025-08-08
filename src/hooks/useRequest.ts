@@ -51,7 +51,7 @@ export default function useRequest(
 
 	const showNotification = ( message: string, color: string, customTitle?: string ) => {
 		if ( !message || message.toLowerCase().trim() === "success" ) return;
-
+		return;
 		notifications.show( {
 			title: customTitle || title,
 			message:

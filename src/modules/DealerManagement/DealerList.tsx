@@ -305,7 +305,7 @@ export function DealerList() {
 							key={dealer.id}
 							xs={12}
 							sm={6}
-							lg={4}
+							lg={12}
 						>
 							<Card
 								className={classes.card}
