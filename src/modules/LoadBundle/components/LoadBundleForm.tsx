@@ -1,9 +1,7 @@
-import { Button, Center, Flex, Text, TextInput, Select } from '@mantine/core';
+import { Button, Center, Flex, Select, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
 import { IconGauge, IconPhone } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
-import { AxiosError, AxiosResponse } from 'axios';
 import useRequest from '../../../hooks/useRequest';
 import { formatCurrency } from '../../../utils/currenyFormatter';
 
@@ -14,6 +12,7 @@ type TLoadBundleFormProps = {
 	speed?: string;
 	volume?: string;
 	categoryName: string;
+	onClose: () => void;
 };
 
 export default function LoadBundleForm({
@@ -23,6 +22,7 @@ export default function LoadBundleForm({
 	volume,
 	bnumber,
 	categoryName,
+	onClose,
 }: TLoadBundleFormProps) {
 	const form = useForm({
 		initialValues: {
@@ -65,21 +65,6 @@ export default function LoadBundleForm({
 					},
 				}
 			),
-		onSuccess: (response: AxiosResponse) => {
-			notifications.show({
-				autoClose: 5000,
-				message: response.data.message,
-				color: 'yellow',
-			});
-		},
-		onError: (error: AxiosError) => {
-			notifications.show({
-				autoClose: 5000,
-				// @ts-ignore
-				message: error.response?.data?.message,
-				color: 'red',
-			});
-		},
 	});
 
 	return (
@@ -152,6 +137,7 @@ export default function LoadBundleForm({
 							setTimeout(() => {
 								mutation.mutate();
 								form.reset();
+								onClose();
 							}, 0);
 						}
 					}}

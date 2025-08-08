@@ -1,12 +1,12 @@
-import { memo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import { setServiceCode, setSubscriptionId } from '../../../app/slices/BundleActivations';
-import useRequest from '../../../hooks/useRequest';
-import { toTitle } from '../../../utils/toTitle';
-import { useDataGridTable } from '../../../hooks/useDataGridTable';
 import { ActionIcon } from '@mantine/core';
 import { IconCircleCheck } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
+import { memo, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { setServiceCode, setSubscriptionId } from '../../../app/slices/BundleActivations';
+import { useDataGridTable } from '../../../hooks/useDataGridTable';
+import useRequest from '../../../hooks/useRequest';
+import { toTitle } from '../../../utils/toTitle';
 
 type Data = {
 	subscriptionId: string;
@@ -39,20 +39,22 @@ const BundleActivationsReport = () => {
 	);
 
 	const columns = [
-		...['subscriptionId', 'msisdn', 'email', 'serviceCode', 'createdAt'].map((column) => ({
-			name: column,
-			header: column === 'createdAt' ? 'PERFORMED AT' : toTitle(column),
-			defaultFlex: 1,
-			render:
-				column === 'createdAt'
-					? ({ data }: { data: Data }) => (
-							<>
-								{new Date(data.createdAt).toLocaleDateString('en-UK')}{' '}
-								{new Date(data.createdAt).toLocaleTimeString('en-UK')}
-							</>
-						)
-					: undefined,
-		})),
+		...['subscriptionId', 'msisdn', 'email', 'paymentMode', 'serviceCode', 'createdAt'].map(
+			(column) => ({
+				name: column,
+				header: column === 'createdAt' ? 'PERFORMED AT' : toTitle(column),
+				defaultFlex: 1,
+				render:
+					column === 'createdAt'
+						? ({ data }: { data: Data }) => (
+								<>
+									{new Date(data.createdAt).toLocaleDateString('en-UK')}{' '}
+									{new Date(data.createdAt).toLocaleTimeString('en-UK')}
+								</>
+							)
+						: undefined,
+			})
+		),
 		{
 			name: 'action_select',
 			header: 'ACTION/SELECT',

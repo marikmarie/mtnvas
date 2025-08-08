@@ -50,8 +50,8 @@ export default function useRequest(
 	} );
 
 	const showNotification = ( message: string, color: string, customTitle?: string ) => {
-		if ( !message || message.toLowerCase().trim() === "success" ) return;
-		return;
+		if ( !message || message.toLowerCase().trim() === 'success' ) return;
+
 		notifications.show( {
 			title: customTitle || title,
 			message:
@@ -87,10 +87,10 @@ export default function useRequest(
 			if ( !showError ) return Promise.reject( error );
 
 			const errorMessage = String(
-				error.response?.data?.status ||
 				error.response?.data?.message ||
 				error.response?.data ||
-				error.message
+				error.message ||
+				error.response?.data?.status
 			);
 
 			if ( error.response ) {
