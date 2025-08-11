@@ -85,7 +85,6 @@ export default function LoadBundleForm({
 				label="WakaNet Number"
 				mb="xs"
 				value={form.values.bnumber}
-				data-autofocus
 				onChange={(event) => form.setFieldValue('bnumber', event.currentTarget.value)}
 				error={form.errors.bnumber}
 				placeholder="For example 2563945..."
@@ -99,6 +98,7 @@ export default function LoadBundleForm({
 				onChange={(event) => form.setFieldValue('msisdn', event.currentTarget.value)}
 				placeholder="For example 078..."
 				error={form.errors.msisdn}
+				autoFocus
 				withAsterisk
 			/>
 

@@ -232,6 +232,7 @@ export default () => {
 						label="Account Number (bnumber)"
 						placeholder="e.g. 256393011001"
 						{...form.getInputProps('bnumber')}
+						autoFocus
 						required
 					/>
 					<Button

@@ -14,6 +14,7 @@ import {
 	Title,
 	Progress,
 	Group,
+	Skeleton,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -58,12 +59,6 @@ const useStyles = createStyles((theme) => ({
 	card: {
 		transition: 'all 0.2s ease',
 		cursor: 'pointer',
-
-		'&:hover': {
-			transform: 'translateY(-2px)',
-			boxShadow: theme.shadows.md,
-			borderColor: theme.colors.yellow[3],
-		},
 	},
 
 	cardHeader: {
@@ -292,12 +287,75 @@ export function StockList() {
 
 			{/* Enhanced Card Grid */}
 			{isLoading ? (
-				<Text
-					align="center"
-					py="xl"
-				>
-					Loading stock data...
-				</Text>
+				<Grid>
+					{Array.from({ length: 6 }).map((_, index) => (
+						<Grid.Col
+							key={index}
+							xs={12}
+							sm={6}
+							lg={4}
+						>
+							<Card className={classes.card}>
+								<Card.Section className={classes.cardHeader}>
+									<Group position="apart">
+										<Group spacing="xs">
+											<Skeleton
+												height={24}
+												width={24}
+												radius="xl"
+											/>
+											<Skeleton
+												height={12}
+												width={140}
+											/>
+										</Group>
+										<Skeleton
+											height={24}
+											width={24}
+											radius="md"
+										/>
+									</Group>
+								</Card.Section>
+
+								<Card.Section className={classes.cardBody}>
+									<Stack spacing="xs">
+										<Skeleton
+											height={12}
+											width="60%"
+										/>
+										<Skeleton
+											height={12}
+											width="50%"
+										/>
+										<Skeleton
+											height={8}
+											width="100%"
+										/>
+										<Skeleton
+											height={10}
+											width="30%"
+										/>
+									</Stack>
+								</Card.Section>
+
+								<Card.Section className={classes.cardFooter}>
+									<Group position="apart">
+										<Skeleton
+											height={24}
+											width={80}
+											radius="xl"
+										/>
+										<Skeleton
+											height={24}
+											width={100}
+											radius="xl"
+										/>
+									</Group>
+								</Card.Section>
+							</Card>
+						</Grid.Col>
+					))}
+				</Grid>
 			) : filteredStocks.length === 0 ? (
 				<div className={classes.emptyState}>
 					<IconBox
