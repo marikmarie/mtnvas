@@ -131,7 +131,9 @@ export function ShopList() {
 
 	const approvalMutation = useMutation({
 		mutationFn: ({ shopId, status }: { shopId: string; status: 'approved' | 'rejected' }) =>
-			request.post(`/shops/${shopId}/approval?status=${status}`),
+			request.post(`/shops/${shopId}/approval`, {
+				action: status === 'approved' ? 'approve' : 'reject',
+			}),
 	});
 
 	const handleAddShopAgent = (shop: Shop) => {

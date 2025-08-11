@@ -145,7 +145,7 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 
 	const mutation = useMutation({
 		mutationFn: (formData: FormData) =>
-			request.post('/stocks', formData, {
+			request.post('/stocks/upload', formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data',
 				},
