@@ -15,14 +15,18 @@ export interface Dealer {
 }
 
 export interface Shop {
-	dealerName: string;
+	id: string;
 	shopName: string;
-	region: string;
+	dealerId: string;
+	dealerName: string;
 	location: string;
+	region: string;
 	status: 'active' | 'inactive' | 'pending_approval';
+	adminId?: string;
+	adminName?: string;
+	agentCount: number;
 	createdBy: string;
 	createdAt: string;
-	updatedBy: string;
 	updatedAt: string;
 }
 
@@ -33,7 +37,7 @@ export interface ShopUser {
 	msisdn: string;
 	shopId: string;
 	shopName: string;
-	userType: 'DSA' | 'Retailer' | 'ShopAgent';
+	userType: 'shop_agent' | 'dsa' | 'retailer';
 	createdAt: string;
 	status: 'active' | 'inactive';
 }
@@ -164,7 +168,7 @@ export interface ShopUserModalProps {
 	opened: boolean;
 	onClose: () => void;
 	shop: Shop;
-	userType: 'DSA' | 'Retailer' | 'ShopAgent';
+	userType: 'shop_agent' | 'dsa' | 'retailer';
 }
 
 export interface StockModalProps {
@@ -175,4 +179,93 @@ export interface StockModalProps {
 export interface StockThresholdModalProps {
 	opened: boolean;
 	onClose: () => void;
+}
+
+export interface EditShopModalProps {
+	opened: boolean;
+	onClose: () => void;
+	shop: Shop;
+}
+
+export interface AssignShopAdminModalProps {
+	opened: boolean;
+	onClose: () => void;
+	shop: Shop;
+}
+
+export interface ShopApprovalModalProps {
+	opened: boolean;
+	onClose: () => void;
+	shop: Shop;
+	action: 'approve' | 'reject';
+}
+
+export interface Agent {
+	id: string;
+	name: string;
+	email: string;
+	msisdn: string;
+	userType: 'shop_agent' | 'dsa' | 'retailer';
+	dealerId: string;
+	shopId?: string;
+	merchantCode?: string;
+	status: 'active' | 'inactive' | 'pending_approval';
+	location: string;
+	createdAt: string;
+}
+
+export interface AgentApprovalPayload {
+	action: 'approve' | 'reject';
+	reason?: string;
+	name?: string;
+	email?: string;
+	msisdn?: string;
+	location?: string;
+}
+
+export interface AgentDuplicateCheck {
+	msisdn?: string;
+	email?: string;
+	merchantCode?: string;
+}
+
+export interface AgentDuplicateResponse {
+	exists: boolean;
+	existingAgent?: {
+		id: string;
+		name: string;
+		userTypes: string[];
+		dealerId: string;
+	};
+	canAddCategory: boolean;
+}
+
+export interface AddAgentCategoryPayload {
+	userType: 'shop_agent' | 'dsa' | 'retailer';
+	shopId?: string;
+}
+
+export interface AgentModalProps {
+	opened: boolean;
+	onClose: () => void;
+	agent?: Agent;
+}
+
+export interface AgentApprovalModalProps {
+	opened: boolean;
+	onClose: () => void;
+	agent: Agent;
+	action: 'approve' | 'reject';
+}
+
+export interface AgentDuplicateCheckModalProps {
+	opened: boolean;
+	onClose: () => void;
+	onDuplicateFound: ( result: AgentDuplicateResponse ) => void;
+}
+
+export interface AddAgentCategoryModalProps {
+	opened: boolean;
+	onClose: () => void;
+	agent: Agent;
 }

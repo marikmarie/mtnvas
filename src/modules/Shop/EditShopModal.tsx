@@ -9,39 +9,31 @@ import {
 	ThemeIcon,
 	Alert,
 	Select,
-	NumberInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
 	IconBuildingStore,
 	IconMapPin,
-	IconPlus,
+	IconEdit,
 	IconAlertCircle,
-	IconClock,
-	IconGlobe,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { Dealer } from '../Dealer/types';
+import { Shop } from '../Dealer/types';
 
-interface AddShopModalProps {
+interface EditShopModalProps {
 	opened: boolean;
 	onClose: () => void;
-	dealer: Dealer;
+	shop: Shop;
 }
 
-interface ShopFormValues {
+interface EditShopFormValues {
 	shopName: string;
-	dealerId: string;
 	location: string;
 	region: string;
-	adminName?: string;
-	adminEmail?: string;
-	adminMsisdn?: string;
+	adminId?: string;
 	operatingHours?: string;
-	latitude?: number;
-	longitude?: number;
 }
 
 const useStyles = createStyles((theme) => ({
@@ -102,7 +94,7 @@ const useStyles = createStyles((theme) => ({
 		marginBottom: theme.spacing.md,
 	},
 
-	dealerInfo: {
+	shopInfo: {
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
 		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		borderRadius: theme.radius.md,
@@ -111,58 +103,32 @@ const useStyles = createStyles((theme) => ({
 	},
 }));
 
-export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
+export function EditShopModal({ opened, onClose, shop }: EditShopModalProps) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
 	const queryClient = useQueryClient();
 
-	const form = useForm<ShopFormValues>({
+	const form = useForm<EditShopFormValues>({
 		initialValues: {
-			shopName: '',
-			dealerId: dealer.id,
-			location: '',
-			region: '',
-			adminName: '',
-			adminEmail: '',
-			adminMsisdn: '',
+			shopName: shop.shopName || '',
+			location: shop.location || '',
+			region: shop.region || '',
+			adminId: shop.adminId || '',
 			operatingHours: '',
-			latitude: undefined,
-			longitude: undefined,
 		},
 		validate: {
 			shopName: (value) => (!value ? 'Shop name is required' : null),
-			dealerId: (value) => (!value ? 'Dealer is required' : null),
 			location: (value) => (!value ? 'Location is required' : null),
 			region: (value) => (!value ? 'Region is required' : null),
 		},
 	});
 
 	const mutation = useMutation({
-		mutationFn: (values: ShopFormValues) => {
-			const payload: any = {
-				shopName: values.shopName,
-				dealerId: values.dealerId,
-				location: values.location,
-				region: values.region,
-			};
-
-			// Add optional fields if provided
-			if (values.adminName) payload.adminName = values.adminName;
-			if (values.adminEmail) payload.adminEmail = values.adminEmail;
-			if (values.adminMsisdn) payload.adminMsisdn = values.adminMsisdn;
-			if (values.operatingHours) payload.operatingHours = values.operatingHours;
-			if (values.latitude && values.longitude) {
-				payload.coordinates = {
-					latitude: values.latitude,
-					longitude: values.longitude,
-				};
-			}
-
-			return request.post('/shops', payload);
+		mutationFn: (values: EditShopFormValues) => {
+			return request.put(`/shops/${shop.id}`, values);
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['shops'] });
-			queryClient.invalidateQueries({ queryKey: ['dealer', dealer.id] });
 			onClose();
 			form.reset();
 		},
@@ -187,22 +153,22 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 						size={40}
 						radius="md"
 						variant="light"
-						color="green"
+						color="blue"
 					>
-						<IconPlus size={20} />
+						<IconEdit size={20} />
 					</ThemeIcon>
 					<div>
 						<Title
 							order={3}
 							size="h4"
 						>
-							Add New Shop
+							Edit Shop
 						</Title>
 						<Text
 							color="dimmed"
 							size="sm"
 						>
-							Create a new shop location for {dealer.companyName || dealer.name}
+							Update shop information for {shop.shopName}
 						</Text>
 					</div>
 				</div>
@@ -210,19 +176,24 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 
 			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Dealer Information */}
-				<div className={classes.dealerInfo}>
+				{/* Shop Information */}
+				<div className={classes.shopInfo}>
 					<Text
 						size="sm"
 						weight={500}
 						color="dimmed"
 						mb="xs"
 					>
-						Parent Dealer
+						Shop Details
 					</Text>
-					<Text weight={600}>{dealer.companyName || dealer.name}</Text>
-					<Text size="sm" color="dimmed">
-						{dealer.location && `${dealer.location}, `}{dealer.region}
+					<Text size="sm" mb="xs">
+						<strong>Dealer:</strong> {shop.dealerName}
+					</Text>
+					<Text size="sm" mb="xs">
+						<strong>Status:</strong> {shop.status?.replace('_', ' ')}
+					</Text>
+					<Text size="sm">
+						<strong>Created:</strong> {new Date(shop.createdAt).toLocaleDateString()}
 					</Text>
 				</div>
 
@@ -282,7 +253,6 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 										label="Region"
 										placeholder="Select region"
 										required
-										icon={<IconGlobe size={16} className={classes.inputIcon} />}
 										data={[
 											{ value: 'central', label: 'Central' },
 											{ value: 'eastern', label: 'Eastern' },
@@ -298,7 +268,12 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 									<TextInput
 										label="Operating Hours"
 										placeholder="e.g., 8:00 AM - 6:00 PM"
-										icon={<IconClock size={16} className={classes.inputIcon} />}
+										icon={
+											<IconBuildingStore
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
 										{...form.getInputProps('operatingHours')}
 										radius="md"
 									/>
@@ -316,87 +291,6 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 										/>
 									}
 									{...form.getInputProps('location')}
-									radius="md"
-								/>
-							</div>
-						</div>
-
-						{/* Coordinates (Optional) */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Coordinates (Optional)
-							</Text>
-							<Text size="xs" color="dimmed" mb="xs">
-								Provide GPS coordinates for precise location mapping
-							</Text>
-							<div className={classes.formRow}>
-								<div className={classes.inputWrapper}>
-									<NumberInput
-										label="Latitude"
-										placeholder="e.g., -1.2921"
-										precision={6}
-										min={-90}
-										max={90}
-										{...form.getInputProps('latitude')}
-										radius="md"
-									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<NumberInput
-										label="Longitude"
-										placeholder="e.g., 36.8219"
-										precision={6}
-										min={-180}
-										max={180}
-										{...form.getInputProps('longitude')}
-										radius="md"
-									/>
-								</div>
-							</div>
-						</div>
-
-						{/* Admin Information (Optional) */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Admin Information (Optional)
-							</Text>
-							<Text size="xs" color="dimmed" mb="xs">
-								You can assign an admin during shop creation or do it later
-							</Text>
-							<div className={classes.formRow}>
-								<div className={classes.inputWrapper}>
-									<TextInput
-										label="Admin Name"
-										placeholder="Enter admin name"
-										{...form.getInputProps('adminName')}
-										radius="md"
-									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<TextInput
-										label="Admin Email"
-										placeholder="Enter admin email"
-										type="email"
-										{...form.getInputProps('adminEmail')}
-										radius="md"
-									/>
-								</div>
-							</div>
-							<div className={classes.inputWrapper}>
-								<TextInput
-									label="Admin Phone"
-									placeholder="Enter admin phone number"
-									{...form.getInputProps('adminMsisdn')}
 									radius="md"
 								/>
 							</div>
@@ -421,12 +315,12 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 					<Button
 						type="submit"
 						loading={mutation.isLoading}
-						leftIcon={<IconPlus size={16} />}
+						leftIcon={<IconEdit size={16} />}
 						className={classes.submitButton}
 						radius="md"
 						onClick={() => handleSubmit()}
 					>
-						Add Shop
+						Update Shop
 					</Button>
 				</Group>
 			</div>

@@ -14,6 +14,8 @@ import {
 	Menu,
 	Title,
 	Alert,
+	Skeleton,
+	Modal,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -30,12 +32,12 @@ import {
 	IconCheck,
 	IconX,
 	IconAlertCircle,
+	IconAlertTriangle,
 } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { AddShopUserModal } from './AddShopUserModal';
-import { ConfirmationModal } from '../Dealer/ConfirmationModal';
 import { Dealer, Shop, ShopUser } from '../Dealer/types';
 
 interface ShopUsersListProps {
@@ -120,10 +122,28 @@ const useStyles = createStyles((theme) => ({
 	noShopAlert: {
 		marginBottom: theme.spacing.lg,
 	},
+
+	confirmModalHeader: {
+		padding: theme.spacing.lg,
+		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+	},
+
+	confirmModalContent: {
+		padding: theme.spacing.lg,
+	},
+
+	confirmModalActions: {
+		padding: theme.spacing.lg,
+		borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+	},
 }));
 
 export function ShopUsersList({ shop }: ShopUsersListProps) {
 	const { classes } = useStyles();
+	const request = useRequest(true);
+	const queryClient = useQueryClient();
 	const [selectedUser, setSelectedUser] = useState<ShopUser | null>(null);
 	const [confirmAction, setConfirmAction] = useState<'activate' | 'deactivate' | 'delete'>(
 		'activate'
@@ -136,12 +156,37 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 	const [confirmModalOpened, { open: openConfirmModal, close: closeConfirmModal }] =
 		useDisclosure(false);
 
-	const request = useRequest(true);
-
 	const { data: users, isLoading } = useQuery({
-		queryFn: () => request.get(`/shops/${shop?.shopName}/users`),
-		queryKey: ['shop-users', shop?.shopName],
-		enabled: !!shop?.shopName,
+		queryFn: () =>
+			request.get(`/agents`, {
+				params: {
+					shopId: shop?.id,
+					dealerId: shop?.dealerId,
+				},
+			}),
+		queryKey: ['shop-users', shop?.id, shop?.dealerId],
+		enabled: !!shop?.id,
+	});
+
+	const activateMutation = useMutation({
+		mutationFn: (userId: string) => request.post(`/agents/${userId}/activate`),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['shop-users'] });
+		},
+	});
+
+	const deactivateMutation = useMutation({
+		mutationFn: (userId: string) => request.post(`/agents/${userId}/deactivate`),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['shop-users'] });
+		},
+	});
+
+	const deleteMutation = useMutation({
+		mutationFn: (userId: string) => request.delete(`/agents/${userId}`),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['shop-users'] });
+		},
 	});
 
 	const handleAction = (user: ShopUser, action: 'activate' | 'deactivate' | 'delete') => {
@@ -150,11 +195,28 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 		openConfirmModal();
 	};
 
+	const executeAction = () => {
+		if (!selectedUser) return;
+
+		switch (confirmAction) {
+			case 'activate':
+				activateMutation.mutate(selectedUser.id);
+				break;
+			case 'deactivate':
+				deactivateMutation.mutate(selectedUser.id);
+				break;
+			case 'delete':
+				deleteMutation.mutate(selectedUser.id);
+				break;
+		}
+		closeConfirmModal();
+	};
+
 	// Filter and search logic
 	const filteredUsers = useMemo(() => {
-		if (!users?.data) return [];
+		if (!users?.data?.data) return [];
 
-		return users.data.filter((user: ShopUser) => {
+		return users.data.data.filter((user: ShopUser) => {
 			const matchesSearch =
 				user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -166,10 +228,10 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 
 			return matchesSearch && matchesStatus && matchesRole;
 		});
-	}, [users?.data, searchTerm, statusFilter, roleFilter]);
+	}, [users?.data?.data, searchTerm, statusFilter, roleFilter]);
 
 	const getStatusColor = (status: string) => {
-		return status === 'active' ? 'yellow' : 'red';
+		return status === 'active' ? 'green' : 'red';
 	};
 
 	const getStatusIcon = (status: string) => {
@@ -179,10 +241,10 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 	const getRoleColor = (role: string) => {
 		switch (role?.toLowerCase()) {
 			case 'dsa':
-				return 'yellow';
+				return 'blue';
 			case 'retailer':
 				return 'green';
-			case 'shopagent':
+			case 'shop_agent':
 				return 'orange';
 			default:
 				return 'gray';
@@ -195,10 +257,51 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 				return <IconShield size={14} />;
 			case 'retailer':
 				return <IconUser size={14} />;
-			case 'shopagent':
+			case 'shop_agent':
 				return <IconUser size={14} />;
 			default:
 				return <IconUser size={14} />;
+		}
+	};
+
+	const getActionTitle = () => {
+		switch (confirmAction) {
+			case 'activate':
+				return 'Activate User';
+			case 'deactivate':
+				return 'Deactivate User';
+			case 'delete':
+				return 'Delete User';
+			default:
+				return 'Confirm Action';
+		}
+	};
+
+	const getActionDescription = () => {
+		if (!selectedUser) return '';
+
+		switch (confirmAction) {
+			case 'activate':
+				return `Are you sure you want to activate "${selectedUser.name}"? This will enable the user to access the system.`;
+			case 'deactivate':
+				return `Are you sure you want to deactivate "${selectedUser.name}"? This will temporarily disable the user's access.`;
+			case 'delete':
+				return `Are you sure you want to permanently delete "${selectedUser.name}"? This action cannot be undone.`;
+			default:
+				return `Are you sure you want to ${confirmAction} the user "${selectedUser.name}"?`;
+		}
+	};
+
+	const getActionColor = () => {
+		switch (confirmAction) {
+			case 'activate':
+				return 'green';
+			case 'deactivate':
+				return 'orange';
+			case 'delete':
+				return 'red';
+			default:
+				return 'blue';
 		}
 	};
 
@@ -274,9 +377,9 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 						placeholder="Filter by role"
 						data={[
 							{ value: 'all', label: 'All Roles' },
-							{ value: 'DSA', label: 'DSA' },
-							{ value: 'Retailer', label: 'Retailer' },
-							{ value: 'ShopAgent', label: 'Shop Agent' },
+							{ value: 'dsa', label: 'DSA' },
+							{ value: 'retailer', label: 'Retailer' },
+							{ value: 'shop_agent', label: 'Shop Agent' },
 						]}
 						value={roleFilter}
 						onChange={(value) => setRoleFilter(value || 'all')}
@@ -288,12 +391,71 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 
 			{/* Enhanced Card Grid */}
 			{isLoading ? (
-				<Text
-					align="center"
-					py="xl"
-				>
-					Loading users...
-				</Text>
+				<Grid>
+					{Array.from({ length: 6 }).map((_, index) => (
+						<Grid.Col
+							key={index}
+							xs={12}
+							sm={6}
+							lg={4}
+						>
+							<Card className={classes.card}>
+								<Card.Section className={classes.cardHeader}>
+									<Group position="apart">
+										<Group spacing="xs">
+											<Skeleton
+												height={24}
+												width={24}
+												radius="xl"
+											/>
+											<Skeleton
+												height={12}
+												width={160}
+											/>
+										</Group>
+										<Skeleton
+											height={24}
+											width={24}
+											radius="md"
+										/>
+									</Group>
+								</Card.Section>
+
+								<Card.Section className={classes.cardBody}>
+									<Stack spacing="xs">
+										<Skeleton
+											height={12}
+											width="50%"
+										/>
+										<Skeleton
+											height={12}
+											width="40%"
+										/>
+										<Skeleton
+											height={12}
+											width="70%"
+										/>
+									</Stack>
+								</Card.Section>
+
+								<Card.Section className={classes.cardFooter}>
+									<Group position="apart">
+										<Skeleton
+											height={24}
+											width={100}
+											radius="xl"
+										/>
+										<Skeleton
+											height={24}
+											width={60}
+											radius="md"
+										/>
+									</Group>
+								</Card.Section>
+							</Card>
+						</Grid.Col>
+					))}
+				</Grid>
 			) : filteredUsers.length === 0 ? (
 				<div className={classes.emptyState}>
 					<IconUser
@@ -355,7 +517,7 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 												<Menu.Item
 													icon={<IconPower size={16} />}
 													color={
-														user.status === 'active' ? 'red' : 'yellow'
+														user.status === 'active' ? 'red' : 'green'
 													}
 													onClick={() =>
 														handleAction(
@@ -409,18 +571,20 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 												{user.msisdn}
 											</Text>
 										</div>
-										<div className={classes.infoRow}>
-											<IconShield
-												size={14}
-												color="gray"
-											/>
-											<Text
-												size="sm"
-												color="dimmed"
-											>
-												{user.shopName}
-											</Text>
-										</div>
+										{user.shopName && (
+											<div className={classes.infoRow}>
+												<IconShield
+													size={14}
+													color="gray"
+												/>
+												<Text
+													size="sm"
+													color="dimmed"
+												>
+													{user.shopName}
+												</Text>
+											</div>
+										)}
 									</Stack>
 								</Card.Section>
 
@@ -443,7 +607,7 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 											className={classes.roleBadge}
 											leftSection={getRoleIcon(user.userType)}
 										>
-											{user.userType}
+											{user.userType?.replace('_', ' ')}
 										</Badge>
 									</Group>
 								</Card.Section>
@@ -459,7 +623,7 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 				onClose={closeAddModal}
 				dealer={
 					{
-						id: shop?.dealerName!,
+						id: shop?.dealerId!,
 						name: shop?.dealerName!,
 						contactPerson: '',
 						email: '',
@@ -471,31 +635,96 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 				}
 				shops={[
 					{
-						id: shop?.shopName!,
+						id: shop?.id!,
 						name: shop?.shopName!,
 					},
 				]}
 			/>
 
-			{selectedUser && (
-				<ConfirmationModal
-					opened={confirmModalOpened}
-					onClose={closeConfirmModal}
-					action={confirmAction}
-					dealer={
-						{
-							id: shop?.dealerName!,
-							name: shop?.dealerName!,
-							contactPerson: '',
-							email: '',
-							phone: '',
-							category: 'wakanet',
-							createdAt: '',
-							status: 'active',
-						} as Dealer
-					}
-				/>
-			)}
+			{/* Custom Confirmation Modal */}
+			<Modal
+				opened={confirmModalOpened}
+				onClose={closeConfirmModal}
+				size="md"
+			>
+				<div className={classes.confirmModalHeader}>
+					<Group spacing="md">
+						<ThemeIcon
+							size={40}
+							radius="md"
+							variant="light"
+							color={getActionColor()}
+						>
+							<IconAlertTriangle size={20} />
+						</ThemeIcon>
+						<div>
+							<Title
+								order={3}
+								size="h4"
+							>
+								{getActionTitle()}
+							</Title>
+							<Text
+								color="dimmed"
+								size="sm"
+							>
+								Confirm your action
+							</Text>
+						</div>
+					</Group>
+				</div>
+
+				<div className={classes.confirmModalContent}>
+					<Text
+						align="center"
+						mb="lg"
+					>
+						{getActionDescription()}
+					</Text>
+					{confirmAction === 'delete' && (
+						<Alert
+							icon={<IconAlertTriangle size={16} />}
+							title="Warning"
+							color="red"
+							variant="light"
+						>
+							This action is permanent and cannot be undone. All associated data will
+							be lost.
+						</Alert>
+					)}
+				</div>
+
+				<div className={classes.confirmModalActions}>
+					<Group
+						position="right"
+						spacing="md"
+					>
+						<Button
+							variant="subtle"
+							onClick={closeConfirmModal}
+							radius="md"
+						>
+							Cancel
+						</Button>
+						<Button
+							color={getActionColor()}
+							onClick={executeAction}
+							loading={
+								activateMutation.isLoading ||
+								deactivateMutation.isLoading ||
+								deleteMutation.isLoading
+							}
+							radius="md"
+						>
+							{confirmAction === 'activate'
+								? 'Activate'
+								: confirmAction === 'deactivate'
+									? 'Deactivate'
+									: 'Delete'}
+						</Button>
+					</Group>
+				</div>
+			</Modal>
 		</div>
 	);
 }

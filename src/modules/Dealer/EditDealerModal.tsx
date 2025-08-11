@@ -44,10 +44,6 @@ interface DealerFormValues {
 }
 
 const useStyles = createStyles((theme) => ({
-	modalContent: {
-		padding: 0,
-	},
-
 	header: {
 		padding: theme.spacing.lg,
 		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
@@ -179,9 +175,6 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 			opened={opened}
 			close={onClose}
 			size="lg"
-			classNames={{
-				content: classes.modalContent,
-			}}
 		>
 			{/* Enhanced Header */}
 			<div className={classes.header}>
@@ -402,7 +395,7 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 						leftIcon={<IconCheck size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={form.onSubmit(handleSubmit)}
+						onClick={() => form.onSubmit(handleSubmit)}
 					>
 						Save Changes
 					</Button>

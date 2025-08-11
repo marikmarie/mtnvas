@@ -21,6 +21,7 @@ import {
 	IconBuildingStore,
 	IconShield,
 	IconAlertCircle,
+	IconMapPin,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
@@ -39,19 +40,18 @@ interface AddShopUserModalProps {
 }
 
 interface ShopUserFormValues {
-	firstName: string;
-	lastName: string;
+	name: string;
 	email: string;
-	phone: string;
-	shopId: string;
-	role: string;
+	msisdn: string;
+	userType: 'shop_agent' | 'dsa' | 'retailer';
+	dealerId: string;
+	shopId?: string;
+	location: string;
+	merchantCode?: string;
+	idNumber?: string;
 }
 
 const useStyles = createStyles((theme) => ({
-	modalContent: {
-		padding: 0,
-	},
-
 	header: {
 		padding: theme.spacing.lg,
 		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
@@ -133,35 +133,46 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 
 	const form = useForm<ShopUserFormValues>({
 		initialValues: {
-			firstName: '',
-			lastName: '',
+			name: '',
 			email: '',
-			phone: '',
-			shopId: '',
-			role: 'shop_user',
+			msisdn: '',
+			userType: 'shop_agent',
+			dealerId: dealer.id,
+			shopId: shops.length === 1 ? shops[0].id : '',
+			location: '',
+			merchantCode: '',
+			idNumber: '',
 		},
 		validate: {
-			firstName: (value) => (!value ? 'First name is required' : null),
-			lastName: (value) => (!value ? 'Last name is required' : null),
+			name: (value) => (!value ? 'Name is required' : null),
 			email: (value) => (!value ? 'Email is required' : null),
-			phone: (value) => (!value ? 'Phone number is required' : null),
-			shopId: (value) => (!value ? 'Shop is required' : null),
+			msisdn: (value) => (!value ? 'Phone number is required' : null),
+			userType: (value) => (!value ? 'User type is required' : null),
+			dealerId: (value) => (!value ? 'Dealer is required' : null),
+			shopId: (value) => {
+				if (form.values.userType === 'shop_agent' && !value) {
+					return 'Shop is required for shop agents';
+				}
+				return null;
+			},
+			location: (value) => (!value ? 'Location is required' : null),
 		},
 	});
 
 	const mutation = useMutation({
 		mutationFn: (values: ShopUserFormValues) => {
-			return request.post(`/dealer-groups/${dealer.id}/users`, values);
+			return request.post('/agents', values);
 		},
 		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['agents'] });
 			queryClient.invalidateQueries({ queryKey: ['dealer', dealer.id] });
 			onClose();
 			form.reset();
 		},
 	});
 
-	const handleSubmit = (values: ShopUserFormValues) => {
-		mutation.mutate(values);
+	const handleSubmit = () => {
+		mutation.mutate(form.values);
 	};
 
 	const shopOptions = shops.map((shop) => ({
@@ -172,14 +183,21 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 	const selectedShop = shops.find((s) => s.id === form.values.shopId);
 	const hasErrors = Object.keys(form.errors).length > 0;
 
+	// Update shopId validation when userType changes
+	const handleUserTypeChange = (value: string) => {
+		form.setFieldValue('userType', value as 'shop_agent' | 'dsa' | 'retailer');
+		if (value !== 'shop_agent') {
+			form.setFieldValue('shopId', '');
+		} else if (shops.length === 1) {
+			form.setFieldValue('shopId', shops[0].id);
+		}
+	};
+
 	return (
 		<Modal
 			opened={opened}
 			close={onClose}
 			size="lg"
-			classNames={{
-				content: classes.modalContent,
-			}}
 		>
 			{/* Enhanced Header */}
 			<div className={classes.header}>
@@ -221,7 +239,7 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 					>
 						Parent Dealer
 					</Text>
-					<Text weight={600}>{dealer.name}</Text>
+					<Text weight={600}>{dealer.companyName || dealer.name}</Text>
 				</div>
 
 				{/* Shop Selection Info */}
@@ -275,8 +293,8 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 							<div className={classes.formRow}>
 								<div className={classes.inputWrapper}>
 									<TextInput
-										label="First Name"
-										placeholder="Enter first name"
+										label="Full Name"
+										placeholder="Enter full name"
 										required
 										icon={
 											<IconUser
@@ -284,22 +302,21 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 												className={classes.inputIcon}
 											/>
 										}
-										{...form.getInputProps('firstName')}
+										{...form.getInputProps('name')}
 										radius="md"
 									/>
 								</div>
 								<div className={classes.inputWrapper}>
 									<TextInput
-										label="Last Name"
-										placeholder="Enter last name"
-										required
+										label="ID Number"
+										placeholder="Enter ID number (optional)"
 										icon={
 											<IconUser
 												size={16}
 												className={classes.inputIcon}
 											/>
 										}
-										{...form.getInputProps('lastName')}
+										{...form.getInputProps('idNumber')}
 										radius="md"
 									/>
 								</div>
@@ -322,6 +339,7 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 										label="Email Address"
 										placeholder="Enter email address"
 										required
+										type="email"
 										icon={
 											<IconMail
 												size={16}
@@ -343,14 +361,14 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 												className={classes.inputIcon}
 											/>
 										}
-										{...form.getInputProps('phone')}
+										{...form.getInputProps('msisdn')}
 										radius="md"
 									/>
 								</div>
 							</div>
 						</div>
 
-						{/* Shop Assignment */}
+						{/* User Type and Assignment */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -358,29 +376,13 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 								color="dimmed"
 								mb="xs"
 							>
-								Shop Assignment
+								User Type and Assignment
 							</Text>
 							<div className={classes.formRow}>
 								<div className={classes.inputWrapper}>
 									<Select
-										label="Shop"
-										placeholder="Select shop"
-										required
-										icon={
-											<IconBuildingStore
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										data={shopOptions}
-										{...form.getInputProps('shopId')}
-										radius="md"
-									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<Select
-										label="Role"
-										placeholder="Select role"
+										label="User Type"
+										placeholder="Select user type"
 										required
 										icon={
 											<IconShield
@@ -389,11 +391,79 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 											/>
 										}
 										data={[
-											{ value: 'shop_user', label: 'Shop User' },
-											{ value: 'shop_admin', label: 'Shop Admin' },
-											{ value: 'shop_manager', label: 'Shop Manager' },
+											{ value: 'shop_agent', label: 'Shop Agent' },
+											{ value: 'dsa', label: 'DSA' },
+											{ value: 'retailer', label: 'Retailer' },
 										]}
-										{...form.getInputProps('role')}
+										value={form.values.userType}
+										onChange={handleUserTypeChange}
+										radius="md"
+									/>
+								</div>
+								<div className={classes.inputWrapper}>
+									<Select
+										label="Shop Assignment"
+										placeholder={
+											form.values.userType === 'shop_agent'
+												? 'Select shop'
+												: 'Not required for this user type'
+										}
+										required={form.values.userType === 'shop_agent'}
+										disabled={form.values.userType !== 'shop_agent'}
+										icon={
+											<IconBuildingStore
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										data={shopOptions}
+										value={form.values.shopId}
+										onChange={(value) =>
+											form.setFieldValue('shopId', value || '')
+										}
+										radius="md"
+									/>
+								</div>
+							</div>
+						</div>
+
+						{/* Business Information */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								Business Information
+							</Text>
+							<div className={classes.formRow}>
+								<div className={classes.inputWrapper}>
+									<TextInput
+										label="Location"
+										placeholder="Enter business location"
+										required
+										icon={
+											<IconMapPin
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										{...form.getInputProps('location')}
+										radius="md"
+									/>
+								</div>
+								<div className={classes.inputWrapper}>
+									<TextInput
+										label="Merchant Code"
+										placeholder="Enter merchant code (optional)"
+										icon={
+											<IconShield
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										{...form.getInputProps('merchantCode')}
 										radius="md"
 									/>
 								</div>
@@ -422,7 +492,7 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 						leftIcon={<IconUserPlus size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={form.onSubmit(handleSubmit)}
+						onClick={() => handleSubmit()}
 					>
 						Add User
 					</Button>

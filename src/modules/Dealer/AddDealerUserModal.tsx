@@ -34,10 +34,6 @@ interface AddDealerUserModalProps {
 }
 
 const useStyles = createStyles((theme) => ({
-	modalContent: {
-		padding: 0,
-	},
-
 	header: {
 		padding: theme.spacing.lg,
 		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
@@ -163,9 +159,6 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 			opened={opened}
 			close={onClose}
 			size="lg"
-			classNames={{
-				content: classes.modalContent,
-			}}
 		>
 			{/* Enhanced Header */}
 			<div className={classes.header}>
@@ -408,7 +401,7 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 						leftIcon={<IconUserPlus size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={handleSubmit}
+						onClick={() => handleSubmit()}
 					>
 						Add {userType}
 					</Button>

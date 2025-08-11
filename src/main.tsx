@@ -27,7 +27,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 					<BrowserRouter>
 						<Notifications
 							autoClose={10000}
-							position="top-right"
+							position="bottom-right"
 							zIndex={2077}
 						/>
 						<App />
@@ -88,10 +88,6 @@ function App() {
 				withNormalizeCSS
 				withGlobalStyles
 			>
-				<Notifications
-					position="top-right"
-					zIndex={2077}
-				/>
 				<ModalsProvider>
 					<AppRouter />
 				</ModalsProvider>

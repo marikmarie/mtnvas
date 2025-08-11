@@ -5,12 +5,14 @@ import {
 	IconUserCircle,
 	IconUsers,
 	IconSettings,
+	IconUser,
 } from '@tabler/icons-react';
 import Layout from '../components/Layout';
 import { DealerList } from '../modules/Dealer/DealerList';
 import { ShopList } from '../modules/Shop/ShopList';
 import { ShopUsersList } from '../modules/Shop/ShopUsersList';
 import { StockList } from '../modules/Stock/StockList';
+import { AgentList } from '../modules/Agent/AgentList';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -187,12 +189,29 @@ export default function DealerManagement() {
 									size="sm"
 									mb="xs"
 								>
-									In Stock
+									Total Agents
 								</Badge>
 								<Text
 									size="xl"
 									weight={700}
 									color="orange"
+								>
+									89
+								</Text>
+							</div>
+							<div className={classes.statCard}>
+								<Badge
+									color="purple"
+									variant="light"
+									size="sm"
+									mb="xs"
+								>
+									In Stock
+								</Badge>
+								<Text
+									size="xl"
+									weight={700}
+									color="purple"
 								>
 									1,234
 								</Text>
@@ -230,6 +249,13 @@ export default function DealerManagement() {
 								Shop Users
 							</Tabs.Tab>
 							<Tabs.Tab
+								value="agents"
+								icon={<IconUser size={16} />}
+								className={classes.tab}
+							>
+								Agent Management
+							</Tabs.Tab>
+							<Tabs.Tab
 								value="stock"
 								icon={<IconBox size={16} />}
 								className={classes.tab}
@@ -255,6 +281,12 @@ export default function DealerManagement() {
 							className={classes.tabPanel}
 						>
 							<ShopUsersList shop={undefined} />
+						</Tabs.Panel>
+						<Tabs.Panel
+							value="agents"
+							className={classes.tabPanel}
+						>
+							<AgentList />
 						</Tabs.Panel>
 						<Tabs.Panel
 							value="stock"

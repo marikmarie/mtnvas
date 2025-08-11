@@ -29,12 +29,19 @@ import {
 	IconUser,
 	IconCheck,
 	IconX,
+	IconEdit,
+	IconShield,
+	IconClock,
+	IconAlertCircle,
 } from '@tabler/icons-react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { AddShopModal } from './AddShopModal';
 import { AddShopUserModal } from './AddShopUserModal';
+import { EditShopModal } from './EditShopModal';
+import { AssignShopAdminModal } from './AssignShopAdminModal';
+import { ShopApprovalModal } from './ShopApprovalModal';
 import { Dealer, Shop } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
@@ -108,37 +115,117 @@ const useStyles = createStyles((theme) => ({
 		display: 'flex',
 		gap: theme.spacing.xs,
 	},
+
+	pendingApprovalBadge: {
+		backgroundColor: theme.colors.orange[6],
+		color: theme.white,
+	},
 }));
 
 export function ShopList() {
 	const { classes } = useStyles();
 	const request = useRequest(true);
+	const queryClient = useQueryClient();
 	const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [statusFilter, setStatusFilter] = useState<string>('all');
 	const [regionFilter, setRegionFilter] = useState<string>('all');
+	const [dealerFilter, setDealerFilter] = useState<string>('all');
+	const [currentPage] = useState(1);
+	const [pageSize] = useState(10);
 
 	// Modal states
 	const [addShopModalOpened, { open: openAddShopModal, close: closeAddShopModal }] =
 		useDisclosure(false);
 	const [addUserModalOpened, { open: openAddUserModal, close: closeAddUserModal }] =
 		useDisclosure(false);
+	const [editShopModalOpened, { open: openEditShopModal, close: closeEditShopModal }] =
+		useDisclosure(false);
+	const [assignAdminModalOpened, { open: openAssignAdminModal, close: closeAssignAdminModal }] =
+		useDisclosure(false);
+	const [approvalModalOpened, { open: openApprovalModal, close: closeApprovalModal }] =
+		useDisclosure(false);
+	const [approvalAction, setApprovalAction] = useState<'approve' | 'reject'>('approve');
 
+	// Fetch shops with proper query parameters
 	const { data: shopsData, isLoading } = useQuery({
-		queryKey: ['shops'],
-		queryFn: () => request.get('/shops'),
+		queryKey: [
+			'shops',
+			currentPage,
+			pageSize,
+			searchTerm,
+			statusFilter,
+			regionFilter,
+			dealerFilter,
+		],
+		queryFn: () =>
+			request.get('/shops', {
+				params: {
+					page: currentPage,
+					limit: pageSize,
+					search: searchTerm || undefined,
+					status: statusFilter === 'all' ? undefined : statusFilter,
+					region: regionFilter === 'all' ? undefined : regionFilter,
+					dealerId: dealerFilter === 'all' ? undefined : dealerFilter,
+				},
+			}),
+	});
+
+	// Fetch pending approvals
+	const { data: pendingApprovals } = useQuery({
+		queryKey: ['shops', 'pending-approvals'],
+		queryFn: () => request.get('/shops/pending-approvals'),
+	});
+
+	// Fetch dealers for filter
+	const { data: dealersData } = useQuery({
+		queryKey: ['dealers'],
+		queryFn: () => request.get('/dealer-groups'),
 	});
 
 	const approvalMutation = useMutation({
-		mutationFn: ({ shopId, status }: { shopId: string; status: 'approved' | 'rejected' }) =>
+		mutationFn: ({
+			shopId,
+			action,
+			reason,
+			assignToAdminId,
+		}: {
+			shopId: string;
+			action: 'approve' | 'reject';
+			reason?: string;
+			assignToAdminId?: string;
+		}) =>
 			request.post(`/shops/${shopId}/approval`, {
-				action: status === 'approved' ? 'approve' : 'reject',
+				action,
+				reason,
+				assignToAdminId,
 			}),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['shops'] });
+			queryClient.invalidateQueries({ queryKey: ['shops', 'pending-approvals'] });
+			closeApprovalModal();
+		},
 	});
 
 	const handleAddShopAgent = (shop: Shop) => {
 		setSelectedShop(shop);
 		openAddUserModal();
+	};
+
+	const handleEditShop = (shop: Shop) => {
+		setSelectedShop(shop);
+		openEditShopModal();
+	};
+
+	const handleAssignAdmin = (shop: Shop) => {
+		setSelectedShop(shop);
+		openAssignAdminModal();
+	};
+
+	const handleApproval = (shop: Shop, action: 'approve' | 'reject') => {
+		setSelectedShop(shop);
+		setApprovalAction(action);
+		openApprovalModal();
 	};
 
 	// Filter and search logic
@@ -154,25 +241,54 @@ export function ShopList() {
 
 			const matchesStatus = statusFilter === 'all' || shop.status === statusFilter;
 			const matchesRegion = regionFilter === 'all' || shop.region === regionFilter;
+			const matchesDealer = dealerFilter === 'all' || shop.dealerId === dealerFilter;
 
-			return matchesSearch && matchesStatus && matchesRegion;
+			return matchesSearch && matchesStatus && matchesRegion && matchesDealer;
 		});
-	}, [shopsData?.data?.data, searchTerm, statusFilter, regionFilter]);
+	}, [shopsData?.data?.data, searchTerm, statusFilter, regionFilter, dealerFilter]);
 
-	// Get unique regions for filter
+	// Get unique regions and dealers for filters
 	const uniqueRegions = useMemo(() => {
 		if (!shopsData?.data?.data) return [];
 		const regions = [...new Set(shopsData.data.data.map((shop: Shop) => shop.region))];
 		return regions.filter((region): region is string => Boolean(region));
 	}, [shopsData?.data?.data]);
 
+	const dealerOptions = useMemo(() => {
+		if (!dealersData?.data?.data) return [];
+		return dealersData.data.data.map((dealer: Dealer) => ({
+			value: dealer.id,
+			label: dealer.companyName || dealer.name,
+		}));
+	}, [dealersData?.data?.data]);
+
 	const getStatusColor = (status: string) => {
-		return status === 'active' ? 'yellow' : 'red';
+		switch (status) {
+			case 'active':
+				return 'green';
+			case 'inactive':
+				return 'red';
+			case 'pending_approval':
+				return 'orange';
+			default:
+				return 'gray';
+		}
 	};
 
 	const getStatusIcon = (status: string) => {
-		return status === 'active' ? <IconCheck size={14} /> : <IconX size={14} />;
+		switch (status) {
+			case 'active':
+				return <IconCheck size={14} />;
+			case 'inactive':
+				return <IconX size={14} />;
+			case 'pending_approval':
+				return <IconClock size={14} />;
+			default:
+				return <IconAlertCircle size={14} />;
+		}
 	};
+
+	const pendingApprovalsCount = pendingApprovals?.data?.length || 0;
 
 	return (
 		<div className={classes.root}>
@@ -194,6 +310,16 @@ export function ShopList() {
 							size="sm"
 						>
 							Manage shop locations and their status across the network
+							{pendingApprovalsCount > 0 && (
+								<Badge
+									color="orange"
+									variant="filled"
+									ml="sm"
+									className={classes.pendingApprovalBadge}
+								>
+									{pendingApprovalsCount} Pending Approval
+								</Badge>
+							)}
 						</Text>
 					</div>
 					<Button
@@ -223,6 +349,7 @@ export function ShopList() {
 							{ value: 'all', label: 'All Status' },
 							{ value: 'active', label: 'Active' },
 							{ value: 'inactive', label: 'Inactive' },
+							{ value: 'pending_approval', label: 'Pending Approval' },
 						]}
 						value={statusFilter}
 						onChange={(value) => setStatusFilter(value || 'all')}
@@ -240,6 +367,14 @@ export function ShopList() {
 						]}
 						value={regionFilter}
 						onChange={(value) => setRegionFilter(value || 'all')}
+						icon={<IconFilter size={16} />}
+						style={{ minWidth: 150 }}
+					/>
+					<Select
+						placeholder="Filter by dealer"
+						data={[{ value: 'all', label: 'All Dealers' }, ...dealerOptions]}
+						value={dealerFilter}
+						onChange={(value) => setDealerFilter(value || 'all')}
 						icon={<IconFilter size={16} />}
 						style={{ minWidth: 150 }}
 					/>
@@ -336,7 +471,7 @@ export function ShopList() {
 				<Grid>
 					{filteredShops.map((shop: Shop) => (
 						<Grid.Col
-							key={shop.shopName}
+							key={shop.id}
 							xs={12}
 							sm={6}
 							lg={4}
@@ -377,17 +512,26 @@ export function ShopList() {
 												>
 													Add Shop Agent
 												</Menu.Item>
-												{shop.status === 'inactive' && (
+												<Menu.Item
+													icon={<IconEdit size={16} />}
+													onClick={() => handleEditShop(shop)}
+												>
+													Edit Shop
+												</Menu.Item>
+												<Menu.Item
+													icon={<IconShield size={16} />}
+													onClick={() => handleAssignAdmin(shop)}
+												>
+													Assign Admin
+												</Menu.Item>
+												{shop.status === 'pending_approval' && (
 													<>
 														<Menu.Divider />
 														<Menu.Item
 															icon={<IconCheck size={16} />}
-															color="yellow"
+															color="green"
 															onClick={() =>
-																approvalMutation.mutate({
-																	shopId: shop.shopName,
-																	status: 'approved',
-																})
+																handleApproval(shop, 'approve')
 															}
 														>
 															Approve
@@ -396,10 +540,7 @@ export function ShopList() {
 															icon={<IconX size={16} />}
 															color="red"
 															onClick={() =>
-																approvalMutation.mutate({
-																	shopId: shop.shopName,
-																	status: 'rejected',
-																})
+																handleApproval(shop, 'reject')
 															}
 														>
 															Reject
@@ -451,6 +592,21 @@ export function ShopList() {
 												{shop.dealerName?.toUpperCase()}
 											</Text>
 										</div>
+										{shop.adminName && (
+											<div className={classes.infoRow}>
+												<IconShield
+													size={14}
+													color="gray"
+												/>
+												<Text
+													size="sm"
+													color="dimmed"
+													lineClamp={1}
+												>
+													Admin: {shop.adminName}
+												</Text>
+											</div>
+										)}
 									</Stack>
 								</Card.Section>
 
@@ -463,21 +619,18 @@ export function ShopList() {
 											className={classes.statusBadge}
 											leftSection={getStatusIcon(shop.status)}
 										>
-											{shop.status?.toUpperCase()}
+											{shop.status?.replace('_', ' ').toUpperCase()}
 										</Badge>
 
-										{shop.status === 'inactive' && (
+										{shop.status === 'pending_approval' && (
 											<div className={classes.approvalButtons}>
 												<Tooltip label="Approve">
 													<ActionIcon
-														color="yellow"
+														color="green"
 														variant="light"
 														size="sm"
 														onClick={() =>
-															approvalMutation.mutate({
-																shopId: shop.shopName,
-																status: 'approved',
-															})
+															handleApproval(shop, 'approve')
 														}
 														loading={approvalMutation.isLoading}
 													>
@@ -490,10 +643,7 @@ export function ShopList() {
 														variant="light"
 														size="sm"
 														onClick={() =>
-															approvalMutation.mutate({
-																shopId: shop.shopName,
-																status: 'rejected',
-															})
+															handleApproval(shop, 'reject')
 														}
 														loading={approvalMutation.isLoading}
 													>
@@ -529,28 +679,49 @@ export function ShopList() {
 			/>
 
 			{selectedShop && (
-				<AddShopUserModal
-					opened={addUserModalOpened}
-					onClose={closeAddUserModal}
-					dealer={
-						{
-							id: selectedShop.dealerName,
-							name: selectedShop.dealerName,
-							contactPerson: '',
-							email: '',
-							phone: '',
-							category: 'wakanet',
-							createdAt: '',
-							status: 'active',
-						} as Dealer
-					}
-					shops={[
-						{
-							id: selectedShop.shopName,
-							name: selectedShop.shopName,
-						},
-					]}
-				/>
+				<>
+					<AddShopUserModal
+						opened={addUserModalOpened}
+						onClose={closeAddUserModal}
+						dealer={
+							{
+								id: selectedShop.dealerId,
+								name: selectedShop.dealerName,
+								contactPerson: '',
+								email: '',
+								phone: '',
+								category: 'wakanet',
+								createdAt: '',
+								status: 'active',
+							} as Dealer
+						}
+						shops={[
+							{
+								id: selectedShop.id,
+								name: selectedShop.shopName,
+							},
+						]}
+					/>
+
+					<EditShopModal
+						opened={editShopModalOpened}
+						onClose={closeEditShopModal}
+						shop={selectedShop}
+					/>
+
+					<AssignShopAdminModal
+						opened={assignAdminModalOpened}
+						onClose={closeAssignAdminModal}
+						shop={selectedShop}
+					/>
+
+					<ShopApprovalModal
+						opened={approvalModalOpened}
+						onClose={closeApprovalModal}
+						shop={selectedShop}
+						action={approvalAction}
+					/>
+				</>
 			)}
 		</div>
 	);
