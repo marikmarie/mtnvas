@@ -1,29 +1,27 @@
-import { 
-	Button, 
-	Group, 
-	Select, 
-	Stack, 
-	TextInput, 
-	Title, 
-	Text, 
-	Divider, 
+import {
+	Button,
+	Group,
+	Select,
+	Stack,
+	TextInput,
+	Title,
+	Text,
 	createStyles,
 	ThemeIcon,
-	Paper,
 	Alert,
-	Badge
+	Badge,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-	IconBuilding, 
-	IconUser, 
-	IconMail, 
-	IconPhone, 
+import {
+	IconBuilding,
+	IconUser,
+	IconMail,
+	IconPhone,
 	IconCategory,
 	IconEdit,
 	IconAlertCircle,
-	IconCheck
+	IconCheck,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
@@ -36,82 +34,84 @@ interface EditDealerModalProps {
 }
 
 interface DealerFormValues {
-	name: string;
+	companyName: string;
 	contactPerson: string;
 	email: string;
-	phone: string;
-	category: 'wakanet' | 'enterprise' | 'both';
+	msisdn: string;
+	department: 'wakanet' | 'enterprise' | 'both';
+	location?: string;
+	region?: string;
 }
 
 const useStyles = createStyles((theme) => ({
 	modalContent: {
 		padding: 0,
 	},
-	
+
 	header: {
 		padding: theme.spacing.lg,
 		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 	},
-	
+
 	headerContent: {
 		display: 'flex',
 		alignItems: 'center',
 		gap: theme.spacing.md,
 	},
-	
+
 	dealerInfo: {
 		display: 'flex',
 		alignItems: 'center',
 		gap: theme.spacing.sm,
 		marginTop: theme.spacing.xs,
 	},
-	
+
 	formSection: {
 		padding: theme.spacing.lg,
 	},
-	
+
 	formGroup: {
 		marginBottom: theme.spacing.md,
 	},
-	
+
 	formRow: {
 		display: 'grid',
 		gridTemplateColumns: '1fr 1fr',
 		gap: theme.spacing.md,
-		
+
 		[theme.fn.smallerThan('sm')]: {
 			gridTemplateColumns: '1fr',
 		},
 	},
-	
+
 	inputWrapper: {
 		position: 'relative',
 	},
-	
+
 	inputIcon: {
 		color: theme.colors.gray[5],
 	},
-	
+
 	actions: {
 		padding: theme.spacing.lg,
 		borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 	},
-	
+
 	submitButton: {
 		transition: 'all 0.2s ease',
-		
+
 		'&:hover': {
 			transform: 'translateY(-1px)',
 			boxShadow: theme.shadows.md,
 		},
 	},
-	
+
 	errorAlert: {
 		marginBottom: theme.spacing.md,
 	},
-	
+
 	statusBadge: {
 		fontWeight: 600,
 	},
@@ -124,18 +124,20 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 
 	const form = useForm<DealerFormValues>({
 		initialValues: {
-			name: dealer.name,
+			companyName: dealer.companyName || dealer.name,
 			contactPerson: dealer.contactPerson,
 			email: dealer.email,
-			phone: dealer.phone,
-			category: dealer.category,
+			msisdn: dealer.msisdn || dealer.phone,
+			department: dealer.department || dealer.category,
+			location: dealer.location,
+			region: dealer.region,
 		},
 		validate: {
-			name: (value) => (!value ? 'Dealer name is required' : null),
+			companyName: (value) => (!value ? 'Company name is required' : null),
 			contactPerson: (value) => (!value ? 'Contact person is required' : null),
 			email: (value) => (!value ? 'Email is required' : null),
-			phone: (value) => (!value ? 'Phone number is required' : null),
-			category: (value) => (!value ? 'Category is required' : null),
+			msisdn: (value) => (!value ? 'Phone number is required' : null),
+			department: (value) => (!value ? 'Department is required' : null),
 		},
 	});
 
@@ -161,10 +163,14 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 
 	const getCategoryColor = (category: string) => {
 		switch (category?.toLowerCase()) {
-			case 'wakanet': return 'blue';
-			case 'enterprise': return 'purple';
-			case 'both': return 'orange';
-			default: return 'gray';
+			case 'wakanet':
+				return 'blue';
+			case 'enterprise':
+				return 'purple';
+			case 'both':
+				return 'orange';
+			default:
+				return 'gray';
 		}
 	};
 
@@ -180,23 +186,29 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
-					<ThemeIcon 
-						size={40} 
-						radius="md" 
+					<ThemeIcon
+						size={40}
+						radius="md"
 						variant="light"
 						color="blue"
 					>
 						<IconEdit size={20} />
 					</ThemeIcon>
 					<div>
-						<Title order={3} size="h4">
+						<Title
+							order={3}
+							size="h4"
+						>
 							Edit Dealer
 						</Title>
-						<Text color="dimmed" size="sm">
+						<Text
+							color="dimmed"
+							size="sm"
+						>
 							Update dealer information and settings
 						</Text>
 						<div className={classes.dealerInfo}>
-							<Badge 
+							<Badge
 								color={getStatusColor(dealer.status)}
 								variant="light"
 								size="sm"
@@ -204,12 +216,13 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 							>
 								{dealer.status?.charAt(0)?.toUpperCase() + dealer.status?.slice(1)}
 							</Badge>
-							<Badge 
+							<Badge
 								color={getCategoryColor(dealer.category)}
 								variant="light"
 								size="sm"
 							>
-								{dealer.category?.charAt(0)?.toUpperCase() + dealer.category?.slice(1)}
+								{dealer.category?.charAt(0)?.toUpperCase() +
+									dealer.category?.slice(1)}
 							</Badge>
 						</div>
 					</div>
@@ -219,9 +232,9 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 			{/* Form Section */}
 			<div className={classes.formSection}>
 				{hasErrors && (
-					<Alert 
-						icon={<IconAlertCircle size={16} />} 
-						title="Please fix the following errors" 
+					<Alert
+						icon={<IconAlertCircle size={16} />}
+						title="Please fix the following errors"
 						color="red"
 						className={classes.errorAlert}
 					>
@@ -233,16 +246,26 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 					<Stack spacing="lg">
 						{/* Company Information */}
 						<div className={classes.formGroup}>
-							<Text size="sm" weight={500} color="dimmed" mb="xs">
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
 								Company Information
 							</Text>
 							<div className={classes.inputWrapper}>
 								<TextInput
-									label="Dealer Name"
-									placeholder="Enter dealer name"
+									label="Company Name"
+									placeholder="Enter company name"
 									required
-									icon={<IconBuilding size={16} className={classes.inputIcon} />}
-									{...form.getInputProps('name')}
+									icon={
+										<IconBuilding
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
+									{...form.getInputProps('companyName')}
 									radius="md"
 								/>
 							</div>
@@ -250,7 +273,12 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 
 						{/* Contact Information */}
 						<div className={classes.formGroup}>
-							<Text size="sm" weight={500} color="dimmed" mb="xs">
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
 								Contact Information
 							</Text>
 							<div className={classes.formRow}>
@@ -259,7 +287,12 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 										label="Contact Person"
 										placeholder="Enter contact person name"
 										required
-										icon={<IconUser size={16} className={classes.inputIcon} />}
+										icon={
+											<IconUser
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
 										{...form.getInputProps('contactPerson')}
 										radius="md"
 									/>
@@ -269,7 +302,12 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 										label="Email Address"
 										placeholder="Enter email address"
 										required
-										icon={<IconMail size={16} className={classes.inputIcon} />}
+										icon={
+											<IconMail
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
 										{...form.getInputProps('email')}
 										radius="md"
 									/>
@@ -280,32 +318,65 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 									label="Phone Number"
 									placeholder="Enter phone number"
 									required
-									icon={<IconPhone size={16} className={classes.inputIcon} />}
-									{...form.getInputProps('phone')}
+									icon={
+										<IconPhone
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
+									{...form.getInputProps('msisdn')}
 									radius="md"
 								/>
 							</div>
 						</div>
 
-						{/* Category Selection */}
+						{/* Department & Location */}
 						<div className={classes.formGroup}>
-							<Text size="sm" weight={500} color="dimmed" mb="xs">
-								Category Assignment
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								Department & Location
 							</Text>
 							<div className={classes.inputWrapper}>
 								<Select
-									label="Category"
-									placeholder="Select category"
+									label="Department"
+									placeholder="Select department"
 									required
-									icon={<IconCategory size={16} className={classes.inputIcon} />}
+									icon={
+										<IconCategory
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
 									data={[
 										{ value: 'wakanet', label: 'WakaNet' },
 										{ value: 'enterprise', label: 'Enterprise' },
 										{ value: 'both', label: 'Both' },
 									]}
-									{...form.getInputProps('category')}
+									{...form.getInputProps('department')}
 									radius="md"
 								/>
+							</div>
+							<div className={classes.formRow}>
+								<div className={classes.inputWrapper}>
+									<TextInput
+										label="Region"
+										placeholder="Enter region"
+										{...form.getInputProps('region')}
+										radius="md"
+									/>
+								</div>
+								<div className={classes.inputWrapper}>
+									<TextInput
+										label="Location"
+										placeholder="Enter location"
+										{...form.getInputProps('location')}
+										radius="md"
+									/>
+								</div>
 							</div>
 						</div>
 					</Stack>
@@ -314,7 +385,10 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 
 			{/* Enhanced Actions */}
 			<div className={classes.actions}>
-				<Group position="right" spacing="md">
+				<Group
+					position="right"
+					spacing="md"
+				>
 					<Button
 						variant="subtle"
 						onClick={onClose}

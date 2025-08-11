@@ -129,8 +129,15 @@ export function StockList() {
 		useDisclosure(false);
 
 	const { data: stockData, isLoading } = useQuery({
-		queryKey: ['stocks'],
-		queryFn: () => request.get('/stocks'),
+		queryKey: ['stocks', { categoryFilter, dealerFilter, searchTerm }],
+		queryFn: () =>
+			request.get('/stocks', {
+				params: {
+					category: categoryFilter !== 'all' ? categoryFilter : undefined,
+					dealerId: dealerFilter !== 'all' ? dealerFilter : undefined,
+					search: searchTerm || undefined,
+				},
+			}),
 	});
 
 	// Filter and search logic

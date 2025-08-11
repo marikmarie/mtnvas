@@ -129,7 +129,12 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 
 	const mutation = useMutation({
 		mutationFn: (values: ShopFormValues) => {
-			return request.post(`/dealer-groups/${dealer.id}/shops`, values);
+			return request.post(`/shops`, {
+				shopName: values.name,
+				dealerId: dealer.id,
+				location: values.address,
+				region: values.region,
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['dealer', dealer.id] });
@@ -149,9 +154,6 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 			opened={opened}
 			close={onClose}
 			size="lg"
-			classNames={{
-				content: classes.modalContent,
-			}}
 		>
 			{/* Enhanced Header */}
 			<div className={classes.header}>
@@ -318,7 +320,7 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 						leftIcon={<IconPlus size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={form.onSubmit(handleSubmit)}
+						onClick={() => form.onSubmit(handleSubmit)()}
 					>
 						Add Shop
 					</Button>

@@ -107,17 +107,17 @@ export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalP
 
 	const { data: dealers } = useQuery({
 		queryKey: ['dealers/list'],
-		queryFn: () => request.get('/dealers/list'),
+		queryFn: () => request.get('/lookups/dealers'),
 	});
 
 	const { data: products } = useQuery({
 		queryKey: ['products'],
-		queryFn: () => request.get('/products'),
+		queryFn: () => request.get('/lookups/products'),
 	});
 
 	const { data: devices } = useQuery({
 		queryKey: ['devices'],
-		queryFn: () => request.get('/devices'),
+		queryFn: () => request.get('/lookups/devices'),
 	});
 
 	const form = useForm({

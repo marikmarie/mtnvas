@@ -10,6 +10,8 @@ export interface Dealer {
 	department: 'wakanet' | 'enterprise' | 'both';
 	msisdn: string;
 	companyName: string;
+	region?: string;
+	location?: string;
 }
 
 export interface Shop {
@@ -17,7 +19,7 @@ export interface Shop {
 	shopName: string;
 	region: string;
 	location: string;
-	status: 'active' | 'inactive';
+	status: 'active' | 'inactive' | 'pending_approval';
 	createdBy: string;
 	createdAt: string;
 	updatedBy: string;
@@ -112,6 +114,44 @@ export interface DealerModalProps {
 	opened: boolean;
 	onClose: () => void;
 	dealer?: Dealer;
+}
+
+export interface DealerAdmin {
+	id: string;
+	name: string;
+	email: string;
+	msisdn: string;
+	role: 'dealer_super_admin' | 'dealer_admin';
+	department: 'wakanet' | 'enterprise' | 'both';
+	status: 'active' | 'inactive';
+	createdAt: string;
+}
+
+export interface StockSummary {
+	totalStock: number;
+	availableStock: number;
+	soldStock: number;
+	byProduct: Array<{
+		productId: string;
+		productName: string;
+		total: number;
+		available: number;
+		sold: number;
+	}>;
+	byDealer: Array<{
+		dealerId: string;
+		dealerName: string;
+		total: number;
+		available: number;
+		sold: number;
+	}>;
+}
+
+export interface DealerDetailsResponse {
+	dealer: Dealer;
+	admins: DealerAdmin[];
+	shops: Shop[];
+	stockSummary: StockSummary;
 }
 
 export interface ShopModalProps {

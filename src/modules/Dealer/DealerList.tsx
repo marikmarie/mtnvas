@@ -14,6 +14,7 @@ import {
 	Menu,
 	Title,
 	Skeleton,
+	Pagination,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -40,6 +41,7 @@ import { ConfirmationModal } from './ConfirmationModal';
 import { EditDealerModal } from './EditDealerModal';
 import { Dealer } from './types';
 import { ViewDealerModal } from './ViewDealerModal';
+import { AddDealerAdminModal } from './AddDealerAdminModal';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -122,6 +124,9 @@ export function DealerList() {
 	const [viewModalOpened, { open: openViewModal, close: closeViewModal }] = useDisclosure(false);
 	const [confirmModalOpened, { open: openConfirmModal, close: closeConfirmModal }] =
 		useDisclosure(false);
+	const [addAdminOpened, { open: openAddAdmin, close: closeAddAdmin }] = useDisclosure(false);
+	const [page, setPage] = useState(1);
+	const [limit] = useState(12);
 	const [confirmAction, setConfirmAction] = useState<'activate' | 'deactivate' | 'delete'>(
 		'activate'
 	);
@@ -150,8 +155,17 @@ export function DealerList() {
 	const request = useRequest(true);
 
 	const { data: dealers, isLoading } = useQuery({
-		queryFn: () => request.get('/dealer-groups'),
-		queryKey: ['dealers'],
+		queryFn: () =>
+			request.get('/dealer-groups', {
+				params: {
+					search: searchTerm || undefined,
+					department: categoryFilter !== 'all' ? categoryFilter : undefined,
+					status: statusFilter !== 'all' ? statusFilter : undefined,
+					page,
+					limit,
+				},
+			}),
+		queryKey: ['dealers', { searchTerm, categoryFilter, statusFilter, page, limit }],
 	});
 
 	const handleAddUser = (dealer: Dealer, userType: 'DSA' | 'Retailer') => {
@@ -161,22 +175,8 @@ export function DealerList() {
 
 	// Filter and search logic
 	const filteredDealers = useMemo(() => {
-		if (!dealers?.data?.data) return [];
-
-		return dealers.data.data.filter((dealer: Dealer) => {
-			const matchesSearch =
-				dealer.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				dealer.contactPerson?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				dealer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				dealer.msisdn?.includes(searchTerm);
-
-			const matchesStatus = statusFilter === 'all' || dealer.status === statusFilter;
-			const matchesCategory =
-				categoryFilter === 'all' || dealer.department === categoryFilter;
-
-			return matchesSearch && matchesStatus && matchesCategory;
-		});
-	}, [dealers?.data?.data, searchTerm, statusFilter, categoryFilter]);
+		return dealers?.data?.data || [];
+	}, [dealers?.data?.data]);
 
 	const getStatusColor = (status: string) => {
 		return status === 'active' ? 'yellow' : 'red';
@@ -405,6 +405,16 @@ export function DealerList() {
 													View Details
 												</Menu.Item>
 												<Menu.Item
+													icon={<IconUserPlus size={16} />}
+													onClick={(e) => {
+														e.stopPropagation();
+														setSelectedDealer(dealer);
+														openAddAdmin();
+													}}
+												>
+													Add Dealer Admin
+												</Menu.Item>
+												<Menu.Item
 													icon={<IconEdit size={16} />}
 													onClick={(e) => {
 														e.stopPropagation();
@@ -538,6 +548,25 @@ export function DealerList() {
 				</Grid>
 			)}
 
+			{/* Pagination */}
+			{dealers?.data?.meta?.total ? (
+				<Group
+					position="right"
+					mt="md"
+				>
+					<Pagination
+						value={page}
+						onChange={setPage}
+						total={Math.max(
+							1,
+							Math.ceil(
+								(dealers.data.meta.total || 0) / (dealers.data.meta.limit || limit)
+							)
+						)}
+					/>
+				</Group>
+			) : null}
+
 			{/* Modals */}
 			<AddDealerModal
 				opened={addModalOpened}
@@ -563,6 +592,11 @@ export function DealerList() {
 						onClose={closeConfirmModal}
 						action={confirmAction}
 						dealer={selectedDealer}
+					/>
+					<AddDealerAdminModal
+						opened={addAdminOpened}
+						onClose={closeAddAdmin}
+						dealerId={selectedDealer.id}
 					/>
 				</>
 			)}
