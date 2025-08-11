@@ -1,57 +1,32 @@
 import {
 	Button,
+	FileInput,
 	Group,
 	Select,
 	Stack,
-	Text,
-	TextInput,
 	Title,
+	Text,
 	createStyles,
 	ThemeIcon,
 	Alert,
-	Badge,
+	Paper,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
-	IconUserPlus,
-	IconUser,
-	IconMail,
-	IconPhone,
-	IconBuildingStore,
-	IconShield,
+	IconBox,
+	IconBuilding,
+	IconCategory,
+	IconDeviceMobile,
+	IconUpload,
 	IconAlertCircle,
+	IconPlus,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { Dealer } from './types';
-
-interface Shop {
-	id: string;
-	name: string;
-}
-
-interface AddShopUserModalProps {
-	opened: boolean;
-	onClose: () => void;
-	dealer: Dealer;
-	shops: Shop[];
-}
-
-interface ShopUserFormValues {
-	firstName: string;
-	lastName: string;
-	email: string;
-	phone: string;
-	shopId: string;
-	role: string;
-}
+import { StockModalProps } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
-	modalContent: {
-		padding: 0,
-	},
-
 	header: {
 		padding: theme.spacing.lg,
 		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
@@ -109,7 +84,7 @@ const useStyles = createStyles((theme) => ({
 		marginBottom: theme.spacing.md,
 	},
 
-	dealerInfo: {
+	infoCard: {
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
 		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		borderRadius: theme.radius.md,
@@ -117,59 +92,80 @@ const useStyles = createStyles((theme) => ({
 		marginBottom: theme.spacing.lg,
 	},
 
-	shopInfo: {
-		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+	fileInput: {
+		border: `2px dashed ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
 		borderRadius: theme.radius.md,
-		padding: theme.spacing.md,
-		marginBottom: theme.spacing.lg,
+		padding: theme.spacing.lg,
+		textAlign: 'center',
+		transition: 'all 0.2s ease',
+
+		'&:hover': {
+			borderColor: theme.colors.blue[4],
+			backgroundColor:
+				theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.blue[0],
+		},
 	},
 }));
 
-export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUserModalProps) {
+export function AddStockModal({ opened, onClose }: StockModalProps) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
-	const queryClient = useQueryClient();
 
-	const form = useForm<ShopUserFormValues>({
+	const { data: dealers } = useQuery({
+		queryKey: ['dealers/list'],
+		queryFn: () => request.get('/dealers/list'),
+	});
+
+	const { data: products } = useQuery({
+		queryKey: ['products'],
+		queryFn: () => request.get('/products'),
+	});
+
+	const { data: devices } = useQuery({
+		queryKey: ['devices'],
+		queryFn: () => request.get('/devices'),
+	});
+
+	const form = useForm({
 		initialValues: {
-			firstName: '',
-			lastName: '',
-			email: '',
-			phone: '',
-			shopId: '',
-			role: 'shop_user',
+			dealerId: '',
+			category: '',
+			productId: '',
+			deviceId: '',
+			imeiFile: null as File | null,
 		},
 		validate: {
-			firstName: (value) => (!value ? 'First name is required' : null),
-			lastName: (value) => (!value ? 'Last name is required' : null),
-			email: (value) => (!value ? 'Email is required' : null),
-			phone: (value) => (!value ? 'Phone number is required' : null),
-			shopId: (value) => (!value ? 'Shop is required' : null),
+			dealerId: (value) => (!value ? 'Dealer is required' : null),
+			category: (value) => (!value ? 'Category is required' : null),
+			productId: (value) => (!value ? 'Product is required' : null),
+			deviceId: (value) => (!value ? 'Device is required' : null),
+			imeiFile: (value) => (!value ? 'IMEI file is required' : null),
 		},
 	});
 
 	const mutation = useMutation({
-		mutationFn: (values: ShopUserFormValues) => {
-			return request.post(`/dealer-groups/${dealer.id}/users`, values);
-		},
+		mutationFn: (formData: FormData) =>
+			request.post('/stocks', formData, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			}),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['dealer', dealer.id] });
 			onClose();
 			form.reset();
 		},
 	});
 
-	const handleSubmit = (values: ShopUserFormValues) => {
-		mutation.mutate(values);
-	};
+	const handleSubmit = form.onSubmit((values) => {
+		const formData = new FormData();
+		Object.entries(values).forEach(([key, value]) => {
+			if (value !== null) {
+				formData.append(key, value);
+			}
+		});
+		mutation.mutate(formData);
+	});
 
-	const shopOptions = shops.map((shop) => ({
-		value: shop.id,
-		label: shop.name,
-	}));
-
-	const selectedShop = shops.find((s) => s.id === form.values.shopId);
 	const hasErrors = Object.keys(form.errors).length > 0;
 
 	return (
@@ -177,9 +173,6 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 			opened={opened}
 			close={onClose}
 			size="lg"
-			classNames={{
-				content: classes.modalContent,
-			}}
 		>
 			{/* Enhanced Header */}
 			<div className={classes.header}>
@@ -188,22 +181,22 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 						size={40}
 						radius="md"
 						variant="light"
-						color="green"
+						color="orange"
 					>
-						<IconUserPlus size={20} />
+						<IconPlus size={20} />
 					</ThemeIcon>
 					<div>
 						<Title
 							order={3}
 							size="h4"
 						>
-							Add Shop User
+							Add Stock
 						</Title>
 						<Text
 							color="dimmed"
 							size="sm"
 						>
-							Create a new user account for shop management
+							Add new inventory items with IMEI data
 						</Text>
 					</div>
 				</div>
@@ -211,43 +204,23 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 
 			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Dealer Information */}
-				<div className={classes.dealerInfo}>
+				{/* Information Card */}
+				<Paper
+					className={classes.infoCard}
+					shadow="xs"
+				>
 					<Text
 						size="sm"
 						weight={500}
 						color="dimmed"
 						mb="xs"
 					>
-						Parent Dealer
+						Stock Information
 					</Text>
-					<Text weight={600}>{dealer.name}</Text>
-				</div>
-
-				{/* Shop Selection Info */}
-				{selectedShop && (
-					<div className={classes.shopInfo}>
-						<Text
-							size="sm"
-							weight={500}
-							color="dimmed"
-							mb="xs"
-						>
-							Selected Shop
-						</Text>
-						<Group spacing="xs">
-							<IconBuildingStore size={16} />
-							<Text weight={600}>{selectedShop.name}</Text>
-							<Badge
-								color="green"
-								variant="light"
-								size="sm"
-							>
-								Active
-							</Badge>
-						</Group>
-					</div>
-				)}
+					<Text size="sm">
+						Upload IMEI data to add new stock items. Supported formats: CSV, XLSX, XLS
+					</Text>
+				</Paper>
 
 				{hasErrors && (
 					<Alert
@@ -260,9 +233,9 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 					</Alert>
 				)}
 
-				<form onSubmit={form.onSubmit(handleSubmit)}>
+				<form onSubmit={handleSubmit}>
 					<Stack spacing="lg">
-						{/* Personal Information */}
+						{/* Dealer and Category Selection */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -270,133 +243,130 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 								color="dimmed"
 								mb="xs"
 							>
-								Personal Information
-							</Text>
-							<div className={classes.formRow}>
-								<div className={classes.inputWrapper}>
-									<TextInput
-										label="First Name"
-										placeholder="Enter first name"
-										required
-										icon={
-											<IconUser
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										{...form.getInputProps('firstName')}
-										radius="md"
-									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<TextInput
-										label="Last Name"
-										placeholder="Enter last name"
-										required
-										icon={
-											<IconUser
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										{...form.getInputProps('lastName')}
-										radius="md"
-									/>
-								</div>
-							</div>
-						</div>
-
-						{/* Contact Information */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Contact Information
-							</Text>
-							<div className={classes.formRow}>
-								<div className={classes.inputWrapper}>
-									<TextInput
-										label="Email Address"
-										placeholder="Enter email address"
-										required
-										icon={
-											<IconMail
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										{...form.getInputProps('email')}
-										radius="md"
-									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<TextInput
-										label="Phone Number"
-										placeholder="Enter phone number"
-										required
-										icon={
-											<IconPhone
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										{...form.getInputProps('phone')}
-										radius="md"
-									/>
-								</div>
-							</div>
-						</div>
-
-						{/* Shop Assignment */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Shop Assignment
+								Dealer Assignment
 							</Text>
 							<div className={classes.formRow}>
 								<div className={classes.inputWrapper}>
 									<Select
-										label="Shop"
-										placeholder="Select shop"
+										label="Dealer"
+										placeholder="Select dealer"
 										required
 										icon={
-											<IconBuildingStore
+											<IconBuilding
 												size={16}
 												className={classes.inputIcon}
 											/>
 										}
-										data={shopOptions}
-										{...form.getInputProps('shopId')}
+										data={dealers?.data?.data || []}
+										searchable
+										nothingFound="No dealers found"
+										{...form.getInputProps('dealerId')}
 										radius="md"
 									/>
 								</div>
 								<div className={classes.inputWrapper}>
 									<Select
-										label="Role"
-										placeholder="Select role"
+										label="Category"
+										placeholder="Select category"
 										required
 										icon={
-											<IconShield
+											<IconCategory
 												size={16}
 												className={classes.inputIcon}
 											/>
 										}
 										data={[
-											{ value: 'shop_user', label: 'Shop User' },
-											{ value: 'shop_admin', label: 'Shop Admin' },
-											{ value: 'shop_manager', label: 'Shop Manager' },
+											{ value: 'wakanet', label: 'WakaNet' },
+											{ value: 'enterprise', label: 'Enterprise' },
+											{ value: 'both', label: 'Both' },
 										]}
-										{...form.getInputProps('role')}
+										{...form.getInputProps('category')}
 										radius="md"
 									/>
 								</div>
+							</div>
+						</div>
+
+						{/* Product and Device Selection */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								Product Details
+							</Text>
+							<div className={classes.formRow}>
+								<div className={classes.inputWrapper}>
+									<Select
+										label="Product"
+										placeholder="Select product"
+										required
+										icon={
+											<IconBox
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										data={products?.data?.data || []}
+										searchable
+										nothingFound="No products found"
+										disabled={!form.values.category}
+										{...form.getInputProps('productId')}
+										radius="md"
+									/>
+								</div>
+								<div className={classes.inputWrapper}>
+									<Select
+										label="Device"
+										placeholder="Select device"
+										required
+										icon={
+											<IconDeviceMobile
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										data={devices?.data?.data || []}
+										searchable
+										nothingFound="No devices found"
+										disabled={!form.values.category}
+										{...form.getInputProps('deviceId')}
+										radius="md"
+									/>
+								</div>
+							</div>
+						</div>
+
+						{/* File Upload */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								IMEI Data Upload
+							</Text>
+							<div className={classes.inputWrapper}>
+								<FileInput
+									label="IMEI File"
+									description="Upload IMEI file (CSV, XLSX, XLS)"
+									accept=".csv,.xlsx,.xls"
+									required
+									icon={
+										<IconUpload
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
+									// @ts-ignore
+									placeholder="Click to upload or drag and drop"
+									className={classes.fileInput}
+									{...form.getInputProps('imeiFile')}
+									radius="md"
+								/>
 							</div>
 						</div>
 					</Stack>
@@ -419,12 +389,12 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 					<Button
 						type="submit"
 						loading={mutation.isLoading}
-						leftIcon={<IconUserPlus size={16} />}
+						leftIcon={<IconPlus size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={form.onSubmit(handleSubmit)}
+						onClick={() => handleSubmit()}
 					>
-						Add User
+						Add Stock
 					</Button>
 				</Group>
 			</div>

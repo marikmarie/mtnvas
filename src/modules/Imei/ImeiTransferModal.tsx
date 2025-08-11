@@ -23,7 +23,7 @@ import {
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { Dealer } from './types';
+import { Dealer } from '../Dealer/types';
 
 interface ImeiTransferModalProps {
 	opened: boolean;
@@ -39,10 +39,6 @@ interface ImeiTransferFormValues {
 }
 
 const useStyles = createStyles((theme) => ({
-	modalContent: {
-		padding: 0,
-	},
-
 	header: {
 		padding: theme.spacing.lg,
 		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
@@ -394,7 +390,7 @@ export function ImeiTransferModal({
 						leftIcon={<IconTransfer size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={() => form.onSubmit(handleSubmit)}
+						onClick={() => handleSubmit(form.values)}
 					>
 						Transfer IMEI
 					</Button>

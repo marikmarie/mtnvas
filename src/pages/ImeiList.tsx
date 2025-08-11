@@ -1,5 +1,5 @@
 import Layout from '../components/Layout';
-import { ImeiList } from '../modules/DealerManagement/ImeiList';
+import { ImeiList } from '../modules/Imei/ImeiList';
 
 export default function ImeiListPage() {
 	return (

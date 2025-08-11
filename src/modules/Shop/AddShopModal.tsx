@@ -1,27 +1,27 @@
-import { 
-	Button, 
-	Group, 
-	Stack, 
-	TextInput, 
-	Title, 
-	Text, 
+import {
+	Button,
+	Group,
+	Stack,
+	TextInput,
+	Title,
+	Text,
 	createStyles,
 	ThemeIcon,
 	Alert,
-	Select
+	Select,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-	IconBuildingStore, 
-	IconMapPin, 
-	IconPhone, 
+import {
+	IconBuildingStore,
+	IconMapPin,
+	IconPhone,
 	IconPlus,
-	IconAlertCircle
+	IconAlertCircle,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { Dealer } from './types';
+import { Dealer } from '../Dealer/types';
 
 interface AddShopModalProps {
 	opened: boolean;
@@ -40,64 +40,64 @@ const useStyles = createStyles((theme) => ({
 	modalContent: {
 		padding: 0,
 	},
-	
+
 	header: {
 		padding: theme.spacing.lg,
 		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 	},
-	
+
 	headerContent: {
 		display: 'flex',
 		alignItems: 'center',
 		gap: theme.spacing.md,
 	},
-	
+
 	formSection: {
 		padding: theme.spacing.lg,
 	},
-	
+
 	formGroup: {
 		marginBottom: theme.spacing.md,
 	},
-	
+
 	formRow: {
 		display: 'grid',
 		gridTemplateColumns: '1fr 1fr',
 		gap: theme.spacing.md,
-		
+
 		[theme.fn.smallerThan('sm')]: {
 			gridTemplateColumns: '1fr',
 		},
 	},
-	
+
 	inputWrapper: {
 		position: 'relative',
 	},
-	
+
 	inputIcon: {
 		color: theme.colors.gray[5],
 	},
-	
+
 	actions: {
 		padding: theme.spacing.lg,
 		borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 	},
-	
+
 	submitButton: {
 		transition: 'all 0.2s ease',
-		
+
 		'&:hover': {
 			transform: 'translateY(-1px)',
 			boxShadow: theme.shadows.md,
 		},
 	},
-	
+
 	errorAlert: {
 		marginBottom: theme.spacing.md,
 	},
-	
+
 	dealerInfo: {
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
 		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
@@ -156,19 +156,25 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
-					<ThemeIcon 
-						size={40} 
-						radius="md" 
+					<ThemeIcon
+						size={40}
+						radius="md"
 						variant="light"
 						color="green"
 					>
 						<IconPlus size={20} />
 					</ThemeIcon>
 					<div>
-						<Title order={3} size="h4">
+						<Title
+							order={3}
+							size="h4"
+						>
 							Add New Shop
 						</Title>
-						<Text color="dimmed" size="sm">
+						<Text
+							color="dimmed"
+							size="sm"
+						>
 							Create a new shop location for {dealer.name}
 						</Text>
 					</div>
@@ -179,16 +185,21 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 			<div className={classes.formSection}>
 				{/* Dealer Information */}
 				<div className={classes.dealerInfo}>
-					<Text size="sm" weight={500} color="dimmed" mb="xs">
+					<Text
+						size="sm"
+						weight={500}
+						color="dimmed"
+						mb="xs"
+					>
 						Parent Dealer
 					</Text>
 					<Text weight={600}>{dealer.name}</Text>
 				</div>
 
 				{hasErrors && (
-					<Alert 
-						icon={<IconAlertCircle size={16} />} 
-						title="Please fix the following errors" 
+					<Alert
+						icon={<IconAlertCircle size={16} />}
+						title="Please fix the following errors"
 						color="red"
 						className={classes.errorAlert}
 					>
@@ -200,7 +211,12 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 					<Stack spacing="lg">
 						{/* Shop Information */}
 						<div className={classes.formGroup}>
-							<Text size="sm" weight={500} color="dimmed" mb="xs">
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
 								Shop Information
 							</Text>
 							<div className={classes.inputWrapper}>
@@ -208,7 +224,12 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 									label="Shop Name"
 									placeholder="Enter shop name"
 									required
-									icon={<IconBuildingStore size={16} className={classes.inputIcon} />}
+									icon={
+										<IconBuildingStore
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
 									{...form.getInputProps('name')}
 									radius="md"
 								/>
@@ -217,7 +238,12 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 
 						{/* Location Information */}
 						<div className={classes.formGroup}>
-							<Text size="sm" weight={500} color="dimmed" mb="xs">
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
 								Location Details
 							</Text>
 							<div className={classes.formRow}>
@@ -242,7 +268,12 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 										label="Phone Number"
 										placeholder="Enter phone number"
 										required
-										icon={<IconPhone size={16} className={classes.inputIcon} />}
+										icon={
+											<IconPhone
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
 										{...form.getInputProps('phone')}
 										radius="md"
 									/>
@@ -253,7 +284,12 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 									label="Address"
 									placeholder="Enter shop address"
 									required
-									icon={<IconMapPin size={16} className={classes.inputIcon} />}
+									icon={
+										<IconMapPin
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
 									{...form.getInputProps('address')}
 									radius="md"
 								/>
@@ -265,7 +301,10 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 
 			{/* Enhanced Actions */}
 			<div className={classes.actions}>
-				<Group position="right" spacing="md">
+				<Group
+					position="right"
+					spacing="md"
+				>
 					<Button
 						variant="subtle"
 						onClick={onClose}

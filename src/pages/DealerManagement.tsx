@@ -7,10 +7,10 @@ import {
 	IconSettings,
 } from '@tabler/icons-react';
 import Layout from '../components/Layout';
-import { DealerList } from '../modules/DealerManagement/DealerList';
-import { ShopList } from '../modules/DealerManagement/ShopList';
-import { ShopUsersList } from '../modules/DealerManagement/ShopUsersList';
-import { StockList } from '../modules/DealerManagement/StockList';
+import { DealerList } from '../modules/Dealer/DealerList';
+import { ShopList } from '../modules/Shop/ShopList';
+import { ShopUsersList } from '../modules/Shop/ShopUsersList';
+import { StockList } from '../modules/Stock/StockList';
 
 const useStyles = createStyles((theme) => ({
 	root: {

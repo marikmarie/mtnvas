@@ -34,10 +34,6 @@ interface ImeiSwapFormValues {
 }
 
 const useStyles = createStyles((theme) => ({
-	modalContent: {
-		padding: 0,
-	},
-
 	header: {
 		padding: theme.spacing.lg,
 		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
@@ -313,7 +309,7 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 						leftIcon={<IconRefresh size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={() => form.onSubmit(handleSubmit)}
+						onClick={() => handleSubmit(form.values)}
 					>
 						Swap IMEI
 					</Button>

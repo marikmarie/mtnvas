@@ -33,8 +33,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { ImeiSwapModal } from './ImeiSwapModal';
+import { Dealer, Imei } from '../Dealer/types';
 import { ImeiTransferModal } from './ImeiTransferModal';
-import { Dealer, Imei } from './types';
 
 const useStyles = createStyles((theme) => ({
 	root: {

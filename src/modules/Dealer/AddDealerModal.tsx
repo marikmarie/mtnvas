@@ -1,90 +1,84 @@
-import { 
-	Button, 
-	Group, 
-	Select, 
-	Stack, 
-	TextInput, 
-	Title, 
-	Text, 
-	Divider, 
+import {
+	Button,
+	Group,
+	Select,
+	Stack,
+	TextInput,
+	Title,
+	Text,
 	createStyles,
 	ThemeIcon,
-	Paper,
-	Alert
+	Alert,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation } from '@tanstack/react-query';
-import { 
-	IconBuilding, 
-	IconUser, 
-	IconMail, 
-	IconPhone, 
+import {
+	IconBuilding,
+	IconUser,
+	IconMail,
+	IconPhone,
 	IconCategory,
 	IconPlus,
-	IconAlertCircle
+	IconAlertCircle,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { DealerModalProps } from './types';
 
 const useStyles = createStyles((theme) => ({
-	modalContent: {
-		padding: 0,
-	},
-	
 	header: {
 		padding: theme.spacing.lg,
 		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 	},
-	
+
 	headerContent: {
 		display: 'flex',
 		alignItems: 'center',
 		gap: theme.spacing.md,
 	},
-	
+
 	formSection: {
 		padding: theme.spacing.lg,
 	},
-	
+
 	formGroup: {
 		marginBottom: theme.spacing.md,
 	},
-	
+
 	formRow: {
 		display: 'grid',
 		gridTemplateColumns: '1fr 1fr',
 		gap: theme.spacing.md,
-		
+
 		[theme.fn.smallerThan('sm')]: {
 			gridTemplateColumns: '1fr',
 		},
 	},
-	
+
 	inputWrapper: {
 		position: 'relative',
 	},
-	
+
 	inputIcon: {
 		color: theme.colors.gray[5],
 	},
-	
+
 	actions: {
 		padding: theme.spacing.lg,
 		borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 	},
-	
+
 	submitButton: {
 		transition: 'all 0.2s ease',
-		
+
 		'&:hover': {
 			transform: 'translateY(-1px)',
 			boxShadow: theme.shadows.md,
 		},
 	},
-	
+
 	errorAlert: {
 		marginBottom: theme.spacing.md,
 	},
@@ -134,26 +128,29 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 			opened={opened}
 			close={onClose}
 			size="lg"
-			classNames={{
-				content: classes.modalContent,
-			}}
 		>
 			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
-					<ThemeIcon 
-						size={40} 
-						radius="md" 
+					<ThemeIcon
+						size={40}
+						radius="md"
 						variant="light"
 						color="blue"
 					>
 						<IconPlus size={20} />
 					</ThemeIcon>
 					<div>
-						<Title order={3} size="h4">
+						<Title
+							order={3}
+							size="h4"
+						>
 							Add New Dealer
 						</Title>
-						<Text color="dimmed" size="sm">
+						<Text
+							color="dimmed"
+							size="sm"
+						>
 							Create a new dealer account with company information
 						</Text>
 					</div>
@@ -163,9 +160,9 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 			{/* Form Section */}
 			<div className={classes.formSection}>
 				{hasErrors && (
-					<Alert 
-						icon={<IconAlertCircle size={16} />} 
-						title="Please fix the following errors" 
+					<Alert
+						icon={<IconAlertCircle size={16} />}
+						title="Please fix the following errors"
 						color="red"
 						className={classes.errorAlert}
 					>
@@ -177,7 +174,12 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 					<Stack spacing="lg">
 						{/* Company Information */}
 						<div className={classes.formGroup}>
-							<Text size="sm" weight={500} color="dimmed" mb="xs">
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
 								Company Information
 							</Text>
 							<div className={classes.inputWrapper}>
@@ -185,7 +187,12 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 									label="Company Name"
 									placeholder="Enter company name"
 									required
-									icon={<IconBuilding size={16} className={classes.inputIcon} />}
+									icon={
+										<IconBuilding
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
 									{...form.getInputProps('companyName')}
 									radius="md"
 								/>
@@ -194,7 +201,12 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 
 						{/* Contact Information */}
 						<div className={classes.formGroup}>
-							<Text size="sm" weight={500} color="dimmed" mb="xs">
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
 								Contact Information
 							</Text>
 							<div className={classes.formRow}>
@@ -203,7 +215,12 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 										label="Contact Person"
 										placeholder="Enter contact person name"
 										required
-										icon={<IconUser size={16} className={classes.inputIcon} />}
+										icon={
+											<IconUser
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
 										{...form.getInputProps('contactPerson')}
 										radius="md"
 									/>
@@ -213,7 +230,12 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 										label="Email Address"
 										placeholder="Enter email address"
 										required
-										icon={<IconMail size={16} className={classes.inputIcon} />}
+										icon={
+											<IconMail
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
 										{...form.getInputProps('email')}
 										radius="md"
 									/>
@@ -224,7 +246,12 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 									label="Phone Number"
 									placeholder="Enter phone number (e.g., 256123456789)"
 									required
-									icon={<IconPhone size={16} className={classes.inputIcon} />}
+									icon={
+										<IconPhone
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
 									{...form.getInputProps('msisdn')}
 									radius="md"
 								/>
@@ -233,7 +260,12 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 
 						{/* Department Selection */}
 						<div className={classes.formGroup}>
-							<Text size="sm" weight={500} color="dimmed" mb="xs">
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
 								Department Assignment
 							</Text>
 							<div className={classes.inputWrapper}>
@@ -241,7 +273,12 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 									label="Department"
 									placeholder="Select dealer department"
 									required
-									icon={<IconCategory size={16} className={classes.inputIcon} />}
+									icon={
+										<IconCategory
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
 									data={[
 										{ value: 'wakanet', label: 'WakaNet' },
 										{ value: 'enterprise', label: 'Enterprise' },
@@ -258,7 +295,10 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 
 			{/* Enhanced Actions */}
 			<div className={classes.actions}>
-				<Group position="right" spacing="md">
+				<Group
+					position="right"
+					spacing="md"
+				>
 					<Button
 						variant="subtle"
 						onClick={onClose}
@@ -272,7 +312,7 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 						leftIcon={<IconPlus size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={handleSubmit}
+						onClick={() => handleSubmit()}
 					>
 						Add Dealer
 					</Button>

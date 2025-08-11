@@ -35,7 +35,7 @@ import { useState, useMemo } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { AddShopModal } from './AddShopModal';
 import { AddShopUserModal } from './AddShopUserModal';
-import { Dealer, Shop } from './types';
+import { Dealer, Shop } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	root: {

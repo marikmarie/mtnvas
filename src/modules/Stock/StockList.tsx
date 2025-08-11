@@ -34,7 +34,7 @@ import { useState, useMemo } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { AddStockModal } from './AddStockModal';
 import { SetStockThresholdModal } from './SetStockThresholdModal';
-import { Stock } from './types';
+import { Stock } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	root: {

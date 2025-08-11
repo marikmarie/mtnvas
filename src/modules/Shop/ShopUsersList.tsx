@@ -35,8 +35,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { AddShopUserModal } from './AddShopUserModal';
-import { ConfirmationModal } from './ConfirmationModal';
-import { Dealer, Shop, ShopUser } from './types';
+import { ConfirmationModal } from '../Dealer/ConfirmationModal';
+import { Dealer, Shop, ShopUser } from '../Dealer/types';
 
 interface ShopUsersListProps {
 	shop: Shop | undefined;

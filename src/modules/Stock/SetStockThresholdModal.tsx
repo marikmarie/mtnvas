@@ -1,7 +1,7 @@
 import {
 	Button,
-	FileInput,
 	Group,
+	NumberInput,
 	Select,
 	Stack,
 	Title,
@@ -14,23 +14,19 @@ import {
 import { useForm } from '@mantine/form';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
-	IconBox,
+	IconSettings,
 	IconBuilding,
 	IconCategory,
+	IconBox,
 	IconDeviceMobile,
-	IconUpload,
 	IconAlertCircle,
-	IconPlus,
+	IconGauge,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { StockModalProps } from './types';
+import { StockThresholdModalProps } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
-	modalContent: {
-		padding: 0,
-	},
-
 	header: {
 		padding: theme.spacing.lg,
 		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
@@ -96,22 +92,16 @@ const useStyles = createStyles((theme) => ({
 		marginBottom: theme.spacing.lg,
 	},
 
-	fileInput: {
-		border: `2px dashed ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-		borderRadius: theme.radius.md,
-		padding: theme.spacing.lg,
-		textAlign: 'center',
-		transition: 'all 0.2s ease',
-
-		'&:hover': {
-			borderColor: theme.colors.blue[4],
-			backgroundColor:
-				theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.blue[0],
+	thresholdInput: {
+		'& input': {
+			fontSize: theme.fontSizes.lg,
+			fontWeight: 600,
+			textAlign: 'center',
 		},
 	},
 }));
 
-export function AddStockModal({ opened, onClose }: StockModalProps) {
+export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalProps) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
 
@@ -136,39 +126,30 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 			category: '',
 			productId: '',
 			deviceId: '',
-			imeiFile: null as File | null,
+			threshold: 100,
 		},
 		validate: {
 			dealerId: (value) => (!value ? 'Dealer is required' : null),
 			category: (value) => (!value ? 'Category is required' : null),
 			productId: (value) => (!value ? 'Product is required' : null),
 			deviceId: (value) => (!value ? 'Device is required' : null),
-			imeiFile: (value) => (!value ? 'IMEI file is required' : null),
+			threshold: (value) => {
+				if (!value) return 'Threshold is required';
+				if (value < 1) return 'Threshold must be greater than 0';
+				return null;
+			},
 		},
 	});
 
 	const mutation = useMutation({
-		mutationFn: (formData: FormData) =>
-			request.post('/stocks', formData, {
-				headers: {
-					'Content-Type': 'multipart/form-data',
-				},
-			}),
+		mutationFn: (values: typeof form.values) => request.post('/stock-thresholds', values),
 		onSuccess: () => {
 			onClose();
 			form.reset();
 		},
 	});
 
-	const handleSubmit = form.onSubmit((values) => {
-		const formData = new FormData();
-		Object.entries(values).forEach(([key, value]) => {
-			if (value !== null) {
-				formData.append(key, value);
-			}
-		});
-		mutation.mutate(formData);
-	});
+	const handleSubmit = form.onSubmit((values) => mutation.mutate(values));
 
 	const hasErrors = Object.keys(form.errors).length > 0;
 
@@ -177,9 +158,6 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 			opened={opened}
 			close={onClose}
 			size="lg"
-			classNames={{
-				content: classes.modalContent,
-			}}
 		>
 			{/* Enhanced Header */}
 			<div className={classes.header}>
@@ -188,22 +166,22 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 						size={40}
 						radius="md"
 						variant="light"
-						color="orange"
+						color="purple"
 					>
-						<IconPlus size={20} />
+						<IconSettings size={20} />
 					</ThemeIcon>
 					<div>
 						<Title
 							order={3}
 							size="h4"
 						>
-							Add Stock
+							Set Stock Threshold
 						</Title>
 						<Text
 							color="dimmed"
 							size="sm"
 						>
-							Add new inventory items with IMEI data
+							Configure minimum stock levels for inventory management
 						</Text>
 					</div>
 				</div>
@@ -222,10 +200,11 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 						color="dimmed"
 						mb="xs"
 					>
-						Stock Information
+						Threshold Information
 					</Text>
 					<Text size="sm">
-						Upload IMEI data to add new stock items. Supported formats: CSV, XLSX, XLS
+						Set minimum stock levels to receive alerts when inventory falls below the
+						threshold.
 					</Text>
 				</Paper>
 
@@ -346,7 +325,7 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 							</div>
 						</div>
 
-						{/* File Upload */}
+						{/* Threshold Setting */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -354,24 +333,24 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 								color="dimmed"
 								mb="xs"
 							>
-								IMEI Data Upload
+								Threshold Configuration
 							</Text>
 							<div className={classes.inputWrapper}>
-								<FileInput
-									label="IMEI File"
-									description="Upload IMEI file (CSV, XLSX, XLS)"
-									accept=".csv,.xlsx,.xls"
+								<NumberInput
+									label="Stock Threshold"
+									placeholder="Enter minimum stock level"
 									required
+									min={1}
 									icon={
-										<IconUpload
+										<IconGauge
 											size={16}
 											className={classes.inputIcon}
 										/>
 									}
-									placeholder="Click to upload or drag and drop"
-									className={classes.fileInput}
-									{...form.getInputProps('imeiFile')}
+									className={classes.thresholdInput}
+									{...form.getInputProps('threshold')}
 									radius="md"
+									description="Minimum quantity before low stock alert"
 								/>
 							</div>
 						</div>
@@ -395,12 +374,12 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 					<Button
 						type="submit"
 						loading={mutation.isLoading}
-						leftIcon={<IconPlus size={16} />}
+						leftIcon={<IconSettings size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={handleSubmit}
+						onClick={() => handleSubmit()}
 					>
-						Add Stock
+						Set Threshold
 					</Button>
 				</Group>
 			</div>
