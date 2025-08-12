@@ -416,3 +416,127 @@ export interface ImeiSwapRequestsModalProps {
 	opened: boolean;
 	onClose: () => void;
 }
+
+// =====================
+// Sales and Transaction Management Types
+// =====================
+
+// Transaction Interface
+export interface Transaction {
+	id: string;
+	type: 'activation' | 'cash_sale';
+	agentId: string;
+	agentName: string;
+	dealerId: string;
+	shopId?: string;
+	customerId?: string;
+	customerName?: string;
+	productId: string;
+	productName: string;
+	imei: string;
+	amount: number;
+	paymentMethod: 'cash' | 'mobile_money';
+	commission: number;
+	status: 'completed' | 'pending' | 'failed';
+	receiptNumber?: string;
+	createdAt: string;
+}
+
+// Customer Activation Request
+export interface CustomerActivationRequest {
+	agentId: string;
+	receiptNumber: string;
+	deviceMsisdn: string;
+	imei: string;
+	customerId?: string;
+	customerName?: string;
+	customerPhone?: string;
+}
+
+// Customer Activation Response
+export interface CustomerActivationResponse {
+	transactionId: string;
+	activationId: string;
+	status: 'completed' | 'failed';
+	commissionEarned?: number;
+}
+
+// Cash Sale Request
+export interface CashSaleRequest {
+	agentId: string;
+	customerId?: string;
+	customerName: string;
+	customerPhone: string;
+	customerEmail?: string;
+	productId: string;
+	deviceId: string;
+	imei: string;
+	paymentMethod: 'cash' | 'mobile_money';
+	amount: number;
+	sponsorMsisdn?: string; // For mobile money
+}
+
+// Cash Sale Response
+export interface CashSaleResponse {
+	transactionId: string;
+	receiptNumber: string;
+	activationId?: string;
+}
+
+// Transaction Summary
+export interface TransactionSummary {
+	totalAmount: number;
+	totalCommission: number;
+	totalTransactions: number;
+}
+
+// Sales Report Request
+export interface SalesReportRequest {
+	reportType: 'summary' | 'detailed';
+	dateFrom: string;
+	dateTo: string;
+	dealerId?: string;
+	agentId?: string;
+	shopId?: string;
+	productId?: string;
+	groupBy?: 'dealer' | 'agent' | 'shop' | 'product' | 'date';
+}
+
+// Sales Report Response
+export interface SalesReportResponse {
+	summary: {
+		totalSales: number;
+		totalCommission: number;
+		totalTransactions: number;
+		activations: number;
+		cashSales: number;
+	};
+	breakdown: Array<{
+		groupKey: string;
+		groupLabel: string;
+		sales: number;
+		commission: number;
+		transactions: number;
+	}>;
+	chartData?: Array<{
+		date: string;
+		sales: number;
+		transactions: number;
+	}>;
+}
+
+// Modal Props for Sales Management
+export interface CustomerActivationModalProps {
+	opened: boolean;
+	onClose: () => void;
+}
+
+export interface CashSaleModalProps {
+	opened: boolean;
+	onClose: () => void;
+}
+
+export interface SalesReportModalProps {
+	opened: boolean;
+	onClose: () => void;
+}
