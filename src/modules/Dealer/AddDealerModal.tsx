@@ -149,7 +149,7 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 						size={40}
 						radius="md"
 						variant="light"
-						color="blue"
+						color="yellow"
 					>
 						<IconPlus size={20} />
 					</ThemeIcon>

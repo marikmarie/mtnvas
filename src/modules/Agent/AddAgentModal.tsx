@@ -2,7 +2,6 @@ import {
 	Modal,
 	TextInput,
 	Select,
-	Textarea,
 	Button,
 	Group,
 	Stack,
@@ -13,7 +12,7 @@ import {
 	Alert,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { IconAlertCircle, IconUserPlus } from '@tabler/icons-react';
 import useRequest from '../../hooks/useRequest';
@@ -97,11 +96,14 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 			idNumber: '',
 		},
 		validate: {
-			name: (value) => (value.trim().length < 2 ? 'Name must be at least 2 characters' : null),
+			name: (value) =>
+				value.trim().length < 2 ? 'Name must be at least 2 characters' : null,
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email address'),
-			msisdn: (value) => (value.trim().length < 10 ? 'Phone number must be at least 10 digits' : null),
+			msisdn: (value) =>
+				value.trim().length < 10 ? 'Phone number must be at least 10 digits' : null,
 			dealerId: (value) => (value ? null : 'Dealer is required'),
-			location: (value) => (value.trim().length < 3 ? 'Location must be at least 3 characters' : null),
+			location: (value) =>
+				value.trim().length < 3 ? 'Location must be at least 3 characters' : null,
 			shopId: (value, values) => {
 				if (values.userType === 'shop_agent' && !value) {
 					return 'Shop is required for shop agents';
@@ -112,8 +114,7 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 	});
 
 	const createAgentMutation = useMutation({
-		mutationFn: (values: AddAgentFormValues) =>
-			request.post('/agents', values),
+		mutationFn: (values: AddAgentFormValues) => request.post('/agents', values),
 		onSuccess: () => {
 			queryClient.invalidateQueries(['agents']);
 			form.reset();
@@ -145,21 +146,34 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 			title={
 				<div className={classes.header}>
 					<Group spacing="sm">
-						<IconUserPlus size={24} color="yellow" />
+						<IconUserPlus
+							size={24}
+							color="yellow"
+						/>
 						<Title order={3}>Add New Agent</Title>
 					</Group>
-					<Text size="sm" color="dimmed">
+					<Text
+						size="sm"
+						color="dimmed"
+					>
 						Create a new agent, DSA, or retailer in your network
 					</Text>
 				</div>
 			}
 			size="lg"
 			className={classes.modal}
+			centered
 		>
-			<form onSubmit={form.onSubmit(handleSubmit)} className={classes.form}>
+			<form
+				onSubmit={form.onSubmit(handleSubmit)}
+				className={classes.form}
+			>
 				{/* Basic Information */}
 				<div className={classes.section}>
-					<Title order={4} className={classes.sectionTitle}>
+					<Title
+						order={4}
+						className={classes.sectionTitle}
+					>
 						Basic Information
 					</Title>
 					<Stack spacing="md">
@@ -195,7 +209,10 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 
 				{/* Agent Type and Assignment */}
 				<div className={classes.section}>
-					<Title order={4} className={classes.sectionTitle}>
+					<Title
+						order={4}
+						className={classes.sectionTitle}
+					>
 						Agent Type & Assignment
 					</Title>
 					<Stack spacing="md">
@@ -230,7 +247,10 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 
 				{/* Additional Information */}
 				<div className={classes.section}>
-					<Title order={4} className={classes.sectionTitle}>
+					<Title
+						order={4}
+						className={classes.sectionTitle}
+					>
 						Additional Information
 					</Title>
 					<Stack spacing="md">
@@ -251,7 +271,7 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 				<Alert
 					icon={<IconAlertCircle size={16} />}
 					title="Important Information"
-					color="blue"
+					color="yellow"
 					variant="light"
 					mb="lg"
 				>
@@ -261,14 +281,19 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 						• Shop agents must be assigned to a specific shop
 						<br />
 						• DSAs and retailers operate independently of shops
-						<br />
-						• All agents will be verified before activation
+						<br />• All agents will be verified before activation
 					</Text>
 				</Alert>
 
 				{/* Form Actions */}
-				<Group position="right" mt="xl">
-					<Button variant="outline" onClick={handleClose}>
+				<Group
+					position="right"
+					mt="xl"
+				>
+					<Button
+						variant="outline"
+						onClick={handleClose}
+					>
 						Cancel
 					</Button>
 					<Button

@@ -193,7 +193,7 @@ export function AgentDuplicateCheckModal({
 					<Group spacing="sm">
 						<IconSearch
 							size={24}
-							color="blue"
+							color="yellow"
 						/>
 						<Title order={3}>Check Agent Duplicates</Title>
 					</Group>
@@ -208,6 +208,7 @@ export function AgentDuplicateCheckModal({
 			}
 			size="lg"
 			className={classes.modal}
+			centered
 		>
 			<form
 				onSubmit={form.onSubmit(handleSubmit)}
@@ -256,7 +257,7 @@ export function AgentDuplicateCheckModal({
 				<Alert
 					icon={<IconAlertCircle size={16} />}
 					title="How Duplicate Checking Works"
-					color="blue"
+					color="yellow"
 					variant="light"
 					mb="lg"
 				>
@@ -279,7 +280,7 @@ export function AgentDuplicateCheckModal({
 					<Button
 						type="submit"
 						loading={isSearching}
-						color="blue"
+						color="yellow"
 						size="lg"
 						leftIcon={<IconSearch size={20} />}
 						className={classes.searchButton}

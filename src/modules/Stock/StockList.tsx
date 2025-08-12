@@ -12,9 +12,11 @@ import {
 	ThemeIcon,
 	Menu,
 	Title,
-	Progress,
 	Group,
 	Skeleton,
+	Table,
+	Pagination,
+	Paper,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -28,12 +30,18 @@ import {
 	IconCategory,
 	IconTrendingUp,
 	IconSettings,
+	IconTransfer,
+	IconAlertTriangle,
+	IconEye,
+	IconDownload,
 } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { AddStockModal } from './AddStockModal';
 import { SetStockThresholdModal } from './SetStockThresholdModal';
+import { StockTransferModal } from './StockTransferModal';
+import { StockThresholdAlertsModal } from './StockThresholdAlertsModal';
 import { Stock } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
@@ -115,27 +123,93 @@ const useStyles = createStyles((theme) => ({
 		alignItems: 'center',
 		marginBottom: theme.spacing.xs,
 	},
+
+	summaryCards: {
+		marginBottom: theme.spacing.lg,
+	},
+
+	summaryCard: {
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		borderRadius: theme.radius.md,
+		padding: theme.spacing.md,
+		height: '100%',
+	},
+
+	summaryValue: {
+		fontSize: theme.fontSizes.xl,
+		fontWeight: 700,
+		marginBottom: theme.spacing.xs,
+	},
+
+	summaryLabel: {
+		fontSize: theme.fontSizes.sm,
+		color: theme.colorScheme === 'dark' ? theme.colors.dark[1] : theme.colors.gray[7],
+	},
+
+	viewModeToggle: {
+		marginBottom: theme.spacing.md,
+	},
+
+	tableContainer: {
+		overflowX: 'auto',
+	},
+
+	statusBadge: {
+		fontWeight: 600,
+	},
+
+	imeiCode: {
+		fontFamily: 'monospace',
+		fontSize: '0.875rem',
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
+		padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+		borderRadius: theme.radius.sm,
+	},
 }));
 
 export function StockList() {
 	const { classes } = useStyles();
 	const request = useRequest(true);
+	const queryClient = useQueryClient();
+
 	const [searchTerm, setSearchTerm] = useState('');
 	const [categoryFilter, setCategoryFilter] = useState<string>('all');
 	const [dealerFilter, setDealerFilter] = useState<string>('all');
+	const [statusFilter, setStatusFilter] = useState<string>('all');
+	const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage] = useState(12);
 
 	const [addModalOpened, { open: openAddModal, close: closeAddModal }] = useDisclosure(false);
 	const [thresholdModalOpened, { open: openThresholdModal, close: closeThresholdModal }] =
 		useDisclosure(false);
+	const [transferModalOpened, { open: openTransferModal, close: closeTransferModal }] =
+		useDisclosure(false);
+	const [alertsModalOpened, { open: openAlertsModal, close: closeAlertsModal }] =
+		useDisclosure(false);
 
+	// Fetch stock summary
+	const { data: stockSummary } = useQuery({
+		queryKey: ['stocks/summary'],
+		queryFn: () => request.get('/stocks/summary'),
+	});
+
+	// Fetch stock list
 	const { data: stockData, isLoading } = useQuery({
-		queryKey: ['stocks', { categoryFilter, dealerFilter, searchTerm }],
+		queryKey: [
+			'stocks',
+			{ categoryFilter, dealerFilter, statusFilter, searchTerm, currentPage },
+		],
 		queryFn: () =>
 			request.get('/stocks', {
 				params: {
 					category: categoryFilter !== 'all' ? categoryFilter : undefined,
 					dealerId: dealerFilter !== 'all' ? dealerFilter : undefined,
+					status: statusFilter !== 'all' ? statusFilter : undefined,
 					search: searchTerm || undefined,
+					page: currentPage,
+					limit: itemsPerPage,
 				},
 			}),
 	});
@@ -148,14 +222,18 @@ export function StockList() {
 			const matchesSearch =
 				stock.dealerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				stock.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				stock.deviceName?.toLowerCase().includes(searchTerm.toLowerCase());
+				stock.deviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				(stock.imei && stock.imei.toLowerCase().includes(searchTerm.toLowerCase())) ||
+				(stock.serialNumber &&
+					stock.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()));
 
 			const matchesCategory = categoryFilter === 'all' || stock.category === categoryFilter;
 			const matchesDealer = dealerFilter === 'all' || stock.dealerName === dealerFilter;
+			const matchesStatus = statusFilter === 'all' || stock.status === statusFilter;
 
-			return matchesSearch && matchesCategory && matchesDealer;
+			return matchesSearch && matchesCategory && matchesDealer && matchesStatus;
 		});
-	}, [stockData?.data?.data, searchTerm, categoryFilter, dealerFilter]);
+	}, [stockData?.data?.data, searchTerm, categoryFilter, dealerFilter, statusFilter]);
 
 	// Get unique dealers for filter
 	const uniqueDealers = useMemo(() => {
@@ -164,22 +242,30 @@ export function StockList() {
 		return dealers.filter((dealer): dealer is string => Boolean(dealer));
 	}, [stockData?.data?.data]);
 
-	const getStockLevelColor = (quantity: number, sold: number) => {
-		const available = quantity - sold;
-		const percentage = quantity > 0 ? (available / quantity) * 100 : 0;
-
-		if (percentage >= 70) return 'yellow';
-		if (percentage >= 30) return 'orange';
-		return 'red';
+	const getStatusColor = (status: string) => {
+		switch (status) {
+			case 'available':
+				return 'green';
+			case 'sold':
+				return 'red';
+			case 'transferred':
+				return 'blue';
+			default:
+				return 'gray';
+		}
 	};
 
-	const getStockLevelText = (quantity: number, sold: number) => {
-		const available = quantity - sold;
-		const percentage = quantity > 0 ? (available / quantity) * 100 : 0;
-
-		if (percentage >= 70) return 'High';
-		if (percentage >= 30) return 'Medium';
-		return 'Low';
+	const getStatusIcon = (status: string) => {
+		switch (status) {
+			case 'available':
+				return <IconBox size={16} />;
+			case 'sold':
+				return <IconTrendingUp size={16} />;
+			case 'transferred':
+				return <IconTransfer size={16} />;
+			default:
+				return <IconBox size={16} />;
+		}
 	};
 
 	const getCategoryColor = (category: string) => {
@@ -188,8 +274,6 @@ export function StockList() {
 				return 'yellow';
 			case 'enterprise':
 				return 'purple';
-			case 'both':
-				return 'orange';
 			default:
 				return 'gray';
 		}
@@ -201,12 +285,23 @@ export function StockList() {
 				return <IconDeviceMobile size={14} />;
 			case 'enterprise':
 				return <IconBuilding size={14} />;
-			case 'both':
-				return <IconCategory size={14} />;
 			default:
 				return <IconCategory size={14} />;
 		}
 	};
+
+	const handleViewDetails = (stock: Stock) => {
+		// Implement stock details view
+		console.log('View stock details:', stock);
+	};
+
+	const handleDownloadTemplate = () => {
+		// Implement template download
+		request.get('/stocks/template', { params: { format: 'csv' } });
+	};
+
+	// Pagination
+	const totalPages = Math.ceil((stockData?.data?.meta?.total || 0) / itemsPerPage);
 
 	return (
 		<div className={classes.root}>
@@ -232,6 +327,35 @@ export function StockList() {
 					</div>
 					<Group spacing="md">
 						<Button
+							leftIcon={<IconAlertTriangle size={16} />}
+							variant="outline"
+							onClick={openAlertsModal}
+							size="md"
+							radius="md"
+							color="red"
+						>
+							View Alerts
+						</Button>
+						<Button
+							leftIcon={<IconTransfer size={16} />}
+							variant="outline"
+							onClick={openTransferModal}
+							size="md"
+							radius="md"
+							color="blue"
+						>
+							Transfer Stock
+						</Button>
+						<Button
+							leftIcon={<IconDownload size={16} />}
+							variant="outline"
+							onClick={handleDownloadTemplate}
+							size="md"
+							radius="md"
+						>
+							Download Template
+						</Button>
+						<Button
 							leftIcon={<IconSettings size={16} />}
 							variant="outline"
 							onClick={openThresholdModal}
@@ -252,6 +376,86 @@ export function StockList() {
 				</Group>
 			</div>
 
+			{/* Stock Summary Cards */}
+			{stockSummary?.data && (
+				<div className={classes.summaryCards}>
+					<Grid>
+						<Grid.Col
+							xs={12}
+							sm={6}
+							md={3}
+						>
+							<Paper
+								className={classes.summaryCard}
+								shadow="xs"
+							>
+								<Text
+									className={classes.summaryValue}
+									color="blue"
+								>
+									{stockSummary.data.totalStock?.toLocaleString() || 0}
+								</Text>
+								<Text className={classes.summaryLabel}>Total Stock</Text>
+							</Paper>
+						</Grid.Col>
+						<Grid.Col
+							xs={12}
+							sm={6}
+							md={3}
+						>
+							<Paper
+								className={classes.summaryCard}
+								shadow="xs"
+							>
+								<Text
+									className={classes.summaryValue}
+									color="green"
+								>
+									{stockSummary.data.availableStock?.toLocaleString() || 0}
+								</Text>
+								<Text className={classes.summaryLabel}>Available Stock</Text>
+							</Paper>
+						</Grid.Col>
+						<Grid.Col
+							xs={12}
+							sm={6}
+							md={3}
+						>
+							<Paper
+								className={classes.summaryCard}
+								shadow="xs"
+							>
+								<Text
+									className={classes.summaryValue}
+									color="red"
+								>
+									{stockSummary.data.soldStock?.toLocaleString() || 0}
+								</Text>
+								<Text className={classes.summaryLabel}>Sold Stock</Text>
+							</Paper>
+						</Grid.Col>
+						<Grid.Col
+							xs={12}
+							sm={6}
+							md={3}
+						>
+							<Paper
+								className={classes.summaryCard}
+								shadow="xs"
+							>
+								<Text
+									className={classes.summaryValue}
+									color="orange"
+								>
+									{stockSummary.data.byProduct?.length || 0}
+								</Text>
+								<Text className={classes.summaryLabel}>Active Products</Text>
+							</Paper>
+						</Grid.Col>
+					</Grid>
+				</div>
+			)}
+
 			{/* Search and Filter Section */}
 			<div className={classes.searchSection}>
 				<div className={classes.searchRow}>
@@ -268,7 +472,6 @@ export function StockList() {
 							{ value: 'all', label: 'All Categories' },
 							{ value: 'wakanet', label: 'WakaNet' },
 							{ value: 'enterprise', label: 'Enterprise' },
-							{ value: 'both', label: 'Both' },
 						]}
 						value={categoryFilter}
 						onChange={(value) => setCategoryFilter(value || 'all')}
@@ -289,10 +492,45 @@ export function StockList() {
 						icon={<IconFilter size={16} />}
 						style={{ minWidth: 150 }}
 					/>
+					<Select
+						placeholder="Filter by status"
+						data={[
+							{ value: 'all', label: 'All Statuses' },
+							{ value: 'available', label: 'Available' },
+							{ value: 'sold', label: 'Sold' },
+							{ value: 'transferred', label: 'Transferred' },
+						]}
+						value={statusFilter}
+						onChange={(value) => setStatusFilter(value || 'all')}
+						icon={<IconFilter size={16} />}
+						style={{ minWidth: 150 }}
+					/>
 				</div>
 			</div>
 
-			{/* Enhanced Card Grid */}
+			{/* View Mode Toggle */}
+			<div className={classes.viewModeToggle}>
+				<Group position="right">
+					<Button.Group>
+						<Button
+							variant={viewMode === 'grid' ? 'filled' : 'outline'}
+							size="sm"
+							onClick={() => setViewMode('grid')}
+						>
+							Grid View
+						</Button>
+						<Button
+							variant={viewMode === 'table' ? 'filled' : 'outline'}
+							size="sm"
+							onClick={() => setViewMode('table')}
+						>
+							Table View
+						</Button>
+					</Button.Group>
+				</Group>
+			</div>
+
+			{/* Stock Display */}
 			{isLoading ? (
 				<Grid>
 					{Array.from({ length: 6 }).map((_, index) => (
@@ -382,172 +620,276 @@ export function StockList() {
 						Try adjusting your search or filters
 					</Text>
 				</div>
-			) : (
+			) : viewMode === 'grid' ? (
 				<Grid>
-					{filteredStocks.map((stock: Stock) => {
-						const available = stock.quantity - stock.sold;
-						const percentage =
-							stock.quantity > 0 ? (available / stock.quantity) * 100 : 0;
-
-						return (
-							<Grid.Col
-								key={stock.id}
-								xs={12}
-								sm={6}
-								lg={4}
-							>
-								<Card className={classes.card}>
-									<Card.Section className={classes.cardHeader}>
-										<Group position="apart">
-											<Group spacing="xs">
-												<ThemeIcon
-													size="md"
-													radius="md"
-													variant="light"
-													color={getStockLevelColor(
-														stock.quantity,
-														stock.sold
-													)}
-												>
-													<IconBox size={16} />
-												</ThemeIcon>
-												<Text
-													weight={600}
-													size="sm"
-													lineClamp={1}
-												>
-													{stock.productName}
-												</Text>
-											</Group>
-											<Menu>
-												<Menu.Target>
-													<ActionIcon
-														variant="subtle"
-														size="sm"
-													>
-														<IconDotsVertical size={16} />
-													</ActionIcon>
-												</Menu.Target>
-												<Menu.Dropdown>
-													<Menu.Item icon={<IconTrendingUp size={16} />}>
-														View Details
-													</Menu.Item>
-													<Menu.Item icon={<IconSettings size={16} />}>
-														Set Threshold
-													</Menu.Item>
-												</Menu.Dropdown>
-											</Menu>
-										</Group>
-									</Card.Section>
-
-									<Card.Section className={classes.cardBody}>
-										<Stack spacing="xs">
-											<div className={classes.infoRow}>
-												<IconBuilding
-													size={14}
-													color="gray"
-												/>
-												<Text
-													size="sm"
-													color="dimmed"
-													lineClamp={1}
-												>
-													{stock.dealerName}
-												</Text>
-											</div>
-											<div className={classes.infoRow}>
-												<IconDeviceMobile
-													size={14}
-													color="gray"
-												/>
-												<Text
-													size="sm"
-													color="dimmed"
-													lineClamp={1}
-												>
-													{stock.deviceName}
-												</Text>
-											</div>
-											<div className={classes.statsRow}>
-												<Text
-													size="sm"
-													color="dimmed"
-												>
-													Available:
-												</Text>
-												<Text
-													size="sm"
-													weight={600}
-												>
-													{available.toLocaleString()}
-												</Text>
-											</div>
-											<div className={classes.statsRow}>
-												<Text
-													size="sm"
-													color="dimmed"
-												>
-													Sold:
-												</Text>
-												<Text
-													size="sm"
-													weight={600}
-												>
-													{stock.sold.toLocaleString()}
-												</Text>
-											</div>
-											<div className={classes.stockProgress}>
-												<Progress
-													value={percentage}
-													color={getStockLevelColor(
-														stock.quantity,
-														stock.sold
-													)}
-													size="sm"
-													radius="md"
-												/>
-												<Text
-													size="xs"
-													color="dimmed"
-													mt={4}
-													ta="center"
-												>
-													{percentage.toFixed(1)}% available
-												</Text>
-											</div>
-										</Stack>
-									</Card.Section>
-
-									<Card.Section className={classes.cardFooter}>
-										<Group position="apart">
-											<Badge
-												color={getStockLevelColor(
-													stock.quantity,
-													stock.sold
-												)}
-												variant="filled"
-												size="sm"
-												className={classes.stockLevelBadge}
-											>
-												{getStockLevelText(stock.quantity, stock.sold)}
-											</Badge>
-											<Badge
-												color={getCategoryColor(stock.category)}
+					{filteredStocks.map((stock: Stock) => (
+						<Grid.Col
+							key={stock.id}
+							xs={12}
+							sm={6}
+							lg={4}
+						>
+							<Card className={classes.card}>
+								<Card.Section className={classes.cardHeader}>
+									<Group position="apart">
+										<Group spacing="xs">
+											<ThemeIcon
+												size="md"
+												radius="md"
 												variant="light"
-												size="sm"
-												className={classes.categoryBadge}
-												leftSection={getCategoryIcon(stock.category)}
+												color={getStatusColor(stock.status)}
 											>
-												{stock.category?.charAt(0)?.toUpperCase() +
-													stock.category?.slice(1)}
-											</Badge>
+												<IconBox size={16} />
+											</ThemeIcon>
+											<Text
+												weight={600}
+												size="sm"
+												lineClamp={1}
+											>
+												{stock.productName}
+											</Text>
 										</Group>
-									</Card.Section>
-								</Card>
-							</Grid.Col>
-						);
-					})}
+										<Menu>
+											<Menu.Target>
+												<ActionIcon
+													variant="subtle"
+													size="sm"
+												>
+													<IconDotsVertical size={16} />
+												</ActionIcon>
+											</Menu.Target>
+											<Menu.Dropdown>
+												<Menu.Item
+													icon={<IconEye size={16} />}
+													onClick={() => handleViewDetails(stock)}
+												>
+													View Details
+												</Menu.Item>
+												<Menu.Item icon={<IconSettings size={16} />}>
+													Set Threshold
+												</Menu.Item>
+											</Menu.Dropdown>
+										</Menu>
+									</Group>
+								</Card.Section>
+
+								<Card.Section className={classes.cardBody}>
+									<Stack spacing="xs">
+										<div className={classes.infoRow}>
+											<IconBuilding
+												size={14}
+												color="gray"
+											/>
+											<Text
+												size="sm"
+												color="dimmed"
+												lineClamp={1}
+											>
+												{stock.dealerName}
+											</Text>
+										</div>
+										<div className={classes.infoRow}>
+											<IconDeviceMobile
+												size={14}
+												color="gray"
+											/>
+											<Text
+												size="sm"
+												color="dimmed"
+												lineClamp={1}
+											>
+												{stock.deviceName}
+											</Text>
+										</div>
+										{stock.imei && (
+											<div className={classes.infoRow}>
+												<IconBox
+													size={14}
+													color="gray"
+												/>
+												<Text
+													size="sm"
+													className={classes.imeiCode}
+												>
+													{stock.imei}
+												</Text>
+											</div>
+										)}
+										{stock.serialNumber && (
+											<div className={classes.infoRow}>
+												<IconBox
+													size={14}
+													color="gray"
+												/>
+												<Text
+													size="sm"
+													className={classes.imeiCode}
+												>
+													{stock.serialNumber}
+												</Text>
+											</div>
+										)}
+									</Stack>
+								</Card.Section>
+
+								<Card.Section className={classes.cardFooter}>
+									<Group position="apart">
+										<Badge
+											color={getStatusColor(stock.status)}
+											variant="filled"
+											size="sm"
+											className={classes.stockLevelBadge}
+											leftSection={getStatusIcon(stock.status)}
+										>
+											{stock.status.toUpperCase()}
+										</Badge>
+										<Badge
+											color={getCategoryColor(stock.category)}
+											variant="light"
+											size="sm"
+											className={classes.categoryBadge}
+											leftSection={getCategoryIcon(stock.category)}
+										>
+											{stock.category?.charAt(0)?.toUpperCase() +
+												stock.category?.slice(1)}
+										</Badge>
+									</Group>
+								</Card.Section>
+							</Card>
+						</Grid.Col>
+					))}
 				</Grid>
+			) : (
+				<div className={classes.tableContainer}>
+					<Table>
+						<thead>
+							<tr>
+								<th>Product</th>
+								<th>Device</th>
+								<th>Dealer</th>
+								<th>IMEI/Serial</th>
+								<th>Category</th>
+								<th>Status</th>
+								<th>Assigned Date</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{filteredStocks.map((stock: Stock) => (
+								<tr key={stock.id}>
+									<td>
+										<Text
+											size="sm"
+											weight={500}
+										>
+											{stock.productName}
+										</Text>
+									</td>
+									<td>
+										<Text size="sm">{stock.deviceName}</Text>
+									</td>
+									<td>
+										<Group spacing="xs">
+											<IconBuilding
+												size={16}
+												color="gray"
+											/>
+											<Text size="sm">{stock.dealerName}</Text>
+										</Group>
+									</td>
+									<td>
+										{stock.imei ? (
+											<Text
+												size="sm"
+												className={classes.imeiCode}
+											>
+												{stock.imei}
+											</Text>
+										) : stock.serialNumber ? (
+											<Text
+												size="sm"
+												className={classes.imeiCode}
+											>
+												{stock.serialNumber}
+											</Text>
+										) : (
+											<Text
+												size="sm"
+												color="dimmed"
+											>
+												N/A
+											</Text>
+										)}
+									</td>
+									<td>
+										<Badge
+											color={getCategoryColor(stock.category)}
+											variant="light"
+											size="sm"
+											leftSection={getCategoryIcon(stock.category)}
+										>
+											{stock.category?.charAt(0)?.toUpperCase() +
+												stock.category?.slice(1)}
+										</Badge>
+									</td>
+									<td>
+										<Badge
+											color={getStatusColor(stock.status)}
+											variant="filled"
+											size="sm"
+											leftSection={getStatusIcon(stock.status)}
+										>
+											{stock.status.toUpperCase()}
+										</Badge>
+									</td>
+									<td>
+										<Text size="sm">
+											{new Date(stock.assignedAt).toLocaleDateString()}
+										</Text>
+									</td>
+									<td>
+										<Menu>
+											<Menu.Target>
+												<ActionIcon
+													variant="subtle"
+													size="sm"
+												>
+													<IconDotsVertical size={16} />
+												</ActionIcon>
+											</Menu.Target>
+											<Menu.Dropdown>
+												<Menu.Item
+													icon={<IconEye size={16} />}
+													onClick={() => handleViewDetails(stock)}
+												>
+													View Details
+												</Menu.Item>
+												<Menu.Item icon={<IconSettings size={16} />}>
+													Set Threshold
+												</Menu.Item>
+											</Menu.Dropdown>
+										</Menu>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</Table>
+				</div>
+			)}
+
+			{/* Pagination */}
+			{totalPages > 1 && (
+				<Group
+					position="center"
+					mt="xl"
+				>
+					<Pagination
+						total={totalPages}
+						value={currentPage}
+						onChange={setCurrentPage}
+						size="sm"
+					/>
+				</Group>
 			)}
 
 			{/* Modals */}
@@ -559,6 +901,16 @@ export function StockList() {
 			<SetStockThresholdModal
 				opened={thresholdModalOpened}
 				onClose={closeThresholdModal}
+			/>
+
+			<StockTransferModal
+				opened={transferModalOpened}
+				onClose={closeTransferModal}
+			/>
+
+			<StockThresholdAlertsModal
+				opened={alertsModalOpened}
+				onClose={closeAlertsModal}
 			/>
 		</div>
 	);

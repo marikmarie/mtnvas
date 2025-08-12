@@ -13,6 +13,8 @@ import {
 	Menu,
 	Title,
 	Skeleton,
+	Button,
+	Pagination,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -22,19 +24,22 @@ import {
 	IconDeviceMobile,
 	IconUser,
 	IconCalendar,
-	IconTransfer,
 	IconRefresh,
 	IconCheck,
 	IconX,
 	IconAlertCircle,
 	IconClock,
+	IconEye,
+	IconPlus,
+	IconSettings,
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { ImeiSwapModal } from './ImeiSwapModal';
-import { Dealer, Imei } from '../Dealer/types';
-import { ImeiTransferModal } from './ImeiTransferModal';
+import { ImeiDetailsModal } from './ImeiDetailsModal';
+import { ImeiSwapRequestsModal } from './ImeiSwapRequestsModal';
+import { Dealer, ImeiDetails } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -111,65 +116,69 @@ const useStyles = createStyles((theme) => ({
 export function ImeiList() {
 	const { classes } = useStyles();
 	const request = useRequest(true);
-	const [selectedImei, setSelectedImei] = useState<Imei | null>(null);
+	const [selectedImei, setSelectedImei] = useState<string>('');
 	const [searchTerm, setSearchTerm] = useState('');
 	const [statusFilter, setStatusFilter] = useState<string>('all');
 	const [dealerFilter, setDealerFilter] = useState<string>('all');
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage] = useState(12);
 
-	const [transferModalOpened, { open: openTransferModal, close: closeTransferModal }] =
+	const [detailsModalOpened, { open: openDetailsModal, close: closeDetailsModal }] =
 		useDisclosure(false);
 	const [swapModalOpened, { open: openSwapModal, close: closeSwapModal }] = useDisclosure(false);
+	const [requestsModalOpened, { open: openRequestsModal, close: closeRequestsModal }] =
+		useDisclosure(false);
 
 	const { data: imeiData, isLoading } = useQuery({
-		queryKey: ['imeis'],
-		queryFn: () => request.get('/imeis'),
+		queryKey: ['imeis', { statusFilter, dealerFilter, searchTerm, currentPage }],
+		queryFn: () =>
+			request.get('/imeis', {
+				params: {
+					status: statusFilter !== 'all' ? statusFilter : undefined,
+					dealerId: dealerFilter !== 'all' ? dealerFilter : undefined,
+					search: searchTerm || undefined,
+					page: currentPage,
+					limit: itemsPerPage,
+				},
+			}),
 	});
 
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers'],
-		queryFn: () => request.get('/dealers'),
+		queryFn: () => request.get('/lookups/dealers'),
 	});
 
-	const handleOpenTransfer = (imei: Imei) => {
-		if (imei?.imei) {
-			setSelectedImei(imei);
-			openTransferModal();
-		}
+	const uniqueDealers = dealersData?.data?.data?.map((dealer: Dealer) => ({
+		value: dealer.id,
+		label: dealer.name,
+	}));
+
+	const handleOpenDetails = (imei: string) => {
+		setSelectedImei(imei);
+		openDetailsModal();
 	};
 
-	const handleOpenSwap = (imei: Imei) => {
-		if (imei?.imei) {
-			setSelectedImei(imei);
-			openSwapModal();
-		}
+	const handleOpenSwap = (imei: string) => {
+		setSelectedImei(imei);
+		openSwapModal();
 	};
 
-	// Filter and search logic
-	const filteredImeis = useMemo(() => {
-		if (!imeiData?.data?.data) return [];
-
-		return imeiData.data.data.filter((imei: Imei) => {
-			const matchesSearch =
-				imei.imei?.includes(searchTerm) ||
-				imei.soldBy?.toLowerCase().includes(searchTerm.toLowerCase());
-
-			const matchesStatus = statusFilter === 'all' || imei.status === statusFilter;
-			const matchesDealer = dealerFilter === 'all' || imei.soldById === dealerFilter;
-
-			return matchesSearch && matchesStatus && matchesDealer;
-		});
-	}, [imeiData?.data?.data, searchTerm, statusFilter, dealerFilter]);
+	// Server-side filtering is handled by the API, so we use the data directly
+	const imeiList: ImeiDetails[] = imeiData?.data?.data || [];
+	const totalPages = Math.ceil((imeiData?.data?.meta?.total || 0) / itemsPerPage);
 
 	const getStatusColor = (status: string) => {
 		switch (status?.toLowerCase()) {
 			case 'available':
 				return 'green';
 			case 'active':
-				return 'yellow';
+				return 'blue';
 			case 'assigned':
 				return 'orange';
 			case 'inactive':
 				return 'red';
+			case 'swapped':
+				return 'purple';
 			default:
 				return 'gray';
 		}
@@ -185,6 +194,8 @@ export function ImeiList() {
 				return <IconClock size={14} />;
 			case 'inactive':
 				return <IconX size={14} />;
+			case 'swapped':
+				return <IconRefresh size={14} />;
 			default:
 				return <IconAlertCircle size={14} />;
 		}
@@ -212,6 +223,26 @@ export function ImeiList() {
 							Track and manage device IMEI numbers across the network
 						</Text>
 					</div>
+					<Group spacing="md">
+						<Button
+							leftIcon={<IconSettings size={16} />}
+							variant="outline"
+							onClick={openRequestsModal}
+							size="md"
+							radius="md"
+							color="orange"
+						>
+							Manage Swap Requests
+						</Button>
+						<Button
+							leftIcon={<IconPlus size={16} />}
+							onClick={() => handleOpenSwap('')}
+							size="md"
+							radius="md"
+						>
+							Request IMEI Swap
+						</Button>
+					</Group>
 				</Group>
 			</div>
 
@@ -233,6 +264,7 @@ export function ImeiList() {
 							{ value: 'active', label: 'Active' },
 							{ value: 'assigned', label: 'Assigned' },
 							{ value: 'inactive', label: 'Inactive' },
+							{ value: 'swapped', label: 'Swapped' },
 						]}
 						value={statusFilter}
 						onChange={(value) => setStatusFilter(value || 'all')}
@@ -243,7 +275,7 @@ export function ImeiList() {
 						placeholder="Filter by dealer"
 						data={[
 							{ value: 'all', label: 'All Dealers' },
-							...(dealersData?.data?.data || []).map((dealer: Dealer) => ({
+							...(uniqueDealers || []).map((dealer: Dealer) => ({
 								value: dealer.id,
 								label: dealer.name,
 							})),
@@ -314,7 +346,7 @@ export function ImeiList() {
 						</Grid.Col>
 					))}
 				</Grid>
-			) : filteredImeis.length === 0 ? (
+			) : imeiList.length === 0 ? (
 				<div className={classes.emptyState}>
 					<IconDeviceMobile
 						size={48}
@@ -335,9 +367,9 @@ export function ImeiList() {
 				</div>
 			) : (
 				<Grid>
-					{filteredImeis.map((imei: Imei) => (
+					{imeiList.map((imei: ImeiDetails) => (
 						<Grid.Col
-							key={imei.id}
+							key={imei.imei}
 							xs={12}
 							sm={6}
 							lg={4}
@@ -372,16 +404,16 @@ export function ImeiList() {
 											</Menu.Target>
 											<Menu.Dropdown>
 												<Menu.Item
-													icon={<IconTransfer size={16} />}
-													onClick={() => handleOpenTransfer(imei)}
+													icon={<IconEye size={16} />}
+													onClick={() => handleOpenDetails(imei.imei)}
 												>
-													Transfer IMEI
+													View Details
 												</Menu.Item>
 												<Menu.Item
 													icon={<IconRefresh size={16} />}
-													onClick={() => handleOpenSwap(imei)}
+													onClick={() => handleOpenSwap(imei.imei)}
 												>
-													Swap IMEI
+													Request Swap
 												</Menu.Item>
 											</Menu.Dropdown>
 										</Menu>
@@ -400,7 +432,7 @@ export function ImeiList() {
 												color="dimmed"
 												lineClamp={1}
 											>
-												{imei.soldBy || 'Not assigned'}
+												{imei.agentName || 'Not assigned'}
 											</Text>
 										</div>
 										<div className={classes.infoRow}>
@@ -412,9 +444,11 @@ export function ImeiList() {
 												size="sm"
 												color="dimmed"
 											>
-												{imei.date
-													? new Date(imei.date).toLocaleDateString()
-													: 'No date'}
+												{imei.activatedAt
+													? new Date(
+															imei.activatedAt
+														).toLocaleDateString()
+													: 'Not activated'}
 											</Text>
 										</div>
 									</Stack>
@@ -440,20 +474,35 @@ export function ImeiList() {
 				</Grid>
 			)}
 
+			{/* Pagination */}
+			{totalPages > 1 && (
+				<Group
+					position="center"
+					mt="xl"
+				>
+					<Pagination
+						total={totalPages}
+						value={currentPage}
+						onChange={setCurrentPage}
+						size="sm"
+					/>
+				</Group>
+			)}
+
 			{/* Modals */}
-			<ImeiTransferModal
-				opened={transferModalOpened}
-				onClose={closeTransferModal}
-				imei={selectedImei?.imei || ''}
-				fromDealer={
-					dealersData?.data?.data?.find((d: Dealer) => d.id === selectedImei?.soldById)!
-				}
-				dealers={dealersData?.data?.data || []}
+			<ImeiDetailsModal
+				opened={detailsModalOpened}
+				onClose={closeDetailsModal}
+				imei={selectedImei}
 			/>
 			<ImeiSwapModal
 				opened={swapModalOpened}
 				onClose={closeSwapModal}
-				oldImei={selectedImei?.imei || ''}
+				imei={selectedImei}
+			/>
+			<ImeiSwapRequestsModal
+				opened={requestsModalOpened}
+				onClose={closeRequestsModal}
 			/>
 		</div>
 	);

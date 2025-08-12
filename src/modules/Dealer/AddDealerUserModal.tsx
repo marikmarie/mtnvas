@@ -151,7 +151,7 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 	const hasErrors = Object.keys(form.errors).length > 0;
 
 	const getUserTypeColor = (type: string) => {
-		return type === 'DSA' ? 'blue' : 'green';
+		return type === 'DSA' ? 'yellow' : 'green';
 	};
 
 	return (

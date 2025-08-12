@@ -9,14 +9,19 @@ import {
 	createStyles,
 	Divider,
 	Alert,
-	Card,
-	ThemeIcon,
 	Badge,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { IconAlertCircle, IconShield, IconUser, IconMail, IconPhone, IconMapPin } from '@tabler/icons-react';
+import {
+	IconAlertCircle,
+	IconShield,
+	IconUser,
+	IconMail,
+	IconPhone,
+	IconMapPin,
+} from '@tabler/icons-react';
 import useRequest from '../../hooks/useRequest';
 import { AddAgentCategoryModalProps, AddAgentCategoryPayload } from '../Dealer/types';
 
@@ -97,7 +102,7 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 		{ value: 'shop_agent', label: 'Shop Agent' },
 		{ value: 'dsa', label: 'DSA' },
 		{ value: 'retailer', label: 'Retailer' },
-	].filter(type => type.value !== agent.userType); // Exclude current user type
+	].filter((type) => type.value !== agent.userType); // Exclude current user type
 
 	const form = useForm<AddCategoryFormValues>({
 		initialValues: {
@@ -149,7 +154,7 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 	const getUserTypeColor = (userType: string) => {
 		switch (userType) {
 			case 'shop_agent':
-				return 'blue';
+				return 'yellow';
 			case 'dsa':
 				return 'purple';
 			case 'retailer':
@@ -179,51 +184,91 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 			title={
 				<div className={classes.header}>
 					<Group spacing="sm">
-						<IconShield size={24} color="purple" />
+						<IconShield
+							size={24}
+							color="purple"
+						/>
 						<Title order={3}>Add Agent Category</Title>
 					</Group>
-					<Text size="sm" color="dimmed">
+					<Text
+						size="sm"
+						color="dimmed"
+					>
 						Add an additional user type category to this agent
 					</Text>
 				</div>
 			}
 			size="lg"
 			className={classes.modal}
+			centered
 		>
-			<form onSubmit={form.onSubmit(handleSubmit)} className={classes.form}>
+			<form
+				onSubmit={form.onSubmit(handleSubmit)}
+				className={classes.form}
+			>
 				{/* Agent Information */}
 				<div className={classes.section}>
-					<Title order={4} className={classes.sectionTitle}>
+					<Title
+						order={4}
+						className={classes.sectionTitle}
+					>
 						Agent Information
 					</Title>
 					<div className={classes.agentInfo}>
 						<Stack spacing="sm">
 							<div className={classes.infoRow}>
-								<IconUser size={16} color="gray" />
-								<Text size="sm" weight={500}>
+								<IconUser
+									size={16}
+									color="gray"
+								/>
+								<Text
+									size="sm"
+									weight={500}
+								>
 									{agent.name}
 								</Text>
 							</div>
 							<div className={classes.infoRow}>
-								<IconMail size={16} color="gray" />
-								<Text size="sm" color="dimmed">
+								<IconMail
+									size={16}
+									color="gray"
+								/>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
 									{agent.email}
 								</Text>
 							</div>
 							<div className={classes.infoRow}>
-								<IconPhone size={16} color="gray" />
-								<Text size="sm" color="dimmed">
+								<IconPhone
+									size={16}
+									color="gray"
+								/>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
 									{agent.msisdn}
 								</Text>
 							</div>
 							<div className={classes.infoRow}>
-								<IconMapPin size={16} color="gray" />
-								<Text size="sm" color="dimmed">
+								<IconMapPin
+									size={16}
+									color="gray"
+								/>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
 									{agent.location}
 								</Text>
 							</div>
 							<div className={classes.infoRow}>
-								<Text size="sm" weight={500}>
+								<Text
+									size="sm"
+									weight={500}
+								>
 									Current Categories:
 								</Text>
 								<Badge
@@ -242,7 +287,10 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 
 				{/* New Category Selection */}
 				<div className={classes.section}>
-					<Title order={4} className={classes.sectionTitle}>
+					<Title
+						order={4}
+						className={classes.sectionTitle}
+					>
 						New Category Details
 					</Title>
 					<Stack spacing="md">
@@ -282,14 +330,19 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 						• DSAs and retailers operate independently of shops
 						<br />
 						• The agent will maintain their existing category while gaining the new one
-						<br />
-						• Commission rates may vary between different user types
+						<br />• Commission rates may vary between different user types
 					</Text>
 				</Alert>
 
 				{/* Form Actions */}
-				<Group position="right" mt="xl">
-					<Button variant="outline" onClick={handleClose}>
+				<Group
+					position="right"
+					mt="xl"
+				>
+					<Button
+						variant="outline"
+						onClick={handleClose}
+					>
 						Cancel
 					</Button>
 					<Button

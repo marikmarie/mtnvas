@@ -9,29 +9,23 @@ import {
 	createStyles,
 	ThemeIcon,
 	Alert,
+	Select,
+	Paper,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
 	IconRefresh,
 	IconDeviceMobile,
 	IconFileText,
 	IconAlertCircle,
 	IconArrowRight,
+	IconUser,
+	IconUserCircle,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-
-interface ImeiSwapModalProps {
-	opened: boolean;
-	onClose: () => void;
-	oldImei: string;
-}
-
-interface ImeiSwapFormValues {
-	newImei: string;
-	reason: string;
-}
+import { ImeiSwapModalProps, ImeiSwapRequest, ImeiAvailabilityCheck } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -94,7 +88,7 @@ const useStyles = createStyles((theme) => ({
 		alignItems: 'center',
 		justifyContent: 'center',
 		margin: theme.spacing.md,
-		color: theme.colors.blue[6],
+		color: theme.colors.yellow[6],
 	},
 
 	imeiDisplay: {
@@ -106,39 +100,73 @@ const useStyles = createStyles((theme) => ({
 		borderRadius: theme.radius.sm,
 		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
 	},
+
+	availabilityCard: {
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		borderRadius: theme.radius.md,
+		padding: theme.spacing.md,
+		marginBottom: theme.spacing.md,
+	},
 }));
 
-export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) {
+export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
 	const queryClient = useQueryClient();
 
-	const form = useForm<ImeiSwapFormValues>({
+	// Get agents for selection
+	const { data: agentsData } = useQuery({
+		queryKey: ['agents'],
+		queryFn: () => request.get('/agents'),
+		enabled: opened,
+	});
+
+	const form = useForm<ImeiSwapRequest & { customerId?: string }>({
 		initialValues: {
+			oldImei: imei || '',
 			newImei: '',
 			reason: '',
+			agentId: '',
+			customerId: '',
 		},
 		validate: {
+			oldImei: (value) => (!value ? 'Old IMEI is required' : null),
 			newImei: (value) => (!value ? 'New IMEI is required' : null),
 			reason: (value) => (!value ? 'Reason is required' : null),
+			agentId: (value) => (!value ? 'Agent is required' : null),
 		},
 	});
 
+	// Check availability of new IMEI
+	const { data: availabilityData, isLoading: checkingAvailability } = useQuery({
+		queryKey: ['imei-availability', form.values.newImei],
+		queryFn: () => request.get(`/imeis/${form.values.newImei}/check`),
+		enabled: !!form.values.newImei && form.values.newImei.length >= 15,
+	});
+
+	const availability: ImeiAvailabilityCheck | undefined = availabilityData?.data;
+
 	const mutation = useMutation({
-		mutationFn: (values: ImeiSwapFormValues) => {
-			return request.post('/imei-swaps', {
-				oldImei,
-				...values,
-			});
+		mutationFn: (values: ImeiSwapRequest & { customerId?: string }) => {
+			const payload: ImeiSwapRequest = {
+				oldImei: values.oldImei,
+				newImei: values.newImei,
+				reason: values.reason,
+				agentId: values.agentId,
+				customerId: values.customerId || undefined,
+			};
+			return request.post('/imeis/swap-request', payload);
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['imeis'] });
+			queryClient.invalidateQueries(['imeis']);
+			queryClient.invalidateQueries(['imei-swap-requests']);
 			onClose();
 			form.reset();
 		},
 	});
 
-	const handleSubmit = (values: ImeiSwapFormValues) => {
+	const handleSubmit = (values: ImeiSwapRequest & { customerId?: string }) => {
 		mutation.mutate(values);
 	};
 
@@ -188,10 +216,11 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 						color="dimmed"
 						mb="xs"
 					>
-						IMEI Swap Details
+						IMEI Swap Request
 					</Text>
 					<Text size="sm">
-						You are about to swap IMEI <strong>{oldImei}</strong> with a new one.
+						Submit a request to swap IMEI <strong>{imei}</strong> with a new one. This
+						request will need approval.
 					</Text>
 				</div>
 
@@ -223,7 +252,7 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 							<div className={classes.inputWrapper}>
 								<TextInput
 									label="Current IMEI"
-									value={oldImei}
+									value={imei}
 									disabled
 									icon={
 										<IconDeviceMobile
@@ -233,6 +262,7 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 									}
 									className={classes.imeiDisplay}
 									radius="md"
+									{...form.getInputProps('oldImei')}
 								/>
 							</div>
 
@@ -255,6 +285,140 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 									}
 									{...form.getInputProps('newImei')}
 									radius="md"
+									description="Enter the 15-digit IMEI number for the replacement device"
+								/>
+							</div>
+
+							{/* IMEI Availability Check */}
+							{form.values.newImei && form.values.newImei.length >= 15 && (
+								<Paper
+									className={classes.availabilityCard}
+									shadow="xs"
+								>
+									<Text
+										size="sm"
+										weight={500}
+										mb="xs"
+									>
+										IMEI Availability Check
+									</Text>
+									{checkingAvailability ? (
+										<Text
+											size="sm"
+											color="dimmed"
+										>
+											Checking availability...
+										</Text>
+									) : availability ? (
+										<Stack spacing="xs">
+											<Group spacing="xs">
+												<Text size="sm">Available:</Text>
+												<Badge
+													color={availability.available ? 'green' : 'red'}
+													size="sm"
+												>
+													{availability.available ? 'Yes' : 'No'}
+												</Badge>
+											</Group>
+											<Group spacing="xs">
+												<Text size="sm">Can Swap:</Text>
+												<Badge
+													color={availability.canSwap ? 'green' : 'red'}
+													size="sm"
+												>
+													{availability.canSwap ? 'Yes' : 'No'}
+												</Badge>
+											</Group>
+											<Group spacing="xs">
+												<Text size="sm">Status:</Text>
+												<Badge
+													color="blue"
+													size="sm"
+												>
+													{availability.currentStatus}
+												</Badge>
+											</Group>
+											{!availability.canSwap && (
+												<Alert
+													icon={<IconAlertCircle size={16} />}
+													color="red"
+													size="sm"
+												>
+													This IMEI cannot be used for swapping
+												</Alert>
+											)}
+										</Stack>
+									) : (
+										<Text
+											size="sm"
+											color="dimmed"
+										>
+											Invalid IMEI format
+										</Text>
+									)}
+								</Paper>
+							)}
+						</div>
+
+						{/* Agent Selection */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								Agent Information
+							</Text>
+							<div className={classes.inputWrapper}>
+								<Select
+									label="Requesting Agent"
+									placeholder="Select the agent requesting this swap"
+									required
+									icon={
+										<IconUser
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
+									data={
+										agentsData?.data?.data?.map((agent: any) => ({
+											value: agent.id,
+											label: `${agent.name} (${agent.userType})`,
+										})) || []
+									}
+									searchable
+									nothingFound="No agents found"
+									{...form.getInputProps('agentId')}
+									radius="md"
+									description="The agent who is requesting this IMEI swap"
+								/>
+							</div>
+						</div>
+
+						{/* Customer ID (Optional) */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								Customer Information (Optional)
+							</Text>
+							<div className={classes.inputWrapper}>
+								<TextInput
+									label="Customer ID"
+									placeholder="Enter customer ID if applicable"
+									icon={
+										<IconUserCircle
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
+									{...form.getInputProps('customerId')}
+									radius="md"
+									description="Optional: Customer ID associated with this device"
 								/>
 							</div>
 						</div>
@@ -283,6 +447,7 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 									}
 									{...form.getInputProps('reason')}
 									radius="md"
+									description="Provide a detailed explanation for why this IMEI swap is necessary"
 								/>
 							</div>
 						</div>
@@ -310,8 +475,9 @@ export function ImeiSwapModal({ opened, onClose, oldImei }: ImeiSwapModalProps) 
 						className={classes.submitButton}
 						radius="md"
 						onClick={() => handleSubmit(form.values)}
+						disabled={availability && !availability.canSwap}
 					>
-						Swap IMEI
+						Submit Swap Request
 					</Button>
 				</Group>
 			</div>

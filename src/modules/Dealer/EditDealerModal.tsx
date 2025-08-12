@@ -160,7 +160,7 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 	const getCategoryColor = (category: string) => {
 		switch (category?.toLowerCase()) {
 			case 'wakanet':
-				return 'blue';
+				return 'yellow';
 			case 'enterprise':
 				return 'purple';
 			case 'both':
@@ -183,7 +183,7 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 						size={40}
 						radius="md"
 						variant="light"
-						color="blue"
+						color="yellow"
 					>
 						<IconEdit size={20} />
 					</ThemeIcon>

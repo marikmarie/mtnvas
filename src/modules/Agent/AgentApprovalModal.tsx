@@ -219,6 +219,7 @@ export function AgentApprovalModal({ opened, onClose, agent, action }: AgentAppr
 			}
 			size="lg"
 			className={classes.modal}
+			centered
 		>
 			<form
 				onSubmit={form.onSubmit(handleSubmit)}

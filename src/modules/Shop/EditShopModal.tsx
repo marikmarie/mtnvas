@@ -12,12 +12,7 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-	IconBuildingStore,
-	IconMapPin,
-	IconEdit,
-	IconAlertCircle,
-} from '@tabler/icons-react';
+import { IconBuildingStore, IconMapPin, IconEdit, IconAlertCircle } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Shop } from '../Dealer/types';
@@ -153,7 +148,7 @@ export function EditShopModal({ opened, onClose, shop }: EditShopModalProps) {
 						size={40}
 						radius="md"
 						variant="light"
-						color="blue"
+						color="yellow"
 					>
 						<IconEdit size={20} />
 					</ThemeIcon>
@@ -186,10 +181,16 @@ export function EditShopModal({ opened, onClose, shop }: EditShopModalProps) {
 					>
 						Shop Details
 					</Text>
-					<Text size="sm" mb="xs">
+					<Text
+						size="sm"
+						mb="xs"
+					>
 						<strong>Dealer:</strong> {shop.dealerName}
 					</Text>
-					<Text size="sm" mb="xs">
+					<Text
+						size="sm"
+						mb="xs"
+					>
 						<strong>Status:</strong> {shop.status?.replace('_', ' ')}
 					</Text>
 					<Text size="sm">

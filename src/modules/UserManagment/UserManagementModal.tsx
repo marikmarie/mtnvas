@@ -16,6 +16,7 @@ export default function UserManagementModal({ opened, onClose }: UserManagementM
 			title="User Management"
 			size="lg"
 			overlayProps={{ opacity: 0.5, blur: 4 }}
+			centered
 		>
 			<Tabs defaultValue="add">
 				<Tabs.List grow>

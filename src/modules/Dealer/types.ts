@@ -56,38 +56,159 @@ export interface Device {
 
 export interface Stock {
 	id: string;
-	dealerId: string;
-	dealerName: string;
+	imei?: string;
+	serialNumber?: string;
 	productId: string;
 	productName: string;
 	deviceId: string;
 	deviceName: string;
-	category: 'wakanet' | 'enterprise' | 'both';
-	imeiFile: string;
-	quantity: number;
-	sold: number;
-	createdAt: string;
+	dealerId: string;
+	dealerName: string;
+	category: 'wakanet' | 'enterprise';
+	status: 'available' | 'sold' | 'transferred';
+	assignedAt: string;
+	soldAt?: string;
+	transferredAt?: string;
 }
 
 export interface StockThreshold {
 	id: string;
 	dealerId: string;
+	productId: string;
+	deviceId: string;
+	category: string;
+	threshold: number;
+	currentStock: number;
+	belowThreshold: boolean;
+	emailNotifications: boolean;
+	smsNotifications: boolean;
+	lastNotifiedAt?: string;
+}
+
+export interface StockTransfer {
+	id: string;
+	fromDealerId: string;
+	fromDealerName: string;
+	toDealerId: string;
+	toDealerName: string;
+	imeiCount: number;
+	transferredBy: string;
+	reason?: string;
+	createdAt: string;
+	imeis: string[];
+}
+
+export interface StockTransferRequest {
+	imeis: string[];
+	fromDealerId: string;
+	toDealerId: string;
+	reason?: string;
+}
+
+export interface StockUploadResponse {
+	totalProcessed: number;
+	successCount: number;
+	errorCount: number;
+	errors: Array<{
+		row: number;
+		imei: string;
+		error: string;
+	}>;
+}
+
+export interface StockUploadRequest {
+	dealerId: string;
+	category: 'wakanet' | 'enterprise' | 'both';
+	productId: string;
+	deviceId: string;
+	imeiFile: File;
+}
+
+export interface StockThresholdRequest {
+	dealerId: string;
+	category: 'wakanet' | 'enterprise' | 'both';
+	productId: string;
+	deviceId: string;
+	threshold: number;
+	emailNotifications: boolean;
+	smsNotifications: boolean;
+	notificationEmails?: string[];
+	notificationMsisdns?: string[];
+}
+
+export interface StockThresholdUpdateRequest {
+	threshold?: number;
+	emailNotifications?: boolean;
+	smsNotifications?: boolean;
+	notificationEmails?: string[];
+	notificationMsisdns?: string[];
+}
+
+export interface StockThresholdAlert {
+	dealerId: string;
 	dealerName: string;
+	productName: string;
+	deviceName: string;
+	currentStock: number;
+	threshold: number;
+	shortfall: number;
+}
+
+export interface StockThresholdAlertsResponse {
+	totalAlerts: number;
+	alerts: StockThresholdAlert[];
+}
+
+export interface ImeiDetails {
+	imei: string;
+	status: 'available' | 'assigned' | 'active' | 'inactive' | 'swapped';
 	productId: string;
 	productName: string;
 	deviceId: string;
 	deviceName: string;
-	threshold: number;
-	createdAt: string;
+	dealerId: string;
+	dealerName: string;
+	agentId?: string;
+	agentName?: string;
+	activatedAt?: string;
+	lastSwapDate?: string;
+	swapHistory: ImeiSwap[];
 }
 
-export interface Imei {
+export interface ImeiAvailabilityCheck {
+	available: boolean;
+	active: boolean;
+	canSwap: boolean;
+	belongsToDealer: boolean;
+	dealerId?: string;
+	currentStatus: string;
+}
+
+export interface ImeiSwapRequest {
+	oldImei: string;
+	newImei: string;
+	reason: string;
+	agentId: string;
+	customerId?: string;
+}
+
+export interface ImeiSwapRequestDetails {
 	id: string;
-	imei: string;
-	status: 'available' | 'assigned' | 'active' | 'inactive';
-	soldBy: string;
-	soldById: string;
-	date: string;
+	oldImei: string;
+	newImei: string;
+	reason: string;
+	agentId: string;
+	agentName: string;
+	dealerId: string;
+	status: 'pending' | 'approved' | 'rejected';
+	requestedAt: string;
+	processedAt?: string;
+	processedBy?: string;
+}
+
+export interface ImeiSwapApproval {
+	action: 'approve' | 'reject';
+	reason?: string;
 }
 
 export interface ImeiTransfer {
@@ -109,9 +230,11 @@ export interface ImeiSwap {
 	oldImei: string;
 	newImei: string;
 	reason: string;
-	swappedBy: string;
-	swappedById: string;
-	swapDate: string;
+	agentId: string;
+	agentName: string;
+	customerId?: string;
+	swappedAt: string;
+	approvedBy: string;
 }
 
 export interface DealerModalProps {
@@ -268,4 +391,28 @@ export interface AddAgentCategoryModalProps {
 	opened: boolean;
 	onClose: () => void;
 	agent: Agent;
+}
+
+// IMEI Modal Props
+export interface ImeiDetailsModalProps {
+	opened: boolean;
+	onClose: () => void;
+	imei: string;
+}
+
+export interface ImeiSwapModalProps {
+	opened: boolean;
+	onClose: () => void;
+	imei?: string;
+}
+
+export interface ImeiSwapApprovalModalProps {
+	opened: boolean;
+	onClose: () => void;
+	swapRequest: ImeiSwapRequestDetails;
+}
+
+export interface ImeiSwapRequestsModalProps {
+	opened: boolean;
+	onClose: () => void;
 }

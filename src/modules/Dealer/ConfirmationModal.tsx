@@ -121,7 +121,7 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 			case 'delete':
 				return 'red';
 			default:
-				return 'blue';
+				return 'yellow';
 		}
 	};
 

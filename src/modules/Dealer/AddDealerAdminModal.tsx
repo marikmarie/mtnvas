@@ -126,7 +126,7 @@ export function AddDealerAdminModal({ opened, onClose, dealerId }: AddDealerAdmi
 						size={40}
 						radius="md"
 						variant="light"
-						color="blue"
+						color="yellow"
 					>
 						<IconUserPlus size={20} />
 					</ThemeIcon>

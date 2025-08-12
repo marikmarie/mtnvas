@@ -169,7 +169,7 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 					<Group spacing="sm">
 						<IconEdit
 							size={24}
-							color="blue"
+							color="yellow"
 						/>
 						<Title order={3}>Edit Agent</Title>
 					</Group>
@@ -183,6 +183,7 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 			}
 			size="lg"
 			className={classes.modal}
+			centered
 		>
 			<form
 				onSubmit={form.onSubmit(handleSubmit)}
@@ -291,7 +292,7 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 				<Alert
 					icon={<IconAlertCircle size={16} />}
 					title="Important Information"
-					color="blue"
+					color="yellow"
 					variant="light"
 					mb="lg"
 				>
@@ -319,7 +320,7 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 					<Button
 						type="submit"
 						loading={isSubmitting}
-						color="blue"
+						color="yellow"
 						leftIcon={<IconEdit size={16} />}
 					>
 						Update Agent

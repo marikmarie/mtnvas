@@ -1,42 +1,29 @@
 import {
 	Button,
 	Group,
-	Select,
 	Stack,
-	TextInput,
 	Title,
 	Text,
 	createStyles,
 	ThemeIcon,
 	Alert,
 	Paper,
+	Textarea,
+	MultiSelect,
+	Select,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
 	IconTransfer,
-	IconDeviceMobile,
 	IconBuilding,
-	IconBox,
 	IconAlertCircle,
 	IconArrowRight,
+	IconPackage,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { Dealer } from '../Dealer/types';
-
-interface ImeiTransferModalProps {
-	opened: boolean;
-	onClose: () => void;
-	imei: string;
-	fromDealer: Dealer;
-	dealers: Dealer[];
-}
-
-interface ImeiTransferFormValues {
-	toDealerId: string;
-	toProductId: string;
-}
+import { StockTransferRequest } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -96,7 +83,7 @@ const useStyles = createStyles((theme) => ({
 		marginBottom: theme.spacing.md,
 	},
 
-	transferInfo: {
+	infoCard: {
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
 		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		borderRadius: theme.radius.md,
@@ -108,78 +95,72 @@ const useStyles = createStyles((theme) => ({
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
-		margin: theme.spacing.md,
-		color: theme.colors.blue[6],
+		color: theme.colors.gray[5],
+		marginTop: theme.spacing.xl,
 	},
 
-	imeiDisplay: {
-		fontFamily: 'monospace',
-		fontSize: theme.fontSizes.sm,
-		fontWeight: 600,
-		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[1],
-		padding: theme.spacing.xs,
-		borderRadius: theme.radius.sm,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-	},
-
-	dealerInfo: {
-		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
-		padding: theme.spacing.xs,
-		borderRadius: theme.radius.sm,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+	imeiInput: {
+		'& .mantine-MultiSelect-input': {
+			fontFamily: 'monospace',
+		},
 	},
 }));
 
-export function ImeiTransferModal({
-	opened,
-	onClose,
-	imei,
-	fromDealer,
-	dealers,
-}: ImeiTransferModalProps) {
+interface StockTransferModalProps {
+	opened: boolean;
+	onClose: () => void;
+}
+
+export function StockTransferModal({ opened, onClose }: StockTransferModalProps) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
-	const queryClient = useQueryClient();
 
-	const form = useForm<ImeiTransferFormValues>({
+	const { data: dealers } = useQuery({
+		queryKey: ['dealers/list'],
+		queryFn: () => request.get('/lookups/dealers'),
+	});
+
+	const { data: stockItems } = useQuery({
+		queryKey: ['stocks/available'],
+		queryFn: () => request.get('/stocks', { params: { status: 'available' } }),
+	});
+
+	const form = useForm<StockTransferRequest>({
 		initialValues: {
+			imeis: [],
+			fromDealerId: '',
 			toDealerId: '',
-			toProductId: '',
+			reason: '',
 		},
 		validate: {
-			toDealerId: (value) => (!value ? 'Target dealer is required' : null),
-			toProductId: (value) => (!value ? 'Target product is required' : null),
+			imeis: (value) => (value.length === 0 ? 'At least one IMEI is required' : null),
+			fromDealerId: (value) => (!value ? 'Source dealer is required' : null),
+			toDealerId: (value) => (!value ? 'Destination dealer is required' : null),
+			reason: (value) => (!value ? 'Transfer reason is required' : null),
 		},
 	});
 
 	const mutation = useMutation({
-		mutationFn: (values: ImeiTransferFormValues) => {
-			return request.post('/imei-transfers', {
-				imei,
-				fromDealerId: fromDealer?.id,
-				...values,
-			});
-		},
+		mutationFn: (values: StockTransferRequest) => request.post('/stocks/transfer', values),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['imeis'] });
 			onClose();
 			form.reset();
 		},
 	});
 
-	const handleSubmit = (values: ImeiTransferFormValues) => {
-		mutation.mutate(values);
-	};
-
-	const dealerOptions = dealers
-		.filter((dealer) => dealer?.id !== fromDealer?.id)
-		.map((dealer) => ({
-			value: dealer?.id,
-			label: dealer?.name,
-		}));
+	const handleSubmit = form.onSubmit((values) => mutation.mutate(values));
 
 	const hasErrors = Object.keys(form.errors).length > 0;
-	const selectedToDealer = dealers.find((d) => d.id === form.values.toDealerId);
+
+	// Get available IMEIs for the selected source dealer
+	const availableImeis =
+		stockItems?.data?.data
+			?.filter(
+				(item: any) =>
+					item.dealerId === form.values.fromDealerId && item.status === 'available'
+			)
+			?.map((item: any) => item.imei || item.serialNumber)
+			?.filter(Boolean) || [];
 
 	return (
 		<Modal
@@ -203,13 +184,13 @@ export function ImeiTransferModal({
 							order={3}
 							size="h4"
 						>
-							Transfer IMEI
+							Transfer Stock
 						</Title>
 						<Text
 							color="dimmed"
 							size="sm"
 						>
-							Move IMEI from one dealer to another
+							Transfer stock items between dealers
 						</Text>
 					</div>
 				</div>
@@ -217,21 +198,24 @@ export function ImeiTransferModal({
 
 			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Transfer Information */}
-				<div className={classes.transferInfo}>
+				{/* Information Card */}
+				<Paper
+					className={classes.infoCard}
+					shadow="xs"
+				>
 					<Text
 						size="sm"
 						weight={500}
 						color="dimmed"
 						mb="xs"
 					>
-						Transfer Details
+						Transfer Information
 					</Text>
 					<Text size="sm">
-						You are about to transfer IMEI <strong>{imei}</strong> to a different
-						dealer.
+						Select the source and destination dealers, choose IMEIs to transfer, and
+						provide a reason for the transfer.
 					</Text>
-				</div>
+				</Paper>
 
 				{hasErrors && (
 					<Alert
@@ -244,9 +228,9 @@ export function ImeiTransferModal({
 					</Alert>
 				)}
 
-				<form onSubmit={form.onSubmit(handleSubmit)}>
+				<form onSubmit={handleSubmit}>
 					<Stack spacing="lg">
-						{/* IMEI Display */}
+						{/* Source Dealer */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -254,118 +238,124 @@ export function ImeiTransferModal({
 								color="dimmed"
 								mb="xs"
 							>
-								IMEI to Transfer
+								Source Dealer
 							</Text>
 							<div className={classes.inputWrapper}>
-								<TextInput
-									label="IMEI Number"
-									value={imei}
-									disabled
-									icon={
-										<IconDeviceMobile
-											size={16}
-											className={classes.inputIcon}
-										/>
-									}
-									className={classes.imeiDisplay}
-									radius="md"
-								/>
-							</div>
-						</div>
-
-						{/* Transfer Details */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Transfer Details
-							</Text>
-
-							{/* From Dealer */}
-							<div className={classes.inputWrapper}>
-								<TextInput
+								<Select
 									label="From Dealer"
-									value={fromDealer?.name}
-									disabled
+									placeholder="Select source dealer"
+									required
 									icon={
 										<IconBuilding
 											size={16}
 											className={classes.inputIcon}
 										/>
 									}
-									className={classes.dealerInfo}
+									data={dealers?.data?.data || []}
+									searchable
+									nothingFound="No dealers found"
+									{...form.getInputProps('fromDealerId')}
 									radius="md"
 								/>
 							</div>
+						</div>
 
-							{/* Transfer Arrow */}
-							<div className={classes.transferArrow}>
-								<IconArrowRight size={24} />
+						{/* Transfer Arrow */}
+						<div className={classes.transferArrow}>
+							<IconArrowRight size={24} />
+						</div>
+
+						{/* Destination Dealer */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								Destination Dealer
+							</Text>
+							<div className={classes.inputWrapper}>
+								<Select
+									label="To Dealer"
+									placeholder="Select destination dealer"
+									required
+									icon={
+										<IconBuilding
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
+									data={
+										dealers?.data?.data?.filter(
+											(dealer: any) => dealer.id !== form.values.fromDealerId
+										) || []
+									}
+									searchable
+									nothingFound="No dealers found"
+									{...form.getInputProps('toDealerId')}
+									radius="md"
+								/>
 							</div>
+						</div>
 
-							{/* To Dealer and Product */}
-							<div className={classes.formRow}>
-								<div className={classes.inputWrapper}>
-									<Select
-										label="To Dealer"
-										placeholder="Select target dealer"
-										required
-										icon={
-											<IconBuilding
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										data={dealerOptions}
-										{...form.getInputProps('toDealerId')}
-										radius="md"
-									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<Select
-										label="To Product"
-										placeholder="Select target product"
-										required
-										icon={
-											<IconBox
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										data={[
-											{ value: 'product1', label: 'Product 1' },
-											{ value: 'product2', label: 'Product 2' },
-											{ value: 'product3', label: 'Product 3' },
-										]}
-										{...form.getInputProps('toProductId')}
-										radius="md"
-									/>
-								</div>
+						{/* IMEI Selection */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								Select IMEIs to Transfer
+							</Text>
+							<div className={classes.inputWrapper}>
+								<MultiSelect
+									label="IMEIs"
+									placeholder="Select IMEIs to transfer"
+									required
+									icon={
+										<IconPackage
+											size={16}
+											className={classes.inputIcon}
+										/>
+									}
+									data={availableImeis.map((imei: string) => ({
+										value: imei,
+										label: imei,
+									}))}
+									searchable
+									nothingFound="No IMEIs available"
+									disabled={!form.values.fromDealerId}
+									className={classes.imeiInput}
+									{...form.getInputProps('imeis')}
+									radius="md"
+									description={`${availableImeis.length} IMEIs available for transfer`}
+								/>
 							</div>
+						</div>
 
-							{/* Selected Dealer Info */}
-							{selectedToDealer && (
-								<Paper
-									className={classes.dealerInfo}
-									shadow="xs"
-								>
-									<Text
-										size="sm"
-										weight={500}
-										color="dimmed"
-										mb="xs"
-									>
-										Target Dealer Information
-									</Text>
-									<Text size="sm">
-										<strong>{selectedToDealer.name}</strong> •{' '}
-										{selectedToDealer.category}
-									</Text>
-								</Paper>
-							)}
+						{/* Transfer Reason */}
+						<div className={classes.formGroup}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								Transfer Reason
+							</Text>
+							<div className={classes.inputWrapper}>
+								<Textarea
+									label="Reason"
+									placeholder="Provide a reason for this transfer"
+									required
+									minRows={3}
+									{...form.getInputProps('reason')}
+									radius="md"
+									description="Explain why this transfer is necessary"
+								/>
+							</div>
 						</div>
 					</Stack>
 				</form>
@@ -390,9 +380,9 @@ export function ImeiTransferModal({
 						leftIcon={<IconTransfer size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={() => handleSubmit(form.values)}
+						onClick={() => handleSubmit()}
 					>
-						Transfer IMEI
+						Transfer Stock
 					</Button>
 				</Group>
 			</div>

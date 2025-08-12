@@ -280,11 +280,6 @@ export function AgentList() {
 		openConfirmationModal();
 	};
 
-	// Safety check: ensure modals are only opened when they have valid data
-	const canOpenAgentModal = (agent: Agent | null) => {
-		return agent !== null && agent !== undefined;
-	};
-
 	const handleConfirmDeactivate = async () => {
 		if (!selectedAgent) return;
 
@@ -363,7 +358,7 @@ export function AgentList() {
 	const getUserTypeColor = (userType: string) => {
 		switch (userType) {
 			case 'shop_agent':
-				return 'blue';
+				return 'yellow';
 			case 'dsa':
 				return 'purple';
 			case 'retailer':
@@ -496,7 +491,7 @@ export function AgentList() {
 											size={40}
 											radius="md"
 											variant="light"
-											color="blue"
+											color="yellow"
 										>
 											<IconUser size={20} />
 										</ThemeIcon>
@@ -715,6 +710,7 @@ export function AgentList() {
 					onClose={handleCloseConfirmationModal}
 					title="Deactivate Agent"
 					size="md"
+					centered
 				>
 					<Stack spacing="lg">
 						<Text>

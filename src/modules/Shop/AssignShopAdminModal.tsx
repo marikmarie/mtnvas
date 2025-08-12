@@ -185,7 +185,7 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 						size={40}
 						radius="md"
 						variant="light"
-						color="blue"
+						color="yellow"
 					>
 						<IconShield size={20} />
 					</ThemeIcon>

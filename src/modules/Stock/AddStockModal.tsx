@@ -10,6 +10,8 @@ import {
 	ThemeIcon,
 	Alert,
 	Paper,
+	Switch,
+	MultiSelect,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -21,10 +23,11 @@ import {
 	IconUpload,
 	IconAlertCircle,
 	IconPlus,
+	IconMail,
+	IconPhone,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { StockModalProps } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -100,39 +103,67 @@ const useStyles = createStyles((theme) => ({
 		transition: 'all 0.2s ease',
 
 		'&:hover': {
-			borderColor: theme.colors.blue[4],
+			borderColor: theme.colors.yellow[4],
 			backgroundColor:
-				theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.blue[0],
+				theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.yellow[0],
 		},
+	},
+
+	notificationSection: {
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+		borderRadius: theme.radius.md,
+		padding: theme.spacing.md,
+		marginTop: theme.spacing.md,
 	},
 }));
 
-export function AddStockModal({ opened, onClose }: StockModalProps) {
+interface AddStockModalProps {
+	opened: boolean;
+	onClose: () => void;
+}
+
+interface StockFormValues {
+	dealerId: string;
+	category: 'wakanet' | 'enterprise' | 'both';
+	productId: string;
+	deviceId: string;
+	imeiFile: File | null;
+	emailNotifications: boolean;
+	smsNotifications: boolean;
+	notificationEmails: string[];
+	notificationMsisdns: string[];
+}
+
+export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
 
 	const { data: dealers } = useQuery({
 		queryKey: ['dealers/list'],
-		queryFn: () => request.get('/dealers/list'),
+		queryFn: () => request.get('/lookups/dealers'),
 	});
 
 	const { data: products } = useQuery({
 		queryKey: ['products'],
-		queryFn: () => request.get('/products'),
+		queryFn: () => request.get('/lookups/products'),
 	});
 
 	const { data: devices } = useQuery({
 		queryKey: ['devices'],
-		queryFn: () => request.get('/devices'),
+		queryFn: () => request.get('/lookups/devices'),
 	});
 
-	const form = useForm({
+	const form = useForm<StockFormValues>({
 		initialValues: {
 			dealerId: '',
-			category: '',
+			category: 'wakanet',
 			productId: '',
 			deviceId: '',
-			imeiFile: null as File | null,
+			imeiFile: null,
+			emailNotifications: true,
+			smsNotifications: false,
+			notificationEmails: [],
+			notificationMsisdns: [],
 		},
 		validate: {
 			dealerId: (value) => (!value ? 'Dealer is required' : null),
@@ -156,13 +187,31 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 		},
 	});
 
-	const handleSubmit = form.onSubmit((values) => {
+	const handleSubmit = form.onSubmit((values: StockFormValues) => {
 		const formData = new FormData();
-		Object.entries(values).forEach(([key, value]) => {
-			if (value !== null) {
-				formData.append(key, value);
+		formData.append('dealerId', values.dealerId);
+		formData.append('category', values.category);
+		formData.append('productId', values.productId);
+		formData.append('deviceId', values.deviceId);
+		if (values.imeiFile) {
+			formData.append('imeiFile', values.imeiFile);
+		}
+
+		// Add notification settings if enabled
+		if (values.emailNotifications) {
+			formData.append('emailNotifications', 'true');
+			if (values.notificationEmails.length > 0) {
+				formData.append('notificationEmails', JSON.stringify(values.notificationEmails));
 			}
-		});
+		}
+
+		if (values.smsNotifications) {
+			formData.append('smsNotifications', 'true');
+			if (values.notificationMsisdns.length > 0) {
+				formData.append('notificationMsisdns', JSON.stringify(values.notificationMsisdns));
+			}
+		}
+
 		mutation.mutate(formData);
 	});
 
@@ -218,7 +267,8 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 						Stock Information
 					</Text>
 					<Text size="sm">
-						Upload IMEI data to add new stock items. Supported formats: CSV, XLSX, XLS
+						Upload IMEI data to add new stock items. Supported formats: CSV, XLSX, XLS.
+						The file should contain one IMEI or serial number per row.
 					</Text>
 				</Paper>
 
@@ -352,7 +402,7 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 							<div className={classes.inputWrapper}>
 								<FileInput
 									label="IMEI File"
-									description="Upload IMEI file (CSV, XLSX, XLS)"
+									description="Upload IMEI file (CSV, XLSX, XLS) - one IMEI per row"
 									accept=".csv,.xlsx,.xls"
 									required
 									icon={
@@ -368,6 +418,81 @@ export function AddStockModal({ opened, onClose }: StockModalProps) {
 									radius="md"
 								/>
 							</div>
+						</div>
+
+						{/* Notification Settings */}
+						<div className={classes.notificationSection}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								Notification Settings
+							</Text>
+							<Stack spacing="md">
+								<Group position="apart">
+									<Text size="sm">Email Notifications</Text>
+									<Switch
+										{...form.getInputProps('emailNotifications', {
+											type: 'checkbox',
+										})}
+									/>
+								</Group>
+
+								{form.values.emailNotifications && (
+									<MultiSelect
+										label="Notification Emails"
+										placeholder="Add email addresses for notifications"
+										icon={<IconMail size={16} />}
+										data={form.values.notificationEmails}
+										searchable
+										creatable
+										getCreateLabel={(query) => `+ Add ${query}`}
+										onCreate={(query) => {
+											const item = { value: query, label: query };
+											form.setFieldValue('notificationEmails', [
+												...form.values.notificationEmails,
+												query,
+											]);
+											return item;
+										}}
+										{...form.getInputProps('notificationEmails')}
+										radius="md"
+									/>
+								)}
+
+								<Group position="apart">
+									<Text size="sm">SMS Notifications</Text>
+									<Switch
+										{...form.getInputProps('smsNotifications', {
+											type: 'checkbox',
+										})}
+									/>
+								</Group>
+
+								{form.values.smsNotifications && (
+									<MultiSelect
+										label="Notification Phone Numbers"
+										placeholder="Add phone numbers for SMS notifications"
+										icon={<IconPhone size={16} />}
+										data={form.values.notificationMsisdns}
+										searchable
+										creatable
+										getCreateLabel={(query) => `+ Add ${query}`}
+										onCreate={(query) => {
+											const item = { value: query, label: query };
+											form.setFieldValue('notificationMsisdns', [
+												...form.values.notificationMsisdns,
+												query,
+											]);
+											return item;
+										}}
+										{...form.getInputProps('notificationMsisdns')}
+										radius="md"
+									/>
+								)}
+							</Stack>
 						</div>
 					</Stack>
 				</form>

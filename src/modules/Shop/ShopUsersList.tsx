@@ -241,7 +241,7 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 	const getRoleColor = (role: string) => {
 		switch (role?.toLowerCase()) {
 			case 'dsa':
-				return 'blue';
+				return 'yellow';
 			case 'retailer':
 				return 'green';
 			case 'shop_agent':
@@ -301,7 +301,7 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 			case 'delete':
 				return 'red';
 			default:
-				return 'blue';
+				return 'yellow';
 		}
 	};
 

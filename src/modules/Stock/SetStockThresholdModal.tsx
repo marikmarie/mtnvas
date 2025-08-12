@@ -10,6 +10,8 @@ import {
 	ThemeIcon,
 	Alert,
 	Paper,
+	Switch,
+	MultiSelect,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -21,10 +23,12 @@ import {
 	IconDeviceMobile,
 	IconAlertCircle,
 	IconGauge,
+	IconMail,
+	IconPhone,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { StockThresholdModalProps } from '../Dealer/types';
+import { StockThresholdRequest } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -99,9 +103,21 @@ const useStyles = createStyles((theme) => ({
 			textAlign: 'center',
 		},
 	},
+
+	notificationSection: {
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+		borderRadius: theme.radius.md,
+		padding: theme.spacing.md,
+		marginTop: theme.spacing.md,
+	},
 }));
 
-export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalProps) {
+interface SetStockThresholdModalProps {
+	opened: boolean;
+	onClose: () => void;
+}
+
+export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdModalProps) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
 
@@ -120,13 +136,17 @@ export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalP
 		queryFn: () => request.get('/lookups/devices'),
 	});
 
-	const form = useForm({
+	const form = useForm<StockThresholdRequest>({
 		initialValues: {
 			dealerId: '',
-			category: '',
+			category: 'wakanet',
 			productId: '',
 			deviceId: '',
 			threshold: 100,
+			emailNotifications: true,
+			smsNotifications: false,
+			notificationEmails: [],
+			notificationMsisdns: [],
 		},
 		validate: {
 			dealerId: (value) => (!value ? 'Dealer is required' : null),
@@ -142,7 +162,7 @@ export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalP
 	});
 
 	const mutation = useMutation({
-		mutationFn: (values: typeof form.values) => request.post('/stock-thresholds', values),
+		mutationFn: (values: StockThresholdRequest) => request.post('/stock-thresholds', values),
 		onSuccess: () => {
 			onClose();
 			form.reset();
@@ -204,7 +224,8 @@ export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalP
 					</Text>
 					<Text size="sm">
 						Set minimum stock levels to receive alerts when inventory falls below the
-						threshold.
+						threshold. You can configure email and SMS notifications for low stock
+						alerts.
 					</Text>
 				</Paper>
 
@@ -353,6 +374,81 @@ export function SetStockThresholdModal({ opened, onClose }: StockThresholdModalP
 									description="Minimum quantity before low stock alert"
 								/>
 							</div>
+						</div>
+
+						{/* Notification Settings */}
+						<div className={classes.notificationSection}>
+							<Text
+								size="sm"
+								weight={500}
+								color="dimmed"
+								mb="xs"
+							>
+								Notification Settings
+							</Text>
+							<Stack spacing="md">
+								<Group position="apart">
+									<Text size="sm">Email Notifications</Text>
+									<Switch
+										{...form.getInputProps('emailNotifications', {
+											type: 'checkbox',
+										})}
+									/>
+								</Group>
+
+								{form.values.emailNotifications && (
+									<MultiSelect
+										label="Notification Emails"
+										placeholder="Add email addresses for notifications"
+										icon={<IconMail size={16} />}
+										data={form.values.notificationEmails}
+										searchable
+										creatable
+										getCreateLabel={(query) => `+ Add ${query}`}
+										onCreate={(query) => {
+											const item = { value: query, label: query };
+											form.setFieldValue('notificationEmails', [
+												...form.values.notificationEmails,
+												query,
+											]);
+											return item;
+										}}
+										{...form.getInputProps('notificationEmails')}
+										radius="md"
+									/>
+								)}
+
+								<Group position="apart">
+									<Text size="sm">SMS Notifications</Text>
+									<Switch
+										{...form.getInputProps('smsNotifications', {
+											type: 'checkbox',
+										})}
+									/>
+								</Group>
+
+								{form.values.smsNotifications && (
+									<MultiSelect
+										label="Notification Phone Numbers"
+										placeholder="Add phone numbers for SMS notifications"
+										icon={<IconPhone size={16} />}
+										data={form.values.notificationMsisdns}
+										searchable
+										creatable
+										getCreateLabel={(query) => `+ Add ${query}`}
+										onCreate={(query) => {
+											const item = { value: query, label: query };
+											form.setFieldValue('notificationMsisdns', [
+												...form.values.notificationMsisdns,
+												query,
+											]);
+											return item;
+										}}
+										{...form.getInputProps('notificationMsisdns')}
+										radius="md"
+									/>
+								)}
+							</Stack>
 						</div>
 					</Stack>
 				</form>

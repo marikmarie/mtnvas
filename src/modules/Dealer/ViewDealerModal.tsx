@@ -116,7 +116,7 @@ const useStyles = createStyles((theme) => ({
 
 	linkValue: {
 		fontWeight: 600,
-		color: theme.colors.blue[6],
+		color: theme.colors.yellow[6],
 		cursor: 'pointer',
 		textDecoration: 'none',
 
@@ -177,7 +177,7 @@ export function ViewDealerModal({ opened, onClose, dealer }: ViewDealerModalProp
 	const getCategoryColor = (category: string) => {
 		switch (category?.toLowerCase()) {
 			case 'wakanet':
-				return 'blue';
+				return 'yellow';
 			case 'enterprise':
 				return 'purple';
 			case 'both':
@@ -215,7 +215,7 @@ export function ViewDealerModal({ opened, onClose, dealer }: ViewDealerModalProp
 							size={40}
 							radius="md"
 							variant="light"
-							color="blue"
+							color="yellow"
 						>
 							<IconEye size={20} />
 						</ThemeIcon>

@@ -132,7 +132,7 @@ export function EditDealerAdminModal({
 						size={40}
 						radius="md"
 						variant="light"
-						color="blue"
+						color="yellow"
 					>
 						<IconUserEdit size={20} />
 					</ThemeIcon>
