@@ -21,7 +21,7 @@ export const Modal: FC<Props> = ({ opened, close, size, height, children }) => {
 				opacity: 0.55,
 				blur: 3,
 			}}
-			sx={{ height }}
+			sx={{ height, padding: 0 }}
 			size={size}
 			centered
 			transitionProps={{

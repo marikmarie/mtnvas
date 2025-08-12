@@ -540,3 +540,77 @@ export interface SalesReportModalProps {
 	opened: boolean;
 	onClose: () => void;
 }
+
+// =====================
+// Commission Management Types
+// =====================
+
+// Commission Rate Interface
+export interface CommissionRate {
+	id: string;
+	dealerId?: string;
+	userType: 'shop_agent' | 'dsa' | 'retailer';
+	productId: string;
+	productName: string;
+	commissionType: 'fixed' | 'percentage';
+	amount: number;
+	currency: string;
+	effectiveFrom: string;
+	isActive: boolean;
+}
+
+// Commission Rate Request
+export interface CommissionRateRequest {
+	dealerId?: string;
+	userType: 'shop_agent' | 'dsa' | 'retailer';
+	productId: string;
+	commissionType: 'fixed' | 'percentage';
+	amount: number;
+	currency?: string;
+	effectiveFrom?: string;
+}
+
+// Commission Earning Interface
+export interface CommissionEarning {
+	id: string;
+	agentId: string;
+	agentName: string;
+	transactionId: string;
+	productName: string;
+	commissionAmount: number;
+	status: 'pending' | 'paid' | 'cancelled';
+	earnedAt: string;
+	paidAt?: string;
+}
+
+// Commission Earnings Summary
+export interface CommissionEarningsSummary {
+	totalEarned: number;
+	totalPaid: number;
+	totalPending: number;
+}
+
+// Commission Earnings Response
+export interface CommissionEarningsResponse {
+	data: CommissionEarning[];
+	summary: CommissionEarningsSummary;
+}
+
+// Commission Modal Props
+export interface CommissionRateModalProps {
+	opened: boolean;
+	onClose: () => void;
+	commissionRate?: CommissionRate | null;
+}
+
+export interface CommissionEarningsModalProps {
+	opened: boolean;
+	onClose: () => void;
+	earning: CommissionEarning | null;
+}
+
+export interface BulkCommissionPaymentModalProps {
+	opened: boolean;
+	onClose: () => void;
+	selectedEarnings: CommissionEarning[];
+}

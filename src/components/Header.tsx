@@ -387,6 +387,12 @@ const navItems = [
 				path: '/sales-management',
 				icon: <IconReceipt size={16} />,
 			},
+			{
+				key: 'commission-management',
+				label: 'Commission Management',
+				path: '/commission-management',
+				icon: <IconUsers size={16} />,
+			},
 		],
 	},
 ];
