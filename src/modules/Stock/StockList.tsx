@@ -35,7 +35,7 @@ import {
 	IconEye,
 	IconDownload,
 } from '@tabler/icons-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { AddStockModal } from './AddStockModal';
@@ -171,7 +171,6 @@ const useStyles = createStyles((theme) => ({
 export function StockList() {
 	const { classes } = useStyles();
 	const request = useRequest(true);
-	const queryClient = useQueryClient();
 
 	const [searchTerm, setSearchTerm] = useState('');
 	const [categoryFilter, setCategoryFilter] = useState<string>('all');
