@@ -221,8 +221,12 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 						Parent Dealer
 					</Text>
 					<Text weight={600}>{dealer.companyName || dealer.name}</Text>
-					<Text size="sm" color="dimmed">
-						{dealer.location && `${dealer.location}, `}{dealer.region}
+					<Text
+						size="sm"
+						color="dimmed"
+					>
+						{dealer.location && `${dealer.location}, `}
+						{dealer.region}
 					</Text>
 				</div>
 
@@ -282,7 +286,12 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 										label="Region"
 										placeholder="Select region"
 										required
-										icon={<IconGlobe size={16} className={classes.inputIcon} />}
+										icon={
+											<IconGlobe
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
 										data={[
 											{ value: 'central', label: 'Central' },
 											{ value: 'eastern', label: 'Eastern' },
@@ -298,7 +307,12 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 									<TextInput
 										label="Operating Hours"
 										placeholder="e.g., 8:00 AM - 6:00 PM"
-										icon={<IconClock size={16} className={classes.inputIcon} />}
+										icon={
+											<IconClock
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
 										{...form.getInputProps('operatingHours')}
 										radius="md"
 									/>
@@ -331,7 +345,11 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 							>
 								Coordinates (Optional)
 							</Text>
-							<Text size="xs" color="dimmed" mb="xs">
+							<Text
+								size="xs"
+								color="dimmed"
+								mb="xs"
+							>
 								Provide GPS coordinates for precise location mapping
 							</Text>
 							<div className={classes.formRow}>
@@ -370,7 +388,11 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 							>
 								Admin Information (Optional)
 							</Text>
-							<Text size="xs" color="dimmed" mb="xs">
+							<Text
+								size="xs"
+								color="dimmed"
+								mb="xs"
+							>
 								You can assign an admin during shop creation or do it later
 							</Text>
 							<div className={classes.formRow}>
@@ -424,7 +446,7 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 						leftIcon={<IconPlus size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={() => handleSubmit()}
+						onClick={() => form.onSubmit(handleSubmit)()}
 					>
 						Add Shop
 					</Button>
