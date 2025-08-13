@@ -3,7 +3,6 @@ import {
 	Card,
 	Divider,
 	Group,
-	Modal,
 	Paper,
 	Select,
 	SimpleGrid,
@@ -27,6 +26,7 @@ import { useMemo } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
 import { SalesReportModalProps, SalesReportRequest, SalesReportResponse } from '../Dealer/types';
+import { Modal } from '../../components/Modal';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -203,17 +203,9 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 	return (
 		<Modal
 			opened={opened}
-			onClose={handleClose}
-			title={null}
+			close={handleClose}
 			size="xl"
-			radius="lg"
-			padding={0}
-			styles={{
-				body: { padding: 0 },
-				header: { display: 'none' },
-			}}
 		>
-			{/* Custom Header */}
 			<div
 				className={classes.header}
 				style={{ padding: '24px 24px 0' }}
@@ -312,7 +304,6 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 						<Group grow>
 							<DatePickerInput
 								label="From Date"
-								placeholder="Select start date"
 								icon={
 									<IconCalendar
 										size={16}
@@ -327,7 +318,6 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 
 							<DatePickerInput
 								label="To Date"
-								placeholder="Select end date"
 								icon={
 									<IconCalendar
 										size={16}

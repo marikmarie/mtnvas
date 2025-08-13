@@ -1,7 +1,6 @@
 import {
 	Button,
 	Group,
-	Modal,
 	NumberInput,
 	Select,
 	Stack,
@@ -23,6 +22,7 @@ import {
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
 import { CashSaleModalProps, CashSaleRequest, CashSaleResponse } from '../Dealer/types';
+import { Modal } from '../../components/Modal';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -188,17 +188,9 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 	return (
 		<Modal
 			opened={opened}
-			onClose={handleClose}
-			title={null}
+			close={handleClose}
 			size="lg"
-			radius="lg"
-			padding={0}
-			styles={{
-				body: { padding: 0 },
-				header: { display: 'none' },
-			}}
 		>
-			{/* Custom Header */}
 			<div
 				className={classes.header}
 				style={{ padding: '24px 24px 0' }}

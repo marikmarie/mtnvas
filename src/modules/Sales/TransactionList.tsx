@@ -94,11 +94,6 @@ const useStyles = createStyles((theme) => ({
 		border: `1px solid ${
 			theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
 		}`,
-		transition: 'all 0.2s ease',
-		'&:hover': {
-			transform: 'translateY(-2px)',
-			boxShadow: theme.shadows.lg,
-		},
 	},
 
 	statIcon: {

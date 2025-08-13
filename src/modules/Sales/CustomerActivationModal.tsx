@@ -1,7 +1,6 @@
 import {
 	Button,
 	Group,
-	Modal,
 	Select,
 	Stack,
 	Text,
@@ -18,6 +17,7 @@ import {
 	CustomerActivationRequest,
 	CustomerActivationResponse,
 } from '../Dealer/types';
+import { Modal } from '../../components/Modal';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -137,20 +137,12 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 	return (
 		<Modal
 			opened={opened}
-			onClose={handleClose}
-			title={null}
+			close={handleClose}
 			size="lg"
-			radius="lg"
-			padding={0}
-			styles={{
-				body: { padding: 0 },
-				header: { display: 'none' },
-			}}
 		>
-			{/* Custom Header */}
 			<div
 				className={classes.header}
-				style={{ padding: '24px 24px 0' }}
+				style={{ padding: '24px 24px 0', marginBottom: 0 }}
 			>
 				<ThemeIcon
 					size="lg"
