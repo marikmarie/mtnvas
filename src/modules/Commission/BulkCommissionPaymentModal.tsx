@@ -2,7 +2,6 @@ import {
 	Button,
 	Divider,
 	Group,
-	Modal,
 	Paper,
 	Stack,
 	Table,
@@ -17,6 +16,7 @@ import { IconCash, IconCheck, IconMessageCircle } from '@tabler/icons-react';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
 import { BulkCommissionPaymentModalProps, CommissionEarning } from '../Dealer/types';
+import { Modal } from '../../components/Modal';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -159,15 +159,8 @@ export function BulkCommissionPaymentModal({
 	return (
 		<Modal
 			opened={opened}
-			onClose={handleClose}
-			title={null}
-			size="lg"
-			radius="lg"
-			padding={0}
-			styles={{
-				body: { padding: 0 },
-				header: { display: 'none' },
-			}}
+			close={handleClose}
+			size="xl"
 		>
 			{/* Custom Header */}
 			<div
