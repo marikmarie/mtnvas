@@ -1,31 +1,31 @@
 import {
+	Alert,
 	Button,
+	createStyles,
 	Group,
+	MultiSelect,
 	NumberInput,
+	Paper,
 	Select,
 	Stack,
-	Title,
-	Text,
-	createStyles,
-	ThemeIcon,
-	Alert,
-	Paper,
 	Switch,
-	MultiSelect,
+	Text,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import {
-	IconSettings,
+	IconAlertCircle,
+	IconBox,
 	IconBuilding,
 	IconCategory,
-	IconBox,
 	IconDeviceMobile,
-	IconAlertCircle,
 	IconGauge,
 	IconMail,
 	IconPhone,
+	IconSettings,
 } from '@tabler/icons-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { StockThresholdRequest } from '../Dealer/types';
@@ -401,14 +401,14 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 										label="Notification Emails"
 										placeholder="Add email addresses for notifications"
 										icon={<IconMail size={16} />}
-										data={form.values.notificationEmails}
+										data={form.values.notificationEmails || []}
 										searchable
 										creatable
 										getCreateLabel={(query) => `+ Add ${query}`}
 										onCreate={(query) => {
 											const item = { value: query, label: query };
 											form.setFieldValue('notificationEmails', [
-												...form.values.notificationEmails,
+												...(form.values.notificationEmails || []),
 												query,
 											]);
 											return item;
@@ -432,14 +432,14 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 										label="Notification Phone Numbers"
 										placeholder="Add phone numbers for SMS notifications"
 										icon={<IconPhone size={16} />}
-										data={form.values.notificationMsisdns}
+										data={form.values.notificationMsisdns || []}
 										searchable
 										creatable
 										getCreateLabel={(query) => `+ Add ${query}`}
 										onCreate={(query) => {
 											const item = { value: query, label: query };
 											form.setFieldValue('notificationMsisdns', [
-												...form.values.notificationMsisdns,
+												...(form.values.notificationMsisdns || []),
 												query,
 											]);
 											return item;

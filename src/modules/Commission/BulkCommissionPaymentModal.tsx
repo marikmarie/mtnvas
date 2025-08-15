@@ -11,12 +11,12 @@ import {
 	createStyles,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { IconCash, IconCheck, IconMessageCircle } from '@tabler/icons-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
-import { BulkCommissionPaymentModalProps, CommissionEarning } from '../Dealer/types';
-import { Modal } from '../../components/Modal';
+import { BulkCommissionPaymentModalProps } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -143,18 +143,18 @@ export function BulkCommissionPaymentModal({
 		onClose();
 	};
 
-	// Group earnings by agent for better display
-	const earningsByAgent = pendingEarnings.reduce(
-		(acc, earning) => {
-			const agentName = earning.agentName;
-			if (!acc[agentName]) {
-				acc[agentName] = [];
-			}
-			acc[agentName].push(earning);
-			return acc;
-		},
-		{} as Record<string, CommissionEarning[]>
-	);
+	// // Group earnings by agent for better display
+	// const earningsByAgent = pendingEarnings.reduce(
+	// 	(acc, earning) => {
+	// 		const agentName = earning.agentName;
+	// 		if (!acc[agentName]) {
+	// 			acc[agentName] = [];
+	// 		}
+	// 		acc[agentName].push(earning);
+	// 		return acc;
+	// 	},
+	// 	{} as Record<string, CommissionEarning[]>
+	// );
 
 	return (
 		<Modal

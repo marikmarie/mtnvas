@@ -1,31 +1,32 @@
 import {
+	Alert,
+	Badge,
 	Button,
 	Group,
+	Paper,
+	Select,
 	Stack,
+	Text,
 	TextInput,
 	Textarea,
-	Title,
-	Text,
-	createStyles,
 	ThemeIcon,
-	Alert,
-	Select,
-	Paper,
+	Title,
+	createStyles,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-	IconRefresh,
-	IconDeviceMobile,
-	IconFileText,
 	IconAlertCircle,
 	IconArrowRight,
+	IconDeviceMobile,
+	IconFileText,
+	IconRefresh,
 	IconUser,
 	IconUserCircle,
 } from '@tabler/icons-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { ImeiSwapModalProps, ImeiSwapRequest, ImeiAvailabilityCheck } from '../Dealer/types';
+import { ImeiAvailabilityCheck, ImeiSwapModalProps, ImeiSwapRequest } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -252,7 +253,6 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 							<div className={classes.inputWrapper}>
 								<TextInput
 									label="Current IMEI"
-									value={imei}
 									disabled
 									icon={
 										<IconDeviceMobile
@@ -263,6 +263,7 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 									className={classes.imeiDisplay}
 									radius="md"
 									{...form.getInputProps('oldImei')}
+									value={imei}
 								/>
 							</div>
 
@@ -342,7 +343,6 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 												<Alert
 													icon={<IconAlertCircle size={16} />}
 													color="red"
-													size="sm"
 												>
 													This IMEI cannot be used for swapping
 												</Alert>
