@@ -220,7 +220,7 @@ Query Params: {
   limit?: number;
   search?: string;
   dealerId?: string;
-  status?: 'active' | 'inactive' | 'pending_approval';
+  status?: 'Active' | 'Inactive' | 'PendingApproval';
   region?: string;
 }
 Response: ApiResponse<{

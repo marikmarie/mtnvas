@@ -183,7 +183,6 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 	const selectedShop = shops.find((s) => s.id === form.values.shopId);
 	const hasErrors = Object.keys(form.errors).length > 0;
 
-	// Update shopId validation when userType changes
 	const handleUserTypeChange = (value: string) => {
 		form.setFieldValue('userType', value as 'shop_agent' | 'dsa' | 'retailer');
 		if (value !== 'shop_agent') {
@@ -199,7 +198,6 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -227,9 +225,7 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 				</div>
 			</div>
 
-			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Dealer Information */}
 				<div className={classes.dealerInfo}>
 					<Text
 						size="sm"
@@ -242,7 +238,6 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 					<Text weight={600}>{dealer.dealerName}</Text>
 				</div>
 
-				{/* Shop Selection Info */}
 				{selectedShop && (
 					<div className={classes.shopInfo}>
 						<Text
@@ -280,7 +275,6 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 
 				<form onSubmit={form.onSubmit(handleSubmit)}>
 					<Stack spacing="lg">
-						{/* Personal Information */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -323,7 +317,6 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 							</div>
 						</div>
 
-						{/* Contact Information */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -368,7 +361,6 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 							</div>
 						</div>
 
-						{/* User Type and Assignment */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -427,7 +419,6 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 							</div>
 						</div>
 
-						{/* Business Information */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -473,7 +464,6 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 				</form>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"

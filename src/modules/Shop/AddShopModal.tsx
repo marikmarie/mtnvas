@@ -3,7 +3,6 @@ import {
 	Button,
 	createStyles,
 	Group,
-	NumberInput,
 	Select,
 	Stack,
 	Text,
@@ -15,12 +14,12 @@ import { useForm } from '@mantine/form';
 import {
 	IconAlertCircle,
 	IconBuildingStore,
-	IconClock,
 	IconGlobe,
 	IconMapPin,
 	IconPlus,
 } from '@tabler/icons-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Dealer } from '../Dealer/types';
@@ -28,7 +27,6 @@ import { Dealer } from '../Dealer/types';
 interface AddShopModalProps {
 	opened: boolean;
 	onClose: () => void;
-	dealer: Dealer;
 }
 
 interface ShopFormValues {
@@ -111,15 +109,24 @@ const useStyles = createStyles((theme) => ({
 	},
 }));
 
-export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
+export function AddShopModal({ opened, onClose }: AddShopModalProps) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
 	const queryClient = useQueryClient();
 
+	const { data: dealers } = useQuery({
+		queryKey: ['dealers'],
+		queryFn: () => request.get('/dealer'),
+	});
+
+	const dealerList = useMemo(() => {
+		return dealers?.data.data as Dealer[];
+	}, [dealers?.data?.data]);
+
 	const form = useForm<ShopFormValues>({
 		initialValues: {
 			shopName: '',
-			dealerId: dealer.id,
+			dealerId: '',
 			location: '',
 			region: '',
 			adminName: '',
@@ -146,7 +153,6 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 				region: values.region,
 			};
 
-			// Add optional fields if provided
 			if (values.adminName) payload.adminName = values.adminName;
 			if (values.adminEmail) payload.adminEmail = values.adminEmail;
 			if (values.adminMsisdn) payload.adminMsisdn = values.adminMsisdn;
@@ -162,7 +168,7 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['shops'] });
-			queryClient.invalidateQueries({ queryKey: ['dealer', dealer.id] });
+			queryClient.invalidateQueries({ queryKey: ['dealer', form.values.dealerId] });
 			onClose();
 			form.reset();
 		},
@@ -180,7 +186,6 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -202,34 +207,13 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 							color="dimmed"
 							size="sm"
 						>
-							Create a new shop location for {dealer.dealerName}
+							Create a new shop location
 						</Text>
 					</div>
 				</div>
 			</div>
 
-			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Dealer Information */}
-				<div className={classes.dealerInfo}>
-					<Text
-						size="sm"
-						weight={500}
-						color="dimmed"
-						mb="xs"
-					>
-						Parent Dealer
-					</Text>
-					<Text weight={600}>{dealer.dealerName}</Text>
-					<Text
-						size="sm"
-						color="dimmed"
-					>
-						{dealer.location && `${dealer.location}, `}
-						{dealer.region}
-					</Text>
-				</div>
-
 				{hasErrors && (
 					<Alert
 						icon={<IconAlertCircle size={16} />}
@@ -242,192 +226,75 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 				)}
 
 				<form onSubmit={form.onSubmit(handleSubmit)}>
-					<Stack spacing="lg">
-						{/* Shop Information */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Shop Information
-							</Text>
-							<div className={classes.inputWrapper}>
-								<TextInput
-									label="Shop Name"
-									placeholder="Enter shop name"
-									required
-									icon={
-										<IconBuildingStore
-											size={16}
-											className={classes.inputIcon}
-										/>
-									}
-									{...form.getInputProps('shopName')}
-									radius="md"
+					<Stack spacing="sm">
+						<Select
+							label="Dealer"
+							placeholder="Select dealer"
+							required
+							icon={
+								<IconGlobe
+									size={16}
+									className={classes.inputIcon}
 								/>
-							</div>
-						</div>
-
-						{/* Location Information */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Location Details
-							</Text>
-							<div className={classes.formRow}>
-								<div className={classes.inputWrapper}>
-									<Select
-										label="Region"
-										placeholder="Select region"
-										required
-										icon={
-											<IconGlobe
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										data={[
-											{ value: 'central', label: 'Central' },
-											{ value: 'eastern', label: 'Eastern' },
-											{ value: 'western', label: 'Western' },
-											{ value: 'northern', label: 'Northern' },
-											{ value: 'southern', label: 'Southern' },
-										]}
-										{...form.getInputProps('region')}
-										radius="md"
-									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<TextInput
-										label="Operating Hours"
-										placeholder="e.g., 8:00 AM - 6:00 PM"
-										icon={
-											<IconClock
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										{...form.getInputProps('operatingHours')}
-										radius="md"
-									/>
-								</div>
-							</div>
-							<div className={classes.inputWrapper}>
-								<TextInput
-									label="Address"
-									placeholder="Enter shop address"
-									required
-									icon={
-										<IconMapPin
-											size={16}
-											className={classes.inputIcon}
-										/>
-									}
-									{...form.getInputProps('location')}
-									radius="md"
+							}
+							data={dealerList?.map((dealer: Dealer) => ({
+								value: dealer.id,
+								label: dealer.dealerName,
+							}))}
+							{...form.getInputProps('dealerId')}
+							radius="md"
+						/>
+						<TextInput
+							label="Shop Name"
+							placeholder="Enter shop name"
+							required
+							icon={
+								<IconBuildingStore
+									size={16}
+									className={classes.inputIcon}
 								/>
-							</div>
-						</div>
+							}
+							{...form.getInputProps('shopName')}
+							radius="md"
+						/>
 
-						{/* Coordinates (Optional) */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Coordinates (Optional)
-							</Text>
-							<Text
-								size="xs"
-								color="dimmed"
-								mb="xs"
-							>
-								Provide GPS coordinates for precise location mapping
-							</Text>
-							<div className={classes.formRow}>
-								<div className={classes.inputWrapper}>
-									<NumberInput
-										label="Latitude"
-										placeholder="e.g., -1.2921"
-										precision={6}
-										min={-90}
-										max={90}
-										{...form.getInputProps('latitude')}
-										radius="md"
-									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<NumberInput
-										label="Longitude"
-										placeholder="e.g., 36.8219"
-										precision={6}
-										min={-180}
-										max={180}
-										{...form.getInputProps('longitude')}
-										radius="md"
-									/>
-								</div>
-							</div>
-						</div>
-
-						{/* Admin Information (Optional) */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Admin Information (Optional)
-							</Text>
-							<Text
-								size="xs"
-								color="dimmed"
-								mb="xs"
-							>
-								You can assign an admin during shop creation or do it later
-							</Text>
-							<div className={classes.formRow}>
-								<div className={classes.inputWrapper}>
-									<TextInput
-										label="Admin Name"
-										placeholder="Enter admin name"
-										{...form.getInputProps('adminName')}
-										radius="md"
-									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<TextInput
-										label="Admin Email"
-										placeholder="Enter admin email"
-										type="email"
-										{...form.getInputProps('adminEmail')}
-										radius="md"
-									/>
-								</div>
-							</div>
-							<div className={classes.inputWrapper}>
-								<TextInput
-									label="Admin Phone"
-									placeholder="Enter admin phone number"
-									{...form.getInputProps('adminMsisdn')}
-									radius="md"
+						<Select
+							label="Region"
+							placeholder="Select region"
+							required
+							icon={
+								<IconGlobe
+									size={16}
+									className={classes.inputIcon}
 								/>
-							</div>
-						</div>
+							}
+							data={[
+								{ value: 'central', label: 'Central' },
+								{ value: 'eastern', label: 'Eastern' },
+								{ value: 'western', label: 'Western' },
+								{ value: 'northern', label: 'Northern' },
+							]}
+							{...form.getInputProps('region')}
+							radius="md"
+						/>
+
+						<TextInput
+							label="Location"
+							placeholder="Enter shop address"
+							required
+							icon={
+								<IconMapPin
+									size={16}
+									className={classes.inputIcon}
+								/>
+							}
+							{...form.getInputProps('location')}
+							radius="md"
+						/>
 					</Stack>
 				</form>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"

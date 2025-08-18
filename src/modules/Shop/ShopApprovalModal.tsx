@@ -21,7 +21,7 @@ interface ShopApprovalModalProps {
 	opened: boolean;
 	onClose: () => void;
 	shop: Shop;
-	action: 'approve' | 'reject';
+	action: 'Approve' | 'Reject';
 }
 
 interface ApprovalFormValues {
@@ -102,7 +102,7 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 		},
 		validate: {
 			reason: (value) => {
-				if (action === 'reject' && !value) {
+				if (action === 'Reject' && !value) {
 					return 'Reason is required for rejection';
 				}
 				return null;
@@ -110,24 +110,20 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 		},
 	});
 
-	// Fetch dealer admins for assignment (only for approval)
 	const { data: dealerAdminsData } = useQuery({
 		queryKey: ['dealer-admins', shop.dealerId],
 		queryFn: () => request.get(`/dealer/${shop.dealerId}/admins`),
-		enabled: action === 'approve' && !!shop.dealerId,
+		enabled: action === 'Approve' && !!shop.dealerId,
 	});
 
 	const mutation = useMutation({
 		mutationFn: (values: ApprovalFormValues) => {
-			return request.post(`/shops/${shop.id}/approval`, {
-				action,
-				reason: values.reason,
-				assignToAdminId: values.assignToAdminId,
-			});
+			return request.post(
+				`/shops/${shop.id}/approval?action=${action}&reason=${values.reason}&assignToAdminId=${values.assignToAdminId}`
+			);
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['shops'] });
-			queryClient.invalidateQueries({ queryKey: ['shops', 'pending-approvals'] });
 			onClose();
 			form.reset();
 		},
@@ -139,7 +135,6 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 
 	const hasErrors = Object.keys(form.errors).length > 0;
 
-	// Prepare admin options for assignment
 	const adminOptions =
 		dealerAdminsData?.data?.data
 			?.filter((admin: any) => admin.status === 'active')
@@ -148,7 +143,7 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 				label: `${admin.name} (${admin.email})`,
 			})) || [];
 
-	const isApproval = action === 'approve';
+	const isApproval = action === 'Approve';
 	const actionColor = isApproval ? 'green' : 'red';
 	const actionIcon = isApproval ? <IconCheck size={20} /> : <IconX size={20} />;
 	const actionTitle = isApproval ? 'Approve Shop' : 'Reject Shop';
@@ -162,7 +157,6 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -190,9 +184,7 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 				</div>
 			</div>
 
-			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Shop Information */}
 				<div className={classes.shopInfo}>
 					<Text
 						size="sm"
@@ -219,7 +211,6 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 					</Text>
 				</div>
 
-				{/* Approval Information */}
 				<div className={classes.approvalInfo}>
 					<Text
 						size="sm"
@@ -227,13 +218,13 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 						color="dimmed"
 						mb="xs"
 					>
-						{action === 'approve' ? 'Approval Details' : 'Rejection Details'}
+						{action === 'Approve' ? 'Approval Details' : 'Rejection Details'}
 					</Text>
 					<Text
 						size="sm"
 						mb="xs"
 					>
-						<strong>Action:</strong> {action === 'approve' ? 'Approve' : 'Reject'}
+						<strong>Action:</strong> {action === 'Approve' ? 'Approve' : 'Reject'}
 					</Text>
 					<Text size="sm">
 						<strong>Status:</strong> {shop.status?.replace('_', ' ')}
@@ -253,8 +244,7 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 
 				<form onSubmit={form.onSubmit(handleSubmit)}>
 					<Stack spacing="lg">
-						{/* Reason for rejection (required for rejection) */}
-						{action === 'reject' && (
+						{action === 'Reject' && (
 							<div className={classes.formGroup}>
 								<Text
 									size="sm"
@@ -277,8 +267,7 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 							</div>
 						)}
 
-						{/* Admin assignment (optional for approval) */}
-						{action === 'approve' && (
+						{action === 'Approve' && (
 							<div className={classes.formGroup}>
 								<Text
 									size="sm"
@@ -317,7 +306,6 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 				</form>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"
@@ -339,7 +327,7 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 						onClick={() => handleSubmit()}
 						color={actionColor}
 					>
-						{action === 'approve' ? 'Approve Shop' : 'Reject Shop'}
+						{action === 'Approve' ? 'Approve Shop' : 'Reject Shop'}
 					</Button>
 				</Group>
 			</div>

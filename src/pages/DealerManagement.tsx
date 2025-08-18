@@ -1,18 +1,21 @@
-import { Tabs, Title, Text, Group, createStyles, ThemeIcon, Badge } from '@mantine/core';
+import { Badge, createStyles, Group, Tabs, Text, ThemeIcon, Title } from '@mantine/core';
 import {
 	IconBox,
 	IconBuildingStore,
-	IconUserCircle,
-	IconUsers,
 	IconSettings,
 	IconUser,
+	IconUserCircle,
+	IconUsers,
 } from '@tabler/icons-react';
+import { useQuery } from '@tanstack/react-query';
 import Layout from '../components/Layout';
+import useRequest from '../hooks/useRequest';
+import { AgentList } from '../modules/Agent/AgentList';
 import { DealerList } from '../modules/Dealer/DealerList';
+import { Dealer } from '../modules/Dealer/types';
 import { ShopList } from '../modules/Shop/ShopList';
 import { ShopUsersList } from '../modules/Shop/ShopUsersList';
 import { StockList } from '../modules/Stock/StockList';
-import { AgentList } from '../modules/Agent/AgentList';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -108,6 +111,43 @@ const useStyles = createStyles((theme) => ({
 
 export default function DealerManagement() {
 	const { classes } = useStyles();
+	const request = useRequest();
+
+	const { data: dealers } = useQuery({
+		queryKey: ['dealers'],
+		queryFn: () => request.get('/dealer'),
+	});
+
+	const { data: shops } = useQuery({
+		queryKey: ['shops'],
+		queryFn: () => request.get('/shops'),
+	});
+
+	const { data: shopUsers } = useQuery({
+		queryKey: ['shopUsers'],
+		queryFn: () => request.get('/shop-users'),
+	});
+
+	const { data: stock } = useQuery({
+		queryKey: ['stock'],
+		queryFn: () => request.get('/stock'),
+	});
+
+	const totalActiveDealers = dealers?.data?.data?.filter(
+		(dealer: Dealer) => dealer.status.toLowerCase() === 'active'
+	).length;
+
+	console.log('dealers', dealers);
+
+	console.log('dealers', dealers?.data?.data?.totalCount);
+	console.log('shops', shops?.data?.data?.totalCount);
+	console.log('shopUsers', shopUsers?.data?.data?.totalCount);
+	console.log('stock', stock?.data?.data?.totalCount);
+
+	const totalShops = shops?.data?.totalCount;
+	const totalShopUsers = shopUsers?.data?.totalCount;
+
+	const totalStock = stock?.data?.totalCount;
 
 	return (
 		<Layout>
@@ -162,7 +202,7 @@ export default function DealerManagement() {
 									weight={700}
 									color="yellow"
 								>
-									24
+									{totalActiveDealers}
 								</Text>
 							</div>
 							<div className={classes.statCard}>
@@ -179,7 +219,7 @@ export default function DealerManagement() {
 									weight={700}
 									color="green"
 								>
-									156
+									{totalShops}
 								</Text>
 							</div>
 							<div className={classes.statCard}>
@@ -196,7 +236,7 @@ export default function DealerManagement() {
 									weight={700}
 									color="orange"
 								>
-									89
+									{totalShopUsers}
 								</Text>
 							</div>
 							<div className={classes.statCard}>
@@ -213,7 +253,7 @@ export default function DealerManagement() {
 									weight={700}
 									color="purple"
 								>
-									1,234
+									{totalStock}
 								</Text>
 							</div>
 						</div>

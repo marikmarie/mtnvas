@@ -212,7 +212,6 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 		closeConfirmModal();
 	};
 
-	// Filter and search logic
 	const filteredUsers = useMemo(() => {
 		if (!users?.data?.data) return [];
 
@@ -231,11 +230,11 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 	}, [users?.data?.data, searchTerm, statusFilter, roleFilter]);
 
 	const getStatusColor = (status: string) => {
-		return status === 'active' ? 'green' : 'red';
+		return status.toLowerCase() === 'active' ? 'green' : 'red';
 	};
 
 	const getStatusIcon = (status: string) => {
-		return status === 'active' ? <IconCheck size={14} /> : <IconX size={14} />;
+		return status.toLowerCase() === 'active' ? <IconCheck size={14} /> : <IconX size={14} />;
 	};
 
 	const getRoleColor = (role: string) => {
@@ -320,7 +319,6 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 
 	return (
 		<div className={classes.root}>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<Group
 					position="apart"
@@ -351,7 +349,6 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 				</Group>
 			</div>
 
-			{/* Search and Filter Section */}
 			<div className={classes.searchSection}>
 				<div className={classes.searchRow}>
 					<TextInput
@@ -389,7 +386,6 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 				</div>
 			</div>
 
-			{/* Enhanced Card Grid */}
 			{isLoading ? (
 				<Grid>
 					{Array.from({ length: 6 }).map((_, index) => (
@@ -517,18 +513,20 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 												<Menu.Item
 													icon={<IconPower size={16} />}
 													color={
-														user.status === 'active' ? 'red' : 'green'
+														user.status.toLowerCase() === 'active'
+															? 'red'
+															: 'green'
 													}
 													onClick={() =>
 														handleAction(
 															user,
-															user.status === 'active'
+															user.status.toLowerCase() === 'active'
 																? 'deactivate'
 																: 'activate'
 														)
 													}
 												>
-													{user.status === 'active'
+													{user.status.toLowerCase() === 'active'
 														? 'Deactivate'
 														: 'Activate'}
 												</Menu.Item>
@@ -617,7 +615,6 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 				</Grid>
 			)}
 
-			{/* Modals */}
 			<AddShopUserModal
 				opened={addModalOpened}
 				onClose={closeAddModal}
@@ -630,11 +627,12 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 						msisdn: '',
 						category: 'EBU',
 						createdAt: '',
-						status: 'active',
+						status: 'Active',
 						region: '',
 						location: '',
 						updatedBy: '',
 						updatedAt: '',
+						isActive: true,
 					} as Dealer
 				}
 				shops={[
@@ -645,7 +643,6 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 				]}
 			/>
 
-			{/* Custom Confirmation Modal */}
 			<Modal
 				opened={confirmModalOpened}
 				onClose={closeConfirmModal}

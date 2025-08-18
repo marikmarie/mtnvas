@@ -1,5 +1,6 @@
 import {
 	Alert,
+	Badge,
 	Button,
 	createStyles,
 	Group,
@@ -12,7 +13,8 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconAlertCircle, IconBuildingStore, IconEdit, IconMapPin } from '@tabler/icons-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { formatDate } from 'date-fns';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Shop } from '../Dealer/types';
@@ -45,10 +47,6 @@ const useStyles = createStyles((theme) => ({
 
 	formSection: {
 		padding: theme.spacing.lg,
-	},
-
-	formGroup: {
-		marginBottom: theme.spacing.md,
 	},
 
 	formRow: {
@@ -127,6 +125,12 @@ export function EditShopModal({ opened, onClose, shop }: EditShopModalProps) {
 		},
 	});
 
+	const { data: dealer } = useQuery({
+		queryKey: ['dealers', shop.dealerId],
+		queryFn: () => request.get(`/dealer/${shop.dealerId}`),
+		enabled: !!shop.dealerId,
+	});
+
 	const handleSubmit = () => {
 		mutation.mutate(form.values);
 	};
@@ -139,7 +143,6 @@ export function EditShopModal({ opened, onClose, shop }: EditShopModalProps) {
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -167,9 +170,7 @@ export function EditShopModal({ opened, onClose, shop }: EditShopModalProps) {
 				</div>
 			</div>
 
-			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Shop Information */}
 				<div className={classes.shopInfo}>
 					<Text
 						size="sm"
@@ -183,16 +184,25 @@ export function EditShopModal({ opened, onClose, shop }: EditShopModalProps) {
 						size="sm"
 						mb="xs"
 					>
-						<strong>Dealer:</strong> {shop.dealerName}
+						<strong>Dealer:</strong> {shop.dealerName || 'N/A'}
 					</Text>
 					<Text
 						size="sm"
 						mb="xs"
 					>
-						<strong>Status:</strong> {shop.status?.replace('_', ' ')}
+						<strong>Status:</strong>{' '}
+						<Badge
+							color={
+								shop.status?.toLowerCase().replace('_', ' ') === 'active'
+									? 'green'
+									: 'red'
+							}
+						>
+							{shop.status?.toLowerCase().replace('_', ' ')}
+						</Badge>
 					</Text>
 					<Text size="sm">
-						<strong>Created:</strong> {new Date(shop.createdAt).toLocaleDateString()}
+						<strong>Created:</strong> {formatDate(shop.createdAt, 'dd/MM/yyyy')}
 					</Text>
 				</div>
 
@@ -209,78 +219,41 @@ export function EditShopModal({ opened, onClose, shop }: EditShopModalProps) {
 
 				<form onSubmit={form.onSubmit(handleSubmit)}>
 					<Stack spacing="lg">
-						{/* Shop Information */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Shop Information
-							</Text>
+						<div className={classes.inputWrapper}>
+							<TextInput
+								label="Shop Name"
+								placeholder="Enter shop name"
+								required
+								icon={
+									<IconBuildingStore
+										size={16}
+										className={classes.inputIcon}
+									/>
+								}
+								{...form.getInputProps('shopName')}
+								radius="md"
+							/>
+						</div>
+
+						<div className={classes.formRow}>
 							<div className={classes.inputWrapper}>
-								<TextInput
-									label="Shop Name"
-									placeholder="Enter shop name"
+								<Select
+									label="Region"
+									placeholder="Select region"
 									required
-									icon={
-										<IconBuildingStore
-											size={16}
-											className={classes.inputIcon}
-										/>
-									}
-									{...form.getInputProps('shopName')}
+									data={[
+										{ value: 'Central', label: 'Central' },
+										{ value: 'Easterns', label: 'Eastern' },
+										{ value: 'Western', label: 'Western' },
+										{ value: 'Northern', label: 'Northern' },
+									]}
+									{...form.getInputProps('region')}
 									radius="md"
 								/>
 							</div>
-						</div>
-
-						{/* Location Information */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Location Details
-							</Text>
-							<div className={classes.formRow}>
-								<div className={classes.inputWrapper}>
-									<Select
-										label="Region"
-										placeholder="Select region"
-										required
-										data={[
-											{ value: 'central', label: 'Central' },
-											{ value: 'eastern', label: 'Eastern' },
-											{ value: 'western', label: 'Western' },
-											{ value: 'northern', label: 'Northern' },
-											{ value: 'southern', label: 'Southern' },
-										]}
-										{...form.getInputProps('region')}
-										radius="md"
-									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<TextInput
-										label="Operating Hours"
-										placeholder="e.g., 8:00 AM - 6:00 PM"
-										icon={
-											<IconBuildingStore
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										{...form.getInputProps('operatingHours')}
-										radius="md"
-									/>
-								</div>
-							</div>
 							<div className={classes.inputWrapper}>
 								<TextInput
-									label="Address"
+									label="Location"
 									placeholder="Enter shop address"
 									required
 									icon={
@@ -298,7 +271,6 @@ export function EditShopModal({ opened, onClose, shop }: EditShopModalProps) {
 				</form>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"

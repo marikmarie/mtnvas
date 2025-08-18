@@ -17,7 +17,7 @@ export interface Shop {
 	shopName: string;
 	location: string;
 	region: string;
-	status: string;
+	status: 'PendingApproval' | 'Active' | 'Inactive';
 	createdBy: string;
 	createdAt: string;
 	updatedBy: string;
@@ -332,7 +332,7 @@ export interface Agent {
 }
 
 export interface AgentApprovalPayload {
-	action: 'approve' | 'reject';
+	action: 'Approve' | 'Reject';
 	reason?: string;
 	name?: string;
 	email?: string;
@@ -372,7 +372,7 @@ export interface AgentApprovalModalProps {
 	opened: boolean;
 	onClose: () => void;
 	agent: Agent;
-	action: 'approve' | 'reject';
+	action: 'Approve' | 'Reject';
 }
 
 export interface AgentDuplicateCheckModalProps {

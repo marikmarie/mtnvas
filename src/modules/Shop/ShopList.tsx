@@ -27,7 +27,6 @@ import {
 	IconMapPin,
 	IconPlus,
 	IconSearch,
-	IconShield,
 	IconUser,
 	IconUserPlus,
 	IconX,
@@ -143,7 +142,7 @@ export function ShopList() {
 		useDisclosure(false);
 	const [approvalModalOpened, { open: openApprovalModal, close: closeApprovalModal }] =
 		useDisclosure(false);
-	const [approvalAction, setApprovalAction] = useState<'approve' | 'reject'>('approve');
+	const [approvalAction, setApprovalAction] = useState<'Approve' | 'Reject'>('Approve');
 
 	// Fetch shops with proper query parameters
 	const { data: shopsData, isLoading } = useQuery({
@@ -189,7 +188,7 @@ export function ShopList() {
 			assignToAdminId,
 		}: {
 			shopId: string;
-			action: 'approve' | 'reject';
+			action: 'Approve' | 'Reject';
 			reason?: string;
 			assignToAdminId?: string;
 		}) =>
@@ -220,7 +219,7 @@ export function ShopList() {
 		openAssignAdminModal();
 	};
 
-	const handleApproval = (shop: Shop, action: 'approve' | 'reject') => {
+	const handleApproval = (shop: Shop, action: 'Approve' | 'Reject') => {
 		setSelectedShop(shop);
 		setApprovalAction(action);
 		openApprovalModal();
@@ -333,9 +332,9 @@ export function ShopList() {
 						placeholder="Filter by status"
 						data={[
 							{ value: 'all', label: 'All Status' },
-							{ value: 'active', label: 'Active' },
-							{ value: 'inactive', label: 'Inactive' },
-							{ value: 'pending_approval', label: 'Pending Approval' },
+							{ value: 'Active', label: 'Active' },
+							{ value: 'Inactive', label: 'Inactive' },
+							{ value: 'PendingApproval', label: 'Pending Approval' },
 						]}
 						value={statusFilter}
 						onChange={(value) => setStatusFilter(value || 'all')}
@@ -504,35 +503,6 @@ export function ShopList() {
 												>
 													Edit Shop
 												</Menu.Item>
-												<Menu.Item
-													icon={<IconShield size={16} />}
-													onClick={() => handleAssignAdmin(shop)}
-												>
-													Assign Admin
-												</Menu.Item>
-												{shop.status === 'Pending Approval' && (
-													<>
-														<Menu.Divider />
-														<Menu.Item
-															icon={<IconCheck size={16} />}
-															color="green"
-															onClick={() =>
-																handleApproval(shop, 'approve')
-															}
-														>
-															Approve
-														</Menu.Item>
-														<Menu.Item
-															icon={<IconX size={16} />}
-															color="red"
-															onClick={() =>
-																handleApproval(shop, 'reject')
-															}
-														>
-															Reject
-														</Menu.Item>
-													</>
-												)}
 											</Menu.Dropdown>
 										</Menu>
 									</Group>
@@ -578,21 +548,6 @@ export function ShopList() {
 												{shop.dealerName?.toUpperCase() || 'N/A'}
 											</Text>
 										</div>
-										{shop.updatedBy && (
-											<div className={classes.infoRow}>
-												<IconShield
-													size={14}
-													color="gray"
-												/>
-												<Text
-													size="sm"
-													color="dimmed"
-													lineClamp={1}
-												>
-													Updated By: {shop.updatedBy || 'N/A'}
-												</Text>
-											</div>
-										)}
 									</Stack>
 								</Card.Section>
 
@@ -607,7 +562,7 @@ export function ShopList() {
 											{shop.status?.toUpperCase()}
 										</Badge>
 
-										{shop.status === 'Pending Approval' && (
+										{shop.status.toLowerCase() === 'PendingApproval' && (
 											<div className={classes.approvalButtons}>
 												<Tooltip label="Approve">
 													<ActionIcon
@@ -615,7 +570,7 @@ export function ShopList() {
 														variant="light"
 														size="sm"
 														onClick={() =>
-															handleApproval(shop, 'approve')
+															handleApproval(shop, 'Approve')
 														}
 														loading={approvalMutation.isLoading}
 													>
@@ -628,7 +583,7 @@ export function ShopList() {
 														variant="light"
 														size="sm"
 														onClick={() =>
-															handleApproval(shop, 'reject')
+															handleApproval(shop, 'Reject')
 														}
 														loading={approvalMutation.isLoading}
 													>
@@ -645,25 +600,9 @@ export function ShopList() {
 				</Grid>
 			)}
 
-			{/* Modals */}
 			<AddShopModal
 				opened={addShopModalOpened}
 				onClose={closeAddShopModal}
-				dealer={
-					{
-						id: '',
-						dealerName: '',
-						contactPerson: '',
-						email: '',
-						phone: '',
-						category: 'wakanet',
-						department: '',
-						msisdn: '',
-						createdAt: '',
-						status: 'active',
-						updatedAt: '',
-					} as Dealer
-				}
 			/>
 
 			{selectedShop && (
@@ -682,8 +621,9 @@ export function ShopList() {
 								department: '',
 								msisdn: '',
 								createdAt: '',
-								status: 'active',
+								status: 'Active',
 								updatedAt: '',
+								isActive: true,
 							} as Dealer
 						}
 						shops={[

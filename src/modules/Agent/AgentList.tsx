@@ -1,40 +1,40 @@
 import {
-	Button,
-	Group,
-	Stack,
-	Text,
-	Card,
-	TextInput,
-	Select,
-	Badge,
 	ActionIcon,
+	Badge,
+	Button,
+	Card,
 	createStyles,
 	Grid,
-	ThemeIcon,
+	Group,
 	Menu,
-	Title,
-	Pagination,
 	Modal,
+	Pagination,
+	Select,
+	Stack,
+	Text,
+	TextInput,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-	IconUserPlus,
-	IconSearch,
-	IconDotsVertical,
-	IconUser,
-	IconMapPin,
-	IconMail,
-	IconPhone,
-	IconCheck,
-	IconX,
-	IconEdit,
-	IconShield,
-	IconClock,
 	IconAlertCircle,
+	IconCheck,
+	IconClock,
+	IconDotsVertical,
+	IconEdit,
 	IconId,
+	IconMail,
+	IconMapPin,
+	IconPhone,
+	IconSearch,
+	IconShield,
+	IconUser,
+	IconUserPlus,
+	IconX,
 } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState, useMemo, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { Agent } from '../Dealer/types';
 import { AddAgentCategoryModal } from './AddAgentCategoryModal';
@@ -141,7 +141,7 @@ export function AgentList() {
 
 	// Selected items
 	const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
-	const [approvalAction, setApprovalAction] = useState<'approve' | 'reject'>('approve');
+	const [approvalAction, setApprovalAction] = useState<'Approve' | 'Reject'>('Approve');
 
 	const request = useRequest(true);
 	const queryClient = useQueryClient();
@@ -157,7 +157,7 @@ export function AgentList() {
 			dealerId: 'dealer1',
 			shopId: 'shop1',
 			merchantCode: 'MC001',
-			status: 'active',
+			status: 'Active',
 			location: 'Kampala Central',
 			createdAt: '2024-01-15T10:00:00Z',
 		},
@@ -169,7 +169,7 @@ export function AgentList() {
 			userType: 'dsa',
 			dealerId: 'dealer1',
 			merchantCode: 'MC002',
-			status: 'pending_approval',
+			status: 'Pending Approval',
 			location: 'Kampala West',
 			createdAt: '2024-01-16T14:30:00Z',
 		},
@@ -181,7 +181,7 @@ export function AgentList() {
 			userType: 'retailer',
 			dealerId: 'dealer2',
 			merchantCode: 'MC003',
-			status: 'active',
+			status: 'Active',
 			location: 'Entebbe',
 			createdAt: '2024-01-17T09:15:00Z',
 		},
@@ -209,9 +209,9 @@ export function AgentList() {
 
 	const statuses = [
 		{ value: '', label: 'All Statuses' },
-		{ value: 'active', label: 'Active' },
-		{ value: 'inactive', label: 'Inactive' },
-		{ value: 'pending_approval', label: 'Pending Approval' },
+		{ value: 'Active', label: 'Active' },
+		{ value: 'Inactive', label: 'Inactive' },
+		{ value: 'PendingApproval', label: 'Pending Approval' },
 	];
 
 	// Filtered agents
@@ -255,7 +255,7 @@ export function AgentList() {
 		openEditModal();
 	};
 
-	const handleApproval = (agent: Agent, action: 'approve' | 'reject') => {
+	const handleApproval = (agent: Agent, action: 'Approve' | 'Reject') => {
 		if (!agent) return;
 		setSelectedAgent(agent);
 		setApprovalAction(action);
@@ -331,11 +331,11 @@ export function AgentList() {
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
-			case 'active':
+			case 'Active':
 				return 'green';
-			case 'inactive':
+			case 'Inactive':
 				return 'red';
-			case 'pending_approval':
+			case 'Pending Approval':
 				return 'yellow';
 			default:
 				return 'gray';
@@ -344,11 +344,11 @@ export function AgentList() {
 
 	const getStatusIcon = (status: string) => {
 		switch (status) {
-			case 'active':
+			case 'Active':
 				return <IconCheck size={16} />;
-			case 'inactive':
+			case 'Inactive':
 				return <IconX size={16} />;
-			case 'pending_approval':
+			case 'Pending Approval':
 				return <IconClock size={16} />;
 			default:
 				return <IconAlertCircle size={16} />;
@@ -525,13 +525,13 @@ export function AgentList() {
 											>
 												Edit
 											</Menu.Item>
-											{agent.status === 'pending_approval' && (
+											{agent.status === 'Pending Approval' && (
 												<>
 													<Menu.Item
 														icon={<IconCheck size={16} />}
 														color="green"
 														onClick={() =>
-															handleApproval(agent, 'approve')
+															handleApproval(agent, 'Approve')
 														}
 													>
 														Approve
@@ -540,7 +540,7 @@ export function AgentList() {
 														icon={<IconX size={16} />}
 														color="red"
 														onClick={() =>
-															handleApproval(agent, 'reject')
+															handleApproval(agent, 'Reject')
 														}
 													>
 														Reject
@@ -553,7 +553,7 @@ export function AgentList() {
 											>
 												Add Category
 											</Menu.Item>
-											{agent.status === 'active' && (
+											{agent.status === 'Active' && (
 												<Menu.Item
 													icon={<IconX size={16} />}
 													color="red"
