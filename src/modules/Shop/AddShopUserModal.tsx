@@ -1,28 +1,28 @@
 import {
+	Alert,
+	Badge,
 	Button,
+	createStyles,
 	Group,
 	Select,
 	Stack,
 	Text,
 	TextInput,
-	Title,
-	createStyles,
 	ThemeIcon,
-	Alert,
-	Badge,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-	IconUserPlus,
-	IconUser,
-	IconMail,
-	IconPhone,
-	IconBuildingStore,
-	IconShield,
 	IconAlertCircle,
+	IconBuildingStore,
+	IconMail,
 	IconMapPin,
+	IconPhone,
+	IconShield,
+	IconUser,
+	IconUserPlus,
 } from '@tabler/icons-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Dealer } from '../Dealer/types';
@@ -239,7 +239,7 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 					>
 						Parent Dealer
 					</Text>
-					<Text weight={600}>{dealer.companyName || dealer.name}</Text>
+					<Text weight={600}>{dealer.dealerName}</Text>
 				</div>
 
 				{/* Shop Selection Info */}

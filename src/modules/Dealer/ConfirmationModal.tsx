@@ -1,6 +1,6 @@
-import { Button, Group, Text, Title, createStyles, ThemeIcon, Alert } from '@mantine/core';
-import { useMutation } from '@tanstack/react-query';
+import { Alert, Button, createStyles, Group, Text, ThemeIcon, Title } from '@mantine/core';
 import { IconAlertTriangle, IconCheck, IconPower, IconTrash, IconX } from '@tabler/icons-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Dealer } from './types';
@@ -98,18 +98,19 @@ const useStyles = createStyles((theme) => ({
 export function ConfirmationModal({ opened, onClose, action, dealer }: ConfirmationModalProps) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
-
+	const queryClient = useQueryClient();
 	const mutation = useMutation({
 		mutationFn: () => {
 			if (action === 'delete') {
-				return request.delete(`/dealer-groups/${dealer.id}`);
+				return request.delete(`/dealer/${dealer.id}`);
 			}
-			return request.post(`/dealer-groups/${dealer.id}/status`, {
-				status: action === 'activate' ? 'active' : 'inactive',
-			});
+			return request.post(
+				`/dealer/${dealer.id}/approval?action=${action === 'activate' ? 'Approve' : 'Deactivate'}`
+			);
 		},
 		onSuccess: () => {
 			onClose();
+			queryClient.invalidateQueries({ queryKey: ['dealers'] });
 		},
 	});
 
@@ -141,7 +142,7 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 	const getActionTitle = () => {
 		switch (action) {
 			case 'activate':
-				return 'Activate Dealer';
+				return 'Approve Dealer';
 			case 'deactivate':
 				return 'Deactivate Dealer';
 			case 'delete':
@@ -154,13 +155,13 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 	const getActionDescription = () => {
 		switch (action) {
 			case 'activate':
-				return `Are you sure you want to activate "${dealer.name}"? This will enable the dealer to access the system.`;
+				return `Are you sure you want to approve "${dealer.dealerName}"? This will enable the dealer to access the system.`;
 			case 'deactivate':
-				return `Are you sure you want to deactivate "${dealer.name}"? This will temporarily disable the dealer's access.`;
+				return `Are you sure you want to deactivate "${dealer.dealerName}"? This will temporarily disable the dealer's access.`;
 			case 'delete':
-				return `Are you sure you want to permanently delete "${dealer.name}"? This action cannot be undone.`;
+				return `Are you sure you want to permanently delete "${dealer.dealerName}"? This action cannot be undone.`;
 			default:
-				return `Are you sure you want to ${action} the dealer "${dealer.name}"?`;
+				return `Are you sure you want to ${action} the dealer "${dealer.dealerName}"?`;
 		}
 	};
 
@@ -169,7 +170,7 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 			case 'delete':
 				return '⚠️ This action is permanent and cannot be undone. All associated data will be lost.';
 			case 'deactivate':
-				return '⚠️ The dealer will lose access to the system until reactivated.';
+				return '⚠️ The dealer will lose access to the system until approved.';
 			case 'activate':
 				return '✅ The dealer will gain full access to the system.';
 			default:
@@ -253,13 +254,13 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 						weight={600}
 						size="lg"
 					>
-						{dealer.name}
+						{dealer.dealerName}
 					</Text>
 					<Text
 						size="sm"
 						color="dimmed"
 					>
-						{dealer.contactPerson} • {dealer.email}
+						{dealer.email} • {dealer.msisdn} • {dealer.department}
 					</Text>
 				</div>
 

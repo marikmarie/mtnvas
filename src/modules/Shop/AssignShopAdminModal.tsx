@@ -1,21 +1,21 @@
 import {
+	Alert,
 	Button,
+	createStyles,
 	Group,
+	Select,
 	Stack,
 	Text,
-	Title,
-	createStyles,
 	ThemeIcon,
-	Alert,
-	Select,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { IconAlertCircle, IconMail, IconPhone, IconShield, IconUser } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { IconShield, IconUser, IconMail, IconPhone, IconAlertCircle } from '@tabler/icons-react';
+import { useMemo } from 'react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Shop } from '../Dealer/types';
-import { useMemo } from 'react';
 
 interface AssignShopAdminModalProps {
 	opened: boolean;
@@ -119,8 +119,8 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 
 	const form = useForm<AssignAdminFormValues>({
 		initialValues: {
-			adminId: shop.adminId || '',
-			adminName: shop.adminName || '',
+			adminId: shop.updatedBy || '',
+			adminName: shop.updatedBy || '',
 			adminEmail: '',
 			adminMsisdn: '',
 		},
@@ -132,7 +132,7 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 	// Fetch dealer admins for assignment
 	const { data: dealerAdminsData } = useQuery({
 		queryKey: ['dealer-admins', 'all'],
-		queryFn: () => request.get('/dealer-groups/admins'),
+		queryFn: () => request.get('/dealer/admins'),
 	});
 
 	const mutation = useMutation({
@@ -236,7 +236,7 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 				</div>
 
 				{/* Current Admin Information */}
-				{shop.adminName && (
+				{shop.updatedBy && (
 					<div className={classes.currentAdminInfo}>
 						<Text
 							size="sm"
@@ -250,10 +250,10 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 							size="sm"
 							mb="xs"
 						>
-							<strong>Name:</strong> {shop.adminName}
+							<strong>Name:</strong> {shop.updatedBy}
 						</Text>
 						<Text size="sm">
-							<strong>ID:</strong> {shop.adminId}
+							<strong>ID:</strong> {shop.updatedBy}
 						</Text>
 					</div>
 				)}

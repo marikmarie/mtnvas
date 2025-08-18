@@ -1,27 +1,27 @@
 import {
-	Button,
-	Group,
-	Stack,
-	TextInput,
-	Title,
-	Text,
-	createStyles,
-	ThemeIcon,
 	Alert,
+	Button,
+	createStyles,
+	Group,
 	Select,
+	Stack,
+	Text,
+	TextInput,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation } from '@tanstack/react-query';
 import {
-	IconUserPlus,
-	IconUser,
-	IconMail,
-	IconPhone,
-	IconMapPin,
-	IconBuilding,
-	IconShield,
 	IconAlertCircle,
+	IconBuilding,
+	IconMail,
+	IconMapPin,
+	IconPhone,
+	IconShield,
+	IconUser,
+	IconUserPlus,
 } from '@tabler/icons-react';
+import { useMutation } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Dealer } from './types';
@@ -137,7 +137,7 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 		mutationFn: () =>
 			request.post('/users', {
 				...form.values,
-				dealerGroup: dealer.name,
+				dealerGroup: dealer.dealerName,
 			}),
 		mutationKey: ['users'],
 		onSuccess: () => {
@@ -182,7 +182,7 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 							color="dimmed"
 							size="sm"
 						>
-							Create a new {userType} account for {dealer.name}
+							Create a new {userType} account for {dealer.dealerName}
 						</Text>
 					</div>
 				</div>
@@ -200,7 +200,7 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 					>
 						Parent Dealer
 					</Text>
-					<Text weight={600}>{dealer.name}</Text>
+					<Text weight={600}>{dealer.dealerName}</Text>
 					<Text
 						size="sm"
 						color="dimmed"

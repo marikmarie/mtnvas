@@ -1,32 +1,26 @@
 export interface Dealer {
 	id: string;
-	name: string;
-	contactPerson: string;
+	dealerName: string;
 	email: string;
-	phone: string;
-	category: 'wakanet' | 'enterprise' | 'both';
 	createdAt: string;
-	status: 'active' | 'inactive';
-	department: 'wakanet' | 'enterprise' | 'both';
+	status: 'Active' | 'Inactive';
+	department: string;
 	msisdn: string;
-	companyName: string;
 	region?: string;
 	location?: string;
 }
 
 export interface Shop {
 	id: string;
-	shopName: string;
-	dealerId: string;
 	dealerName: string;
+	dealerId: string;
+	shopName: string;
 	location: string;
 	region: string;
-	status: 'active' | 'inactive' | 'pending_approval';
-	adminId?: string;
-	adminName?: string;
-	agentCount: number;
+	status: string;
 	createdBy: string;
 	createdAt: string;
+	updatedBy: string;
 	updatedAt: string;
 }
 
@@ -39,7 +33,7 @@ export interface ShopUser {
 	shopName: string;
 	userType: 'shop_agent' | 'dsa' | 'retailer';
 	createdAt: string;
-	status: 'active' | 'inactive';
+	status: 'Active' | 'Inactive';
 }
 
 export interface Product {
@@ -65,7 +59,7 @@ export interface Stock {
 	dealerId: string;
 	dealerName: string;
 	category: 'wakanet' | 'enterprise';
-	status: 'available' | 'sold' | 'transferred';
+	status: 'Available' | 'Sold' | 'Transferred';
 	assignedAt: string;
 	soldAt?: string;
 	transferredAt?: string;
@@ -161,7 +155,7 @@ export interface StockThresholdAlertsResponse {
 
 export interface ImeiDetails {
 	imei: string;
-	status: 'available' | 'assigned' | 'active' | 'inactive' | 'swapped';
+	status: 'Available' | 'Assigned' | 'Active' | 'Inactive' | 'Swapped';
 	productId: string;
 	productName: string;
 	deviceId: string;
@@ -250,7 +244,7 @@ export interface DealerAdmin {
 	msisdn: string;
 	role: 'dealer_super_admin' | 'dealer_admin';
 	department: 'wakanet' | 'enterprise' | 'both';
-	status: 'active' | 'inactive';
+	status: 'Active' | 'Inactive';
 	createdAt: string;
 }
 
@@ -332,7 +326,7 @@ export interface Agent {
 	dealerId: string;
 	shopId?: string;
 	merchantCode?: string;
-	status: 'active' | 'inactive' | 'pending_approval';
+	status: 'Active' | 'Inactive' | 'Pending Approval';
 	location: string;
 	createdAt: string;
 }
@@ -384,7 +378,7 @@ export interface AgentApprovalModalProps {
 export interface AgentDuplicateCheckModalProps {
 	opened: boolean;
 	onClose: () => void;
-	onDuplicateFound: ( result: AgentDuplicateResponse ) => void;
+	onDuplicateFound: (result: AgentDuplicateResponse) => void;
 }
 
 export interface AddAgentCategoryModalProps {
@@ -437,7 +431,7 @@ export interface Transaction {
 	amount: number;
 	paymentMethod: 'cash' | 'mobile_money';
 	commission: number;
-	status: 'completed' | 'pending' | 'failed';
+	status: 'Completed' | 'Pending' | 'Failed';
 	receiptNumber?: string;
 	createdAt: string;
 }
@@ -457,7 +451,7 @@ export interface CustomerActivationRequest {
 export interface CustomerActivationResponse {
 	transactionId: string;
 	activationId: string;
-	status: 'completed' | 'failed';
+	status: 'Completed' | 'Failed';
 	commissionEarned?: number;
 }
 
@@ -578,7 +572,7 @@ export interface CommissionEarning {
 	transactionId: string;
 	productName: string;
 	commissionAmount: number;
-	status: 'pending' | 'paid' | 'cancelled';
+	status: 'Pending' | 'Paid' | 'Cancelled';
 	earnedAt: string;
 	paidAt?: string;
 }

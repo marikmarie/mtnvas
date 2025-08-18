@@ -1,48 +1,46 @@
 import {
-	Button,
-	Group,
-	Stack,
-	Text,
-	Card,
-	TextInput,
-	Select,
-	Badge,
 	ActionIcon,
-	Tooltip,
+	Badge,
+	Button,
+	Card,
 	createStyles,
 	Grid,
-	ThemeIcon,
+	Group,
 	Menu,
-	Title,
+	Select,
 	Skeleton,
+	Stack,
+	Text,
+	TextInput,
+	ThemeIcon,
+	Title,
+	Tooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-	IconUserPlus,
-	IconSearch,
-	IconFilter,
-	IconPlus,
-	IconDotsVertical,
 	IconBuildingStore,
-	IconMapPin,
-	IconGlobe,
-	IconUser,
 	IconCheck,
-	IconX,
+	IconDotsVertical,
 	IconEdit,
+	IconFilter,
+	IconGlobe,
+	IconMapPin,
+	IconPlus,
+	IconSearch,
 	IconShield,
-	IconClock,
-	IconAlertCircle,
+	IconUser,
+	IconUserPlus,
+	IconX,
 } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import useRequest from '../../hooks/useRequest';
+import { Dealer, Shop } from '../Dealer/types';
 import { AddShopModal } from './AddShopModal';
 import { AddShopUserModal } from './AddShopUserModal';
-import { EditShopModal } from './EditShopModal';
 import { AssignShopAdminModal } from './AssignShopAdminModal';
+import { EditShopModal } from './EditShopModal';
 import { ShopApprovalModal } from './ShopApprovalModal';
-import { Dealer, Shop } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -180,7 +178,7 @@ export function ShopList() {
 	// Fetch dealers for filter
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers'],
-		queryFn: () => request.get('/dealer-groups'),
+		queryFn: () => request.get('/dealer'),
 	});
 
 	const approvalMutation = useMutation({
@@ -239,7 +237,8 @@ export function ShopList() {
 				shop.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				shop.region?.toLowerCase().includes(searchTerm.toLowerCase());
 
-			const matchesStatus = statusFilter === 'all' || shop.status === statusFilter;
+			const matchesStatus =
+				statusFilter === 'all' || shop.status.toLowerCase() === statusFilter.toLowerCase();
 			const matchesRegion = regionFilter === 'all' || shop.region === regionFilter;
 			const matchesDealer = dealerFilter === 'all' || shop.dealerId === dealerFilter;
 
@@ -258,33 +257,20 @@ export function ShopList() {
 		if (!dealersData?.data?.data) return [];
 		return dealersData.data.data.map((dealer: Dealer) => ({
 			value: dealer.id,
-			label: dealer.companyName || dealer.name,
+			label: dealer.dealerName,
 		}));
 	}, [dealersData?.data?.data]);
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
-			case 'active':
+			case 'Active':
 				return 'green';
-			case 'inactive':
+			case 'Inactive':
 				return 'red';
-			case 'pending_approval':
+			case 'Pending Approval':
 				return 'orange';
 			default:
 				return 'gray';
-		}
-	};
-
-	const getStatusIcon = (status: string) => {
-		switch (status) {
-			case 'active':
-				return <IconCheck size={14} />;
-			case 'inactive':
-				return <IconX size={14} />;
-			case 'pending_approval':
-				return <IconClock size={14} />;
-			default:
-				return <IconAlertCircle size={14} />;
 		}
 	};
 
@@ -474,7 +460,7 @@ export function ShopList() {
 							key={shop.id}
 							xs={12}
 							sm={6}
-							lg={4}
+							lg={3}
 						>
 							<Card className={classes.card}>
 								<Card.Section className={classes.cardHeader}>
@@ -524,7 +510,7 @@ export function ShopList() {
 												>
 													Assign Admin
 												</Menu.Item>
-												{shop.status === 'pending_approval' && (
+												{shop.status === 'Pending Approval' && (
 													<>
 														<Menu.Divider />
 														<Menu.Item
@@ -589,10 +575,10 @@ export function ShopList() {
 												color="dimmed"
 												lineClamp={1}
 											>
-												{shop.dealerName?.toUpperCase()}
+												{shop.dealerName?.toUpperCase() || 'N/A'}
 											</Text>
 										</div>
-										{shop.adminName && (
+										{shop.updatedBy && (
 											<div className={classes.infoRow}>
 												<IconShield
 													size={14}
@@ -603,7 +589,7 @@ export function ShopList() {
 													color="dimmed"
 													lineClamp={1}
 												>
-													Admin: {shop.adminName}
+													Updated By: {shop.updatedBy || 'N/A'}
 												</Text>
 											</div>
 										)}
@@ -617,12 +603,11 @@ export function ShopList() {
 											variant="filled"
 											size="sm"
 											className={classes.statusBadge}
-											leftSection={getStatusIcon(shop.status)}
 										>
-											{shop.status?.replace('_', ' ').toUpperCase()}
+											{shop.status?.toUpperCase()}
 										</Badge>
 
-										{shop.status === 'pending_approval' && (
+										{shop.status === 'Pending Approval' && (
 											<div className={classes.approvalButtons}>
 												<Tooltip label="Approve">
 													<ActionIcon
@@ -667,13 +652,16 @@ export function ShopList() {
 				dealer={
 					{
 						id: '',
-						name: '',
+						dealerName: '',
 						contactPerson: '',
 						email: '',
 						phone: '',
 						category: 'wakanet',
+						department: '',
+						msisdn: '',
 						createdAt: '',
 						status: 'active',
+						updatedAt: '',
 					} as Dealer
 				}
 			/>
@@ -686,13 +674,16 @@ export function ShopList() {
 						dealer={
 							{
 								id: selectedShop.dealerId,
-								name: selectedShop.dealerName,
+								dealerName: selectedShop.dealerName,
 								contactPerson: '',
 								email: '',
 								phone: '',
 								category: 'wakanet',
+								department: '',
+								msisdn: '',
 								createdAt: '',
 								status: 'active',
+								updatedAt: '',
 							} as Dealer
 						}
 						shops={[

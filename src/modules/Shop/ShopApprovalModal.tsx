@@ -1,18 +1,18 @@
 import {
+	Alert,
 	Button,
+	createStyles,
 	Group,
+	Select,
 	Stack,
 	Text,
-	Title,
-	createStyles,
-	ThemeIcon,
-	Alert,
 	Textarea,
-	Select,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { IconAlertCircle, IconCheck, IconShield, IconX } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { IconCheck, IconX, IconAlertCircle, IconShield } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Shop } from '../Dealer/types';
@@ -113,7 +113,7 @@ export function ShopApprovalModal({ opened, onClose, shop, action }: ShopApprova
 	// Fetch dealer admins for assignment (only for approval)
 	const { data: dealerAdminsData } = useQuery({
 		queryKey: ['dealer-admins', shop.dealerId],
-		queryFn: () => request.get(`/dealer-groups/${shop.dealerId}/admins`),
+		queryFn: () => request.get(`/dealer/${shop.dealerId}/admins`),
 		enabled: action === 'approve' && !!shop.dealerId,
 	});
 

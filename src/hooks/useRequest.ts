@@ -1,4 +1,3 @@
-import { notifications } from '@mantine/notifications';
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -26,7 +25,7 @@ export default function useRequest(
 	requireAuth: boolean = false,
 	notificationOptions: NotificationOptions = {}
 ): AxiosInstance {
-	const token = useSelector( ( state: RootState ) => state.auth.token );
+	const token = useSelector((state: RootState) => state.auth.token);
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
@@ -40,64 +39,64 @@ export default function useRequest(
 	} = notificationOptions;
 
 	function logout() {
-		dispatch( signout() );
-		navigate( '/signin' );
+		dispatch(signout());
+		navigate('/signin');
 	}
 
-	const instance = axios.create( {
+	const instance = axios.create({
 		baseURL: BASE_URL,
 		headers: requireAuth ? { Authorization: `Bearer ${token}` } : {},
-	} );
+	});
 
-	const showNotification = ( message: string, color: string, customTitle?: string ) => {
-		if ( !message || message.toLowerCase().trim() === 'success' ) return;
+	const showNotification = (message: string, color: string, customTitle?: string) => {
+		if (!message || message.toLowerCase().trim() === 'success') return;
 
-		notifications.show( {
-			title: customTitle || title,
-			message:
-				typeof message === 'string' ? message : JSON.stringify( message ).replace( /"/g, '' ),
-			color,
-			autoClose,
-		} );
+		// notifications.show({
+		// 	title: customTitle || title,
+		// 	message:
+		// 		typeof message === 'string' ? message : JSON.stringify(message).replace(/"/g, ''),
+		// 	color,
+		// 	autoClose,
+		// });
 	};
 
 	instance.interceptors.response.use(
-		( response: AxiosResponse<ApiResponse> ) => {
+		(response: AxiosResponse<ApiResponse>) => {
 			const responseMessage = String(
 				response?.data?.status ||
-				response?.data?.message ||
-				response?.data ||
-				// @ts-ignore
-				response.message
+					response?.data?.message ||
+					response?.data ||
+					// @ts-ignore
+					response.message
 			);
-			if ( response.data.status === 401 ) {
+			if (response.data.status === 401) {
 				logout();
-				if ( response.data.message ) {
-					showNotification( responseMessage, 'yellow', 'Authentication Error' );
+				if (response.data.message) {
+					showNotification(responseMessage, 'yellow', 'Authentication Error');
 				}
 			}
 
-			if ( showSuccess && response.data.message ) {
-				showNotification( response.data.message, successColor );
+			if (showSuccess && response.data.message) {
+				showNotification(response.data.message, successColor);
 			}
 
 			return response;
 		},
-		( error: AxiosError<ApiResponse> ) => {
-			if ( !showError ) return Promise.reject( error );
+		(error: AxiosError<ApiResponse>) => {
+			if (!showError) return Promise.reject(error);
 
 			const errorMessage = String(
 				error.response?.data?.message ||
-				error.response?.data ||
-				error.message ||
-				error.response?.data?.status
+					error.response?.data ||
+					error.message ||
+					error.response?.data?.status
 			);
 
-			if ( error.response ) {
-				showNotification( errorMessage, errorColor, 'Error' );
+			if (error.response) {
+				showNotification(errorMessage, errorColor, 'Error');
 			}
 
-			return Promise.reject( error );
+			return Promise.reject(error);
 		}
 	);
 

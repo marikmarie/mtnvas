@@ -1,45 +1,45 @@
 import {
-	Group,
-	Stack,
-	Text,
-	Card,
-	TextInput,
-	Select,
-	Badge,
 	ActionIcon,
+	Badge,
+	Button,
+	Card,
 	createStyles,
 	Grid,
-	ThemeIcon,
+	Group,
 	Menu,
-	Title,
-	Skeleton,
-	Button,
 	Pagination,
+	Select,
+	Skeleton,
+	Stack,
+	Text,
+	TextInput,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-	IconSearch,
-	IconFilter,
-	IconDotsVertical,
-	IconDeviceMobile,
-	IconUser,
-	IconCalendar,
-	IconRefresh,
-	IconCheck,
-	IconX,
 	IconAlertCircle,
+	IconCalendar,
+	IconCheck,
 	IconClock,
+	IconDeviceMobile,
+	IconDotsVertical,
 	IconEye,
+	IconFilter,
 	IconPlus,
+	IconRefresh,
+	IconSearch,
 	IconSettings,
+	IconUser,
+	IconX,
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import useRequest from '../../hooks/useRequest';
-import { ImeiSwapModal } from './ImeiSwapModal';
-import { ImeiDetailsModal } from './ImeiDetailsModal';
-import { ImeiSwapRequestsModal } from './ImeiSwapRequestsModal';
 import { Dealer, ImeiDetails } from '../Dealer/types';
+import { ImeiDetailsModal } from './ImeiDetailsModal';
+import { ImeiSwapModal } from './ImeiSwapModal';
+import { ImeiSwapRequestsModal } from './ImeiSwapRequestsModal';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -150,7 +150,7 @@ export function ImeiList() {
 
 	const uniqueDealers = dealersData?.data?.data?.map((dealer: Dealer) => ({
 		value: dealer.id,
-		label: dealer.name,
+		label: dealer.dealerName,
 	}));
 
 	const handleOpenDetails = (imei: string) => {
@@ -277,7 +277,7 @@ export function ImeiList() {
 							{ value: 'all', label: 'All Dealers' },
 							...(uniqueDealers || []).map((dealer: Dealer) => ({
 								value: dealer.id,
-								label: dealer.name,
+								label: dealer.dealerName,
 							})),
 						]}
 						value={dealerFilter}

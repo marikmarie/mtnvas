@@ -34,7 +34,7 @@ Content-Type: application/json
 ### 1.1 Get Dealers
 
 ```typescript
-GET /dealer-groups
+GET /dealer
 Query Params: {
   page?: number;
   limit?: number;
@@ -92,7 +92,7 @@ interface DealerAdmin {
 ### 1.3 Create Dealer
 
 ```typescript
-POST /dealer-groups
+POST /dealer
 Payload: {
   companyName: string;
   contactPerson: string;
@@ -112,7 +112,7 @@ Response: ApiResponse<Dealer>
 ### 1.4 Update Dealer
 
 ```typescript
-PUT /dealer-groups/{dealerId}
+PUT /dealer/{dealerId}
 Payload: {
   companyName?: string;
   contactPerson?: string;
@@ -128,7 +128,7 @@ Response: ApiResponse<Dealer>
 ### 1.5 Update Dealer Status
 
 ```typescript
-POST /dealer-groups/{dealerId}/status
+POST /dealer/{dealerId}/status
 Payload: {
   status: 'active' | 'inactive';
   reason?: string;
@@ -164,7 +164,7 @@ Response: ApiResponse<{
 ### 2.1 Create Dealer Admin
 
 ```typescript
-POST /dealer-groups/{dealerId}/admins
+POST /dealer/{dealerId}/admins
 Payload: {
   name: string;
   email: string;
@@ -186,7 +186,7 @@ Response: ApiResponse<DealerAdmin[]>;
 ### 2.3 Update Dealer Admin
 
 ```typescript
-PUT /dealer-groups/{dealerId}/admins/{adminId}
+PUT /dealer/{dealerId}/admins/{adminId}
 Payload: {
   name?: string;
   email?: string;
@@ -200,7 +200,7 @@ Response: ApiResponse<DealerAdmin>
 ### 2.4 Deactivate Dealer Admin
 
 ```typescript
-POST /dealer-groups/{dealerId}/admins/{adminId}/deactivate
+POST /dealer/{dealerId}/admins/{adminId}/deactivate
 Payload: {
   reason?: string;
 }

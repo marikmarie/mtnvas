@@ -1,28 +1,27 @@
 import {
+	Alert,
+	Badge,
 	Button,
+	createStyles,
 	Group,
 	Select,
 	Stack,
-	TextInput,
-	Title,
 	Text,
-	createStyles,
+	TextInput,
 	ThemeIcon,
-	Alert,
-	Badge,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+	IconAlertCircle,
 	IconBuilding,
-	IconUser,
+	IconCategory,
+	IconCheck,
+	IconEdit,
 	IconMail,
 	IconPhone,
-	IconCategory,
-	IconEdit,
-	IconAlertCircle,
-	IconCheck,
 } from '@tabler/icons-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Dealer } from './types';
@@ -34,11 +33,10 @@ interface EditDealerModalProps {
 }
 
 interface DealerFormValues {
-	companyName: string;
-	contactPerson: string;
+	dealerName: string;
 	email: string;
 	msisdn: string;
-	department: 'wakanet' | 'enterprise' | 'both';
+	department: string;
 	location?: string;
 	region?: string;
 }
@@ -120,17 +118,15 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 
 	const form = useForm<DealerFormValues>({
 		initialValues: {
-			companyName: dealer.companyName || dealer.name,
-			contactPerson: dealer.contactPerson,
+			dealerName: dealer.dealerName,
 			email: dealer.email,
-			msisdn: dealer.msisdn || dealer.phone,
-			department: dealer.department || dealer.category,
+			msisdn: dealer.msisdn,
+			department: dealer.department,
 			location: dealer.location,
 			region: dealer.region,
 		},
 		validate: {
-			companyName: (value) => (!value ? 'Company name is required' : null),
-			contactPerson: (value) => (!value ? 'Contact person is required' : null),
+			dealerName: (value) => (!value ? 'Dealer name is required' : null),
 			email: (value) => (!value ? 'Email is required' : null),
 			msisdn: (value) => (!value ? 'Phone number is required' : null),
 			department: (value) => (!value ? 'Department is required' : null),
@@ -139,7 +135,7 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 
 	const mutation = useMutation({
 		mutationFn: (values: DealerFormValues) => {
-			return request.put(`/dealer-groups/${dealer.id}`, values);
+			return request.put(`/dealer/${dealer.id}`, values);
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['dealer', dealer.id] });
@@ -157,8 +153,8 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 		return status === 'active' ? 'green' : 'red';
 	};
 
-	const getCategoryColor = (category: string) => {
-		switch (category?.toLowerCase()) {
+	const getCategoryColor = (department: string) => {
+		switch (department?.toLowerCase()) {
 			case 'wakanet':
 				return 'yellow';
 			case 'enterprise':
@@ -210,12 +206,12 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 								{dealer.status?.charAt(0)?.toUpperCase() + dealer.status?.slice(1)}
 							</Badge>
 							<Badge
-								color={getCategoryColor(dealer.category)}
+								color={getCategoryColor(dealer.department)}
 								variant="light"
 								size="sm"
 							>
-								{dealer.category?.charAt(0)?.toUpperCase() +
-									dealer.category?.slice(1)}
+								{dealer.department?.charAt(0)?.toUpperCase() +
+									dealer.department?.slice(1)}
 							</Badge>
 						</div>
 					</div>
@@ -237,7 +233,7 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 
 				<form onSubmit={form.onSubmit(handleSubmit)}>
 					<Stack spacing="lg">
-						{/* Company Information */}
+						{/* Dealer Information */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -245,12 +241,12 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 								color="dimmed"
 								mb="xs"
 							>
-								Company Information
+								Dealer Information
 							</Text>
 							<div className={classes.inputWrapper}>
 								<TextInput
-									label="Company Name"
-									placeholder="Enter company name"
+									label="Dealer Name"
+									placeholder="Enter dealer name"
 									required
 									icon={
 										<IconBuilding
@@ -258,7 +254,7 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 											className={classes.inputIcon}
 										/>
 									}
-									{...form.getInputProps('companyName')}
+									{...form.getInputProps('dealerName')}
 									radius="md"
 								/>
 							</div>
@@ -277,21 +273,6 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 							<div className={classes.formRow}>
 								<div className={classes.inputWrapper}>
 									<TextInput
-										label="Contact Person"
-										placeholder="Enter contact person name"
-										required
-										icon={
-											<IconUser
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										{...form.getInputProps('contactPerson')}
-										radius="md"
-									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<TextInput
 										label="Email Address"
 										placeholder="Enter email address"
 										required
@@ -305,25 +286,40 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 										radius="md"
 									/>
 								</div>
+								<div className={classes.inputWrapper}>
+									<TextInput
+										label="Phone Number"
+										placeholder="Enter phone number"
+										required
+										icon={
+											<IconPhone
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										{...form.getInputProps('msisdn')}
+										radius="md"
+									/>
+								</div>
 							</div>
 							<div className={classes.inputWrapper}>
 								<TextInput
-									label="Phone Number"
-									placeholder="Enter phone number"
+									label="Department"
+									placeholder="Enter department"
 									required
 									icon={
-										<IconPhone
+										<IconBuilding
 											size={16}
 											className={classes.inputIcon}
 										/>
 									}
-									{...form.getInputProps('msisdn')}
+									{...form.getInputProps('department')}
 									radius="md"
 								/>
 							</div>
 						</div>
 
-						{/* Department & Location */}
+						{/* Region & Location & Contact Person */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -331,12 +327,12 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 								color="dimmed"
 								mb="xs"
 							>
-								Department & Location
+								Region & Location & Contact Person
 							</Text>
 							<div className={classes.inputWrapper}>
 								<Select
-									label="Department"
-									placeholder="Select department"
+									label="Region"
+									placeholder="Select region"
 									required
 									icon={
 										<IconCategory
@@ -345,23 +341,16 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 										/>
 									}
 									data={[
-										{ value: 'wakanet', label: 'WakaNet' },
-										{ value: 'enterprise', label: 'Enterprise' },
-										{ value: 'both', label: 'Both' },
+										{ value: 'central', label: 'Central' },
+										{ value: 'western', label: 'Western' },
+										{ value: 'eastern', label: 'Eastern' },
+										{ value: 'northern', label: 'Northern' },
 									]}
-									{...form.getInputProps('department')}
+									{...form.getInputProps('region')}
 									radius="md"
 								/>
 							</div>
 							<div className={classes.formRow}>
-								<div className={classes.inputWrapper}>
-									<TextInput
-										label="Region"
-										placeholder="Enter region"
-										{...form.getInputProps('region')}
-										radius="md"
-									/>
-								</div>
 								<div className={classes.inputWrapper}>
 									<TextInput
 										label="Location"
@@ -376,7 +365,6 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 				</form>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"
@@ -395,7 +383,7 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 						leftIcon={<IconCheck size={16} />}
 						className={classes.submitButton}
 						radius="md"
-						onClick={() => form.onSubmit(handleSubmit)}
+						onClick={() => handleSubmit(form.values)}
 					>
 						Save Changes
 					</Button>

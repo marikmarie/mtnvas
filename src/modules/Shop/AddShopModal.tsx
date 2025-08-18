@@ -1,26 +1,26 @@
 import {
-	Button,
-	Group,
-	Stack,
-	TextInput,
-	Title,
-	Text,
-	createStyles,
-	ThemeIcon,
 	Alert,
-	Select,
+	Button,
+	createStyles,
+	Group,
 	NumberInput,
+	Select,
+	Stack,
+	Text,
+	TextInput,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-	IconBuildingStore,
-	IconMapPin,
-	IconPlus,
 	IconAlertCircle,
+	IconBuildingStore,
 	IconClock,
 	IconGlobe,
+	IconMapPin,
+	IconPlus,
 } from '@tabler/icons-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Dealer } from '../Dealer/types';
@@ -202,7 +202,7 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 							color="dimmed"
 							size="sm"
 						>
-							Create a new shop location for {dealer.companyName || dealer.name}
+							Create a new shop location for {dealer.dealerName}
 						</Text>
 					</div>
 				</div>
@@ -220,7 +220,7 @@ export function AddShopModal({ opened, onClose, dealer }: AddShopModalProps) {
 					>
 						Parent Dealer
 					</Text>
-					<Text weight={600}>{dealer.companyName || dealer.name}</Text>
+					<Text weight={600}>{dealer.dealerName}</Text>
 					<Text
 						size="sm"
 						color="dimmed"

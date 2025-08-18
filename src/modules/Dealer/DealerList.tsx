@@ -1,39 +1,37 @@
 import {
-	Button,
-	Group,
-	Stack,
-	Text,
-	Card,
-	TextInput,
-	Select,
-	Badge,
 	ActionIcon,
+	Badge,
+	Button,
+	Card,
 	createStyles,
 	Grid,
-	ThemeIcon,
+	Group,
 	Menu,
-	Title,
-	Skeleton,
 	Pagination,
+	Select,
+	Skeleton,
+	Stack,
+	Text,
+	TextInput,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-	IconEdit,
-	IconEye,
-	IconPower,
-	IconTrash,
-	IconUserPlus,
-	IconSearch,
-	IconFilter,
-	IconPlus,
-	IconDotsVertical,
 	IconBuilding,
+	IconDotsVertical,
+	IconEdit,
+	IconFilter,
 	IconMail,
 	IconPhone,
+	IconPlus,
+	IconPower,
+	IconSearch,
 	IconUser,
+	IconUserPlus,
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { AddDealerModal } from './AddDealerModal';
 import { AddDealerUserModal } from './AddDealerUserModal';
@@ -41,7 +39,6 @@ import { ConfirmationModal } from './ConfirmationModal';
 import { EditDealerModal } from './EditDealerModal';
 import { Dealer } from './types';
 import { ViewDealerModal } from './ViewDealerModal';
-import { AddDealerAdminModal } from './AddDealerAdminModal';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -109,6 +106,12 @@ const useStyles = createStyles((theme) => ({
 		padding: theme.spacing.xl,
 		color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
 	},
+
+	pagination: {
+		display: 'flex',
+		justifyContent: 'center',
+		marginTop: theme.spacing.md,
+	},
 }));
 
 export function DealerList() {
@@ -124,17 +127,11 @@ export function DealerList() {
 	const [viewModalOpened, { open: openViewModal, close: closeViewModal }] = useDisclosure(false);
 	const [confirmModalOpened, { open: openConfirmModal, close: closeConfirmModal }] =
 		useDisclosure(false);
-	const [addAdminOpened, { open: openAddAdmin, close: closeAddAdmin }] = useDisclosure(false);
 	const [page, setPage] = useState(1);
 	const [limit] = useState(12);
-	const [confirmAction, setConfirmAction] = useState<'activate' | 'deactivate' | 'delete'>(
-		'activate'
-	);
+	const [confirmAction, setConfirmAction] = useState<'activate' | 'deactivate'>('activate');
 
-	const handleAction = (
-		dealer: Dealer,
-		action: 'edit' | 'view' | 'activate' | 'deactivate' | 'delete'
-	) => {
+	const handleAction = (dealer: Dealer, action: 'edit' | 'view' | 'activate' | 'deactivate') => {
 		setSelectedDealer(dealer);
 		switch (action) {
 			case 'edit':
@@ -145,7 +142,6 @@ export function DealerList() {
 				break;
 			case 'activate':
 			case 'deactivate':
-			case 'delete':
 				setConfirmAction(action);
 				openConfirmModal();
 				break;
@@ -156,7 +152,7 @@ export function DealerList() {
 
 	const { data: dealers, isLoading } = useQuery({
 		queryFn: () =>
-			request.get('/dealer-groups', {
+			request.get('/dealer', {
 				params: {
 					search: searchTerm || undefined,
 					department: categoryFilter !== 'all' ? categoryFilter : undefined,
@@ -173,22 +169,21 @@ export function DealerList() {
 		setAddUserType(userType);
 	};
 
-	// Filter and search logic
 	const filteredDealers = useMemo(() => {
 		return dealers?.data?.data || [];
 	}, [dealers?.data?.data]);
 
 	const getStatusColor = (status: string) => {
-		return status === 'active' ? 'yellow' : 'red';
+		return status === 'Active' ? 'yellow' : 'red';
 	};
 
 	const getCategoryColor = (category: string) => {
 		switch (category?.toLowerCase()) {
-			case 'wakanet':
+			case 'EBU':
 				return 'yellow';
-			case 'enterprise':
+			case 'Consumer':
 				return 'purple';
-			case 'both':
+			case 'Both':
 				return 'orange';
 			default:
 				return 'gray';
@@ -197,7 +192,6 @@ export function DealerList() {
 
 	return (
 		<div className={classes.root}>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<Group
 					position="apart"
@@ -228,7 +222,6 @@ export function DealerList() {
 				</Group>
 			</div>
 
-			{/* Search and Filter Section */}
 			<div className={classes.searchSection}>
 				<div className={classes.searchRow}>
 					<TextInput
@@ -242,8 +235,8 @@ export function DealerList() {
 						placeholder="Filter by status"
 						data={[
 							{ value: 'all', label: 'All Status' },
-							{ value: 'active', label: 'Active' },
-							{ value: 'inactive', label: 'Inactive' },
+							{ value: 'Active', label: 'Active' },
+							{ value: 'Inactive', label: 'Inactive' },
 						]}
 						value={statusFilter}
 						onChange={(value) => setStatusFilter(value || 'all')}
@@ -254,9 +247,9 @@ export function DealerList() {
 						placeholder="Filter by category"
 						data={[
 							{ value: 'all', label: 'All Categories' },
-							{ value: 'wakanet', label: 'WakaNet' },
-							{ value: 'enterprise', label: 'Enterprise' },
-							{ value: 'both', label: 'Both' },
+							{ value: 'EBU', label: 'EBU' },
+							{ value: 'Consumer', label: 'Consumer' },
+							{ value: 'Both', label: 'Both' },
 						]}
 						value={categoryFilter}
 						onChange={(value) => setCategoryFilter(value || 'all')}
@@ -266,7 +259,6 @@ export function DealerList() {
 				</div>
 			</div>
 
-			{/* Enhanced Card Grid */}
 			{isLoading ? (
 				<Grid>
 					{Array.from({ length: 6 }).map((_, index) => (
@@ -359,7 +351,7 @@ export function DealerList() {
 							key={dealer.id}
 							xs={12}
 							sm={6}
-							lg={12}
+							lg={3}
 						>
 							<Card
 								className={classes.card}
@@ -381,7 +373,7 @@ export function DealerList() {
 												size="sm"
 												lineClamp={1}
 											>
-												{dealer.companyName}
+												{dealer.dealerName}
 											</Text>
 										</Group>
 										<Menu>
@@ -395,25 +387,6 @@ export function DealerList() {
 												</ActionIcon>
 											</Menu.Target>
 											<Menu.Dropdown>
-												<Menu.Item
-													icon={<IconEye size={16} />}
-													onClick={(e) => {
-														e.stopPropagation();
-														handleAction(dealer, 'view');
-													}}
-												>
-													View Details
-												</Menu.Item>
-												<Menu.Item
-													icon={<IconUserPlus size={16} />}
-													onClick={(e) => {
-														e.stopPropagation();
-														setSelectedDealer(dealer);
-														openAddAdmin();
-													}}
-												>
-													Add Dealer Admin
-												</Menu.Item>
 												<Menu.Item
 													icon={<IconEdit size={16} />}
 													onClick={(e) => {
@@ -446,7 +419,7 @@ export function DealerList() {
 												<Menu.Item
 													icon={<IconPower size={16} />}
 													color={
-														dealer.status === 'active'
+														dealer.status === 'Active'
 															? 'red'
 															: 'yellow'
 													}
@@ -454,25 +427,15 @@ export function DealerList() {
 														e.stopPropagation();
 														handleAction(
 															dealer,
-															dealer.status === 'active'
+															dealer.status === 'Active'
 																? 'deactivate'
 																: 'activate'
 														);
 													}}
 												>
-													{dealer.status === 'active'
+													{dealer.status === 'Active'
 														? 'Deactivate'
-														: 'Activate'}
-												</Menu.Item>
-												<Menu.Item
-													icon={<IconTrash size={16} />}
-													color="red"
-													onClick={(e) => {
-														e.stopPropagation();
-														handleAction(dealer, 'delete');
-													}}
-												>
-													Delete
+														: 'Approve'}
 												</Menu.Item>
 											</Menu.Dropdown>
 										</Menu>
@@ -490,7 +453,7 @@ export function DealerList() {
 												size="sm"
 												color="dimmed"
 											>
-												{dealer.contactPerson}
+												{dealer.msisdn}
 											</Text>
 										</div>
 										<div className={classes.infoRow}>
@@ -548,7 +511,6 @@ export function DealerList() {
 				</Grid>
 			)}
 
-			{/* Pagination */}
 			{dealers?.data?.meta?.total ? (
 				<Group
 					position="right"
@@ -567,7 +529,6 @@ export function DealerList() {
 				</Group>
 			) : null}
 
-			{/* Modals */}
 			<AddDealerModal
 				opened={addModalOpened}
 				onClose={closeAddModal}
@@ -593,11 +554,6 @@ export function DealerList() {
 						action={confirmAction}
 						dealer={selectedDealer}
 					/>
-					<AddDealerAdminModal
-						opened={addAdminOpened}
-						onClose={closeAddAdmin}
-						dealerId={selectedDealer.id}
-					/>
 				</>
 			)}
 
@@ -609,6 +565,14 @@ export function DealerList() {
 					userType={addUserType}
 				/>
 			)}
+
+			<div className={classes.pagination}>
+				<Pagination
+					value={page}
+					onChange={setPage}
+					total={Math.max(1, Math.ceil(dealers?.data?.meta?.total || 0))}
+				/>
+			</div>
 		</div>
 	);
 }

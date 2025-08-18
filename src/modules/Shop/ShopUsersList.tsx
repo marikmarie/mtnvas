@@ -1,44 +1,44 @@
 import {
-	Button,
-	Group,
-	Stack,
-	Text,
-	Card,
-	TextInput,
-	Select,
-	Badge,
 	ActionIcon,
+	Alert,
+	Badge,
+	Button,
+	Card,
 	createStyles,
 	Grid,
-	ThemeIcon,
+	Group,
 	Menu,
-	Title,
-	Alert,
-	Skeleton,
 	Modal,
+	Select,
+	Skeleton,
+	Stack,
+	Text,
+	TextInput,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-	IconPower,
-	IconTrash,
-	IconSearch,
-	IconFilter,
-	IconPlus,
-	IconDotsVertical,
-	IconUser,
-	IconMail,
-	IconPhone,
-	IconShield,
-	IconCheck,
-	IconX,
 	IconAlertCircle,
 	IconAlertTriangle,
+	IconCheck,
+	IconDotsVertical,
+	IconFilter,
+	IconMail,
+	IconPhone,
+	IconPlus,
+	IconPower,
+	IconSearch,
+	IconShield,
+	IconTrash,
+	IconUser,
+	IconX,
 } from '@tabler/icons-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useMemo } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import useRequest from '../../hooks/useRequest';
-import { AddShopUserModal } from './AddShopUserModal';
 import { Dealer, Shop, ShopUser } from '../Dealer/types';
+import { AddShopUserModal } from './AddShopUserModal';
 
 interface ShopUsersListProps {
 	shop: Shop | undefined;
@@ -624,13 +624,17 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 				dealer={
 					{
 						id: shop?.dealerId!,
-						name: shop?.dealerName!,
-						contactPerson: '',
+						dealerName: shop?.dealerName!,
 						email: '',
-						phone: '',
-						category: 'wakanet',
+						department: '',
+						msisdn: '',
+						category: 'EBU',
 						createdAt: '',
 						status: 'active',
+						region: '',
+						location: '',
+						updatedBy: '',
+						updatedAt: '',
 					} as Dealer
 				}
 				shops={[

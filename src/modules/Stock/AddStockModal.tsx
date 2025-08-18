@@ -1,31 +1,31 @@
 import {
+	Alert,
 	Button,
+	createStyles,
 	FileInput,
 	Group,
+	MultiSelect,
+	Paper,
 	Select,
 	Stack,
-	Title,
-	Text,
-	createStyles,
-	ThemeIcon,
-	Alert,
-	Paper,
 	Switch,
-	MultiSelect,
+	Text,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import {
+	IconAlertCircle,
 	IconBox,
 	IconBuilding,
 	IconCategory,
 	IconDeviceMobile,
-	IconUpload,
-	IconAlertCircle,
-	IconPlus,
 	IconMail,
 	IconPhone,
+	IconPlus,
+	IconUpload,
 } from '@tabler/icons-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 

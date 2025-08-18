@@ -1,18 +1,18 @@
 import {
-	Button,
-	Group,
-	Stack,
-	TextInput,
-	Title,
-	Text,
-	createStyles,
-	ThemeIcon,
 	Alert,
+	Button,
+	createStyles,
+	Group,
 	Select,
+	Stack,
+	Text,
+	TextInput,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { IconAlertCircle, IconBuildingStore, IconEdit, IconMapPin } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { IconBuildingStore, IconMapPin, IconEdit, IconAlertCircle } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { Shop } from '../Dealer/types';
@@ -27,7 +27,6 @@ interface EditShopFormValues {
 	shopName: string;
 	location: string;
 	region: string;
-	adminId?: string;
 	operatingHours?: string;
 }
 
@@ -108,7 +107,6 @@ export function EditShopModal({ opened, onClose, shop }: EditShopModalProps) {
 			shopName: shop.shopName || '',
 			location: shop.location || '',
 			region: shop.region || '',
-			adminId: shop.adminId || '',
 			operatingHours: '',
 		},
 		validate: {

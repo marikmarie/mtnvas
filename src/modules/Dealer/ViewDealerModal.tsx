@@ -1,37 +1,29 @@
 import {
+	ActionIcon,
 	Badge,
 	Button,
+	createStyles,
 	Group,
+	Paper,
 	Stack,
 	Text,
-	Title,
-	createStyles,
 	ThemeIcon,
-	Paper,
-	ActionIcon,
+	Title,
 	Tooltip,
 } from '@mantine/core';
 import {
 	IconBuilding,
 	IconCalendar,
+	IconCopy,
+	IconExternalLink,
+	IconEye,
 	IconMail,
 	IconPhone,
 	IconUser,
-	IconEye,
-	IconExternalLink,
-	IconCopy,
 	IconX,
 } from '@tabler/icons-react';
 import { Modal } from '../../components/Modal';
-import { Dealer, DealerAdmin, DealerDetailsResponse } from './types';
-import { useQuery } from '@tanstack/react-query';
-import useRequest from '../../hooks/useRequest';
-import { useDisclosure } from '@mantine/hooks';
-import { Menu } from '@mantine/core';
-import { IconDotsVertical, IconUserEdit, IconPower } from '@tabler/icons-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { EditDealerAdminModal } from './EditDealerAdminModal';
-import { useState } from 'react';
+import { Dealer } from './types';
 
 interface ViewDealerModalProps {
 	opened: boolean;
@@ -150,16 +142,6 @@ const useStyles = createStyles((theme) => ({
 
 export function ViewDealerModal({ opened, onClose, dealer }: ViewDealerModalProps) {
 	const { classes } = useStyles();
-	const request = useRequest(true);
-	const queryClient = useQueryClient();
-	const [editAdminOpened, { open: openEditAdmin, close: closeEditAdmin }] = useDisclosure(false);
-	const [selectedAdmin, setSelectedAdmin] = useState<DealerAdmin | null>(null);
-
-	const { data, isLoading } = useQuery({
-		queryKey: ['dealer-details', dealer.id],
-		queryFn: () => request.get(`/dealer-groups/${dealer.id}`),
-		enabled: opened && !!dealer?.id,
-	});
 
 	const formatDate = (dateString: string) => {
 		const date = new Date(dateString);
@@ -174,32 +156,9 @@ export function ViewDealerModal({ opened, onClose, dealer }: ViewDealerModalProp
 		return status === 'active' ? 'green' : 'red';
 	};
 
-	const getCategoryColor = (category: string) => {
-		switch (category?.toLowerCase()) {
-			case 'wakanet':
-				return 'yellow';
-			case 'enterprise':
-				return 'purple';
-			case 'both':
-				return 'orange';
-			default:
-				return 'gray';
-		}
-	};
-
 	const copyToClipboard = (text: string) => {
 		navigator.clipboard.writeText(text);
 	};
-
-	const details: DealerDetailsResponse | undefined = data?.data;
-
-	const deactivateAdmin = useMutation({
-		mutationFn: (adminId: string) =>
-			request.post(`/dealer-groups/${dealer.id}/admins/${adminId}/deactivate`, {}),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['dealer-details', dealer.id] });
-		},
-	});
 
 	return (
 		<Modal
@@ -207,7 +166,6 @@ export function ViewDealerModal({ opened, onClose, dealer }: ViewDealerModalProp
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<div className={classes.headerLeft}>
@@ -258,315 +216,199 @@ export function ViewDealerModal({ opened, onClose, dealer }: ViewDealerModalProp
 				</div>
 			</div>
 
-			{/* Content */}
 			<div className={classes.content}>
-				{isLoading ? (
-					<Text color="dimmed">Loading dealer details...</Text>
-				) : (
-					<>
-						{/* Company Information */}
-						<div className={classes.infoSection}>
-							<Text className={classes.sectionTitle}>Company Information</Text>
-							<Paper
-								className={classes.infoCard}
-								shadow="xs"
-							>
-								<Stack spacing="xs">
-									<div className={classes.infoRow}>
-										<div className={classes.infoLabel}>
-											<IconBuilding size={16} />
-											Company Name
-										</div>
-										<Text className={classes.infoValue}>
-											{details?.dealer.companyName || dealer.name}
-										</Text>
+				<>
+					<div className={classes.infoSection}>
+						<Text className={classes.sectionTitle}>Company Information</Text>
+						<Paper
+							className={classes.infoCard}
+							shadow="xs"
+						>
+							<Stack spacing="xs">
+								<div className={classes.infoRow}>
+									<div className={classes.infoLabel}>
+										<IconBuilding size={16} />
+										Company Name
 									</div>
+									<Text className={classes.infoValue}>{dealer.dealerName}</Text>
+								</div>
+								<div className={classes.infoRow}>
+									<div className={classes.infoLabel}>Status</div>
+									<Badge
+										color={getStatusColor(dealer.status)}
+										variant="filled"
+										size="sm"
+										className={classes.statusBadge}
+									>
+										{dealer.status?.charAt(0)?.toUpperCase() +
+											dealer.status?.slice(1)}
+									</Badge>
+								</div>
+								{dealer.region && (
 									<div className={classes.infoRow}>
-										<div className={classes.infoLabel}>Status</div>
-										<Badge
-											color={getStatusColor(dealer.status)}
-											variant="filled"
-											size="sm"
-											className={classes.statusBadge}
+										<div className={classes.infoLabel}>Region</div>
+										<Text className={classes.infoValue}>{dealer.region}</Text>
+									</div>
+								)}
+								{dealer.location && (
+									<div className={classes.infoRow}>
+										<div className={classes.infoLabel}>Location</div>
+										<Text className={classes.infoValue}>{dealer.location}</Text>
+									</div>
+								)}
+							</Stack>
+						</Paper>
+					</div>
+
+					<div className={classes.infoSection}>
+						<Text className={classes.sectionTitle}>Contact Information</Text>
+						<Paper
+							className={classes.infoCard}
+							shadow="xs"
+						>
+							<Stack spacing="xs">
+								<div className={classes.infoRow}>
+									<div className={classes.infoLabel}>
+										<IconUser size={16} />
+										Department
+									</div>
+									<Text>{dealer.department}</Text>
+								</div>
+								<div className={classes.infoRow}>
+									<div className={classes.infoLabel}>
+										<IconMail size={16} />
+										Email Address
+									</div>
+									<Group spacing="xs">
+										<Text
+											component="a"
+											href={`mailto:${dealer.email}`}
+											className={classes.linkValue}
 										>
-											{dealer.status?.charAt(0)?.toUpperCase() +
-												dealer.status?.slice(1)}
-										</Badge>
+											{dealer.email}
+										</Text>
+										<Tooltip label="Open email client">
+											<ActionIcon
+												variant="subtle"
+												size="xs"
+												component="a"
+												href={`mailto:${dealer.email}`}
+											>
+												<IconExternalLink size={12} />
+											</ActionIcon>
+										</Tooltip>
+									</Group>
+								</div>
+								<div className={classes.infoRow}>
+									<div className={classes.infoLabel}>
+										<IconPhone size={16} />
+										Phone Number
 									</div>
-									<div className={classes.infoRow}>
-										<div className={classes.infoLabel}>Category</div>
-										<Badge
-											color={getCategoryColor(dealer.category)}
-											variant="light"
-											size="sm"
-											className={classes.categoryBadge}
+									<Group spacing="xs">
+										<Text
+											component="a"
+											href={`tel:${dealer.msisdn}`}
+											className={classes.linkValue}
 										>
-											{dealer.category?.charAt(0)?.toUpperCase() +
-												dealer.category?.slice(1)}
-										</Badge>
+											{dealer.msisdn}
+										</Text>
+										<Tooltip label="Call number">
+											<ActionIcon
+												variant="subtle"
+												size="xs"
+												component="a"
+												href={`tel:${dealer.msisdn}`}
+											>
+												<IconExternalLink size={12} />
+											</ActionIcon>
+										</Tooltip>
+									</Group>
+								</div>
+							</Stack>
+						</Paper>
+					</div>
+
+					<div className={classes.infoSection}>
+						<Text className={classes.sectionTitle}>Business Details</Text>
+						<Paper
+							className={classes.infoCard}
+							shadow="xs"
+						>
+							<Stack spacing="xs">
+								<div className={classes.infoRow}>
+									<div className={classes.infoLabel}>
+										<IconCalendar size={16} />
+										Created Date
 									</div>
-									{details?.dealer.region && (
-										<div className={classes.infoRow}>
-											<div className={classes.infoLabel}>Region</div>
-											<Text className={classes.infoValue}>
-												{details.dealer.region}
-											</Text>
-										</div>
-									)}
-									{details?.dealer.location && (
-										<div className={classes.infoRow}>
-											<div className={classes.infoLabel}>Location</div>
-											<Text className={classes.infoValue}>
-												{details.dealer.location}
-											</Text>
-										</div>
-									)}
-								</Stack>
+									<Text className={classes.infoValue}>
+										{formatDate(dealer.createdAt)}
+									</Text>
+								</div>
+								<div className={classes.infoRow}>
+									<div className={classes.infoLabel}>Dealer ID</div>
+									<Group spacing="xs">
+										<Text
+											className={classes.infoValue}
+											style={{ fontFamily: 'monospace' }}
+										>
+											{dealer.id}
+										</Text>
+										<Tooltip label="Copy ID">
+											<ActionIcon
+												variant="subtle"
+												size="xs"
+												onClick={() => copyToClipboard(dealer.id)}
+											>
+												<IconCopy size={12} />
+											</ActionIcon>
+										</Tooltip>
+									</Group>
+								</div>
+							</Stack>
+						</Paper>
+					</div>
+
+					{/* {dealer.shops && (
+						<div className={classes.infoSection}>
+							<Text className={classes.sectionTitle}>Shops</Text>
+							<Paper
+								className={classes.infoCard}
+								shadow="xs"
+							>
+								<Text>Total shops: {dealer.shops.length}</Text>
 							</Paper>
 						</div>
+					)} */}
 
-						{/* Contact Information */}
+					{/* {dealer.stockSummary && (
 						<div className={classes.infoSection}>
-							<Text className={classes.sectionTitle}>Contact Information</Text>
+							<Text className={classes.sectionTitle}>Stock Summary</Text>
 							<Paper
 								className={classes.infoCard}
 								shadow="xs"
 							>
 								<Stack spacing="xs">
-									<div className={classes.infoRow}>
-										<div className={classes.infoLabel}>
-											<IconUser size={16} />
-											Contact Person
-										</div>
-										<Text className={classes.infoValue}>
-											{details?.dealer.contactPerson || dealer.contactPerson}
+									<Group position="apart">
+										<Text>Total</Text>
+										<Text weight={600}>{dealer.stockSummary.totalStock}</Text>
+									</Group>
+									<Group position="apart">
+										<Text>Available</Text>
+										<Text weight={600}>
+											{dealer.stockSummary.availableStock}
 										</Text>
-									</div>
-									<div className={classes.infoRow}>
-										<div className={classes.infoLabel}>
-											<IconMail size={16} />
-											Email Address
-										</div>
-										<Group spacing="xs">
-											<Text
-												component="a"
-												href={`mailto:${details?.dealer.email || dealer.email}`}
-												className={classes.linkValue}
-											>
-												{details?.dealer.email || dealer.email}
-											</Text>
-											<Tooltip label="Open email client">
-												<ActionIcon
-													variant="subtle"
-													size="xs"
-													component="a"
-													href={`mailto:${details?.dealer.email || dealer.email}`}
-												>
-													<IconExternalLink size={12} />
-												</ActionIcon>
-											</Tooltip>
-										</Group>
-									</div>
-									<div className={classes.infoRow}>
-										<div className={classes.infoLabel}>
-											<IconPhone size={16} />
-											Phone Number
-										</div>
-										<Group spacing="xs">
-											<Text
-												component="a"
-												href={`tel:${details?.dealer.msisdn || dealer.phone}`}
-												className={classes.linkValue}
-											>
-												{details?.dealer.msisdn || dealer.phone}
-											</Text>
-											<Tooltip label="Call number">
-												<ActionIcon
-													variant="subtle"
-													size="xs"
-													component="a"
-													href={`tel:${details?.dealer.msisdn || dealer.phone}`}
-												>
-													<IconExternalLink size={12} />
-												</ActionIcon>
-											</Tooltip>
-										</Group>
-									</div>
+									</Group>
+									<Group position="apart">
+										<Text>Sold</Text>
+										<Text weight={600}>{dealer.stockSummary.soldStock}</Text>
+									</Group>
 								</Stack>
 							</Paper>
 						</div>
-
-						{/* Business Details */}
-						<div className={classes.infoSection}>
-							<Text className={classes.sectionTitle}>Business Details</Text>
-							<Paper
-								className={classes.infoCard}
-								shadow="xs"
-							>
-								<Stack spacing="xs">
-									<div className={classes.infoRow}>
-										<div className={classes.infoLabel}>
-											<IconCalendar size={16} />
-											Created Date
-										</div>
-										<Text className={classes.infoValue}>
-											{formatDate(
-												details?.dealer.createdAt || dealer.createdAt
-											)}
-										</Text>
-									</div>
-									<div className={classes.infoRow}>
-										<div className={classes.infoLabel}>Dealer ID</div>
-										<Group spacing="xs">
-											<Text
-												className={classes.infoValue}
-												style={{ fontFamily: 'monospace' }}
-											>
-												{details?.dealer.id || dealer.id}
-											</Text>
-											<Tooltip label="Copy ID">
-												<ActionIcon
-													variant="subtle"
-													size="xs"
-													onClick={() => copyToClipboard(dealer.id)}
-												>
-													<IconCopy size={12} />
-												</ActionIcon>
-											</Tooltip>
-										</Group>
-									</div>
-								</Stack>
-							</Paper>
-						</div>
-
-						{/* Admins */}
-						{details?.admins && (
-							<div className={classes.infoSection}>
-								<Text className={classes.sectionTitle}>Dealer Admins</Text>
-								<Paper
-									className={classes.infoCard}
-									shadow="xs"
-								>
-									<Stack spacing="xs">
-										{details.admins.map((a) => (
-											<div
-												key={a.id}
-												className={classes.infoRow}
-											>
-												<div className={classes.infoLabel}>{a.name}</div>
-												<Group spacing="xs">
-													<Badge
-														size="sm"
-														variant="light"
-													>
-														{a.role.replace('_', ' ')}
-													</Badge>
-													<Badge
-														size="sm"
-														color={
-															a.status === 'active' ? 'green' : 'red'
-														}
-													>
-														{a.status}
-													</Badge>
-													<Menu>
-														<Menu.Target>
-															<ActionIcon
-																variant="subtle"
-																size="sm"
-															>
-																<IconDotsVertical size={16} />
-															</ActionIcon>
-														</Menu.Target>
-														<Menu.Dropdown>
-															<Menu.Item
-																icon={<IconUserEdit size={16} />}
-																onClick={() => {
-																	setSelectedAdmin(a);
-																	openEditAdmin();
-																}}
-															>
-																Edit
-															</Menu.Item>
-															{a.status === 'active' && (
-																<Menu.Item
-																	color="red"
-																	icon={<IconPower size={16} />}
-																	onClick={() =>
-																		deactivateAdmin.mutate(a.id)
-																	}
-																>
-																	Deactivate
-																</Menu.Item>
-															)}
-														</Menu.Dropdown>
-													</Menu>
-												</Group>
-											</div>
-										))}
-									</Stack>
-								</Paper>
-							</div>
-						)}
-
-						{/* Shops count */}
-						{details?.shops && (
-							<div className={classes.infoSection}>
-								<Text className={classes.sectionTitle}>Shops</Text>
-								<Paper
-									className={classes.infoCard}
-									shadow="xs"
-								>
-									<Text>Total shops: {details.shops.length}</Text>
-								</Paper>
-							</div>
-						)}
-
-						{selectedAdmin && (
-							<EditDealerAdminModal
-								opened={editAdminOpened}
-								onClose={closeEditAdmin}
-								dealerId={dealer.id}
-								admin={selectedAdmin}
-							/>
-						)}
-
-						{/* Stock summary */}
-						{details?.stockSummary && (
-							<div className={classes.infoSection}>
-								<Text className={classes.sectionTitle}>Stock Summary</Text>
-								<Paper
-									className={classes.infoCard}
-									shadow="xs"
-								>
-									<Stack spacing="xs">
-										<Group position="apart">
-											<Text>Total</Text>
-											<Text weight={600}>
-												{details.stockSummary.totalStock}
-											</Text>
-										</Group>
-										<Group position="apart">
-											<Text>Available</Text>
-											<Text weight={600}>
-												{details.stockSummary.availableStock}
-											</Text>
-										</Group>
-										<Group position="apart">
-											<Text>Sold</Text>
-											<Text weight={600}>
-												{details.stockSummary.soldStock}
-											</Text>
-										</Group>
-									</Stack>
-								</Paper>
-							</div>
-						)}
-					</>
-				)}
+					)} */}
+				</>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group position="right">
 					<Button
