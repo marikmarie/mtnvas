@@ -1,32 +1,33 @@
 import {
-	Modal,
-	TextInput,
+	Alert,
+	Badge,
 	Button,
-	Group,
-	Stack,
-	Title,
-	Text,
+	Card,
 	createStyles,
 	Divider,
-	Alert,
-	Card,
-	Badge,
+	Group,
+	Modal,
+	Stack,
+	Text,
+	TextInput,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
 import {
 	IconAlertCircle,
-	IconSearch,
 	IconId,
-	IconUser,
 	IconMail,
 	IconPhone,
+	IconSearch,
+	IconUser,
 } from '@tabler/icons-react';
+import { useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
 import useRequest from '../../hooks/useRequest';
+import { formatPhoneNumber } from '../../utils/phone.util';
 import {
-	AgentDuplicateCheckModalProps,
 	AgentDuplicateCheck,
+	AgentDuplicateCheckModalProps,
 	AgentDuplicateResponse,
 } from '../Dealer/types';
 
@@ -155,7 +156,7 @@ export function AgentDuplicateCheckModal({
 		try {
 			// Only send fields that have values
 			const payload: AgentDuplicateCheck = {};
-			if (values.msisdn?.trim()) payload.msisdn = values.msisdn.trim();
+			if (values.msisdn?.trim()) payload.msisdn = formatPhoneNumber(values.msisdn.trim());
 			if (values.email?.trim()) payload.email = values.email.trim();
 			if (values.merchantCode?.trim()) payload.merchantCode = values.merchantCode.trim();
 

@@ -1,21 +1,22 @@
 import {
-	Modal,
-	TextInput,
-	Select,
+	Alert,
 	Button,
-	Group,
-	Stack,
-	Title,
-	Text,
 	createStyles,
 	Divider,
-	Alert,
+	Group,
+	Modal,
+	Select,
+	Stack,
+	Text,
+	TextInput,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { IconAlertCircle, IconUserPlus } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { IconAlertCircle, IconUserPlus } from '@tabler/icons-react';
 import useRequest from '../../hooks/useRequest';
+import { formatPhoneNumber } from '../../utils/phone.util';
 import { AgentModalProps } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
@@ -114,7 +115,8 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 	});
 
 	const createAgentMutation = useMutation({
-		mutationFn: (values: AddAgentFormValues) => request.post('/agents', values),
+		mutationFn: (values: AddAgentFormValues) =>
+			request.post('/agents', { ...values, msisdn: formatPhoneNumber(values.msisdn) }),
 		onSuccess: () => {
 			queryClient.invalidateQueries(['agents']);
 			form.reset();

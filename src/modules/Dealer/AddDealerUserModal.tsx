@@ -24,6 +24,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
+import { formatPhoneNumber } from '../../utils/phone.util';
 import { Dealer } from './types';
 
 interface AddDealerUserModalProps {
@@ -124,8 +125,6 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
 			msisdn: (value) => {
 				if (!value) return 'Phone number is required';
-				if (!/^256\d{9}$/.test(value))
-					return 'Phone number must start with 256 followed by 9 digits';
 				return null;
 			},
 			username: (value) => (!value ? 'Username is required' : null),
@@ -138,6 +137,7 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 			request.post('/users', {
 				...form.values,
 				dealerGroup: dealer.dealerName,
+				msisdn: formatPhoneNumber(form.values.msisdn),
 			}),
 		mutationKey: ['users'],
 		onSuccess: () => {

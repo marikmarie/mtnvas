@@ -17,6 +17,7 @@ import { useMutation } from '@tanstack/react-query';
 import { memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import useRequest from '../hooks/useRequest';
+import { formatPhoneNumber, isValidUgandanPhone } from '../utils/phone.util';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -54,8 +55,7 @@ export default memo((props: PaperProps) => {
 		validate: {
 			msisdn: (value) => {
 				if (!value) return 'Phone number is required';
-				if (!/^256\d{9}$/.test(value))
-					return 'Phone number must start with 256 followed by 9 digits';
+				if (!isValidUgandanPhone(value)) return 'Phone number must be of the form 25677...';
 				return null;
 			},
 			otp: (value) => (value.length !== 6 ? 'OTP must be 6 characters' : null),
@@ -73,7 +73,7 @@ export default memo((props: PaperProps) => {
 		mutationFn: () =>
 			request.post('/password-reset', {
 				otp: form.values.otp,
-				msisdn: form.values.msisdn,
+				msisdn: formatPhoneNumber(form.values.msisdn),
 				password: form.values.password,
 				passwordConfirm: form.values.passwordConfirm,
 			}),

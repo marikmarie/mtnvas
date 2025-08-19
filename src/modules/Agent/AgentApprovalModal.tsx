@@ -1,31 +1,32 @@
 import {
-	Modal,
-	TextInput,
-	Textarea,
-	Button,
-	Group,
-	Stack,
-	Title,
-	Text,
-	createStyles,
-	Divider,
 	Alert,
 	Badge,
+	Button,
+	Divider,
+	Group,
+	Modal,
+	Stack,
+	Text,
+	TextInput,
+	Textarea,
 	ThemeIcon,
+	Title,
+	createStyles,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
 import {
 	IconAlertCircle,
 	IconCheck,
-	IconX,
-	IconUser,
 	IconMail,
-	IconPhone,
 	IconMapPin,
+	IconPhone,
+	IconUser,
+	IconX,
 } from '@tabler/icons-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import useRequest from '../../hooks/useRequest';
+import { formatPhoneNumber } from '../../utils/phone.util';
 import { AgentApprovalModalProps, AgentApprovalPayload } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
@@ -103,7 +104,7 @@ export function AgentApprovalModal({ opened, onClose, agent, action }: AgentAppr
 		},
 		validate: {
 			reason: (value) => {
-				if (action === 'reject' && !value?.trim()) {
+				if (action === 'Reject' && !value?.trim()) {
 					return 'Reason is required for rejection';
 				}
 				return null;
@@ -158,7 +159,8 @@ export function AgentApprovalModal({ opened, onClose, agent, action }: AgentAppr
 			// Only include editable fields if they were changed
 			if (values.name !== agent.name) payload.name = values.name;
 			if (values.email !== agent.email) payload.email = values.email;
-			if (values.msisdn !== agent.msisdn) payload.msisdn = values.msisdn;
+			if (values.msisdn !== agent.msisdn)
+				payload.msisdn = formatPhoneNumber(values.msisdn || '');
 			if (values.location !== agent.location) payload.location = values.location;
 
 			await approvalMutation.mutateAsync(payload);
@@ -173,19 +175,19 @@ export function AgentApprovalModal({ opened, onClose, agent, action }: AgentAppr
 	};
 
 	const getActionColor = () => {
-		return action === 'approve' ? 'green' : 'red';
+		return action === 'Approve' ? 'green' : 'red';
 	};
 
 	const getActionIcon = () => {
-		return action === 'approve' ? <IconCheck size={24} /> : <IconX size={24} />;
+		return action === 'Approve' ? <IconCheck size={24} /> : <IconX size={24} />;
 	};
 
 	const getActionTitle = () => {
-		return action === 'approve' ? 'Approve Agent' : 'Reject Agent';
+		return action === 'Approve' ? 'Approve Agent' : 'Reject Agent';
 	};
 
 	const getActionDescription = () => {
-		return action === 'approve'
+		return action === 'Approve'
 			? 'Review and approve this agent application. You can also edit their information before approval.'
 			: 'Provide a reason for rejecting this agent application.';
 	};
@@ -285,7 +287,7 @@ export function AgentApprovalModal({ opened, onClose, agent, action }: AgentAppr
 							</div>
 							<div className={classes.infoRow}>
 								<Badge
-									color={action === 'approve' ? 'yellow' : 'red'}
+									color={action === 'Approve' ? 'yellow' : 'red'}
 									variant="light"
 									className={classes.statusBadge}
 								>
@@ -299,7 +301,7 @@ export function AgentApprovalModal({ opened, onClose, agent, action }: AgentAppr
 				<Divider my="md" />
 
 				{/* Editable Information (for approval) */}
-				{action === 'approve' && (
+				{action === 'Approve' && (
 					<>
 						<div className={classes.section}>
 							<Title
@@ -350,12 +352,12 @@ export function AgentApprovalModal({ opened, onClose, agent, action }: AgentAppr
 						order={4}
 						className={classes.sectionTitle}
 					>
-						{action === 'approve' ? 'Approval Notes (Optional)' : 'Rejection Reason'}
-						{action === 'reject' && <span className={classes.required}> *</span>}
+						{action === 'Approve' ? 'Approval Notes (Optional)' : 'Rejection Reason'}
+						{action === 'Reject' && <span className={classes.required}> *</span>}
 					</Title>
 					<Textarea
 						placeholder={
-							action === 'approve'
+							action === 'Approve'
 								? 'Add any notes about this approval...'
 								: 'Please provide a reason for rejecting this application...'
 						}
@@ -369,12 +371,12 @@ export function AgentApprovalModal({ opened, onClose, agent, action }: AgentAppr
 				<Alert
 					icon={<IconAlertCircle size={16} />}
 					title="Important Information"
-					color={action === 'approve' ? 'green' : 'red'}
+					color={action === 'Approve' ? 'green' : 'red'}
 					variant="light"
 					mb="lg"
 				>
 					<Text size="sm">
-						{action === 'approve' ? (
+						{action === 'Approve' ? (
 							<>
 								• Approved agents will be activated immediately
 								<br />
@@ -413,7 +415,7 @@ export function AgentApprovalModal({ opened, onClose, agent, action }: AgentAppr
 						color={getActionColor()}
 						leftIcon={getActionIcon()}
 					>
-						{action === 'approve' ? 'Approve Agent' : 'Reject Agent'}
+						{action === 'Approve' ? 'Approve Agent' : 'Reject Agent'}
 					</Button>
 				</Group>
 			</form>

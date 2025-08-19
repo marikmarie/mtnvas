@@ -28,6 +28,7 @@ import {
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
+import { formatPhoneNumber } from '../../utils/phone.util';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -201,14 +202,20 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 		if (values.emailNotifications) {
 			formData.append('emailNotifications', 'true');
 			if (values.notificationEmails.length > 0) {
-				formData.append('notificationEmails', JSON.stringify(values.notificationEmails));
+				formData.append(
+					'notificationEmails',
+					JSON.stringify(values.notificationEmails.map(formatPhoneNumber))
+				);
 			}
 		}
 
 		if (values.smsNotifications) {
 			formData.append('smsNotifications', 'true');
 			if (values.notificationMsisdns.length > 0) {
-				formData.append('notificationMsisdns', JSON.stringify(values.notificationMsisdns));
+				formData.append(
+					'notificationMsisdns',
+					JSON.stringify(values.notificationMsisdns.map(formatPhoneNumber))
+				);
 			}
 		}
 

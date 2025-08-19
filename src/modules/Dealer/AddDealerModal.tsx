@@ -22,7 +22,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { formatPhone } from '../../utils/phone.util';
+import { formatPhoneNumber } from '../../utils/phone.util';
 import { DealerModalProps } from './types';
 
 const useStyles = createStyles((theme) => ({
@@ -108,7 +108,10 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 
 	const mutation = useMutation({
 		mutationFn: () =>
-			request.post('/dealer', { ...form.values, msisdn: formatPhone(form.values.msisdn) }),
+			request.post('/dealer', {
+				...form.values,
+				msisdn: formatPhoneNumber(form.values.msisdn),
+			}),
 		mutationKey: ['dealers'],
 		onSuccess: () => {
 			onClose();

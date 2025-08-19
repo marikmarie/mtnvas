@@ -25,6 +25,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
+import { formatPhoneNumber } from '../../utils/phone.util';
 import { Dealer } from '../Dealer/types';
 
 interface Shop {
@@ -161,7 +162,10 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 
 	const mutation = useMutation({
 		mutationFn: (values: ShopUserFormValues) => {
-			return request.post('/agents', values);
+			return request.post('/agents', {
+				...values,
+				msisdn: formatPhoneNumber(values.msisdn),
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['agents'] });

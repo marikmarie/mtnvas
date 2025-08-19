@@ -1,21 +1,22 @@
 import {
-	Modal,
-	TextInput,
-	Select,
+	Alert,
 	Button,
-	Group,
-	Stack,
-	Title,
-	Text,
 	createStyles,
 	Divider,
-	Alert,
+	Group,
+	Modal,
+	Select,
+	Stack,
+	Text,
+	TextInput,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
 import { IconAlertCircle, IconEdit } from '@tabler/icons-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import useRequest from '../../hooks/useRequest';
+import { formatPhoneNumber } from '../../utils/phone.util';
 import { AgentModalProps } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
@@ -113,13 +114,12 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 		},
 	});
 
-	// Update form when agent changes
 	useEffect(() => {
 		if (agent) {
 			form.setValues({
 				name: agent.name,
 				email: agent.email,
-				msisdn: agent.msisdn,
+				msisdn: formatPhoneNumber(agent.msisdn),
 				userType: agent.userType,
 				dealerId: agent.dealerId,
 				shopId: agent.shopId || '',
@@ -157,7 +157,6 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 		onClose();
 	};
 
-	// Don't render if no agent is provided
 	if (!agent) return null;
 
 	return (
@@ -189,7 +188,6 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 				onSubmit={form.onSubmit(handleSubmit)}
 				className={classes.form}
 			>
-				{/* Basic Information */}
 				<div className={classes.section}>
 					<Title
 						order={4}
@@ -228,7 +226,6 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 
 				<Divider my="md" />
 
-				{/* Agent Type and Assignment */}
 				<div className={classes.section}>
 					<Title
 						order={4}
@@ -266,7 +263,6 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 
 				<Divider my="md" />
 
-				{/* Additional Information */}
 				<div className={classes.section}>
 					<Title
 						order={4}
@@ -288,7 +284,6 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 					</Stack>
 				</div>
 
-				{/* Information Alert */}
 				<Alert
 					icon={<IconAlertCircle size={16} />}
 					title="Important Information"
@@ -306,7 +301,6 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 					</Text>
 				</Alert>
 
-				{/* Form Actions */}
 				<Group
 					position="right"
 					mt="xl"

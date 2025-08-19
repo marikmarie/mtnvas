@@ -28,6 +28,7 @@ import {
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
+import { formatPhoneNumber } from '../../utils/phone.util';
 import { StockThresholdRequest } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
@@ -162,7 +163,12 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 	});
 
 	const mutation = useMutation({
-		mutationFn: (values: StockThresholdRequest) => request.post('/stock-thresholds', values),
+		mutationFn: (values: StockThresholdRequest) =>
+			request.post('/stock-thresholds', {
+				...values,
+				notificationEmails: values.notificationEmails?.map(formatPhoneNumber),
+				notificationMsisdns: values.notificationMsisdns?.map(formatPhoneNumber),
+			}),
 		onSuccess: () => {
 			onClose();
 			form.reset();
