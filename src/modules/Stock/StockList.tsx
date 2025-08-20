@@ -178,7 +178,7 @@ export function StockList() {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [dealerFilter, setDealerFilter] = useState<string>('all');
 	const [statusFilter, setStatusFilter] = useState<string>('all');
-	const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+	const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage] = useState(12);
 

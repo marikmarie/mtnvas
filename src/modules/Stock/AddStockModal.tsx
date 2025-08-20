@@ -30,6 +30,7 @@ import { useMemo } from 'react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { formatPhoneNumber } from '../../utils/phone.util';
+import { Dealer, Device, Product } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -158,25 +159,25 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 	// Transform data for Select components
 	const dealerOptions = useMemo(() => {
 		if (!dealers?.data?.data) return [];
-		return dealers.data.data.map((dealer: any) => ({
+		return dealers.data.data.map((dealer: Dealer) => ({
 			value: dealer.id?.toString() || '',
-			label: dealer.dealerName || 'Unknown Dealer',
+			label: dealer.dealerName.toUpperCase() || 'Unknown Dealer',
 		}));
 	}, [dealers?.data?.data]);
 
 	const productOptions = useMemo(() => {
 		if (!products?.data?.data) return [];
-		return products.data.data.map((product: any) => ({
+		return products.data.data.map((product: Product) => ({
 			value: product.id?.toString() || '',
-			label: product.name || 'Unknown Product',
+			label: product.productName.toUpperCase() || 'Unknown Product',
 		}));
 	}, [products?.data?.data]);
 
 	const deviceOptions = useMemo(() => {
 		if (!devices?.data?.data) return [];
-		return devices.data.data.map((device: any) => ({
+		return devices.data.data.map((device: Device) => ({
 			value: device.id?.toString() || '',
-			label: device.name || 'Unknown Device',
+			label: device.deviceName.toUpperCase() || 'Unknown Device',
 		}));
 	}, [devices?.data?.data]);
 

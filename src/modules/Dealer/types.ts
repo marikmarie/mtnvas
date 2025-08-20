@@ -37,15 +37,29 @@ export interface ShopUser {
 }
 
 export interface Product {
-	id: string;
-	name: string;
-	category: 'wakanet' | 'enterprise' | 'both';
+	id: number;
+	productName: string;
+	description: string;
+	productCategory: string;
+	status: string;
+	price: number;
+	createdAt: string;
+	createdBy: string;
+	updatedAt: string;
+	updatedBy: string;
 }
 
 export interface Device {
-	id: string;
-	name: string;
-	category: 'wakanet' | 'enterprise' | 'both';
+	id: number;
+	deviceName: string;
+	description: string;
+	deviceCategory: string;
+	status: string;
+	price: number;
+	createdAt: string;
+	createdBy: string;
+	updatedAt: string;
+	updatedBy: string;
 }
 
 export interface Stock {
