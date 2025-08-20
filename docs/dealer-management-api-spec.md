@@ -1770,7 +1770,7 @@ interface WebhookPayload {
 ### Data Validation Rules
 
 1. **Phone Numbers**: Must be valid international format
-2. **Email Addresses**: Standard email validation
+2. **Emailes**: Standard email validation
 3. **IMEIs**: 15-digit validation with check digit
 4. **File Uploads**:
     - CSV files: Max 10MB, UTF-8 encoding

@@ -346,7 +346,7 @@ export function DealerList() {
 				</div>
 			) : (
 				<Grid>
-					{filteredDealers.map((dealer: Dealer) => (
+					{filteredDealers?.map((dealer: Dealer) => (
 						<Grid.Col
 							key={dealer.id}
 							xs={12}

@@ -31,7 +31,7 @@ export interface ShopUser {
 	msisdn: string;
 	shopId: string;
 	shopName: string;
-	userType: 'shop_agent' | 'dsa' | 'retailer';
+	userType: UserType;
 	createdAt: string;
 	status: 'Active' | 'Inactive';
 }
@@ -285,7 +285,7 @@ export interface ShopUserModalProps {
 	opened: boolean;
 	onClose: () => void;
 	shop: Shop;
-	userType: 'shop_agent' | 'dsa' | 'retailer';
+	userType: UserType;
 }
 
 export interface StockModalProps {
@@ -317,27 +317,27 @@ export interface ShopApprovalModalProps {
 	action: 'approve' | 'reject';
 }
 
+export type UserType = 'ShopAgent' | 'DSA' | 'Retailer';
+export type AgentStatus = 'Active' | 'Inactive' | 'PendingApproval';
+
 export interface Agent {
 	id: string;
-	name: string;
+	agentName: string;
 	email: string;
 	msisdn: string;
-	userType: 'shop_agent' | 'dsa' | 'retailer';
+	userType: UserType;
 	dealerId: string;
 	shopId?: string;
 	merchantCode?: string;
-	status: 'Active' | 'Inactive' | 'Pending Approval';
+	status: AgentStatus;
 	location: string;
+	region: string;
 	createdAt: string;
 }
 
 export interface AgentApprovalPayload {
 	action: 'Approve' | 'Reject';
 	reason?: string;
-	name?: string;
-	email?: string;
-	msisdn?: string;
-	location?: string;
 }
 
 export interface AgentDuplicateCheck {
@@ -358,7 +358,7 @@ export interface AgentDuplicateResponse {
 }
 
 export interface AddAgentCategoryPayload {
-	userType: 'shop_agent' | 'dsa' | 'retailer';
+	userType: UserType;
 	shopId?: string;
 }
 
@@ -543,7 +543,7 @@ export interface SalesReportModalProps {
 export interface CommissionRate {
 	id: string;
 	dealerId?: string;
-	userType: 'shop_agent' | 'dsa' | 'retailer';
+	userType: UserType;
 	productId: string;
 	productName: string;
 	commissionType: 'fixed' | 'percentage';
@@ -556,7 +556,7 @@ export interface CommissionRate {
 // Commission Rate Request
 export interface CommissionRateRequest {
 	dealerId?: string;
-	userType: 'shop_agent' | 'dsa' | 'retailer';
+	userType: UserType;
 	productId: string;
 	commissionType: 'fixed' | 'percentage';
 	amount: number;

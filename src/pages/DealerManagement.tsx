@@ -24,7 +24,6 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	header: {
-		backgroundColor: theme.white,
 		padding: theme.spacing.xl,
 		borderRadius: theme.radius.lg,
 		boxShadow: theme.shadows.sm,
@@ -57,16 +56,9 @@ const useStyles = createStyles((theme) => ({
 		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		minWidth: 120,
 		textAlign: 'center',
-		transition: 'all 0.2s ease',
-
-		'&:hover': {
-			transform: 'translateY(-2px)',
-			boxShadow: theme.shadows.md,
-		},
 	},
 
 	contentCard: {
-		backgroundColor: theme.white,
 		borderRadius: theme.radius.lg,
 		boxShadow: theme.shadows.sm,
 		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
@@ -74,7 +66,7 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	tabsList: {
-		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.colors.gray[0],
 		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		padding: `0 ${theme.spacing.lg}`,
 		position: 'sticky',
@@ -86,17 +78,6 @@ const useStyles = createStyles((theme) => ({
 		padding: `${theme.spacing.md} ${theme.spacing.lg}`,
 		fontWeight: 500,
 		transition: 'all 0.2s ease',
-
-		'&[data-active]': {
-			backgroundColor: theme.colors.yellow[0],
-			color: theme.colors.yellow[7],
-			borderBottom: `2px solid ${theme.colors.yellow[6]}`,
-		},
-
-		'&:hover': {
-			backgroundColor:
-				theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[0],
-		},
 	},
 
 	tabPanel: {
@@ -136,13 +117,6 @@ export default function DealerManagement() {
 	const totalActiveDealers = dealers?.data?.data?.filter(
 		(dealer: Dealer) => dealer.status.toLowerCase() === 'active'
 	).length;
-
-	console.log('dealers', dealers);
-
-	console.log('dealers', dealers?.data?.data?.totalCount);
-	console.log('shops', shops?.data?.data?.totalCount);
-	console.log('shopUsers', shopUsers?.data?.data?.totalCount);
-	console.log('stock', stock?.data?.data?.totalCount);
 
 	const totalShops = shops?.data?.totalCount;
 	const totalShopUsers = shopUsers?.data?.totalCount;

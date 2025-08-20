@@ -419,7 +419,7 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 										/>
 									}
 									// @ts-ignore
-									placeholder="Click to upload or drag and drop"
+									placeholder="Click to upload the IMEI file"
 									className={classes.fileInput}
 									{...form.getInputProps('imeiFile')}
 									radius="md"

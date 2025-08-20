@@ -2,10 +2,8 @@ import {
 	Alert,
 	Button,
 	createStyles,
-	Divider,
 	Group,
 	Modal,
-	Select,
 	Stack,
 	Text,
 	TextInput,
@@ -50,13 +48,11 @@ const useStyles = createStyles((theme) => ({
 }));
 
 interface EditAgentFormValues {
-	name: string;
+	agentName: string;
 	email: string;
 	msisdn: string;
-	userType: 'shop_agent' | 'dsa' | 'retailer';
-	dealerId: string;
-	shopId?: string;
 	location: string;
+	region: string;
 	merchantCode?: string;
 	idNumber?: string;
 }
@@ -67,68 +63,40 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 	const request = useRequest(true);
 	const queryClient = useQueryClient();
 
-	// Mock data - replace with actual API calls
-	const mockDealers = [
-		{ value: 'dealer1', label: 'Tech Solutions Ltd' },
-		{ value: 'dealer2', label: 'Digital Innovations' },
-	];
-
-	const mockShops = [
-		{ value: 'shop1', label: 'Kampala Central Branch' },
-		{ value: 'shop2', label: 'Entebbe Branch' },
-	];
-
-	const userTypes = [
-		{ value: 'shop_agent', label: 'Shop Agent' },
-		{ value: 'dsa', label: 'DSA' },
-		{ value: 'retailer', label: 'Retailer' },
-	];
-
 	const form = useForm<EditAgentFormValues>({
 		initialValues: {
-			name: '',
+			agentName: '',
 			email: '',
 			msisdn: '',
-			userType: 'shop_agent',
-			dealerId: '',
-			shopId: '',
 			location: '',
+			region: '',
 			merchantCode: '',
 			idNumber: '',
 		},
 		validate: {
-			name: (value) =>
+			agentName: (value) =>
 				value.trim().length < 2 ? 'Name must be at least 2 characters' : null,
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email address'),
 			msisdn: (value) =>
 				value.trim().length < 10 ? 'Phone number must be at least 10 digits' : null,
-			dealerId: (value) => (value ? null : 'Dealer is required'),
 			location: (value) =>
 				value.trim().length < 3 ? 'Location must be at least 3 characters' : null,
-			shopId: (value, values) => {
-				if (values.userType === 'shop_agent' && !value) {
-					return 'Shop is required for shop agents';
-				}
-				return null;
-			},
 		},
 	});
 
 	useEffect(() => {
 		if (agent) {
 			form.setValues({
-				name: agent.name,
+				agentName: agent.agentName,
 				email: agent.email,
 				msisdn: formatPhoneNumber(agent.msisdn),
-				userType: agent.userType,
-				dealerId: agent.dealerId,
-				shopId: agent.shopId || '',
 				location: agent.location,
+				region: agent.region,
 				merchantCode: agent.merchantCode || '',
 				idNumber: '',
 			});
 		}
-	}, [agent, form]);
+	}, [agent]);
 
 	const updateAgentMutation = useMutation({
 		mutationFn: (values: EditAgentFormValues) => request.put(`/agents/${agent?.id}`, values),
@@ -197,13 +165,13 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 					</Title>
 					<Stack spacing="md">
 						<TextInput
-							label="Full Name"
-							placeholder="Enter full name"
+							label="Agent Name"
+							placeholder="Enter agent name"
 							required
-							{...form.getInputProps('name')}
+							{...form.getInputProps('agentName')}
 						/>
 						<TextInput
-							label="Email Address"
+							label="Email"
 							placeholder="Enter email address"
 							type="email"
 							required
@@ -223,45 +191,6 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 						/>
 					</Stack>
 				</div>
-
-				<Divider my="md" />
-
-				<div className={classes.section}>
-					<Title
-						order={4}
-						className={classes.sectionTitle}
-					>
-						Agent Type & Assignment
-					</Title>
-					<Stack spacing="md">
-						<Select
-							label="User Type"
-							placeholder="Select user type"
-							data={userTypes}
-							required
-							{...form.getInputProps('userType')}
-						/>
-						<Select
-							label="Dealer"
-							placeholder="Select dealer"
-							data={mockDealers}
-							required
-							searchable
-							{...form.getInputProps('dealerId')}
-						/>
-						<Select
-							label="Shop (Optional)"
-							placeholder="Select shop"
-							data={mockShops}
-							searchable
-							clearable
-							{...form.getInputProps('shopId')}
-							disabled={form.values.userType !== 'shop_agent'}
-						/>
-					</Stack>
-				</div>
-
-				<Divider my="md" />
 
 				<div className={classes.section}>
 					<Title

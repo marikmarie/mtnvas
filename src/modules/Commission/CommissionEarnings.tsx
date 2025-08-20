@@ -6,11 +6,11 @@ import {
 	Container,
 	createStyles,
 	Group,
+	rem,
 	Select,
 	Text,
 	TextInput,
 	Title,
-	rem,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
@@ -34,8 +34,8 @@ import { formatCurrency } from '../../utils/currenyFormatter';
 import { toTitle } from '../../utils/toTitle';
 import {
 	CommissionEarning,
-	CommissionEarningsSummary,
 	CommissionEarningsResponse,
+	CommissionEarningsSummary,
 } from '../Dealer/types';
 import { BulkCommissionPaymentModal } from './BulkCommissionPaymentModal';
 
@@ -253,7 +253,7 @@ export function CommissionEarnings() {
 	};
 
 	const handleBulkPayment = () => {
-		const pendingEarnings = selectedEarnings.filter((e) => e.status === 'pending');
+		const pendingEarnings = selectedEarnings.filter((e) => e.status === 'Pending');
 		if (pendingEarnings.length === 0) {
 			alert('Please select pending earnings for payment.');
 			return;
@@ -268,11 +268,11 @@ export function CommissionEarnings() {
 	// Get status badge color
 	const getStatusColor = (status: string) => {
 		switch (status) {
-			case 'paid':
+			case 'Paid':
 				return 'green';
-			case 'pending':
+			case 'Pending':
 				return 'yellow';
-			case 'cancelled':
+			case 'Cancelled':
 				return 'red';
 			default:
 				return 'gray';
@@ -282,11 +282,11 @@ export function CommissionEarnings() {
 	// Get status icon
 	const getStatusIcon = (status: string) => {
 		switch (status) {
-			case 'paid':
+			case 'Paid':
 				return <IconCheck size={14} />;
-			case 'pending':
+			case 'Pending':
 				return <IconCash size={14} />;
-			case 'cancelled':
+			case 'Cancelled':
 				return <IconX size={14} />;
 			default:
 				return <IconCash size={14} />;

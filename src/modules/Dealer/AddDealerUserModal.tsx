@@ -280,7 +280,7 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 							<div className={classes.formRow}>
 								<div className={classes.inputWrapper}>
 									<TextInput
-										label="Email Address"
+										label="Email"
 										placeholder="Enter email address"
 										required
 										icon={

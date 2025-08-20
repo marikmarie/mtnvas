@@ -239,7 +239,7 @@ export function AgentDuplicateCheckModal({
 							{...form.getInputProps('msisdn')}
 						/>
 						<TextInput
-							label="Email Address"
+							label="Email"
 							placeholder="agent@example.com"
 							type="email"
 							icon={<IconMail size={16} />}

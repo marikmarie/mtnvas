@@ -1,48 +1,48 @@
 import {
-	Button,
-	Stack,
-	Text,
-	Card,
-	TextInput,
-	Select,
-	Badge,
 	ActionIcon,
+	Badge,
+	Button,
+	Card,
 	createStyles,
 	Grid,
-	ThemeIcon,
-	Menu,
-	Title,
 	Group,
-	Skeleton,
-	Table,
+	Menu,
 	Pagination,
 	Paper,
+	Select,
+	Skeleton,
+	Stack,
+	Table,
+	Text,
+	TextInput,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-	IconSearch,
-	IconFilter,
-	IconPlus,
-	IconDotsVertical,
+	IconAlertTriangle,
 	IconBox,
 	IconBuilding,
-	IconDeviceMobile,
 	IconCategory,
-	IconTrendingUp,
+	IconDeviceMobile,
+	IconDotsVertical,
+	IconDownload,
+	IconEye,
+	IconFilter,
+	IconPlus,
+	IconSearch,
 	IconSettings,
 	IconTransfer,
-	IconAlertTriangle,
-	IconEye,
-	IconDownload,
+	IconTrendingUp,
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import useRequest from '../../hooks/useRequest';
+import { Stock } from '../Dealer/types';
 import { AddStockModal } from './AddStockModal';
 import { SetStockThresholdModal } from './SetStockThresholdModal';
-import { StockTransferModal } from './StockTransferModal';
 import { StockThresholdAlertsModal } from './StockThresholdAlertsModal';
-import { Stock } from '../Dealer/types';
+import { StockTransferModal } from './StockTransferModal';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -626,7 +626,7 @@ export function StockList() {
 							key={stock.id}
 							xs={12}
 							sm={6}
-							lg={4}
+							lg={3}
 						>
 							<Card className={classes.card}>
 								<Card.Section className={classes.cardHeader}>
@@ -740,7 +740,7 @@ export function StockList() {
 											className={classes.stockLevelBadge}
 											leftSection={getStatusIcon(stock.status)}
 										>
-											{stock.status.toUpperCase()}
+											{stock?.status?.replace('_', ' ')?.toUpperCase()}
 										</Badge>
 										<Badge
 											color={getCategoryColor(stock.category)}
@@ -838,7 +838,7 @@ export function StockList() {
 											size="sm"
 											leftSection={getStatusIcon(stock.status)}
 										>
-											{stock.status.toUpperCase()}
+											{stock?.status?.replace('_', ' ')?.toUpperCase()}
 										</Badge>
 									</td>
 									<td>

@@ -1,27 +1,27 @@
 import {
-	Modal,
-	Select,
-	Button,
-	Group,
-	Stack,
-	Title,
-	Text,
-	createStyles,
-	Divider,
 	Alert,
 	Badge,
+	Button,
+	createStyles,
+	Divider,
+	Group,
+	Modal,
+	Select,
+	Stack,
+	Text,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
 import {
 	IconAlertCircle,
+	IconMail,
+	IconMapPin,
+	IconPhone,
 	IconShield,
 	IconUser,
-	IconMail,
-	IconPhone,
-	IconMapPin,
 } from '@tabler/icons-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { AddAgentCategoryModalProps, AddAgentCategoryPayload } from '../Dealer/types';
 
@@ -225,7 +225,7 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 									size="sm"
 									weight={500}
 								>
-									{agent.name}
+									{agent.agentName}
 								</Text>
 							</div>
 							<div className={classes.infoRow}>

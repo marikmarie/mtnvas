@@ -13,7 +13,7 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconAlertCircle, IconBuildingStore, IconEdit, IconMapPin } from '@tabler/icons-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDate } from 'date-fns';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
@@ -123,12 +123,6 @@ export function EditShopModal({ opened, onClose, shop }: EditShopModalProps) {
 			onClose();
 			form.reset();
 		},
-	});
-
-	const { data: dealer } = useQuery({
-		queryKey: ['dealers', shop.dealerId],
-		queryFn: () => request.get(`/dealer/${shop.dealerId}`),
-		enabled: !!shop.dealerId,
 	});
 
 	const handleSubmit = () => {

@@ -273,7 +273,7 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 							<div className={classes.formRow}>
 								<div className={classes.inputWrapper}>
 									<TextInput
-										label="Email Address"
+										label="Email"
 										placeholder="Enter email address"
 										required
 										icon={

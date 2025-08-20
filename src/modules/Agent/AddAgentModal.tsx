@@ -2,7 +2,7 @@ import {
 	Alert,
 	Button,
 	createStyles,
-	Divider,
+	Flex,
 	Group,
 	Modal,
 	Select,
@@ -13,11 +13,11 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconAlertCircle, IconUserPlus } from '@tabler/icons-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { formatPhoneNumber } from '../../utils/phone.util';
-import { AgentModalProps } from '../Dealer/types';
+import { AgentModalProps, Dealer, Shop, UserType } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	modal: {
@@ -25,40 +25,19 @@ const useStyles = createStyles((theme) => ({
 			padding: theme.spacing.xl,
 		},
 	},
-
-	header: {
-		marginBottom: theme.spacing.lg,
-	},
-
-	form: {
-		marginTop: theme.spacing.lg,
-	},
-
-	section: {
-		marginBottom: theme.spacing.xl,
-	},
-
-	sectionTitle: {
-		marginBottom: theme.spacing.md,
-		fontWeight: 600,
-		color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[8],
-	},
-
-	required: {
-		color: theme.colors.red[6],
-	},
 }));
 
 interface AddAgentFormValues {
-	name: string;
+	agentName: string;
 	email: string;
 	msisdn: string;
-	userType: 'shop_agent' | 'dsa' | 'retailer';
-	dealerId: string;
-	shopId?: string;
+	userType: UserType;
+	dealerId: number;
+	shopId: number;
 	location: string;
 	merchantCode?: string;
-	idNumber?: string;
+	NIN?: string;
+	region: string;
 }
 
 export function AddAgentModal({ opened, onClose }: AgentModalProps) {
@@ -67,46 +46,46 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 	const request = useRequest(true);
 	const queryClient = useQueryClient();
 
-	// Mock data - replace with actual API calls
-	const mockDealers = [
-		{ value: 'dealer1', label: 'Tech Solutions Ltd' },
-		{ value: 'dealer2', label: 'Digital Innovations' },
-	];
+	const { data: dealers } = useQuery({
+		queryKey: ['dealer'],
+		queryFn: () => request.get('/dealer'),
+	});
 
-	const mockShops = [
-		{ value: 'shop1', label: 'Kampala Central Branch' },
-		{ value: 'shop2', label: 'Entebbe Branch' },
-	];
+	const { data: shops } = useQuery({
+		queryKey: ['shops'],
+		queryFn: () => request.get('/shops'),
+	});
 
 	const userTypes = [
-		{ value: 'shop_agent', label: 'Shop Agent' },
-		{ value: 'dsa', label: 'DSA' },
-		{ value: 'retailer', label: 'Retailer' },
+		{ value: 'ShopAgent', label: 'Shop Agent' },
+		{ value: 'DSA', label: 'DSA' },
+		{ value: 'Retailer', label: 'Retailer' },
 	];
 
 	const form = useForm<AddAgentFormValues>({
 		initialValues: {
-			name: '',
-			email: '',
+			shopId: 0,
+			dealerId: 0,
+			agentName: '',
 			msisdn: '',
-			userType: 'shop_agent',
-			dealerId: '',
-			shopId: '',
-			location: '',
+			email: '',
+			userType: 'ShopAgent',
 			merchantCode: '',
-			idNumber: '',
+			region: '',
+			location: '',
+			NIN: '',
 		},
 		validate: {
-			name: (value) =>
+			agentName: (value) =>
 				value.trim().length < 2 ? 'Name must be at least 2 characters' : null,
 			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email address'),
 			msisdn: (value) =>
 				value.trim().length < 10 ? 'Phone number must be at least 10 digits' : null,
 			dealerId: (value) => (value ? null : 'Dealer is required'),
-			location: (value) =>
-				value.trim().length < 3 ? 'Location must be at least 3 characters' : null,
+			location: (value) => (value.trim().length < 3 ? 'Location is required' : null),
+			region: (value) => (value.trim().length < 3 ? 'You need to add a region' : null),
 			shopId: (value, values) => {
-				if (values.userType === 'shop_agent' && !value) {
+				if (values.userType === 'ShopAgent' && !value) {
 					return 'Shop is required for shop agents';
 				}
 				return null;
@@ -146,7 +125,7 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 			opened={opened}
 			onClose={handleClose}
 			title={
-				<div className={classes.header}>
+				<div>
 					<Group spacing="sm">
 						<IconUserPlus
 							size={24}
@@ -166,116 +145,120 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 			className={classes.modal}
 			centered
 		>
-			<form
-				onSubmit={form.onSubmit(handleSubmit)}
-				className={classes.form}
-			>
-				{/* Basic Information */}
-				<div className={classes.section}>
-					<Title
-						order={4}
-						className={classes.sectionTitle}
+			<form onSubmit={form.onSubmit(handleSubmit)}>
+				<Title
+					order={4}
+					my="sm"
+				>
+					Basic Information
+				</Title>
+				<Stack spacing="sm">
+					<TextInput
+						label="Agent Name"
+						placeholder="Enter agent name"
+						required
+						{...form.getInputProps('agentName')}
+					/>
+					<TextInput
+						label="Email"
+						placeholder="Enter email address"
+						type="email"
+						required
+						{...form.getInputProps('email')}
+					/>
+					<TextInput
+						label="Phone Number (MSISDN)"
+						placeholder="+256701234567"
+						required
+						{...form.getInputProps('msisdn')}
+					/>
+					<Flex
+						gap="sm"
+						align="center"
+						justify="space-between"
 					>
-						Basic Information
-					</Title>
-					<Stack spacing="md">
 						<TextInput
-							label="Full Name"
-							placeholder="Enter full name"
-							required
-							{...form.getInputProps('name')}
-						/>
-						<TextInput
-							label="Email Address"
-							placeholder="Enter email address"
-							type="email"
-							required
-							{...form.getInputProps('email')}
-						/>
-						<TextInput
-							label="Phone Number (MSISDN)"
-							placeholder="+256701234567"
-							required
-							{...form.getInputProps('msisdn')}
-						/>
-						<TextInput
+							w="100%"
 							label="Location"
 							placeholder="Enter location"
 							required
 							{...form.getInputProps('location')}
 						/>
-					</Stack>
-				</div>
-
-				<Divider my="md" />
-
-				{/* Agent Type and Assignment */}
-				<div className={classes.section}>
-					<Title
-						order={4}
-						className={classes.sectionTitle}
-					>
-						Agent Type & Assignment
-					</Title>
-					<Stack spacing="md">
 						<Select
-							label="User Type"
-							placeholder="Select user type"
-							data={userTypes}
+							w="100%"
+							label="Region"
+							placeholder="Select Region"
+							data={['Central', 'Eastern', 'Northern', 'Western']}
 							required
-							{...form.getInputProps('userType')}
+							{...form.getInputProps('region')}
 						/>
-						<Select
-							label="Dealer"
-							placeholder="Select dealer"
-							data={mockDealers}
-							required
-							searchable
-							{...form.getInputProps('dealerId')}
-						/>
-						<Select
-							label="Shop (Optional)"
-							placeholder="Select shop"
-							data={mockShops}
-							searchable
-							clearable
-							{...form.getInputProps('shopId')}
-							disabled={form.values.userType !== 'shop_agent'}
-						/>
-					</Stack>
-				</div>
+					</Flex>
+				</Stack>
 
-				<Divider my="md" />
+				<Title
+					order={4}
+					my="sm"
+				>
+					Agent Type & Assignment
+				</Title>
+				<Stack spacing="sm">
+					<Select
+						label="User Type"
+						placeholder="Select user type"
+						data={userTypes}
+						required
+						{...form.getInputProps('userType')}
+					/>
+					<Select
+						label="Dealer"
+						placeholder="Select dealer"
+						data={dealers?.data.data.map((dealer: Dealer) => ({
+							value: dealer.id,
+							label: dealer.dealerName,
+						}))}
+						required
+						searchable
+						{...form.getInputProps('dealerId')}
+					/>
+					<Select
+						label="Shop (Required for Shop Agents)"
+						placeholder="Select shop"
+						data={shops?.data.data.map((shop: Shop) => ({
+							value: shop.id,
+							label: shop.shopName,
+						}))}
+						searchable
+						clearable
+						{...form.getInputProps('shopId')}
+						disabled={form.values.userType !== 'ShopAgent'}
+					/>
+				</Stack>
 
-				{/* Additional Information */}
-				<div className={classes.section}>
-					<Title
-						order={4}
-						className={classes.sectionTitle}
-					>
-						Additional Information
-					</Title>
-					<Stack spacing="md">
-						<TextInput
-							label="Merchant Code"
-							placeholder="Enter merchant code (optional)"
-							{...form.getInputProps('merchantCode')}
-						/>
-						<TextInput
-							label="ID Number"
-							placeholder="Enter ID number (optional)"
-							{...form.getInputProps('idNumber')}
-						/>
-					</Stack>
-				</div>
+				<Title
+					order={4}
+					my="sm"
+				>
+					Additional Information
+				</Title>
+				<Stack spacing="sm">
+					<TextInput
+						label="Merchant Code"
+						placeholder="Enter merchant code (optional)"
+						{...form.getInputProps('merchantCode')}
+					/>
+					<TextInput
+						label="NIN Number"
+						placeholder="Enter NIN number (optional)"
+						{...form.getInputProps('NIN')}
+					/>
+				</Stack>
 
-				{/* Information Alert */}
 				<Alert
 					icon={<IconAlertCircle size={16} />}
 					title="Important Information"
 					color="yellow"
 					variant="light"
-					mb="lg"
+					my="lg"
 				>
 					<Text size="sm">
 						• New agents will be created with 'pending_approval' status
@@ -287,7 +270,6 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 					</Text>
 				</Alert>
 
-				{/* Form Actions */}
 				<Group
 					position="right"
 					mt="xl"

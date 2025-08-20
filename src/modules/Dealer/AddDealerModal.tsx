@@ -188,7 +188,7 @@ export function AddDealerModal({ opened, onClose }: DealerModalProps) {
 							</div>
 
 							<TextInput
-								label="Email Address"
+								label="Email"
 								placeholder="Enter email address"
 								required
 								icon={

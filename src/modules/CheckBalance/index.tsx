@@ -1,10 +1,10 @@
-import React from 'react';
 import { Button, Divider, Flex, Loader, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation } from '@tanstack/react-query';
 import { useDisclosure } from '@mantine/hooks';
-import useRequest from '../../hooks/useRequest';
+import { useMutation } from '@tanstack/react-query';
+import React from 'react';
 import { Modal } from '../../components/Modal';
+import useRequest from '../../hooks/useRequest';
 
 const BalanceCheck: React.FC = () => {
 	const [successModalOpened, successModalHandlers] = useDisclosure(false);
@@ -17,7 +17,7 @@ const BalanceCheck: React.FC = () => {
 			bnumber: (val: string) => (val.length > 9 ? null : 'Should be a valid wakanetNumber'),
 		},
 	});
-
+	``;
 	const mutation = useMutation({
 		mutationFn: (data: typeof form.values) => request.post('/balance-detail', data),
 		onSuccess: successModalHandlers.open,

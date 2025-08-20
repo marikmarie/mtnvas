@@ -277,7 +277,7 @@ export function ViewDealerModal({ opened, onClose, dealer }: ViewDealerModalProp
 								<div className={classes.infoRow}>
 									<div className={classes.infoLabel}>
 										<IconMail size={16} />
-										Email Address
+										Email
 									</div>
 									<Group spacing="xs">
 										<Text

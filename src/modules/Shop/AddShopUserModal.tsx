@@ -333,7 +333,7 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 							<div className={classes.formRow}>
 								<div className={classes.inputWrapper}>
 									<TextInput
-										label="Email Address"
+										label="Email"
 										placeholder="Enter email address"
 										required
 										type="email"

@@ -105,7 +105,7 @@ export function BulkCommissionPaymentModal({
 	});
 
 	// Filter only pending earnings
-	const pendingEarnings = selectedEarnings.filter((earning) => earning.status === 'pending');
+	const pendingEarnings = selectedEarnings.filter((earning) => earning.status === 'Pending');
 	const totalAmount = pendingEarnings.reduce((sum, earning) => sum + earning.commissionAmount, 0);
 
 	// Bulk payment mutation
