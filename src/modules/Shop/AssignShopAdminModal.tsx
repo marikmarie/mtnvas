@@ -129,7 +129,6 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 		},
 	});
 
-	// Fetch dealer admins for assignment
 	const { data: dealerAdminsData } = useQuery({
 		queryKey: ['dealer-admins', 'all'],
 		queryFn: () => request.get('/dealer/admins'),
@@ -155,7 +154,6 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 
 	const hasErrors = Object.keys(form.errors).length > 0;
 
-	// Prepare admin options
 	const adminOptions = useMemo(() => {
 		if (!dealerAdminsData?.data?.data) return [];
 
@@ -178,7 +176,6 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -206,9 +203,7 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 				</div>
 			</div>
 
-			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Shop Information */}
 				<div className={classes.shopInfo}>
 					<Text
 						size="sm"
@@ -235,7 +230,6 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 					</Text>
 				</div>
 
-				{/* Current Admin Information */}
 				{shop.updatedBy && (
 					<div className={classes.currentAdminInfo}>
 						<Text
@@ -271,7 +265,6 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 
 				<form onSubmit={form.onSubmit(handleSubmit)}>
 					<Stack spacing="lg">
-						{/* Admin Selection */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -302,7 +295,6 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 							</div>
 						</div>
 
-						{/* Selected Admin Details */}
 						{selectedAdmin && (
 							<div className={classes.currentAdminInfo}>
 								<Text
@@ -358,7 +350,6 @@ export function AssignShopAdminModal({ opened, onClose, shop }: AssignShopAdminM
 				</form>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"

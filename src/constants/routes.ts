@@ -6,7 +6,6 @@ export const ROUTES = {
 	UPLOAD: '/upload',
 	NOT_FOUND: '/404',
 	ALL: '*',
-	// New routes for the standalone pages
 	SIGNUP: '/signup',
 	WAKANET_ACTIVATION: '/wakanet-activation',
 	LOAD_BUNDLE: '/load-bundle',

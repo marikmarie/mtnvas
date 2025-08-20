@@ -130,7 +130,6 @@ export function ShopList() {
 	const [currentPage] = useState(1);
 	const [pageSize] = useState(10);
 
-	// Modal states
 	const [addShopModalOpened, { open: openAddShopModal, close: closeAddShopModal }] =
 		useDisclosure(false);
 	const [addUserModalOpened, { open: openAddUserModal, close: closeAddUserModal }] =
@@ -141,7 +140,6 @@ export function ShopList() {
 		useDisclosure(false);
 	const [approvalAction, setApprovalAction] = useState<'Approve' | 'Reject'>('Approve');
 
-	// Fetch shops with proper query parameters
 	const { data: shopsData, isLoading } = useQuery({
 		queryKey: [
 			'shops',
@@ -165,13 +163,11 @@ export function ShopList() {
 			}),
 	});
 
-	// Fetch pending approvals
 	const { data: pendingApprovals } = useQuery({
 		queryKey: ['shops', 'pending-approvals'],
 		queryFn: () => request.get('/shops/pending-approvals'),
 	});
 
-	// Fetch dealers for filter
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers'],
 		queryFn: () => request.get('/dealer'),
@@ -217,7 +213,6 @@ export function ShopList() {
 		openApprovalModal();
 	};
 
-	// Filter and search logic
 	const filteredShops = useMemo(() => {
 		if (!shopsData?.data?.data) return [];
 
@@ -237,7 +232,6 @@ export function ShopList() {
 		});
 	}, [shopsData?.data?.data, searchTerm, statusFilter, regionFilter, dealerFilter]);
 
-	// Get unique regions and dealers for filters
 	const uniqueRegions = useMemo(() => {
 		if (!shopsData?.data?.data) return [];
 		const regions = [...new Set(shopsData.data.data.map((shop: Shop) => shop.region))];

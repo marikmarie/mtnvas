@@ -116,7 +116,6 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 	const request = useRequest(true);
 	const queryClient = useQueryClient();
 
-	// Get agents for selection
 	const { data: agentsData } = useQuery({
 		queryKey: ['agents'],
 		queryFn: () => request.get('/agents'),
@@ -139,7 +138,6 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 		},
 	});
 
-	// Check availability of new IMEI
 	const { data: availabilityData, isLoading: checkingAvailability } = useQuery({
 		queryKey: ['imei-availability', form.values.newImei],
 		queryFn: () => request.get(`/imeis/${form.values.newImei}/check`),
@@ -179,7 +177,6 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -207,9 +204,7 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 				</div>
 			</div>
 
-			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* IMEI Information */}
 				<div className={classes.imeiInfo}>
 					<Text
 						size="sm"
@@ -238,7 +233,6 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 
 				<form onSubmit={form.onSubmit(handleSubmit)}>
 					<Stack spacing="lg">
-						{/* IMEI Swap */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -249,7 +243,6 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 								IMEI Swap
 							</Text>
 
-							{/* Old IMEI */}
 							<div className={classes.inputWrapper}>
 								<TextInput
 									label="Current IMEI"
@@ -267,12 +260,10 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 								/>
 							</div>
 
-							{/* Swap Arrow */}
 							<div className={classes.swapArrow}>
 								<IconArrowRight size={24} />
 							</div>
 
-							{/* New IMEI */}
 							<div className={classes.inputWrapper}>
 								<TextInput
 									label="New IMEI"
@@ -290,7 +281,6 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 								/>
 							</div>
 
-							{/* IMEI Availability Check */}
 							{form.values.newImei && form.values.newImei.length >= 15 && (
 								<Paper
 									className={classes.availabilityCard}
@@ -360,7 +350,6 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 							)}
 						</div>
 
-						{/* Agent Selection */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -396,7 +385,6 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 							</div>
 						</div>
 
-						{/* Customer ID (Optional) */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -423,7 +411,6 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 							</div>
 						</div>
 
-						{/* Reason for Swap */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -455,7 +442,6 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 				</form>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"

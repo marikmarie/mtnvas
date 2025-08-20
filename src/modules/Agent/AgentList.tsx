@@ -130,7 +130,6 @@ export function AgentList() {
 		to: null,
 	});
 
-	// Modal states
 	const [addModalOpened, { open: openAddModal, close: closeAddModal }] = useDisclosure(false);
 	const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
 	const [approvalModalOpened, { open: openApprovalModal, close: closeApprovalModal }] =
@@ -203,7 +202,6 @@ export function AgentList() {
 		keepPreviousData: true,
 	});
 
-	// Extract data from responses
 	const agents = agentsResponse?.data?.data || agentsResponse?.data || [];
 	const shops = shopsResponse?.data?.data || shopsResponse?.data || [];
 	const dealersData = dealers?.data?.data || dealers?.data || [];
@@ -267,9 +265,7 @@ export function AgentList() {
 		setCurrentPage(1);
 	}, [selectedDealer, selectedShop, selectedRegion, selectedLocation, selectedStatus]);
 
-	// Handlers
 	const handleAddAgent = () => {
-		// Clear any previously selected agent when adding a new one
 		setSelectedAgent(null);
 		openAddModal();
 	};

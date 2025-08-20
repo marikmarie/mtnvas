@@ -111,7 +111,6 @@ export default function CommissionManagement() {
 	const { classes } = useStyles();
 	const [activeTab, setActiveTab] = useState<string>('rates');
 
-	// Mock data for header stats - in real app, fetch from API
 	const headerStats = {
 		totalRates: 12,
 		activeRates: 8,

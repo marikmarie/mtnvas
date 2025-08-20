@@ -1,33 +1,33 @@
 import {
-	Group,
-	Stack,
-	Text,
+	ActionIcon,
 	Badge,
 	createStyles,
-	ThemeIcon,
-	Table,
+	Group,
 	Modal,
-	Paper,
-	Title,
-	ActionIcon,
-	Select,
-	TextInput,
 	Pagination,
+	Paper,
+	Select,
+	Stack,
+	Table,
+	Text,
+	TextInput,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { useQuery } from '@tanstack/react-query';
 import {
-	IconUser,
 	IconCalendar,
-	IconFilter,
-	IconSearch,
-	IconEye,
 	IconCheck,
-	IconX,
 	IconClock,
+	IconEye,
+	IconFilter,
 	IconRefresh,
+	IconSearch,
+	IconUser,
+	IconX,
 } from '@tabler/icons-react';
-import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { ImeiSwapRequestDetails, ImeiSwapRequestsModalProps } from '../Dealer/types';
 import { ImeiSwapApprovalModal } from './ImeiSwapApprovalModal';
@@ -144,7 +144,6 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 	const requests: ImeiSwapRequestDetails[] = requestsData?.data?.data || [];
 	const totalPages = Math.ceil((requestsData?.data?.meta?.total || 0) / itemsPerPage);
 
-	// Filter requests locally for search
 	const filteredRequests = useMemo(() => {
 		return requests.filter((request) => {
 			const matchesSearch =
@@ -195,7 +194,6 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 		setSelectedRequest(null);
 	};
 
-	// Calculate summary statistics
 	const summaryStats = useMemo(() => {
 		const pending = requests.filter((r) => r.status === 'pending').length;
 		const approved = requests.filter((r) => r.status === 'approved').length;
@@ -212,7 +210,6 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 				title="IMEI Swap Requests"
 				centered
 			>
-				{/* Header */}
 				<div className={classes.header}>
 					<div className={classes.headerContent}>
 						<ThemeIcon
@@ -240,9 +237,7 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 					</div>
 				</div>
 
-				{/* Content */}
 				<div className={classes.content}>
-					{/* Summary Cards */}
 					<div className={classes.summaryCards}>
 						<Group grow>
 							<Paper
@@ -296,7 +291,6 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 						</Group>
 					</div>
 
-					{/* Search and Filter Section */}
 					<div className={classes.searchSection}>
 						<div className={classes.searchRow}>
 							<TextInput
@@ -322,7 +316,6 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 						</div>
 					</div>
 
-					{/* Requests Table */}
 					{isLoading ? (
 						<Stack spacing="md">
 							<Text>Loading swap requests...</Text>
@@ -442,7 +435,6 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 								</tbody>
 							</Table>
 
-							{/* Pagination */}
 							{totalPages > 1 && (
 								<Group
 									position="center"
@@ -461,7 +453,6 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 				</div>
 			</Modal>
 
-			{/* Approval Modal */}
 			{selectedRequest && (
 				<ImeiSwapApprovalModal
 					opened={approvalModalOpened}

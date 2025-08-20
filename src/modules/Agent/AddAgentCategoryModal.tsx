@@ -23,7 +23,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import useRequest from '../../hooks/useRequest';
-import { AddAgentCategoryModalProps, AddAgentCategoryPayload } from '../Dealer/types';
+import { AddAgentCategoryModalProps, AddAgentCategoryPayload, UserType } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	modal: {
@@ -79,7 +79,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 interface AddCategoryFormValues {
-	userType: 'shop_agent' | 'dsa' | 'retailer';
+	userType: UserType;
 	shopId?: string;
 }
 
@@ -89,10 +89,8 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 	const request = useRequest(true);
 	const queryClient = useQueryClient();
 
-	// Don't render if no agent is provided
 	if (!agent) return null;
 
-	// Mock data - replace with actual API calls
 	const mockShops = [
 		{ value: 'shop1', label: 'Kampala Central Branch' },
 		{ value: 'shop2', label: 'Entebbe Branch' },
@@ -102,17 +100,17 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 		{ value: 'shop_agent', label: 'Shop Agent' },
 		{ value: 'dsa', label: 'DSA' },
 		{ value: 'retailer', label: 'Retailer' },
-	].filter((type) => type.value !== agent.userType); // Exclude current user type
+	].filter((type) => type.value !== agent.userType);
 
 	const form = useForm<AddCategoryFormValues>({
 		initialValues: {
-			userType: 'shop_agent',
+			userType: 'ShopAgent',
 			shopId: '',
 		},
 		validate: {
 			userType: (value) => (value ? null : 'User type is required'),
 			shopId: (value, values) => {
-				if (values.userType === 'shop_agent' && !value) {
+				if (values.userType === 'ShopAgent' && !value) {
 					return 'Shop is required for shop agents';
 				}
 				return null;
@@ -136,7 +134,7 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 		setIsSubmitting(true);
 		try {
 			const payload: AddAgentCategoryPayload = {
-				userType: values.userType,
+				userType: values.userType as UserType,
 				shopId: values.shopId,
 			};
 
@@ -151,13 +149,13 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 		onClose();
 	};
 
-	const getUserTypeColor = (userType: string) => {
+	const getUserTypeColor = (userType: UserType) => {
 		switch (userType) {
-			case 'shop_agent':
+			case 'ShopAgent':
 				return 'yellow';
-			case 'dsa':
+			case 'DSA':
 				return 'purple';
-			case 'retailer':
+			case 'Retailer':
 				return 'orange';
 			default:
 				return 'gray';
@@ -166,11 +164,11 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 
 	const getUserTypeLabel = (userType: string) => {
 		switch (userType) {
-			case 'shop_agent':
+			case 'ShopAgent':
 				return 'Shop Agent';
-			case 'dsa':
+			case 'DSA':
 				return 'DSA';
-			case 'retailer':
+			case 'Retailer':
 				return 'Retailer';
 			default:
 				return userType;
@@ -206,7 +204,6 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 				onSubmit={form.onSubmit(handleSubmit)}
 				className={classes.form}
 			>
-				{/* Agent Information */}
 				<div className={classes.section}>
 					<Title
 						order={4}
@@ -285,7 +282,6 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 
 				<Divider my="md" />
 
-				{/* New Category Selection */}
 				<div className={classes.section}>
 					<Title
 						order={4}
@@ -308,13 +304,12 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 							searchable
 							clearable
 							{...form.getInputProps('shopId')}
-							disabled={form.values.userType !== 'shop_agent'}
-							required={form.values.userType === 'shop_agent'}
+							disabled={form.values.userType !== 'ShopAgent'}
+							required={form.values.userType === 'ShopAgent'}
 						/>
 					</Stack>
 				</div>
 
-				{/* Information Alert */}
 				<Alert
 					icon={<IconAlertCircle size={16} />}
 					title="Important Information"
@@ -334,7 +329,6 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 					</Text>
 				</Alert>
 
-				{/* Form Actions */}
 				<Group
 					position="right"
 					mt="xl"

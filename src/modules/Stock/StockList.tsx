@@ -190,7 +190,6 @@ export function StockList() {
 	const [alertsModalOpened, { open: openAlertsModal, close: closeAlertsModal }] =
 		useDisclosure(false);
 
-	// Fetch stock summary
 	const { data: stockSummary } = useQuery({
 		queryKey: ['stock/summary', { dealerFilter }],
 		queryFn: () =>
@@ -201,7 +200,6 @@ export function StockList() {
 			}),
 	});
 
-	// Fetch stock list
 	const { data: stockData, isLoading } = useQuery({
 		queryKey: ['stock', { dealerFilter, statusFilter, searchTerm, currentPage }],
 		queryFn: () =>
@@ -215,7 +213,6 @@ export function StockList() {
 			}),
 	});
 
-	// Filter and search logic
 	const filteredStocks = useMemo(() => {
 		if (!stockData?.data?.data) return [];
 
@@ -235,7 +232,6 @@ export function StockList() {
 		});
 	}, [stockData?.data?.data, searchTerm, dealerFilter, statusFilter]);
 
-	// Get unique dealers for filter
 	const uniqueDealers = useMemo(() => {
 		if (!stockData?.data?.data) return [];
 		const dealers = [...new Set(stockData.data.data.map((stock: Stock) => stock.dealerName))];
@@ -275,21 +271,17 @@ export function StockList() {
 	};
 
 	const handleViewDetails = (stock: Stock) => {
-		// Implement stock details view
 		console.log('View stock details:', stock);
 	};
 
 	const handleDownloadTemplate = () => {
-		// Implement template download
 		request.get('/stocks/template', { params: { format: 'csv' } });
 	};
 
-	// Pagination
 	const totalPages = Math.ceil((stockData?.data?.meta?.total || 0) / itemsPerPage);
 
 	return (
 		<div className={classes.root}>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<Group
 					position="apart"
@@ -360,7 +352,6 @@ export function StockList() {
 				</Group>
 			</div>
 
-			{/* Stock Summary Cards */}
 			{stockSummary?.data && (
 				<div className={classes.summaryCards}>
 					<Grid>
@@ -440,7 +431,6 @@ export function StockList() {
 				</div>
 			)}
 
-			{/* Search and Filter Section */}
 			<div className={classes.searchSection}>
 				<div className={classes.searchRow}>
 					<TextInput
@@ -481,17 +471,9 @@ export function StockList() {
 				</div>
 			</div>
 
-			{/* View Mode Toggle */}
 			<div className={classes.viewModeToggle}>
 				<Group position="right">
 					<Button.Group>
-						<Button
-							variant={viewMode === 'grid' ? 'filled' : 'outline'}
-							size="sm"
-							onClick={() => setViewMode('grid')}
-						>
-							Grid View
-						</Button>
 						<Button
 							variant={viewMode === 'table' ? 'filled' : 'outline'}
 							size="sm"
@@ -499,11 +481,17 @@ export function StockList() {
 						>
 							Table View
 						</Button>
+						<Button
+							variant={viewMode === 'grid' ? 'filled' : 'outline'}
+							size="sm"
+							onClick={() => setViewMode('grid')}
+						>
+							Grid View
+						</Button>
 					</Button.Group>
 				</Group>
 			</div>
 
-			{/* Stock Display */}
 			{isLoading ? (
 				<Grid>
 					{Array.from({ length: 6 }).map((_, index) => (
@@ -814,7 +802,6 @@ export function StockList() {
 				</div>
 			)}
 
-			{/* Pagination */}
 			{totalPages > 1 && (
 				<Group
 					position="center"
@@ -829,7 +816,6 @@ export function StockList() {
 				</Group>
 			)}
 
-			{/* Modals */}
 			<AddStockModal
 				opened={addModalOpened}
 				onClose={closeAddModal}

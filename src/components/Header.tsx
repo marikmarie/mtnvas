@@ -79,13 +79,6 @@ const useStyles = createStyles((theme) => ({
 			textDecoration: 'none',
 			backgroundColor:
 				theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.colors.gray[0],
-			// transform: 'translateY(-1px)',
-		},
-	},
-
-	logoImage: {
-		'&:hover': {
-			// transform: 'scale(1.05)',
 		},
 	},
 
@@ -124,7 +117,6 @@ const useStyles = createStyles((theme) => ({
 		'&:hover': {
 			backgroundColor:
 				theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-			// transform: 'translateY(-1px)',
 			boxShadow: theme.shadows.sm,
 		},
 		userSelect: 'none',
@@ -171,7 +163,6 @@ const useStyles = createStyles((theme) => ({
 		'&:hover': {
 			backgroundColor:
 				theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-			// transform: 'translateX(4px)',
 		},
 	},
 
@@ -182,7 +173,6 @@ const useStyles = createStyles((theme) => ({
 		fontWeight: 600,
 	},
 
-	// Mobile styles
 	mobileMenu: {
 		[theme.fn.largerThan('lg')]: {
 			display: 'none',
@@ -300,7 +290,6 @@ const useStyles = createStyles((theme) => ({
 	chevronRotated: {},
 }));
 
-// Navigation structure
 const navItems = [
 	{
 		label: 'Starter Packs',
@@ -407,15 +396,12 @@ export function Header() {
 	const isOfficeUser = user?.category === 'office';
 	const isAdmin = user?.role === 'ADMIN';
 
-	// State for dropdown menus
 	const [openDropdown, setOpenDropdown] = useState<number | null>(null);
 	const [mobileExpanded, setMobileExpanded] = useState<number[]>([]);
 
-	// Mobile menu state
 	const [mobileMenuOpened, { toggle: toggleMobileMenu, close: closeMobileMenu }] =
 		useDisclosure(false);
 
-	// User management modal state
 	const [userManagementOpened, { open: openUserManagement, close: closeUserManagement }] =
 		useDisclosure(false);
 
@@ -441,29 +427,23 @@ export function Header() {
 		};
 	}, []);
 
-	// Get user display info
 	const displayName = user?.email?.split('@')[0] || 'User';
 	const avatarLetter = displayName[0]?.toUpperCase() || 'U';
 
-	// Check if path is active
 	const isActive = (path: string) => location.pathname === path;
 
-	// Check if any sub-item is active
 	const isParentActive = (items: any[]) => {
 		return items.some((item) => isActive(item.path));
 	};
 
-	// Filter navigation items based on user role
 	const getFilteredItems = (items: (typeof navItems)[0]['items']) => {
 		return items.filter((item) => !item.officeRestricted || !isOfficeUser);
 	};
 
-	// Close mobile menu when clicking outside
 	const handleMobileOverlayClick = () => {
 		closeMobileMenu();
 	};
 
-	// Render desktop navigation
 	const renderDesktopNav = () => {
 		return navItems.map((item, index) => {
 			const filteredSubItems = getFilteredItems(item.items);
@@ -476,7 +456,7 @@ export function Header() {
 					key={index}
 					className={cx(classes.navItem, { [classes.navItemActive]: isItemActive })}
 					onClick={(e) => {
-						e.stopPropagation(); // prevent bubbling in case it's nested in a link or another handler
+						e.stopPropagation();
 						setOpenDropdown(openDropdown === index ? null : index);
 					}}
 					role="button"
@@ -536,7 +516,6 @@ export function Header() {
 		});
 	};
 
-	// Render mobile navigation
 	const renderMobileNav = () => {
 		return (
 			<Box className={classes.mobileMenu}>
@@ -646,7 +625,6 @@ export function Header() {
 
 	return (
 		<>
-			{/* User Management Modal */}
 			<UserManagementModal
 				opened={userManagementOpened}
 				onClose={closeUserManagement}
@@ -661,7 +639,6 @@ export function Header() {
 					className={classes.inner}
 					fluid
 				>
-					{/* Logo */}
 					<Link
 						to="/"
 						className={classes.logo}
@@ -671,20 +648,16 @@ export function Header() {
 							alt="Logo"
 							width={width < 768 ? 40 : 45}
 							height={width < 768 ? 40 : 45}
-							className={classes.logoImage}
 						/>
 						<Text className={classes.logoText}>
 							{width < 480 ? '4G|5G' : '4G | 5G PORTAL'}
 						</Text>
 					</Link>
 
-					{/* Desktop Navigation */}
 					<Group className={classes.navigation}>{renderDesktopNav()}</Group>
 
-					{/* Mobile Navigation */}
 					{renderMobileNav()}
 
-					{/* User Actions */}
 					<Group className={classes.userSection}>
 						{isAdmin && width >= 768 && (
 							<Button

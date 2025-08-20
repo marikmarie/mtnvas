@@ -7,11 +7,11 @@ import {
 	createStyles,
 	Group,
 	Paper,
+	rem,
 	Select,
 	Text,
 	TextInput,
 	Title,
-	rem,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
@@ -166,7 +166,6 @@ export function TransactionList() {
 	const { classes } = useStyles();
 	const request = useRequest(true);
 
-	// State for filters
 	const [searchTerm, setSearchTerm] = useState('');
 	const [agentFilter, setAgentFilter] = useState<string>('');
 	const [dealerFilter, setDealerFilter] = useState<string>('');
@@ -179,7 +178,6 @@ export function TransactionList() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const itemsPerPage = 25;
 
-	// Modal states
 	const [activationModalOpened, { open: openActivationModal, close: closeActivationModal }] =
 		useDisclosure(false);
 	const [cashSaleModalOpened, { open: openCashSaleModal, close: closeCashSaleModal }] =
@@ -187,7 +185,6 @@ export function TransactionList() {
 	const [reportsModalOpened, { open: openReportsModal, close: closeReportsModal }] =
 		useDisclosure(false);
 
-	// Fetch transaction summary
 	const { data: summaryData } = useQuery({
 		queryKey: ['transactionSummary', dealerFilter, agentFilter, shopFilter],
 		queryFn: () =>
@@ -201,7 +198,6 @@ export function TransactionList() {
 			}),
 	});
 
-	// Fetch transactions
 	const fetchTransactions = useCallback(async () => {
 		const params = {
 			page: currentPage,
@@ -252,7 +248,6 @@ export function TransactionList() {
 		queryFn: fetchTransactions,
 	});
 
-	// Fetch lookup data
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers-lookup'],
 		queryFn: () => request.get('/lookups/dealers'),
@@ -263,11 +258,6 @@ export function TransactionList() {
 		queryFn: () => request.get('/agents'),
 	});
 
-	// const { data: shopsData } = useQuery({
-	// 	queryKey: ['shops-lookup'],
-	// 	queryFn: () => request.get('/lookups/shops'),
-	// });
-
 	const summary: TransactionSummary = summaryData?.data?.summary || {
 		totalAmount: 0,
 		totalCommission: 0,
@@ -275,9 +265,7 @@ export function TransactionList() {
 	};
 
 	const transactions: Transaction[] = transactionsData?.data?.data || [];
-	// const totalPages = Math.ceil((transactionsData?.data?.meta?.total || 0) / itemsPerPage);
 
-	// Filter transactions based on search term
 	const filteredTransactions = transactions.filter(
 		(transaction) =>
 			searchTerm === '' ||
@@ -305,11 +293,9 @@ export function TransactionList() {
 	};
 
 	const handleExportTransactions = () => {
-		// Implement export functionality
 		console.log('Exporting transactions...');
 	};
 
-	// Status badge colors
 	const getStatusColor = (status: string) => {
 		switch (status) {
 			case 'completed':
@@ -323,7 +309,6 @@ export function TransactionList() {
 		}
 	};
 
-	// Type badge colors
 	const getTypeColor = (type: string) => {
 		switch (type) {
 			case 'activation':
@@ -335,7 +320,6 @@ export function TransactionList() {
 		}
 	};
 
-	// Payment method icons
 	const getPaymentMethodIcon = (method: string) => {
 		switch (method) {
 			case 'cash':
@@ -347,7 +331,6 @@ export function TransactionList() {
 		}
 	};
 
-	// Data grid columns
 	const columns = [
 		{
 			name: 'receiptNumber',
@@ -469,7 +452,6 @@ export function TransactionList() {
 			fluid
 			className={classes.root}
 		>
-			{/* Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<div className={classes.titleSection}>
@@ -537,7 +519,6 @@ export function TransactionList() {
 				</div>
 			</div>
 
-			{/* Summary Statistics */}
 			<div className={classes.statsGrid}>
 				<Card className={classes.statCard}>
 					<div
@@ -584,7 +565,6 @@ export function TransactionList() {
 				</Card>
 			</div>
 
-			{/* Filters */}
 			<Paper className={classes.filtersCard}>
 				<Group
 					position="apart"
@@ -701,7 +681,6 @@ export function TransactionList() {
 				</div>
 			</Paper>
 
-			{/* Transactions Table */}
 			<Card className={classes.tableCard}>
 				<div className={classes.tableHeader}>
 					<Group position="apart">
@@ -723,7 +702,6 @@ export function TransactionList() {
 				{transactionTable}
 			</Card>
 
-			{/* Modals */}
 			<CustomerActivationModal
 				opened={activationModalOpened}
 				onClose={closeActivationModal}

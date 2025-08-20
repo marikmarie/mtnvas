@@ -6,14 +6,15 @@ import {
 	Container,
 	createStyles,
 	Group,
+	rem,
 	Select,
 	Text,
 	TextInput,
 	Title,
-	rem,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
+	IconCurrencyDollar,
 	IconEdit,
 	IconFilter,
 	IconPercentage,
@@ -21,15 +22,14 @@ import {
 	IconRefresh,
 	IconSearch,
 	IconTrash,
-	IconCurrencyDollar,
 } from '@tabler/icons-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
 import { toTitle } from '../../utils/toTitle';
-import { CommissionRate } from '../Dealer/types';
+import { CommissionRate, UserType } from '../Dealer/types';
 import { CommissionRateModal } from './CommissionRateModal';
 
 const useStyles = createStyles((theme) => ({
@@ -118,7 +118,6 @@ export function CommissionRates() {
 	const request = useRequest(true);
 	const queryClient = useQueryClient();
 
-	// State for filters
 	const [searchTerm, setSearchTerm] = useState('');
 	const [dealerFilter, setDealerFilter] = useState<string>('');
 	const [userTypeFilter, setUserTypeFilter] = useState<string>('');
@@ -126,10 +125,8 @@ export function CommissionRates() {
 	const [statusFilter, setStatusFilter] = useState<string>('');
 	const [selectedRate, setSelectedRate] = useState<CommissionRate | null>(null);
 
-	// Modal states
 	const [rateModalOpened, { open: openRateModal, close: closeRateModal }] = useDisclosure(false);
 
-	// Fetch commission rates
 	const fetchCommissionRates = useCallback(async () => {
 		const params = {
 			dealerId: dealerFilter || undefined,
@@ -152,7 +149,6 @@ export function CommissionRates() {
 		queryFn: fetchCommissionRates,
 	});
 
-	// Fetch lookup data
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers-lookup'],
 		queryFn: () => request.get('/lookups/dealers'),
@@ -163,7 +159,6 @@ export function CommissionRates() {
 		queryFn: () => request.get('/lookups/products'),
 	});
 
-	// Delete commission rate mutation
 	const deleteRateMutation = useMutation({
 		mutationFn: async (rateId: string) => {
 			await request.delete(`/commissions/rates/${rateId}`);
@@ -175,7 +170,6 @@ export function CommissionRates() {
 
 	const commissionRates: CommissionRate[] = ratesData?.data || [];
 
-	// Filter rates based on search term
 	const filteredRates = commissionRates.filter(
 		(rate) =>
 			searchTerm === '' ||
@@ -216,7 +210,6 @@ export function CommissionRates() {
 		closeRateModal();
 	};
 
-	// Get commission type badge color
 	const getCommissionTypeColor = (type: string) => {
 		switch (type) {
 			case 'fixed':
@@ -228,26 +221,23 @@ export function CommissionRates() {
 		}
 	};
 
-	// Get user type badge color
-	const getUserTypeColor = (userType: string) => {
+	const getUserTypeColor = (userType: UserType) => {
 		switch (userType) {
-			case 'shop_agent':
+			case 'ShopAgent':
 				return 'blue';
-			case 'dsa':
+			case 'DSA':
 				return 'teal';
-			case 'retailer':
+			case 'Retailer':
 				return 'orange';
 			default:
 				return 'gray';
 		}
 	};
 
-	// Get status badge color
 	const getStatusColor = (isActive: boolean) => {
 		return isActive ? 'green' : 'red';
 	};
 
-	// Data grid columns
 	const columns = [
 		{
 			name: 'productName',
@@ -385,7 +375,6 @@ export function CommissionRates() {
 			fluid
 			className={classes.root}
 		>
-			{/* Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<div className={classes.titleSection}>
@@ -425,7 +414,6 @@ export function CommissionRates() {
 				</div>
 			</div>
 
-			{/* Filters */}
 			<Card className={classes.filtersCard}>
 				<Group
 					position="apart"
@@ -474,9 +462,9 @@ export function CommissionRates() {
 						placeholder="User Type"
 						data={[
 							{ value: '', label: 'All User Types' },
-							{ value: 'shop_agent', label: 'Shop Agent' },
-							{ value: 'dsa', label: 'DSA' },
-							{ value: 'retailer', label: 'Retailer' },
+							{ value: 'ShopAgent', label: 'Shop Agent' },
+							{ value: 'DSA', label: 'DSA' },
+							{ value: 'Retailer', label: 'Retailer' },
 						]}
 						value={userTypeFilter}
 						onChange={(value) => setUserTypeFilter(value || '')}
@@ -514,7 +502,6 @@ export function CommissionRates() {
 				</div>
 			</Card>
 
-			{/* Commission Rates Table */}
 			<Card className={classes.tableCard}>
 				<div className={classes.tableHeader}>
 					<Group position="apart">
@@ -536,7 +523,6 @@ export function CommissionRates() {
 				{ratesTable}
 			</Card>
 
-			{/* Modals */}
 			<CommissionRateModal
 				opened={rateModalOpened}
 				onClose={handleCloseRateModal}

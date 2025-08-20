@@ -163,7 +163,6 @@ export function ImeiList() {
 		openSwapModal();
 	};
 
-	// Server-side filtering is handled by the API, so we use the data directly
 	const imeiList: ImeiDetails[] = imeiData?.data?.data || [];
 	const totalPages = Math.ceil((imeiData?.data?.meta?.total || 0) / itemsPerPage);
 
@@ -203,7 +202,6 @@ export function ImeiList() {
 
 	return (
 		<div className={classes.root}>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<Group
 					position="apart"
@@ -246,7 +244,6 @@ export function ImeiList() {
 				</Group>
 			</div>
 
-			{/* Search and Filter Section */}
 			<div className={classes.searchSection}>
 				<div className={classes.searchRow}>
 					<TextInput
@@ -288,7 +285,6 @@ export function ImeiList() {
 				</div>
 			</div>
 
-			{/* Enhanced Card Grid */}
 			{isLoading ? (
 				<Grid>
 					{Array.from({ length: 6 }).map((_, index) => (
@@ -474,7 +470,6 @@ export function ImeiList() {
 				</Grid>
 			)}
 
-			{/* Pagination */}
 			{totalPages > 1 && (
 				<Group
 					position="center"
@@ -489,7 +484,6 @@ export function ImeiList() {
 				</Group>
 			)}
 
-			{/* Modals */}
 			<ImeiDetailsModal
 				opened={detailsModalOpened}
 				onClose={closeDetailsModal}

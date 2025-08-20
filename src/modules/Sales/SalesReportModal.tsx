@@ -13,20 +13,20 @@ import {
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
-import { useQuery } from '@tanstack/react-query';
 import {
+	IconBuilding,
 	IconCalendar,
+	IconDeviceMobile,
 	IconDownload,
 	IconTrendingUp,
-	IconDeviceMobile,
 	IconUser,
-	IconBuilding,
 } from '@tabler/icons-react';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
 import { SalesReportModalProps, SalesReportRequest, SalesReportResponse } from '../Dealer/types';
-import { Modal } from '../../components/Modal';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -143,7 +143,6 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 		},
 	});
 
-	// Parse dates for date pickers
 	const dateFromValue = useMemo(() => {
 		return form.values.dateFrom ? new Date(form.values.dateFrom) : null;
 	}, [form.values.dateFrom]);
@@ -152,7 +151,6 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 		return form.values.dateTo ? new Date(form.values.dateTo) : null;
 	}, [form.values.dateTo]);
 
-	// Fetch lookup data
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers-lookup'],
 		queryFn: () => request.get('/lookups/dealers'),
@@ -173,7 +171,6 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 		queryFn: () => request.get('/lookups/products'),
 	});
 
-	// Fetch report data
 	const { data: reportData, isLoading: reportLoading } = useQuery({
 		queryKey: ['sales-report', form.values],
 		queryFn: async () => {
@@ -192,7 +189,6 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 	};
 
 	const handleExportReport = () => {
-		// Implement export functionality
 		console.log('Exporting report...', form.values);
 	};
 
@@ -234,7 +230,6 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 			</div>
 
 			<div className={classes.formSection}>
-				{/* Info Card */}
 				<div className={classes.infoCard}>
 					<Text
 						size="sm"
@@ -253,7 +248,6 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 				</div>
 
 				<Stack spacing="lg">
-					{/* Report Configuration */}
 					<Card className={classes.reportCard}>
 						<Text
 							size="md"
@@ -431,7 +425,6 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 						</SimpleGrid>
 					</Card>
 
-					{/* Report Results */}
 					{reportData && !reportLoading && (
 						<Card className={classes.reportCard}>
 							<Group
@@ -454,7 +447,6 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 								</Button>
 							</Group>
 
-							{/* Summary Statistics */}
 							<SimpleGrid
 								cols={4}
 								spacing="md"
@@ -492,7 +484,6 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 								</div>
 							</SimpleGrid>
 
-							{/* Breakdown */}
 							{reportData.breakdown && reportData.breakdown.length > 0 && (
 								<>
 									<Divider my="lg" />
@@ -550,7 +541,6 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 				</Stack>
 			</div>
 
-			{/* Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"

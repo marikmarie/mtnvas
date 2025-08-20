@@ -10,7 +10,6 @@ import {
 	createStyles,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
 	IconCash,
 	IconDeviceMobile,
@@ -19,10 +18,11 @@ import {
 	IconPhone,
 	IconUser,
 } from '@tabler/icons-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
 import { CashSaleModalProps, CashSaleRequest, CashSaleResponse } from '../Dealer/types';
-import { Modal } from '../../components/Modal';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -128,7 +128,6 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 		},
 	});
 
-	// Fetch lookup data
 	const { data: agentsData } = useQuery({
 		queryKey: ['agents-lookup'],
 		queryFn: () => request.get('/agents', { params: { status: 'active' } }),
@@ -148,21 +147,17 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 		enabled: !!form.values.productId,
 	});
 
-	// Create cash sale mutation
 	const cashSaleMutation = useMutation({
 		mutationFn: async (data: CashSaleRequest) => {
 			const response = await request.post('/transactions/cash-sale', data);
 			return response.data as CashSaleResponse;
 		},
 		onSuccess: (data) => {
-			// Show success notification
 			console.log('Cash sale successful:', data);
 
-			// Invalidate relevant queries
 			queryClient.invalidateQueries(['transactions']);
 			queryClient.invalidateQueries(['transactionSummary']);
 
-			// Reset form and close modal
 			form.reset();
 			onClose();
 		},
@@ -182,7 +177,6 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 
 	const handleProductChange = (productId: string | null) => {
 		form.setFieldValue('productId', productId || '');
-		form.setFieldValue('deviceId', ''); // Reset device when product changes
 	};
 
 	return (

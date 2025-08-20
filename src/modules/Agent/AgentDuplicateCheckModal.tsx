@@ -154,7 +154,6 @@ export function AgentDuplicateCheckModal({
 	const handleSubmit = async (values: DuplicateCheckFormValues) => {
 		setIsSearching(true);
 		try {
-			// Only send fields that have values
 			const payload: AgentDuplicateCheck = {};
 			if (values.msisdn?.trim()) payload.msisdn = formatPhoneNumber(values.msisdn.trim());
 			if (values.email?.trim()) payload.email = values.email.trim();
@@ -215,7 +214,6 @@ export function AgentDuplicateCheckModal({
 				onSubmit={form.onSubmit(handleSubmit)}
 				className={classes.form}
 			>
-				{/* Search Form */}
 				<div className={classes.section}>
 					<Title
 						order={4}
@@ -254,7 +252,6 @@ export function AgentDuplicateCheckModal({
 					</Stack>
 				</div>
 
-				{/* Information Alert */}
 				<Alert
 					icon={<IconAlertCircle size={16} />}
 					title="How Duplicate Checking Works"
@@ -273,7 +270,6 @@ export function AgentDuplicateCheckModal({
 					</Text>
 				</Alert>
 
-				{/* Search Button */}
 				<Group
 					position="center"
 					mb="lg"
@@ -291,7 +287,6 @@ export function AgentDuplicateCheckModal({
 					</Button>
 				</Group>
 
-				{/* Search Results */}
 				{searchResult && (
 					<>
 						<Divider my="md" />
@@ -447,7 +442,6 @@ export function AgentDuplicateCheckModal({
 					</>
 				)}
 
-				{/* Form Actions */}
 				<Group
 					position="right"
 					mt="xl"

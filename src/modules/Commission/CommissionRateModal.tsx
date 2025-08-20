@@ -12,18 +12,18 @@ import {
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-	IconCurrencyDollar,
-	IconCalendar,
-	IconUser,
 	IconBuilding,
+	IconCalendar,
+	IconCurrencyDollar,
 	IconDeviceMobile,
 	IconPercentage,
+	IconUser,
 } from '@tabler/icons-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import useRequest from '../../hooks/useRequest';
 import { Modal } from '../../components/Modal';
+import useRequest from '../../hooks/useRequest';
 import { CommissionRateModalProps, CommissionRateRequest } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
@@ -86,7 +86,7 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 		initialValues: {
 			dealerId: commissionRate?.dealerId || '',
 			isSystemWide: !commissionRate?.dealerId,
-			userType: commissionRate?.userType || 'shop_agent',
+			userType: commissionRate?.userType || 'ShopAgent',
 			productId: commissionRate?.productId || '',
 			commissionType: commissionRate?.commissionType || 'fixed',
 			amount: commissionRate?.amount || 0,
@@ -114,12 +114,10 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 		},
 	});
 
-	// Parse effective date for date picker
 	const effectiveFromValue = useMemo(() => {
 		return form.values.effectiveFrom ? new Date(form.values.effectiveFrom) : null;
 	}, [form.values.effectiveFrom]);
 
-	// Fetch lookup data
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers-lookup'],
 		queryFn: () => request.get('/lookups/dealers'),
@@ -130,7 +128,6 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 		queryFn: () => request.get('/lookups/products'),
 	});
 
-	// Create/update commission rate mutation
 	const commissionRateMutation = useMutation({
 		mutationFn: async (data: CommissionRateRequest) => {
 			if (isEditing) {
@@ -142,10 +139,8 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 			}
 		},
 		onSuccess: () => {
-			// Invalidate relevant queries
 			queryClient.invalidateQueries(['commission-rates']);
 
-			// Reset form and close modal
 			form.reset();
 			onClose();
 		},
@@ -164,7 +159,6 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 			effectiveFrom: values.effectiveFrom,
 		};
 
-		// Only include dealerId if not system-wide
 		if (!values.isSystemWide && values.dealerId) {
 			submitData.dealerId = values.dealerId;
 		}
@@ -194,7 +188,6 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 			close={handleClose}
 			size="xl"
 		>
-			{/* Custom Header */}
 			<div
 				className={classes.header}
 				style={{ padding: '24px 24px 0' }}
@@ -226,7 +219,6 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 
 			<form onSubmit={form.onSubmit(handleSubmit)}>
 				<div className={classes.formSection}>
-					{/* Info Card */}
 					<div className={classes.infoCard}>
 						<Text
 							size="sm"
@@ -246,7 +238,6 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 					</div>
 
 					<Stack spacing="lg">
-						{/* Basic Configuration */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -331,7 +322,6 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 							</Stack>
 						</div>
 
-						{/* Commission Details */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -425,7 +415,6 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 							</Stack>
 						</div>
 
-						{/* Rate Preview */}
 						{form.values.amount > 0 && (
 							<div className={classes.typeCard}>
 								<Text
@@ -456,7 +445,6 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 					</Stack>
 				</div>
 
-				{/* Actions */}
 				<div className={classes.actions}>
 					<Group
 						position="right"

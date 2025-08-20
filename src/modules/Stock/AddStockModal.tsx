@@ -156,7 +156,6 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 		queryFn: () => request.get('/lookups/devices'),
 	});
 
-	// Transform data for Select components
 	const dealerOptions = useMemo(() => {
 		if (!dealers?.data?.data) return [];
 		return dealers.data.data.map((dealer: Dealer) => ({
@@ -224,7 +223,6 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 			formData.append('ImeiFile', values.imeiFile);
 		}
 
-		// Add notification settings if enabled
 		if (values.emailNotifications) {
 			formData.append('emailNotifications', 'true');
 			if (values.notificationEmails.length > 0) {
@@ -256,7 +254,6 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -284,9 +281,7 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 				</div>
 			</div>
 
-			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Information Card */}
 				<Paper
 					className={classes.infoCard}
 					shadow="xs"
@@ -318,7 +313,6 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 
 				<form onSubmit={handleSubmit}>
 					<Stack spacing="lg">
-						{/* Dealer and Category Selection */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -370,7 +364,6 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 							</div>
 						</div>
 
-						{/* Product and Device Selection */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -422,7 +415,6 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 							</div>
 						</div>
 
-						{/* File Upload */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -453,7 +445,6 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 							</div>
 						</div>
 
-						{/* Notification Settings */}
 						<div className={classes.notificationSection}>
 							<Text
 								size="sm"
@@ -531,7 +522,6 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 				</form>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"

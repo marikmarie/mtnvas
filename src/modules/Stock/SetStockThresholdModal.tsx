@@ -30,7 +30,7 @@ import { useMemo } from 'react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { formatPhoneNumber } from '../../utils/phone.util';
-import { StockThresholdRequest } from '../Dealer/types';
+import { Dealer, Device, Product, StockThresholdRequest } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -138,10 +138,9 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 		queryFn: () => request.get('/lookups/devices'),
 	});
 
-	// Transform data for Select components
 	const dealerOptions = useMemo(() => {
 		if (!dealers?.data?.data) return [];
-		return dealers.data.data.map((dealer: any) => ({
+		return dealers.data.data.map((dealer: Dealer) => ({
 			value: dealer.id?.toString() || '',
 			label: dealer.dealerName || 'Unknown Dealer',
 		}));
@@ -149,17 +148,17 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 
 	const productOptions = useMemo(() => {
 		if (!products?.data?.data) return [];
-		return products.data.data.map((product: any) => ({
+		return products.data.data.map((product: Product) => ({
 			value: product.id?.toString() || '',
-			label: product.name || 'Unknown Product',
+			label: product.productName.toUpperCase() || 'Unknown Product',
 		}));
 	}, [products?.data?.data]);
 
 	const deviceOptions = useMemo(() => {
 		if (!devices?.data?.data) return [];
-		return devices.data.data.map((device: any) => ({
+		return devices.data.data.map((device: Device) => ({
 			value: device.id?.toString() || '',
-			label: device.name || 'Unknown Device',
+			label: device.deviceName.toUpperCase() || 'Unknown Device',
 		}));
 	}, [devices?.data?.data]);
 
@@ -211,7 +210,6 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -239,9 +237,7 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 				</div>
 			</div>
 
-			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Information Card */}
 				<Paper
 					className={classes.infoCard}
 					shadow="xs"
@@ -274,7 +270,6 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 
 				<form onSubmit={handleSubmit}>
 					<Stack spacing="lg">
-						{/* Dealer and Category Selection */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -326,7 +321,6 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 							</div>
 						</div>
 
-						{/* Product and Device Selection */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -378,7 +372,6 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 							</div>
 						</div>
 
-						{/* Threshold Setting */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -408,7 +401,6 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 							</div>
 						</div>
 
-						{/* Notification Settings */}
 						<div className={classes.notificationSection}>
 							<Text
 								size="sm"
@@ -486,7 +478,6 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 				</form>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"

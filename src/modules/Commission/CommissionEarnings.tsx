@@ -169,7 +169,6 @@ export function CommissionEarnings() {
 	const { classes } = useStyles();
 	const request = useRequest(true);
 
-	// State for filters
 	const [searchTerm, setSearchTerm] = useState('');
 	const [agentFilter, setAgentFilter] = useState<string>('');
 	const [dealerFilter, setDealerFilter] = useState<string>('');
@@ -178,11 +177,9 @@ export function CommissionEarnings() {
 	const [dateTo, setDateTo] = useState<Date | null>(null);
 	const [selectedEarnings, setSelectedEarnings] = useState<CommissionEarning[]>([]);
 
-	// Modal states
 	const [bulkPaymentModalOpened, { open: openBulkPaymentModal, close: closeBulkPaymentModal }] =
 		useDisclosure(false);
 
-	// Fetch commission earnings
 	const fetchCommissionEarnings = useCallback(async () => {
 		const params = {
 			agentId: agentFilter || undefined,
@@ -212,7 +209,6 @@ export function CommissionEarnings() {
 		queryFn: fetchCommissionEarnings,
 	});
 
-	// Fetch lookup data
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers-lookup'],
 		queryFn: () => request.get('/lookups/dealers'),
@@ -230,7 +226,6 @@ export function CommissionEarnings() {
 		totalPending: 0,
 	};
 
-	// Filter earnings based on search term
 	const filteredEarnings = commissionEarnings.filter(
 		(earning) =>
 			searchTerm === '' ||
@@ -265,7 +260,6 @@ export function CommissionEarnings() {
 		console.log('Exporting earnings...');
 	};
 
-	// Get status badge color
 	const getStatusColor = (status: string) => {
 		switch (status) {
 			case 'Paid':
@@ -279,7 +273,6 @@ export function CommissionEarnings() {
 		}
 	};
 
-	// Get status icon
 	const getStatusIcon = (status: string) => {
 		switch (status) {
 			case 'Paid':
@@ -293,7 +286,6 @@ export function CommissionEarnings() {
 		}
 	};
 
-	// Data grid columns
 	const columns = [
 		{
 			name: 'transactionId',
@@ -400,7 +392,6 @@ export function CommissionEarnings() {
 			fluid
 			className={classes.root}
 		>
-			{/* Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<div className={classes.titleSection}>
@@ -452,7 +443,6 @@ export function CommissionEarnings() {
 				</div>
 			</div>
 
-			{/* Summary Statistics */}
 			<div className={classes.statsGrid}>
 				<Card className={classes.statCard}>
 					<div
@@ -499,7 +489,6 @@ export function CommissionEarnings() {
 				</Card>
 			</div>
 
-			{/* Filters */}
 			<Card className={classes.filtersCard}>
 				<Group
 					position="apart"
@@ -590,7 +579,6 @@ export function CommissionEarnings() {
 				</div>
 			</Card>
 
-			{/* Commission Earnings Table */}
 			<Card className={classes.tableCard}>
 				{selectedEarnings.length > 0 && (
 					<div className={classes.bulkActions}>
@@ -641,7 +629,6 @@ export function CommissionEarnings() {
 				{earningsTable}
 			</Card>
 
-			{/* Modals */}
 			<BulkCommissionPaymentModal
 				opened={bulkPaymentModalOpened}
 				onClose={closeBulkPaymentModal}

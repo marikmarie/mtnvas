@@ -9,15 +9,15 @@ import {
 	createStyles,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { IconDeviceMobile, IconHash, IconPhone, IconReceipt, IconUser } from '@tabler/icons-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import {
 	CustomerActivationModalProps,
 	CustomerActivationRequest,
 	CustomerActivationResponse,
 } from '../Dealer/types';
-import { Modal } from '../../components/Modal';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -96,27 +96,22 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 		},
 	});
 
-	// Fetch agents for dropdown
 	const { data: agentsData } = useQuery({
 		queryKey: ['agents-lookup'],
 		queryFn: () => request.get('/agents', { params: { status: 'active' } }),
 	});
 
-	// Create activation mutation
 	const activationMutation = useMutation({
 		mutationFn: async (data: CustomerActivationRequest) => {
 			const response = await request.post('/transactions/activation', data);
 			return response.data as CustomerActivationResponse;
 		},
 		onSuccess: (data) => {
-			// Show success notification
 			console.log('Activation successful:', data);
 
-			// Invalidate relevant queries
 			queryClient.invalidateQueries(['transactions']);
 			queryClient.invalidateQueries(['transactionSummary']);
 
-			// Reset form and close modal
 			form.reset();
 			onClose();
 		},

@@ -104,11 +104,9 @@ export function BulkCommissionPaymentModal({
 		},
 	});
 
-	// Filter only pending earnings
 	const pendingEarnings = selectedEarnings.filter((earning) => earning.status === 'Pending');
 	const totalAmount = pendingEarnings.reduce((sum, earning) => sum + earning.commissionAmount, 0);
 
-	// Bulk payment mutation
 	const bulkPaymentMutation = useMutation({
 		mutationFn: async (data: { earningIds: string[]; notes: string }) => {
 			const response = await request.post('/commissions/bulk-payment', {
@@ -118,10 +116,8 @@ export function BulkCommissionPaymentModal({
 			return response.data;
 		},
 		onSuccess: () => {
-			// Invalidate relevant queries
 			queryClient.invalidateQueries(['commission-earnings']);
 
-			// Reset form and close modal
 			form.reset();
 			onClose();
 		},
@@ -143,26 +139,12 @@ export function BulkCommissionPaymentModal({
 		onClose();
 	};
 
-	// // Group earnings by agent for better display
-	// const earningsByAgent = pendingEarnings.reduce(
-	// 	(acc, earning) => {
-	// 		const agentName = earning.agentName;
-	// 		if (!acc[agentName]) {
-	// 			acc[agentName] = [];
-	// 		}
-	// 		acc[agentName].push(earning);
-	// 		return acc;
-	// 	},
-	// 	{} as Record<string, CommissionEarning[]>
-	// );
-
 	return (
 		<Modal
 			opened={opened}
 			close={handleClose}
 			size="xl"
 		>
-			{/* Custom Header */}
 			<div
 				className={classes.header}
 				style={{ padding: '24px 24px 0' }}
@@ -192,7 +174,6 @@ export function BulkCommissionPaymentModal({
 
 			<form onSubmit={form.onSubmit(handleSubmit)}>
 				<div className={classes.formSection}>
-					{/* Payment Summary */}
 					<div className={classes.summaryCard}>
 						<Group
 							position="apart"
@@ -249,7 +230,6 @@ export function BulkCommissionPaymentModal({
 						</Group>
 					</div>
 
-					{/* Earnings Breakdown */}
 					<Paper
 						withBorder
 						radius="md"
@@ -325,7 +305,6 @@ export function BulkCommissionPaymentModal({
 						</Table>
 					</Paper>
 
-					{/* Payment Notes */}
 					<Stack spacing="md">
 						<Divider />
 
@@ -363,7 +342,6 @@ export function BulkCommissionPaymentModal({
 					</Stack>
 				</div>
 
-				{/* Actions */}
 				<div className={classes.actions}>
 					<Group
 						position="right"
