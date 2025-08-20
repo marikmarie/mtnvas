@@ -1,26 +1,26 @@
 import {
-	Button,
-	Group,
-	Stack,
-	Title,
-	Text,
-	createStyles,
-	ThemeIcon,
 	Alert,
-	Paper,
-	Textarea,
+	Button,
+	createStyles,
+	Group,
 	MultiSelect,
+	Paper,
 	Select,
+	Stack,
+	Text,
+	Textarea,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import {
-	IconTransfer,
-	IconBuilding,
 	IconAlertCircle,
 	IconArrowRight,
+	IconBuilding,
 	IconPackage,
+	IconTransfer,
 } from '@tabler/icons-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { StockTransferRequest } from '../Dealer/types';
@@ -121,8 +121,14 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 	});
 
 	const { data: stockItems } = useQuery({
-		queryKey: ['stocks/available'],
-		queryFn: () => request.get('/stocks', { params: { status: 'available' } }),
+		queryKey: ['stock/available'],
+		queryFn: () =>
+			request.get('/stock', {
+				params: {
+					status: 1, // 1 = available
+					pageSize: 1000, // Get more items for selection
+				},
+			}),
 	});
 
 	const form = useForm<StockTransferRequest>({
@@ -141,7 +147,7 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 	});
 
 	const mutation = useMutation({
-		mutationFn: (values: StockTransferRequest) => request.post('/stocks/transfer', values),
+		mutationFn: (values: StockTransferRequest) => request.post('/stock/transfer', values),
 		onSuccess: () => {
 			onClose();
 			form.reset();

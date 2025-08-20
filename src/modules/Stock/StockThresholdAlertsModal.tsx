@@ -1,25 +1,25 @@
 import {
-	Group,
-	Stack,
-	Title,
-	Text,
-	createStyles,
-	ThemeIcon,
-	Alert,
-	Paper,
-	Badge,
-	Table,
 	ActionIcon,
+	Alert,
+	Badge,
+	createStyles,
+	Group,
 	Modal,
+	Paper,
+	Stack,
+	Table,
+	Text,
+	ThemeIcon,
+	Title,
 } from '@mantine/core';
-import { useQuery } from '@tanstack/react-query';
 import {
 	IconAlertTriangle,
+	IconBuilding,
 	IconEye,
 	IconPackage,
-	IconBuilding,
 	IconTrendingDown,
 } from '@tabler/icons-react';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import useRequest from '../../hooks/useRequest';
 import { StockThresholdAlert } from '../Dealer/types';
@@ -118,8 +118,16 @@ export function StockThresholdAlertsModal({ opened, onClose }: StockThresholdAle
 	const [detailModalOpened, setDetailModalOpened] = useState(false);
 
 	const { data: alertsData, isLoading } = useQuery({
-		queryKey: ['stock-thresholds/alerts'],
-		queryFn: () => request.get('/stock-thresholds/alerts'),
+		queryKey: [
+			'stock-thresholds',
+			{ dealerId: undefined, category: undefined, belowThreshold: true },
+		],
+		queryFn: () =>
+			request.get('/stock-thresholds', {
+				params: {
+					belowThreshold: true,
+				},
+			}),
 	});
 
 	const alerts = alertsData?.data?.alerts || [];

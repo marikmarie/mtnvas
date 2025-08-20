@@ -23,7 +23,6 @@ import {
 	IconAlertTriangle,
 	IconBox,
 	IconBuilding,
-	IconCategory,
 	IconDeviceMobile,
 	IconDotsVertical,
 	IconDownload,
@@ -32,6 +31,7 @@ import {
 	IconPlus,
 	IconSearch,
 	IconSettings,
+	IconSwitch,
 	IconTransfer,
 	IconTrendingUp,
 } from '@tabler/icons-react';
@@ -89,10 +89,6 @@ const useStyles = createStyles((theme) => ({
 		alignItems: 'center',
 		gap: theme.spacing.xs,
 		marginBottom: theme.spacing.xs,
-	},
-
-	stockLevelBadge: {
-		fontWeight: 600,
 	},
 
 	categoryBadge: {
@@ -168,12 +164,18 @@ const useStyles = createStyles((theme) => ({
 	},
 }));
 
+const statusMap = {
+	1: 'Available',
+	2: 'Sold',
+	3: 'Transferred',
+	4: 'Swapped',
+};
+
 export function StockList() {
 	const { classes } = useStyles();
 	const request = useRequest(true);
 
 	const [searchTerm, setSearchTerm] = useState('');
-	const [categoryFilter, setCategoryFilter] = useState<string>('all');
 	const [dealerFilter, setDealerFilter] = useState<string>('all');
 	const [statusFilter, setStatusFilter] = useState<string>('all');
 	const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
@@ -190,25 +192,25 @@ export function StockList() {
 
 	// Fetch stock summary
 	const { data: stockSummary } = useQuery({
-		queryKey: ['stocks/summary'],
-		queryFn: () => request.get('/stocks/summary'),
+		queryKey: ['stock/summary', { dealerFilter }],
+		queryFn: () =>
+			request.get('/stock/summary', {
+				params: {
+					dealerId: dealerFilter !== 'all' ? dealerFilter : undefined,
+				},
+			}),
 	});
 
 	// Fetch stock list
 	const { data: stockData, isLoading } = useQuery({
-		queryKey: [
-			'stocks',
-			{ categoryFilter, dealerFilter, statusFilter, searchTerm, currentPage },
-		],
+		queryKey: ['stock', { dealerFilter, statusFilter, searchTerm, currentPage }],
 		queryFn: () =>
-			request.get('/stocks', {
+			request.get('/stock', {
 				params: {
-					category: categoryFilter !== 'all' ? categoryFilter : undefined,
 					dealerId: dealerFilter !== 'all' ? dealerFilter : undefined,
-					status: statusFilter !== 'all' ? statusFilter : undefined,
-					search: searchTerm || undefined,
+					status: statusFilter !== 'all' ? parseInt(statusFilter) : undefined,
 					page: currentPage,
-					limit: itemsPerPage,
+					pageSize: itemsPerPage,
 				},
 			}),
 	});
@@ -224,15 +226,14 @@ export function StockList() {
 				stock.deviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				(stock.imei && stock.imei.toLowerCase().includes(searchTerm.toLowerCase())) ||
 				(stock.serialNumber &&
-					stock.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()));
+					stock.serialNumber.toString().toLowerCase().includes(searchTerm.toLowerCase()));
 
-			const matchesCategory = categoryFilter === 'all' || stock.category === categoryFilter;
 			const matchesDealer = dealerFilter === 'all' || stock.dealerName === dealerFilter;
-			const matchesStatus = statusFilter === 'all' || stock.status === statusFilter;
+			const matchesStatus = statusFilter === 'all' || stock.status === parseInt(statusFilter);
 
-			return matchesSearch && matchesCategory && matchesDealer && matchesStatus;
+			return matchesSearch && matchesDealer && matchesStatus;
 		});
-	}, [stockData?.data?.data, searchTerm, categoryFilter, dealerFilter, statusFilter]);
+	}, [stockData?.data?.data, searchTerm, dealerFilter, statusFilter]);
 
 	// Get unique dealers for filter
 	const uniqueDealers = useMemo(() => {
@@ -241,51 +242,35 @@ export function StockList() {
 		return dealers.filter((dealer): dealer is string => Boolean(dealer));
 	}, [stockData?.data?.data]);
 
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case 'available':
+	const getStatusColor = (status: string | number) => {
+		const statusStr = typeof status === 'number' ? status : status;
+		switch (statusStr) {
+			case 1:
 				return 'green';
-			case 'sold':
+			case 2:
 				return 'red';
-			case 'transferred':
+			case 3:
 				return 'blue';
-			default:
-				return 'gray';
-		}
-	};
-
-	const getStatusIcon = (status: string) => {
-		switch (status) {
-			case 'available':
-				return <IconBox size={16} />;
-			case 'sold':
-				return <IconTrendingUp size={16} />;
-			case 'transferred':
-				return <IconTransfer size={16} />;
-			default:
-				return <IconBox size={16} />;
-		}
-	};
-
-	const getCategoryColor = (category: string) => {
-		switch (category?.toLowerCase()) {
-			case 'wakanet':
+			case 4:
 				return 'yellow';
-			case 'enterprise':
-				return 'purple';
 			default:
 				return 'gray';
 		}
 	};
 
-	const getCategoryIcon = (category: string) => {
-		switch (category?.toLowerCase()) {
-			case 'wakanet':
-				return <IconDeviceMobile size={14} />;
-			case 'enterprise':
-				return <IconBuilding size={14} />;
+	const getStatusIcon = (status: string | number) => {
+		const statusStr = typeof status === 'number' ? status : status;
+		switch (statusStr) {
+			case 1:
+				return <IconBox size={16} />;
+			case 2:
+				return <IconTrendingUp size={16} />;
+			case 3:
+				return <IconTransfer size={16} />;
+			case 4:
+				return <IconSwitch size={16} />;
 			default:
-				return <IconCategory size={14} />;
+				return <IconBox size={16} />;
 		}
 	};
 
@@ -466,18 +451,6 @@ export function StockList() {
 						style={{ flex: 1, minWidth: 250 }}
 					/>
 					<Select
-						placeholder="Filter by category"
-						data={[
-							{ value: 'all', label: 'All Categories' },
-							{ value: 'wakanet', label: 'WakaNet' },
-							{ value: 'enterprise', label: 'Enterprise' },
-						]}
-						value={categoryFilter}
-						onChange={(value) => setCategoryFilter(value || 'all')}
-						icon={<IconFilter size={16} />}
-						style={{ minWidth: 150 }}
-					/>
-					<Select
 						placeholder="Filter by dealer"
 						data={[
 							{ value: 'all', label: 'All Dealers' },
@@ -495,9 +468,10 @@ export function StockList() {
 						placeholder="Filter by status"
 						data={[
 							{ value: 'all', label: 'All Statuses' },
-							{ value: 'available', label: 'Available' },
-							{ value: 'sold', label: 'Sold' },
-							{ value: 'transferred', label: 'Transferred' },
+							{ value: '1', label: 'Available' },
+							{ value: '2', label: 'Sold' },
+							{ value: '3', label: 'Transferred' },
+							{ value: '4', label: 'Swapped' },
 						]}
 						value={statusFilter}
 						onChange={(value) => setStatusFilter(value || 'all')}
@@ -623,10 +597,10 @@ export function StockList() {
 				<Grid>
 					{filteredStocks.map((stock: Stock) => (
 						<Grid.Col
-							key={stock.id}
+							key={stock.imei}
 							xs={12}
-							sm={6}
-							lg={3}
+							sm={4}
+							lg={2}
 						>
 							<Card className={classes.card}>
 								<Card.Section className={classes.cardHeader}>
@@ -645,7 +619,7 @@ export function StockList() {
 												size="sm"
 												lineClamp={1}
 											>
-												{stock.productName}
+												{stock.productName.toUpperCase()}
 											</Text>
 										</Group>
 										<Menu>
@@ -684,7 +658,7 @@ export function StockList() {
 												color="dimmed"
 												lineClamp={1}
 											>
-												{stock.dealerName}
+												{stock.dealerName.toUpperCase()}
 											</Text>
 										</div>
 										<div className={classes.infoRow}>
@@ -697,15 +671,11 @@ export function StockList() {
 												color="dimmed"
 												lineClamp={1}
 											>
-												{stock.deviceName}
+												{stock.deviceName.toUpperCase()}
 											</Text>
 										</div>
 										{stock.imei && (
 											<div className={classes.infoRow}>
-												<IconBox
-													size={14}
-													color="gray"
-												/>
 												<Text
 													size="sm"
 													className={classes.imeiCode}
@@ -716,10 +686,6 @@ export function StockList() {
 										)}
 										{stock.serialNumber && (
 											<div className={classes.infoRow}>
-												<IconBox
-													size={14}
-													color="gray"
-												/>
 												<Text
 													size="sm"
 													className={classes.imeiCode}
@@ -729,30 +695,13 @@ export function StockList() {
 											</div>
 										)}
 									</Stack>
-								</Card.Section>
-
-								<Card.Section className={classes.cardFooter}>
-									<Group position="apart">
-										<Badge
-											color={getStatusColor(stock.status)}
-											variant="filled"
-											size="sm"
-											className={classes.stockLevelBadge}
-											leftSection={getStatusIcon(stock.status)}
-										>
-											{stock?.status?.replace('_', ' ')?.toUpperCase()}
-										</Badge>
-										<Badge
-											color={getCategoryColor(stock.category)}
-											variant="light"
-											size="sm"
-											className={classes.categoryBadge}
-											leftSection={getCategoryIcon(stock.category)}
-										>
-											{stock.category?.charAt(0)?.toUpperCase() +
-												stock.category?.slice(1)}
-										</Badge>
-									</Group>
+									<Badge
+										color={getStatusColor(stock.status)}
+										size="sm"
+										leftSection={getStatusIcon(stock.status)}
+									>
+										{statusMap[stock.status as keyof typeof statusMap]}
+									</Badge>
 								</Card.Section>
 							</Card>
 						</Grid.Col>
@@ -766,26 +715,27 @@ export function StockList() {
 								<th>Product</th>
 								<th>Device</th>
 								<th>Dealer</th>
-								<th>IMEI/Serial</th>
-								<th>Category</th>
+								<th>IMEI</th>
+								<th>Serial Number</th>
 								<th>Status</th>
 								<th>Assigned Date</th>
+								<th>Transferred Date</th>
 								<th>Actions</th>
 							</tr>
 						</thead>
 						<tbody>
 							{filteredStocks.map((stock: Stock) => (
-								<tr key={stock.id}>
+								<tr key={stock.imei}>
 									<td>
 										<Text
 											size="sm"
 											weight={500}
 										>
-											{stock.productName}
+											{stock.productName.toUpperCase()}
 										</Text>
 									</td>
 									<td>
-										<Text size="sm">{stock.deviceName}</Text>
+										<Text size="sm">{stock.deviceName.toUpperCase()}</Text>
 									</td>
 									<td>
 										<Group spacing="xs">
@@ -793,57 +743,45 @@ export function StockList() {
 												size={16}
 												color="gray"
 											/>
-											<Text size="sm">{stock.dealerName}</Text>
+											<Text size="sm">{stock.dealerName.toUpperCase()}</Text>
 										</Group>
 									</td>
 									<td>
-										{stock.imei ? (
-											<Text
-												size="sm"
-												className={classes.imeiCode}
-											>
-												{stock.imei}
-											</Text>
-										) : stock.serialNumber ? (
-											<Text
-												size="sm"
-												className={classes.imeiCode}
-											>
-												{stock.serialNumber}
-											</Text>
-										) : (
-											<Text
-												size="sm"
-												color="dimmed"
-											>
-												N/A
-											</Text>
-										)}
+										<Text
+											size="sm"
+											className={classes.imeiCode}
+										>
+											{stock.imei || 'N/A'}
+										</Text>
 									</td>
 									<td>
-										<Badge
-											color={getCategoryColor(stock.category)}
-											variant="light"
+										<Text
 											size="sm"
-											leftSection={getCategoryIcon(stock.category)}
+											className={classes.imeiCode}
 										>
-											{stock.category?.charAt(0)?.toUpperCase() +
-												stock.category?.slice(1)}
-										</Badge>
+											{stock.serialNumber || 'N/A'}
+										</Text>
 									</td>
+
 									<td>
 										<Badge
 											color={getStatusColor(stock.status)}
-											variant="filled"
 											size="sm"
 											leftSection={getStatusIcon(stock.status)}
 										>
-											{stock?.status?.replace('_', ' ')?.toUpperCase()}
+											{statusMap[stock.status as keyof typeof statusMap]}
 										</Badge>
 									</td>
 									<td>
 										<Text size="sm">
 											{new Date(stock.assignedAt).toLocaleDateString()}
+										</Text>
+									</td>
+									<td>
+										<Text size="sm">
+											{stock.transferedOn
+												? new Date(stock.transferedOn).toLocaleDateString()
+												: 'N/A'}
 										</Text>
 									</td>
 									<td>

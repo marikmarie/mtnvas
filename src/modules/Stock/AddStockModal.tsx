@@ -177,7 +177,7 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 
 	const mutation = useMutation({
 		mutationFn: (formData: FormData) =>
-			request.post('/stocks/upload', formData, {
+			request.post('/stock/upload', formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data',
 				},
@@ -190,12 +190,11 @@ export function AddStockModal({ opened, onClose }: AddStockModalProps) {
 
 	const handleSubmit = form.onSubmit((values: StockFormValues) => {
 		const formData = new FormData();
-		formData.append('dealerId', values.dealerId);
-		formData.append('category', values.category);
-		formData.append('productId', values.productId);
-		formData.append('deviceId', values.deviceId);
+		formData.append('DealerId', values.dealerId);
+		formData.append('ProductId', values.productId);
+		formData.append('DeviceId', values.deviceId);
 		if (values.imeiFile) {
-			formData.append('imeiFile', values.imeiFile);
+			formData.append('ImeiFile', values.imeiFile);
 		}
 
 		// Add notification settings if enabled

@@ -49,20 +49,20 @@ export interface Device {
 }
 
 export interface Stock {
-	id: string;
-	imei?: string;
-	serialNumber?: string;
-	productId: string;
-	productName: string;
-	deviceId: string;
-	deviceName: string;
-	dealerId: string;
+	imei: string;
+	serialNumber: string | null;
+	productId: number;
+	deviceId: number;
+	dealerId: number;
+	status: number;
+	soldAt: null;
+	transferedOn: string | null;
+	createdAt: string;
+	updatedAt: string;
 	dealerName: string;
-	category: 'wakanet' | 'enterprise';
-	status: 'Available' | 'Sold' | 'Transferred';
+	productName: string;
+	deviceName: string;
 	assignedAt: string;
-	soldAt?: string;
-	transferredAt?: string;
 }
 
 export interface StockThreshold {
