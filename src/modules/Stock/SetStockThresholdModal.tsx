@@ -26,6 +26,7 @@ import {
 	IconSettings,
 } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { formatPhoneNumber } from '../../utils/phone.util';
@@ -123,8 +124,8 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 	const request = useRequest(true);
 
 	const { data: dealers } = useQuery({
-		queryKey: ['dealers/list'],
-		queryFn: () => request.get('/lookups/dealers'),
+		queryKey: ['dealer'],
+		queryFn: () => request.get('/dealer'),
 	});
 
 	const { data: products } = useQuery({
@@ -136,6 +137,31 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 		queryKey: ['devices'],
 		queryFn: () => request.get('/lookups/devices'),
 	});
+
+	// Transform data for Select components
+	const dealerOptions = useMemo(() => {
+		if (!dealers?.data?.data) return [];
+		return dealers.data.data.map((dealer: any) => ({
+			value: dealer.id?.toString() || '',
+			label: dealer.dealerName || 'Unknown Dealer',
+		}));
+	}, [dealers?.data?.data]);
+
+	const productOptions = useMemo(() => {
+		if (!products?.data?.data) return [];
+		return products.data.data.map((product: any) => ({
+			value: product.id?.toString() || '',
+			label: product.name || 'Unknown Product',
+		}));
+	}, [products?.data?.data]);
+
+	const deviceOptions = useMemo(() => {
+		if (!devices?.data?.data) return [];
+		return devices.data.data.map((device: any) => ({
+			value: device.id?.toString() || '',
+			label: device.name || 'Unknown Device',
+		}));
+	}, [devices?.data?.data]);
 
 	const form = useForm<StockThresholdRequest>({
 		initialValues: {
@@ -270,7 +296,7 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 												className={classes.inputIcon}
 											/>
 										}
-										data={dealers?.data?.data || []}
+										data={dealerOptions}
 										searchable
 										nothingFound="No dealers found"
 										{...form.getInputProps('dealerId')}
@@ -322,7 +348,7 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 												className={classes.inputIcon}
 											/>
 										}
-										data={products?.data?.data || []}
+										data={productOptions}
 										searchable
 										nothingFound="No products found"
 										disabled={!form.values.category}
@@ -341,7 +367,7 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 												className={classes.inputIcon}
 											/>
 										}
-										data={devices?.data?.data || []}
+										data={deviceOptions}
 										searchable
 										nothingFound="No devices found"
 										disabled={!form.values.category}
