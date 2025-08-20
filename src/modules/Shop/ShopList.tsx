@@ -37,7 +37,6 @@ import useRequest from '../../hooks/useRequest';
 import { Dealer, Shop } from '../Dealer/types';
 import { AddShopModal } from './AddShopModal';
 import { AddShopUserModal } from './AddShopUserModal';
-import { AssignShopAdminModal } from './AssignShopAdminModal';
 import { EditShopModal } from './EditShopModal';
 import { ShopApprovalModal } from './ShopApprovalModal';
 
@@ -138,8 +137,6 @@ export function ShopList() {
 		useDisclosure(false);
 	const [editShopModalOpened, { open: openEditShopModal, close: closeEditShopModal }] =
 		useDisclosure(false);
-	const [assignAdminModalOpened, { open: openAssignAdminModal, close: closeAssignAdminModal }] =
-		useDisclosure(false);
 	const [approvalModalOpened, { open: openApprovalModal, close: closeApprovalModal }] =
 		useDisclosure(false);
 	const [approvalAction, setApprovalAction] = useState<'Approve' | 'Reject'>('Approve');
@@ -212,11 +209,6 @@ export function ShopList() {
 	const handleEditShop = (shop: Shop) => {
 		setSelectedShop(shop);
 		openEditShopModal();
-	};
-
-	const handleAssignAdmin = (shop: Shop) => {
-		setSelectedShop(shop);
-		openAssignAdminModal();
 	};
 
 	const handleApproval = (shop: Shop, action: 'Approve' | 'Reject') => {
@@ -637,12 +629,6 @@ export function ShopList() {
 					<EditShopModal
 						opened={editShopModalOpened}
 						onClose={closeEditShopModal}
-						shop={selectedShop}
-					/>
-
-					<AssignShopAdminModal
-						opened={assignAdminModalOpened}
-						onClose={closeAssignAdminModal}
 						shop={selectedShop}
 					/>
 
