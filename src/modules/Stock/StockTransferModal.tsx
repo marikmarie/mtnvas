@@ -21,9 +21,10 @@ import {
 	IconTransfer,
 } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { StockTransferRequest } from '../Dealer/types';
+import { Dealer, Stock, StockTransferRequest } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -116,21 +117,20 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 	const request = useRequest(true);
 
 	const { data: dealers } = useQuery({
-		queryKey: ['dealers/list'],
-		queryFn: () => request.get('/lookups/dealers'),
+		queryKey: ['dealer'],
+		queryFn: () => request.get('/dealer'),
 	});
 
 	const { data: stockItems } = useQuery({
-		queryKey: ['stock/available'],
+		queryKey: ['stock'],
 		queryFn: () =>
 			request.get('/stock', {
 				params: {
-					status: 1, // 1 = available
-					pageSize: 1000, // Get more items for selection
+					status: 1,
+					pageSize: 1000,
 				},
 			}),
 	});
-
 	const form = useForm<StockTransferRequest>({
 		initialValues: {
 			imeis: [],
@@ -158,14 +158,21 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 
 	const hasErrors = Object.keys(form.errors).length > 0;
 
-	// Get available IMEIs for the selected source dealer
+	const dealerOptions = useMemo(() => {
+		if (!dealers?.data?.data) return [];
+		return dealers.data.data.map((dealer: Dealer) => ({
+			value: dealer.id,
+			label: dealer.dealerName || 'Unknown Dealer',
+		}));
+	}, [dealers?.data?.data]);
+
 	const availableImeis =
 		stockItems?.data?.data
 			?.filter(
-				(item: any) =>
-					item.dealerId === form.values.fromDealerId && item.status === 'available'
+				(item: Stock) =>
+					item.dealerId === parseInt(form.values.fromDealerId) && item.status === 1
 			)
-			?.map((item: any) => item.imei || item.serialNumber)
+			?.map((item: Stock) => item.imei)
 			?.filter(Boolean) || [];
 
 	return (
@@ -174,7 +181,6 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -202,9 +208,7 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 				</div>
 			</div>
 
-			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Information Card */}
 				<Paper
 					className={classes.infoCard}
 					shadow="xs"
@@ -234,140 +238,130 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 					</Alert>
 				)}
 
-				<form onSubmit={handleSubmit}>
-					<Stack spacing="lg">
-						{/* Source Dealer */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Source Dealer
-							</Text>
-							<div className={classes.inputWrapper}>
-								<Select
-									label="From Dealer"
-									placeholder="Select source dealer"
-									required
-									icon={
-										<IconBuilding
-											size={16}
-											className={classes.inputIcon}
-										/>
-									}
-									data={dealers?.data?.data || []}
-									searchable
-									nothingFound="No dealers found"
-									{...form.getInputProps('fromDealerId')}
-									radius="md"
-								/>
-							</div>
+				<Stack spacing="lg">
+					<div className={classes.formGroup}>
+						<Text
+							size="sm"
+							weight={500}
+							color="dimmed"
+							mb="xs"
+						>
+							Source Dealer
+						</Text>
+						<div className={classes.inputWrapper}>
+							<Select
+								label="From Dealer"
+								placeholder="Select source dealer"
+								required
+								icon={
+									<IconBuilding
+										size={16}
+										className={classes.inputIcon}
+									/>
+								}
+								data={dealerOptions}
+								searchable
+								nothingFound="No dealers found"
+								{...form.getInputProps('fromDealerId')}
+								radius="md"
+							/>
 						</div>
+					</div>
 
-						{/* Transfer Arrow */}
-						<div className={classes.transferArrow}>
-							<IconArrowRight size={24} />
-						</div>
+					<div className={classes.transferArrow}>
+						<IconArrowRight size={24} />
+					</div>
 
-						{/* Destination Dealer */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Destination Dealer
-							</Text>
-							<div className={classes.inputWrapper}>
-								<Select
-									label="To Dealer"
-									placeholder="Select destination dealer"
-									required
-									icon={
-										<IconBuilding
-											size={16}
-											className={classes.inputIcon}
-										/>
-									}
-									data={
-										dealers?.data?.data?.filter(
-											(dealer: any) => dealer.id !== form.values.fromDealerId
-										) || []
-									}
-									searchable
-									nothingFound="No dealers found"
-									{...form.getInputProps('toDealerId')}
-									radius="md"
-								/>
-							</div>
+					<div className={classes.formGroup}>
+						<Text
+							size="sm"
+							weight={500}
+							color="dimmed"
+							mb="xs"
+						>
+							Destination Dealer
+						</Text>
+						<div className={classes.inputWrapper}>
+							<Select
+								label="To Dealer"
+								placeholder="Select destination dealer"
+								required
+								icon={
+									<IconBuilding
+										size={16}
+										className={classes.inputIcon}
+									/>
+								}
+								data={dealerOptions.filter(
+									(dealer: Dealer) => dealer.id !== form.values.fromDealerId
+								)}
+								searchable
+								nothingFound="No dealers found"
+								{...form.getInputProps('toDealerId')}
+								radius="md"
+							/>
 						</div>
+					</div>
 
-						{/* IMEI Selection */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Select IMEIs to Transfer
-							</Text>
-							<div className={classes.inputWrapper}>
-								<MultiSelect
-									label="IMEIs"
-									placeholder="Select IMEIs to transfer"
-									required
-									icon={
-										<IconPackage
-											size={16}
-											className={classes.inputIcon}
-										/>
-									}
-									data={availableImeis.map((imei: string) => ({
-										value: imei,
-										label: imei,
-									}))}
-									searchable
-									nothingFound="No IMEIs available"
-									disabled={!form.values.fromDealerId}
-									className={classes.imeiInput}
-									{...form.getInputProps('imeis')}
-									radius="md"
-									description={`${availableImeis.length} IMEIs available for transfer`}
-								/>
-							</div>
+					<div className={classes.formGroup}>
+						<Text
+							size="sm"
+							weight={500}
+							color="dimmed"
+							mb="xs"
+						>
+							Select IMEIs to Transfer
+						</Text>
+						<div className={classes.inputWrapper}>
+							<MultiSelect
+								label="IMEIs"
+								placeholder="Select IMEIs to transfer"
+								required
+								icon={
+									<IconPackage
+										size={16}
+										className={classes.inputIcon}
+									/>
+								}
+								data={availableImeis.map((imei: string) => ({
+									value: imei,
+									label: imei,
+								}))}
+								searchable
+								nothingFound="No IMEIs available"
+								disabled={!form.values.fromDealerId}
+								className={classes.imeiInput}
+								{...form.getInputProps('imeis')}
+								radius="md"
+								description={`${availableImeis.length} IMEIs available for transfer`}
+							/>
 						</div>
+					</div>
 
-						{/* Transfer Reason */}
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Transfer Reason
-							</Text>
-							<div className={classes.inputWrapper}>
-								<Textarea
-									label="Reason"
-									placeholder="Provide a reason for this transfer"
-									required
-									minRows={3}
-									{...form.getInputProps('reason')}
-									radius="md"
-									description="Explain why this transfer is necessary"
-								/>
-							</div>
+					<div className={classes.formGroup}>
+						<Text
+							size="sm"
+							weight={500}
+							color="dimmed"
+							mb="xs"
+						>
+							Transfer Reason
+						</Text>
+						<div className={classes.inputWrapper}>
+							<Textarea
+								label="Reason"
+								placeholder="Provide a reason for this transfer"
+								required
+								minRows={3}
+								{...form.getInputProps('reason')}
+								radius="md"
+								description="Explain why this transfer is necessary"
+							/>
 						</div>
-					</Stack>
-				</form>
+					</div>
+				</Stack>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"
