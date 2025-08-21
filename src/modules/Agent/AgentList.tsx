@@ -125,7 +125,7 @@ export function AgentList() {
 	const [selectedLocation, setSelectedLocation] = useState<string | null>('');
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage] = useState(12);
-	const [dateRange, setDateRange] = useState<{ from: string | null; to: string | null }>({
+	const [dateRange] = useState<{ from: string | null; to: string | null }>({
 		from: null,
 		to: null,
 	});

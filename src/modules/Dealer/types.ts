@@ -101,8 +101,15 @@ export interface StockTransfer {
 	toDealerName: string;
 	imeiCount: number;
 	transferredBy: string;
+	transferredByName?: string;
 	reason?: string;
+	status: 'Pending' | 'Approved' | 'Rejected';
 	createdAt: string;
+	updatedAt?: string;
+	approvedBy?: string;
+	approvedByName?: string;
+	approvedAt?: string;
+	rejectionReason?: string;
 	imeis: string[];
 }
 
@@ -111,6 +118,21 @@ export interface StockTransferRequest {
 	fromDealerId: string;
 	toDealerId: string;
 	reason?: string;
+}
+
+export interface StockTransferApprovalRequest {
+	action: 'approve' | 'reject';
+	reason?: string;
+}
+
+export interface StockTransferListParams {
+	page?: number;
+	pageSize?: number;
+	from?: string;
+	to?: string;
+	fromDealerId?: number;
+	toDealerId?: number;
+	status?: string;
 }
 
 export interface StockUploadResponse {

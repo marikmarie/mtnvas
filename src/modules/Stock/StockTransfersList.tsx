@@ -1,0 +1,588 @@
+import {
+	ActionIcon,
+	Badge,
+	createStyles,
+	Grid,
+	Group,
+	Menu,
+	Pagination,
+	Paper,
+	Select,
+	Stack,
+	Table,
+	Text,
+	TextInput,
+	Title,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import {
+	IconArrowRight,
+	IconBuilding,
+	IconCheck,
+	IconClock,
+	IconDotsVertical,
+	IconEye,
+	IconFilter,
+	IconSearch,
+	IconTransfer,
+	IconX,
+} from '@tabler/icons-react';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import useRequest from '../../hooks/useRequest';
+import { Dealer, StockTransfer, StockTransferListParams } from '../Dealer/types';
+import { StockTransferApprovalModal } from './StockTransferApprovalModal';
+
+const useStyles = createStyles((theme) => ({
+	root: {
+		padding: 0,
+	},
+
+	header: {
+		marginBottom: theme.spacing.lg,
+	},
+
+	searchSection: {
+		marginBottom: theme.spacing.lg,
+	},
+
+	searchRow: {
+		display: 'flex',
+		gap: theme.spacing.md,
+		alignItems: 'flex-end',
+		flexWrap: 'wrap',
+	},
+
+	summaryCards: {
+		marginBottom: theme.spacing.lg,
+	},
+
+	summaryCard: {
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		borderRadius: theme.radius.md,
+		padding: theme.spacing.md,
+		height: '100%',
+	},
+
+	summaryValue: {
+		fontSize: theme.fontSizes.xl,
+		fontWeight: 700,
+		marginBottom: theme.spacing.xs,
+	},
+
+	summaryLabel: {
+		fontSize: theme.fontSizes.sm,
+		color: theme.colorScheme === 'dark' ? theme.colors.dark[1] : theme.colors.gray[7],
+	},
+
+	tableContainer: {
+		overflowX: 'auto',
+	},
+
+	statusBadge: {
+		fontWeight: 600,
+	},
+
+	transferArrow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.xs,
+		color: theme.colors.gray[5],
+	},
+
+	transferRoute: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.xs,
+		fontSize: theme.fontSizes.sm,
+	},
+
+	emptyState: {
+		textAlign: 'center',
+		padding: theme.spacing.xl,
+		color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
+	},
+
+	imeiCount: {
+		fontFamily: 'monospace',
+		fontSize: '0.875rem',
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
+		padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+		borderRadius: theme.radius.sm,
+		fontWeight: 600,
+	},
+
+	dateRange: {
+		display: 'flex',
+		gap: theme.spacing.sm,
+		alignItems: 'center',
+	},
+}));
+
+export function StockTransfersList() {
+	const { classes } = useStyles();
+	const request = useRequest(true);
+
+	const [searchTerm, setSearchTerm] = useState('');
+	const [statusFilter, setStatusFilter] = useState<string>('all');
+	const [fromDealerFilter, setFromDealerFilter] = useState<string>('all');
+	const [toDealerFilter, setToDealerFilter] = useState<string>('all');
+	const [dateFrom] = useState<Date | null>(null);
+	const [dateTo] = useState<Date | null>(null);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage] = useState(10);
+
+	const [approvalModalOpened, { open: openApprovalModal, close: closeApprovalModal }] =
+		useDisclosure(false);
+	const [selectedTransfer, setSelectedTransfer] = useState<StockTransfer | null>(null);
+	const [approvalAction, setApprovalAction] = useState<'approve' | 'reject'>('approve');
+
+	// Fetch dealers for filters
+	const { data: dealers } = useQuery({
+		queryKey: ['dealer'],
+		queryFn: () => request.get('/dealer'),
+	});
+
+	// Fetch transfers
+	const { data: transfersData, isLoading } = useQuery({
+		queryKey: [
+			'stock-transfers',
+			{
+				page: currentPage,
+				pageSize: itemsPerPage,
+				status: statusFilter !== 'all' ? statusFilter : undefined,
+				fromDealerId: fromDealerFilter !== 'all' ? parseInt(fromDealerFilter) : undefined,
+				toDealerId: toDealerFilter !== 'all' ? parseInt(toDealerFilter) : undefined,
+				from: dateFrom?.toISOString(),
+				to: dateTo?.toISOString(),
+			},
+		],
+		queryFn: () => {
+			const params: StockTransferListParams = {
+				page: currentPage,
+				pageSize: itemsPerPage,
+			};
+
+			if (statusFilter !== 'all') params.status = statusFilter;
+			if (fromDealerFilter !== 'all') params.fromDealerId = parseInt(fromDealerFilter);
+			if (toDealerFilter !== 'all') params.toDealerId = parseInt(toDealerFilter);
+			if (dateFrom) params.from = dateFrom.toISOString();
+			if (dateTo) params.to = dateTo.toISOString();
+
+			return request.get('/stock-transfers', { params });
+		},
+	});
+
+	// Fetch transfer summary
+	const { data: transferSummary } = useQuery({
+		queryKey: ['stock-transfers/summary'],
+		queryFn: () => request.get('/stock-transfers/summary'),
+	});
+
+	const dealerOptions = useMemo(() => {
+		if (!dealers?.data?.data) return [];
+		return dealers.data.data.map((dealer: Dealer) => ({
+			value: dealer.id,
+			label: dealer.dealerName || 'Unknown Dealer',
+		}));
+	}, [dealers?.data?.data]);
+
+	const filteredTransfers = useMemo(() => {
+		if (!transfersData?.data?.data) return [];
+
+		return transfersData.data.data.filter((transfer: StockTransfer) => {
+			const matchesSearch =
+				transfer.fromDealerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				transfer.toDealerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				transfer.transferredByName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				transfer.id.toLowerCase().includes(searchTerm.toLowerCase());
+
+			return matchesSearch;
+		});
+	}, [transfersData?.data?.data, searchTerm]);
+
+	const getStatusColor = (status: string) => {
+		switch (status.toLowerCase()) {
+			case 'pending':
+				return 'yellow';
+			case 'approved':
+				return 'green';
+			case 'rejected':
+				return 'red';
+			default:
+				return 'gray';
+		}
+	};
+
+	const getStatusIcon = (status: string) => {
+		switch (status.toLowerCase()) {
+			case 'pending':
+				return <IconClock size={14} />;
+			case 'approved':
+				return <IconCheck size={14} />;
+			case 'rejected':
+				return <IconX size={14} />;
+			default:
+				return <IconTransfer size={14} />;
+		}
+	};
+
+	const handleApproveTransfer = (transfer: StockTransfer) => {
+		setSelectedTransfer(transfer);
+		setApprovalAction('approve');
+		openApprovalModal();
+	};
+
+	const handleRejectTransfer = (transfer: StockTransfer) => {
+		setSelectedTransfer(transfer);
+		setApprovalAction('reject');
+		openApprovalModal();
+	};
+
+	const handleViewDetails = (transfer: StockTransfer) => {
+		console.log('View transfer details:', transfer);
+	};
+
+	const totalPages = Math.ceil((transfersData?.data?.meta?.total || 0) / itemsPerPage);
+
+	return (
+		<div className={classes.root}>
+			<div className={classes.header}>
+				<Group
+					position="apart"
+					mb="md"
+				>
+					<div>
+						<Title
+							order={3}
+							mb="xs"
+						>
+							Stock Transfers
+						</Title>
+						<Text
+							color="dimmed"
+							size="sm"
+						>
+							View and manage stock transfer requests between dealers
+						</Text>
+					</div>
+				</Group>
+			</div>
+
+			{/* Summary Cards */}
+			{transferSummary?.data && (
+				<div className={classes.summaryCards}>
+					<Grid>
+						<Grid.Col
+							xs={12}
+							sm={6}
+							md={3}
+						>
+							<Paper
+								className={classes.summaryCard}
+								shadow="xs"
+							>
+								<Text
+									className={classes.summaryValue}
+									color="blue"
+								>
+									{transferSummary.data.total?.toLocaleString() || 0}
+								</Text>
+								<Text className={classes.summaryLabel}>Total Transfers</Text>
+							</Paper>
+						</Grid.Col>
+						<Grid.Col
+							xs={12}
+							sm={6}
+							md={3}
+						>
+							<Paper
+								className={classes.summaryCard}
+								shadow="xs"
+							>
+								<Text
+									className={classes.summaryValue}
+									color="yellow"
+								>
+									{transferSummary.data.pending?.toLocaleString() || 0}
+								</Text>
+								<Text className={classes.summaryLabel}>Pending Approval</Text>
+							</Paper>
+						</Grid.Col>
+						<Grid.Col
+							xs={12}
+							sm={6}
+							md={3}
+						>
+							<Paper
+								className={classes.summaryCard}
+								shadow="xs"
+							>
+								<Text
+									className={classes.summaryValue}
+									color="green"
+								>
+									{transferSummary.data.approved?.toLocaleString() || 0}
+								</Text>
+								<Text className={classes.summaryLabel}>Approved</Text>
+							</Paper>
+						</Grid.Col>
+						<Grid.Col
+							xs={12}
+							sm={6}
+							md={3}
+						>
+							<Paper
+								className={classes.summaryCard}
+								shadow="xs"
+							>
+								<Text
+									className={classes.summaryValue}
+									color="red"
+								>
+									{transferSummary.data.rejected?.toLocaleString() || 0}
+								</Text>
+								<Text className={classes.summaryLabel}>Rejected</Text>
+							</Paper>
+						</Grid.Col>
+					</Grid>
+				</div>
+			)}
+
+			{/* Search and Filters */}
+			<div className={classes.searchSection}>
+				<Stack spacing="md">
+					<div className={classes.searchRow}>
+						<TextInput
+							placeholder="Search transfers..."
+							icon={<IconSearch size={16} />}
+							value={searchTerm}
+							onChange={(e) => setSearchTerm(e.currentTarget.value)}
+							style={{ flex: 1, minWidth: 250 }}
+						/>
+						<Select
+							placeholder="Filter by status"
+							data={[
+								{ value: 'all', label: 'All Statuses' },
+								{ value: 'Pending', label: 'Pending' },
+								{ value: 'Approved', label: 'Approved' },
+								{ value: 'Rejected', label: 'Rejected' },
+							]}
+							value={statusFilter}
+							onChange={(value) => setStatusFilter(value || 'all')}
+							icon={<IconFilter size={16} />}
+							style={{ minWidth: 150 }}
+						/>
+						<Select
+							placeholder="From dealer"
+							data={[{ value: 'all', label: 'All Dealers' }, ...dealerOptions]}
+							value={fromDealerFilter}
+							onChange={(value) => setFromDealerFilter(value || 'all')}
+							icon={<IconBuilding size={16} />}
+							style={{ minWidth: 150 }}
+						/>
+						<Select
+							placeholder="To dealer"
+							data={[{ value: 'all', label: 'All Dealers' }, ...dealerOptions]}
+							value={toDealerFilter}
+							onChange={(value) => setToDealerFilter(value || 'all')}
+							icon={<IconBuilding size={16} />}
+							style={{ minWidth: 150 }}
+						/>
+					</div>
+				</Stack>
+			</div>
+
+			{/* Transfers Table */}
+			{isLoading ? (
+				<div className={classes.emptyState}>
+					<Text>Loading transfers...</Text>
+				</div>
+			) : filteredTransfers.length === 0 ? (
+				<div className={classes.emptyState}>
+					<IconTransfer
+						size={48}
+						color="gray"
+					/>
+					<Text
+						size="lg"
+						mt="md"
+					>
+						No transfers found
+					</Text>
+					<Text
+						size="sm"
+						color="dimmed"
+					>
+						Try adjusting your search or filters
+					</Text>
+				</div>
+			) : (
+				<div className={classes.tableContainer}>
+					<Table>
+						<thead>
+							<tr>
+								<th>Transfer ID</th>
+								<th>Transfer Route</th>
+								<th>Items</th>
+								<th>Requested By</th>
+								<th>Status</th>
+								<th>Request Date</th>
+								<th>Approval Date</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{filteredTransfers.map((transfer: StockTransfer) => (
+								<tr key={transfer.id}>
+									<td>
+										<Text
+											size="sm"
+											weight={500}
+											style={{ fontFamily: 'monospace' }}
+										>
+											{transfer.id.slice(-8).toUpperCase()}
+										</Text>
+									</td>
+									<td>
+										<div className={classes.transferRoute}>
+											<Group spacing="xs">
+												<IconBuilding
+													size={14}
+													color="gray"
+												/>
+												<Text
+													size="sm"
+													weight={500}
+												>
+													{transfer.fromDealerName}
+												</Text>
+											</Group>
+											<IconArrowRight
+												size={16}
+												color="gray"
+											/>
+											<Group spacing="xs">
+												<IconBuilding
+													size={14}
+													color="gray"
+												/>
+												<Text
+													size="sm"
+													weight={500}
+												>
+													{transfer.toDealerName}
+												</Text>
+											</Group>
+										</div>
+									</td>
+									<td>
+										<Text
+											size="sm"
+											className={classes.imeiCount}
+										>
+											{transfer.imeiCount} items
+										</Text>
+									</td>
+									<td>
+										<Text size="sm">
+											{transfer.transferredByName || 'Unknown'}
+										</Text>
+									</td>
+									<td>
+										<Badge
+											color={getStatusColor(transfer.status)}
+											size="sm"
+											leftSection={getStatusIcon(transfer.status)}
+											className={classes.statusBadge}
+										>
+											{transfer.status}
+										</Badge>
+									</td>
+									<td>
+										<Text size="sm">
+											{new Date(transfer.createdAt).toLocaleDateString()}
+										</Text>
+									</td>
+									<td>
+										<Text size="sm">
+											{transfer.approvedAt
+												? new Date(transfer.approvedAt).toLocaleDateString()
+												: 'N/A'}
+										</Text>
+									</td>
+									<td>
+										<Menu>
+											<Menu.Target>
+												<ActionIcon
+													variant="subtle"
+													size="sm"
+												>
+													<IconDotsVertical size={16} />
+												</ActionIcon>
+											</Menu.Target>
+											<Menu.Dropdown>
+												<Menu.Item
+													icon={<IconEye size={16} />}
+													onClick={() => handleViewDetails(transfer)}
+												>
+													View Details
+												</Menu.Item>
+												{transfer.status === 'Pending' && (
+													<>
+														<Menu.Item
+															icon={<IconCheck size={16} />}
+															color="green"
+															onClick={() =>
+																handleApproveTransfer(transfer)
+															}
+														>
+															Approve
+														</Menu.Item>
+														<Menu.Item
+															icon={<IconX size={16} />}
+															color="red"
+															onClick={() =>
+																handleRejectTransfer(transfer)
+															}
+														>
+															Reject
+														</Menu.Item>
+													</>
+												)}
+											</Menu.Dropdown>
+										</Menu>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</Table>
+				</div>
+			)}
+
+			{/* Pagination */}
+			{totalPages > 1 && (
+				<Group
+					position="center"
+					mt="xl"
+				>
+					<Pagination
+						total={totalPages}
+						value={currentPage}
+						onChange={setCurrentPage}
+						size="sm"
+					/>
+				</Group>
+			)}
+
+			{/* Approval Modal */}
+			<StockTransferApprovalModal
+				opened={approvalModalOpened}
+				onClose={closeApprovalModal}
+				transfer={selectedTransfer}
+				action={approvalAction}
+			/>
+		</div>
+	);
+}

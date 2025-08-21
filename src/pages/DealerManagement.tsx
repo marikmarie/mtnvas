@@ -3,6 +3,7 @@ import {
 	IconBox,
 	IconBuildingStore,
 	IconSettings,
+	IconTransfer,
 	IconUser,
 	IconUserCircle,
 	IconUsers,
@@ -16,6 +17,7 @@ import { Dealer } from '../modules/Dealer/types';
 import { ShopList } from '../modules/Shop/ShopList';
 import { ShopUsersList } from '../modules/Shop/ShopUsersList';
 import { StockList } from '../modules/Stock/StockList';
+import { StockTransfersList } from '../modules/Stock/StockTransfersList';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -92,7 +94,7 @@ const useStyles = createStyles((theme) => ({
 
 export default function DealerManagement() {
 	const { classes } = useStyles();
-	const request = useRequest();
+	const request = useRequest(true);
 
 	const { data: dealers } = useQuery({
 		queryKey: ['dealers'],
@@ -104,9 +106,9 @@ export default function DealerManagement() {
 		queryFn: () => request.get('/shops'),
 	});
 
-	const { data: shopUsers } = useQuery({
-		queryKey: ['shopUsers'],
-		queryFn: () => request.get('/shop-users'),
+	const { data: agents } = useQuery({
+		queryKey: ['agents'],
+		queryFn: () => request.get('/agents'),
 	});
 
 	const { data: stock } = useQuery({
@@ -114,12 +116,14 @@ export default function DealerManagement() {
 		queryFn: () => request.get('/stock'),
 	});
 
+	console.log(agents);
+
 	const totalActiveDealers = dealers?.data?.data?.filter(
 		(dealer: Dealer) => dealer.status.toLowerCase() === 'active'
 	).length;
 
 	const totalShops = shops?.data?.totalCount;
-	const totalShopUsers = shopUsers?.data?.totalCount;
+	const totalAgents = agents?.data?.totalCount;
 
 	const totalStock = stock?.data?.totalCount;
 
@@ -210,7 +214,7 @@ export default function DealerManagement() {
 									weight={700}
 									color="orange"
 								>
-									{totalShopUsers}
+									{totalAgents}
 								</Text>
 							</div>
 							<div className={classes.statCard}>
@@ -276,6 +280,13 @@ export default function DealerManagement() {
 							>
 								Stock Management
 							</Tabs.Tab>
+							<Tabs.Tab
+								value="stock-transfers"
+								icon={<IconTransfer size={16} />}
+								className={classes.tab}
+							>
+								Stock Transfers
+							</Tabs.Tab>
 						</Tabs.List>
 
 						<Tabs.Panel
@@ -307,6 +318,12 @@ export default function DealerManagement() {
 							className={classes.tabPanel}
 						>
 							<StockList />
+						</Tabs.Panel>
+						<Tabs.Panel
+							value="stock-transfers"
+							className={classes.tabPanel}
+						>
+							<StockTransfersList />
 						</Tabs.Panel>
 					</Tabs>
 				</div>
