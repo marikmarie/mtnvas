@@ -269,8 +269,9 @@ export function StockList() {
 		}
 	};
 
-	const handleViewDetails = (stock: Stock) => {
-		console.log('View stock details:', stock);
+	const handleOpenSetThresholdModal = (stock: Stock) => {
+		console.log(stock);
+		openThresholdModal();
 	};
 
 	const handleDownloadTemplate = () => {
@@ -612,7 +613,9 @@ export function StockList() {
 											<Menu.Dropdown>
 												<Menu.Item
 													icon={<IconSettings size={16} />}
-													onClick={openThresholdModal}
+													onClick={() =>
+														handleOpenSetThresholdModal(stock)
+													}
 												>
 													Set Threshold
 												</Menu.Item>
@@ -772,7 +775,9 @@ export function StockList() {
 											<Menu.Dropdown>
 												<Menu.Item
 													icon={<IconSettings size={16} />}
-													onClick={openThresholdModal}
+													onClick={() =>
+														handleOpenSetThresholdModal(stock)
+													}
 												>
 													Set Threshold
 												</Menu.Item>
