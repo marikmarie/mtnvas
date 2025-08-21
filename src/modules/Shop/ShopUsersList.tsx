@@ -169,21 +169,21 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 	});
 
 	const activateMutation = useMutation({
-		mutationFn: (userId: string) => request.post(`/agents/${userId}/activate`),
+		mutationFn: (userId: number) => request.post(`/agents/${userId}/activate`),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['shop-users'] });
 		},
 	});
 
 	const deactivateMutation = useMutation({
-		mutationFn: (userId: string) => request.post(`/agents/${userId}/deactivate`),
+		mutationFn: (userId: number) => request.post(`/agents/${userId}/deactivate`),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['shop-users'] });
 		},
 	});
 
 	const deleteMutation = useMutation({
-		mutationFn: (userId: string) => request.delete(`/agents/${userId}`),
+		mutationFn: (userId: number) => request.delete(`/agents/${userId}`),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['shop-users'] });
 		},
@@ -633,13 +633,13 @@ export function ShopUsersList({ shop }: ShopUsersListProps) {
 						updatedBy: '',
 						updatedAt: '',
 						isActive: true,
-					} as Dealer
+					} as unknown as Dealer
 				}
 				shops={[
 					{
 						id: shop?.id!,
 						name: shop?.shopName!,
-					},
+					} as unknown as Shop,
 				]}
 			/>
 

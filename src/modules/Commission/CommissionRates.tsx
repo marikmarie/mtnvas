@@ -160,7 +160,7 @@ export function CommissionRates() {
 	});
 
 	const deleteRateMutation = useMutation({
-		mutationFn: async (rateId: string) => {
+		mutationFn: async (rateId: number) => {
 			await request.delete(`/commissions/rates/${rateId}`);
 		},
 		onSuccess: () => {
@@ -199,7 +199,7 @@ export function CommissionRates() {
 		openRateModal();
 	};
 
-	const handleDeleteRate = (rateId: string) => {
+	const handleDeleteRate = (rateId: number) => {
 		if (confirm('Are you sure you want to delete this commission rate?')) {
 			deleteRateMutation.mutate(rateId);
 		}

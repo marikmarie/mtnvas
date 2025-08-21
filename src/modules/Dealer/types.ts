@@ -1,6 +1,6 @@
 export interface Dealer {
 	id: number;
-	dealerName: number;
+	dealerName: string;
 	email: string;
 	createdAt: string;
 	status: 'Active' | 'Inactive';
@@ -29,7 +29,7 @@ export interface ShopUser {
 	name: string;
 	email: string;
 	msisdn: string;
-	shopid: number;
+	shopId: number;
 	shopName: string;
 	userType: UserType;
 	createdAt: string;
@@ -82,8 +82,8 @@ export interface Stock {
 export interface StockThreshold {
 	id: number;
 	dealerid: number;
-	productid: number;
-	deviceid: number;
+	productId: number;
+	deviceId: number;
 	category: string;
 	threshold: number;
 	currentStock: number;
@@ -134,8 +134,8 @@ export interface StockUploadResponse {
 export interface StockUploadRequest {
 	dealerid: number;
 	category: 'wakanet' | 'enterprise' | 'both';
-	productid: number;
-	deviceid: number;
+	productId: number;
+	deviceId: number;
 	imeiFile: File;
 }
 
@@ -200,9 +200,9 @@ export interface StockThresholdAlertsResponse {
 export interface ImeiDetails {
 	imei: string;
 	status: 'Available' | 'Assigned' | 'Active' | 'Inactive' | 'Swapped';
-	productid: number;
+	productId: number;
 	productName: string;
-	deviceid: number;
+	deviceId: number;
 	deviceName: string;
 	dealerid: number;
 	dealerName: string;
@@ -226,7 +226,7 @@ export interface ImeiSwapRequest {
 	oldImei: string;
 	newImei: string;
 	reason: string;
-	agentid: number;
+	agentId: number;
 	customerId?: string;
 }
 
@@ -235,7 +235,7 @@ export interface ImeiSwapRequestDetails {
 	oldImei: string;
 	newImei: string;
 	reason: string;
-	agentid: number;
+	agentId: number;
 	agentName: string;
 	dealerid: number;
 	status: 'pending' | 'approved' | 'rejected';
@@ -268,7 +268,7 @@ export interface ImeiSwap {
 	oldImei: string;
 	newImei: string;
 	reason: string;
-	agentid: number;
+	agentId: number;
 	agentName: string;
 	customerId?: string;
 	swappedAt: string;
@@ -297,7 +297,7 @@ export interface StockSummary {
 	availableStock: number;
 	soldStock: number;
 	byProduct: Array<{
-		productid: number;
+		productId: number;
 		productName: string;
 		total: number;
 		available: number;
@@ -396,7 +396,7 @@ export interface AgentDuplicateResponse {
 		id: number;
 		name: string;
 		userTypes: string[];
-		dealerid: number;
+		dealerId: number;
 	};
 	canAddCategory: boolean;
 }
@@ -463,13 +463,13 @@ export interface ImeiSwapRequestsModalProps {
 export interface Transaction {
 	id: number;
 	type: 'activation' | 'cash_sale';
-	agentid: number;
+	agentId: number;
 	agentName: string;
 	dealerid: number;
 	shopId?: string;
 	customerId?: string;
 	customerName?: string;
-	productid: number;
+	productId: number;
 	productName: string;
 	imei: string;
 	amount: number;
@@ -482,7 +482,7 @@ export interface Transaction {
 
 // Customer Activation Request
 export interface CustomerActivationRequest {
-	agentid: number;
+	agentId: number;
 	receiptNumber: string;
 	deviceMsisdn: string;
 	imei: string;
@@ -501,13 +501,13 @@ export interface CustomerActivationResponse {
 
 // Cash Sale Request
 export interface CashSaleRequest {
-	agentid: number;
+	agentId: number;
 	customerId?: string;
 	customerName: string;
 	customerPhone: string;
 	customerEmail?: string;
-	productid: number;
-	deviceid: number;
+	productId: number;
+	deviceId: number;
 	imei: string;
 	paymentMethod: 'cash' | 'mobile_money';
 	amount: number;
@@ -586,9 +586,9 @@ export interface SalesReportModalProps {
 // Commission Rate Interface
 export interface CommissionRate {
 	id: number;
-	dealerId?: string;
+	dealerId?: number;
 	userType: UserType;
-	productid: number;
+	productId: number;
 	productName: string;
 	commissionType: 'fixed' | 'percentage';
 	amount: number;
@@ -599,9 +599,9 @@ export interface CommissionRate {
 
 // Commission Rate Request
 export interface CommissionRateRequest {
-	dealerId?: string;
+	dealerId?: number;
 	userType: UserType;
-	productid: number;
+	productId: number;
 	commissionType: 'fixed' | 'percentage';
 	amount: number;
 	currency?: string;
@@ -611,10 +611,16 @@ export interface CommissionRateRequest {
 // Commission Earning Interface
 export interface CommissionEarning {
 	id: number;
-	agentid: number;
+	agentId: number;
 	agentName: string;
-	transactionid: number;
+	transactionId: number;
+	productId: number;
 	productName: string;
+	deviceId: number;
+	deviceName: string;
+	dealerId: number;
+	dealerName: string;
+	shopId: number;
 	commissionAmount: number;
 	status: 'Pending' | 'Paid' | 'Cancelled';
 	earnedAt: string;

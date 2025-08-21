@@ -230,8 +230,7 @@ export function CommissionEarnings() {
 		(earning) =>
 			searchTerm === '' ||
 			earning.agentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			earning.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			earning.transactionId.toLowerCase().includes(searchTerm.toLowerCase())
+			earning.productName.toLowerCase().includes(searchTerm.toLowerCase())
 	);
 
 	const handleRefresh = () => {

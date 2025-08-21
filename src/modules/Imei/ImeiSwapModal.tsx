@@ -127,7 +127,7 @@ export function ImeiSwapModal({ opened, onClose, imei }: ImeiSwapModalProps) {
 			oldImei: imei || '',
 			newImei: '',
 			reason: '',
-			agentId: '',
+			agentId: 0,
 			customerId: '',
 		},
 		validate: {

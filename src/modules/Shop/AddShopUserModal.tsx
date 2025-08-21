@@ -26,12 +26,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { formatPhoneNumber } from '../../utils/phone.util';
-import { Dealer } from '../Dealer/types';
-
-interface Shop {
-	id: string;
-	name: string;
-}
+import { Dealer, Shop } from '../Dealer/types';
 
 interface AddShopUserModalProps {
 	opened: boolean;
@@ -45,8 +40,8 @@ interface ShopUserFormValues {
 	email: string;
 	msisdn: string;
 	userType: 'shop_agent' | 'dsa' | 'retailer';
-	dealerId: string;
-	shopId?: string;
+	dealerId: number;
+	shopId?: number;
 	location: string;
 	merchantCode?: string;
 	idNumber?: string;
@@ -139,7 +134,7 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 			msisdn: '',
 			userType: 'shop_agent',
 			dealerId: dealer.id,
-			shopId: shops.length === 1 ? shops[0].id : '',
+			shopId: shops.length === 1 ? shops[0].id : undefined,
 			location: '',
 			merchantCode: '',
 			idNumber: '',
@@ -180,8 +175,8 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 	};
 
 	const shopOptions = shops.map((shop) => ({
-		value: shop.id,
-		label: shop.name,
+		value: shop.id.toString(),
+		label: shop.shopName,
 	}));
 
 	const selectedShop = shops.find((s) => s.id === form.values.shopId);
@@ -190,7 +185,7 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 	const handleUserTypeChange = (value: string) => {
 		form.setFieldValue('userType', value as 'shop_agent' | 'dsa' | 'retailer');
 		if (value !== 'shop_agent') {
-			form.setFieldValue('shopId', '');
+			form.setFieldValue('shopId', undefined);
 		} else if (shops.length === 1) {
 			form.setFieldValue('shopId', shops[0].id);
 		}
@@ -254,7 +249,7 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 						</Text>
 						<Group spacing="xs">
 							<IconBuildingStore size={16} />
-							<Text weight={600}>{selectedShop.name}</Text>
+							<Text weight={600}>{selectedShop.shopName}</Text>
 							<Badge
 								color="green"
 								variant="light"
@@ -413,9 +408,9 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 											/>
 										}
 										data={shopOptions}
-										value={form.values.shopId}
+										value={form.values.shopId?.toString() || undefined}
 										onChange={(value) =>
-											form.setFieldValue('shopId', value || '')
+											form.setFieldValue('shopId', Number(value) || undefined)
 										}
 										radius="md"
 									/>

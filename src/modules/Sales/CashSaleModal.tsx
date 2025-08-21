@@ -81,13 +81,13 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 
 	const form = useForm<CashSaleRequest>({
 		initialValues: {
-			agentId: '',
+			agentId: 0,
 			customerId: '',
 			customerName: '',
 			customerPhone: '',
 			customerEmail: '',
-			productId: '',
-			deviceId: '',
+			productId: 0,
+			deviceId: 0,
 			imei: '',
 			paymentMethod: 'cash',
 			amount: 0,
@@ -175,8 +175,8 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 		onClose();
 	};
 
-	const handleProductChange = (productId: string | null) => {
-		form.setFieldValue('productId', productId || '');
+	const handleProductChange = (productId: number | undefined) => {
+		form.setFieldValue('productId', productId || 0);
 	};
 
 	return (
@@ -346,8 +346,10 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 												label: product.name,
 											})) || []
 										}
-										value={form.values.productId}
-										onChange={handleProductChange}
+										value={form.values.productId.toString()}
+										onChange={(value) =>
+											handleProductChange(Number(value) || undefined)
+										}
 										radius="md"
 										required
 									/>

@@ -66,7 +66,7 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 
 	const form = useForm<CustomerActivationRequest>({
 		initialValues: {
-			agentId: '',
+			agentId: 0,
 			receiptNumber: '',
 			deviceMsisdn: '',
 			imei: '',

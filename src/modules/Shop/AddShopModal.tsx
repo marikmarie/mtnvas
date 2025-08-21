@@ -238,7 +238,7 @@ export function AddShopModal({ opened, onClose }: AddShopModalProps) {
 								/>
 							}
 							data={dealerList?.map((dealer: Dealer) => ({
-								value: dealer.id,
+								value: dealer.id.toString(),
 								label: dealer.dealerName,
 							}))}
 							{...form.getInputProps('dealerId')}

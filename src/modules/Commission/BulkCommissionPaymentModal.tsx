@@ -108,7 +108,7 @@ export function BulkCommissionPaymentModal({
 	const totalAmount = pendingEarnings.reduce((sum, earning) => sum + earning.commissionAmount, 0);
 
 	const bulkPaymentMutation = useMutation({
-		mutationFn: async (data: { earningIds: string[]; notes: string }) => {
+		mutationFn: async (data: { earningIds: number[]; notes: string }) => {
 			const response = await request.post('/commissions/bulk-payment', {
 				earningIds: data.earningIds,
 				notes: data.notes,

@@ -197,7 +197,7 @@ export function ViewDealerModal({ opened, onClose, dealer }: ViewDealerModalProp
 							<ActionIcon
 								variant="subtle"
 								size="sm"
-								onClick={() => copyToClipboard(dealer.id)}
+								onClick={() => copyToClipboard(dealer.id.toString())}
 							>
 								<IconCopy size={16} />
 							</ActionIcon>
@@ -357,7 +357,9 @@ export function ViewDealerModal({ opened, onClose, dealer }: ViewDealerModalProp
 											<ActionIcon
 												variant="subtle"
 												size="xs"
-												onClick={() => copyToClipboard(dealer.id)}
+												onClick={() =>
+													copyToClipboard(dealer.id.toString())
+												}
 											>
 												<IconCopy size={12} />
 											</ActionIcon>

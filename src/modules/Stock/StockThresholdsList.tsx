@@ -472,7 +472,8 @@ export function StockThresholdsList({ opened, onClose }: StockThresholdsListProp
 								Product Details
 							</Text>
 							<Text size="sm">
-								{editingThreshold?.productName} - {editingThreshold?.deviceName}
+								{editingThreshold?.productName.toUpperCase() || 'Unknown Product'} -{' '}
+								{editingThreshold?.deviceName.toUpperCase() || 'Unknown Device'}
 							</Text>
 						</div>
 
@@ -485,7 +486,9 @@ export function StockThresholdsList({ opened, onClose }: StockThresholdsListProp
 							>
 								Dealer
 							</Text>
-							<Text size="sm">{editingThreshold?.dealerName}</Text>
+							<Text size="sm">
+								{editingThreshold?.dealerName.toUpperCase() || 'Unknown Dealer'}
+							</Text>
 						</div>
 
 						<div className={classes.formGroup}>

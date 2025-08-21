@@ -84,10 +84,10 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 
 	const form = useForm<CommissionRateRequest & { isSystemWide: boolean }>({
 		initialValues: {
-			dealerId: commissionRate?.dealerId || '',
+			dealerId: commissionRate?.dealerId || undefined,
 			isSystemWide: !commissionRate?.dealerId,
 			userType: commissionRate?.userType || 'ShopAgent',
-			productId: commissionRate?.productId || '',
+			productId: commissionRate?.productId || 0,
 			commissionType: commissionRate?.commissionType || 'fixed',
 			amount: commissionRate?.amount || 0,
 			currency: commissionRate?.currency || 'UGX',
@@ -178,7 +178,7 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 	const handleSystemWideChange = (isSystemWide: boolean) => {
 		form.setFieldValue('isSystemWide', isSystemWide);
 		if (isSystemWide) {
-			form.setFieldValue('dealerId', '');
+			form.setFieldValue('dealerId', undefined);
 		}
 	};
 

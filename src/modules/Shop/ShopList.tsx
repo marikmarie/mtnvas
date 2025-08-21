@@ -613,9 +613,17 @@ export function ShopList() {
 						}
 						shops={[
 							{
-								id: selectedShop.id.toString(),
-								name: selectedShop.shopName,
-							},
+								id: selectedShop.id,
+								shopName: selectedShop.shopName,
+								dealerId: selectedShop.dealerId,
+								location: selectedShop.location,
+								region: selectedShop.region,
+								status: selectedShop.status,
+								createdBy: selectedShop.createdBy,
+								createdAt: selectedShop.createdAt,
+								updatedBy: selectedShop.updatedBy,
+								updatedAt: selectedShop.updatedAt,
+							} as unknown as Shop,
 						]}
 					/>
 
