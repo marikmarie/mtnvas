@@ -3,7 +3,6 @@ import {
 	Badge,
 	Button,
 	createStyles,
-	Divider,
 	Group,
 	Paper,
 	Stack,
@@ -19,14 +18,13 @@ import {
 	IconBuilding,
 	IconCheck,
 	IconClock,
-	IconPackage,
 	IconUser,
 	IconX,
 } from '@tabler/icons-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { StockTransfer, StockTransferApprovalRequest } from '../Dealer/types';
+import { Dealer, StockTransfer } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -146,7 +144,7 @@ interface StockTransferApprovalModalProps {
 	opened: boolean;
 	onClose: () => void;
 	transfer: StockTransfer | null;
-	action: 'approve' | 'reject';
+	action: 'Approve' | 'Reject';
 }
 
 export function StockTransferApprovalModal({
@@ -156,29 +154,29 @@ export function StockTransferApprovalModal({
 	action,
 }: StockTransferApprovalModalProps) {
 	const { classes } = useStyles();
-	const request = useRequest(true);
 	const queryClient = useQueryClient();
+	const request = useRequest(true);
 
-	const form = useForm<StockTransferApprovalRequest>({
+	const { data: dealersData } = useQuery({
+		queryKey: ['dealer'],
+		queryFn: () => request.get('/dealer'),
+	});
+	const form = useForm<{ reason: string }>({
 		initialValues: {
-			action,
-			reason: '',
+			reason: action === 'Approve' ? '' : 'Transfer not necessary',
 		},
 		validate: {
 			reason: (value) =>
-				action === 'reject' && !value ? 'Reason is required for rejection' : null,
+				action === 'Reject' && !value ? 'Reason is required for rejection' : null,
 		},
 	});
 
 	const mutation = useMutation({
-		mutationFn: (values: StockTransferApprovalRequest) => {
+		mutationFn: (values: { reason: string }) => {
 			if (!transfer) throw new Error('No transfer selected');
-			return request.post(`/stock/transfer/${transfer.id}/approval`, null, {
-				params: {
-					action: values.action,
-					reason: values.reason || undefined,
-				},
-			});
+			return request.post(
+				`/stock/transfer/${transfer.id}/approval?action=${action}&reason=${values.reason}`
+			);
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries(['stock-transfers']);
@@ -189,7 +187,7 @@ export function StockTransferApprovalModal({
 	});
 
 	const handleSubmit = form.onSubmit((values) => {
-		mutation.mutate({ ...values, action });
+		mutation.mutate(values);
 	});
 
 	const handleClose = () => {
@@ -199,7 +197,7 @@ export function StockTransferApprovalModal({
 
 	if (!transfer) return null;
 
-	const isApprove = action === 'approve';
+	const isApprove = action === 'Approve';
 	const actionColor = isApprove ? 'green' : 'red';
 	const actionIcon = isApprove ? <IconCheck size={20} /> : <IconX size={20} />;
 	const actionText = isApprove ? 'Approve' : 'Reject';
@@ -256,7 +254,11 @@ export function StockTransferApprovalModal({
 									size="sm"
 									weight={500}
 								>
-									{transfer.fromDealerName}
+									{
+										dealersData?.data.data.find(
+											(d: Dealer) => d.id === transfer.fromDealerId
+										)?.dealerName
+									}
 								</Text>
 								<Text
 									size="xs"
@@ -281,7 +283,11 @@ export function StockTransferApprovalModal({
 									size="sm"
 									weight={500}
 								>
-									{transfer.toDealerName}
+									{
+										dealersData?.data.data.find(
+											(d: Dealer) => d.id === transfer.toDealerId
+										)?.dealerName
+									}
 								</Text>
 								<Text
 									size="xs"
@@ -300,7 +306,7 @@ export function StockTransferApprovalModal({
 								className={classes.detailValue}
 								style={{ fontFamily: 'monospace' }}
 							>
-								{transfer.id.slice(-8).toUpperCase()}
+								{transfer.id.toString().slice(-8).toUpperCase()}
 							</Text>
 						</div>
 
@@ -323,7 +329,7 @@ export function StockTransferApprovalModal({
 									color="gray"
 								/>
 								<Text className={classes.detailValue}>
-									{transfer.transferredByName || 'Unknown'}
+									{transfer.transferredBy || 'Unknown'}
 								</Text>
 							</Group>
 						</div>
@@ -350,7 +356,7 @@ export function StockTransferApprovalModal({
 								leftSection={<IconClock size={14} />}
 								className={classes.statusBadge}
 							>
-								{transfer.status}
+								{transfer.status || 'Pending'}
 							</Badge>
 						</div>
 
@@ -362,34 +368,6 @@ export function StockTransferApprovalModal({
 						)}
 					</Stack>
 				</Paper>
-
-				{/* IMEI List */}
-				<Stack spacing="xs">
-					<Group spacing="xs">
-						<IconPackage
-							size={16}
-							color="gray"
-						/>
-						<Text
-							size="sm"
-							weight={500}
-						>
-							Items to Transfer ({transfer.imeis.length})
-						</Text>
-					</Group>
-					<div className={classes.imeiList}>
-						{transfer.imeis.map((imei, index) => (
-							<div
-								key={index}
-								className={classes.imeiItem}
-							>
-								{imei}
-							</div>
-						))}
-					</div>
-				</Stack>
-
-				<Divider my="lg" />
 
 				{/* Action Alert */}
 				<Alert

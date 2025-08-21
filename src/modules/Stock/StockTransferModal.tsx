@@ -134,8 +134,8 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 	const form = useForm<StockTransferRequest>({
 		initialValues: {
 			imeis: [],
-			fromDealerId: '',
-			toDealerId: '',
+			fromDealerId: 0,
+			toDealerId: 0,
 			reason: '',
 		},
 		validate: {
@@ -169,8 +169,7 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 	const availableImeis =
 		stockItems?.data?.data
 			?.filter(
-				(item: Stock) =>
-					item.dealerId === parseInt(form.values.fromDealerId) && item.status === 1
+				(item: Stock) => item.dealerId === form.values.fromDealerId && item.status === 1
 			)
 			?.map((item: Stock) => item.imei)
 			?.filter(Boolean) || [];
@@ -292,9 +291,7 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 										className={classes.inputIcon}
 									/>
 								}
-								data={dealerOptions.filter(
-									(dealer: Dealer) => dealer.id !== form.values.fromDealerId
-								)}
+								data={dealerOptions}
 								searchable
 								nothingFound="No dealers found"
 								{...form.getInputProps('toDealerId')}

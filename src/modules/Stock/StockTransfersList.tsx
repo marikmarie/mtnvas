@@ -19,9 +19,7 @@ import {
 	IconArrowRight,
 	IconBuilding,
 	IconCheck,
-	IconClock,
 	IconDotsVertical,
-	IconEye,
 	IconFilter,
 	IconSearch,
 	IconTransfer,
@@ -136,7 +134,7 @@ export function StockTransfersList() {
 	const [approvalModalOpened, { open: openApprovalModal, close: closeApprovalModal }] =
 		useDisclosure(false);
 	const [selectedTransfer, setSelectedTransfer] = useState<StockTransfer | null>(null);
-	const [approvalAction, setApprovalAction] = useState<'approve' | 'reject'>('approve');
+	const [approvalAction, setApprovalAction] = useState<'Approve' | 'Reject'>('Approve');
 
 	// Fetch dealers for filters
 	const { data: dealers } = useQuery({
@@ -183,8 +181,8 @@ export function StockTransfersList() {
 	const dealerOptions = useMemo(() => {
 		if (!dealers?.data?.data) return [];
 		return dealers.data.data.map((dealer: Dealer) => ({
-			value: dealer.id,
-			label: dealer.dealerName || 'Unknown Dealer',
+			value: dealer.id.toString(),
+			label: dealer.dealerName?.toString() || 'Unknown Dealer',
 		}));
 	}, [dealers?.data?.data]);
 
@@ -193,17 +191,16 @@ export function StockTransfersList() {
 
 		return transfersData.data.data.filter((transfer: StockTransfer) => {
 			const matchesSearch =
-				transfer.fromDealerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				transfer.toDealerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				transfer.transferredByName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				transfer.id.toLowerCase().includes(searchTerm.toLowerCase());
+				transfer.transferredBy?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				transfer.reason?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				transfer.id.toString().toLowerCase().includes(searchTerm.toLowerCase());
 
 			return matchesSearch;
 		});
 	}, [transfersData?.data?.data, searchTerm]);
 
 	const getStatusColor = (status: string) => {
-		switch (status.toLowerCase()) {
+		switch (status?.toLowerCase()) {
 			case 'pending':
 				return 'yellow';
 			case 'approved':
@@ -215,33 +212,16 @@ export function StockTransfersList() {
 		}
 	};
 
-	const getStatusIcon = (status: string) => {
-		switch (status.toLowerCase()) {
-			case 'pending':
-				return <IconClock size={14} />;
-			case 'approved':
-				return <IconCheck size={14} />;
-			case 'rejected':
-				return <IconX size={14} />;
-			default:
-				return <IconTransfer size={14} />;
-		}
-	};
-
 	const handleApproveTransfer = (transfer: StockTransfer) => {
 		setSelectedTransfer(transfer);
-		setApprovalAction('approve');
+		setApprovalAction('Approve');
 		openApprovalModal();
 	};
 
 	const handleRejectTransfer = (transfer: StockTransfer) => {
 		setSelectedTransfer(transfer);
-		setApprovalAction('reject');
+		setApprovalAction('Reject');
 		openApprovalModal();
-	};
-
-	const handleViewDetails = (transfer: StockTransfer) => {
-		console.log('View transfer details:', transfer);
 	};
 
 	const totalPages = Math.ceil((transfersData?.data?.meta?.total || 0) / itemsPerPage);
@@ -425,11 +405,11 @@ export function StockTransfersList() {
 							<tr>
 								<th>Transfer ID</th>
 								<th>Transfer Route</th>
-								<th>Items</th>
-								<th>Requested By</th>
+								<th>IMEI Count</th>
 								<th>Status</th>
-								<th>Request Date</th>
-								<th>Approval Date</th>
+								<th>Transferred By</th>
+								<th>Reason</th>
+								<th>Created Date</th>
 								<th>Actions</th>
 							</tr>
 						</thead>
@@ -442,7 +422,7 @@ export function StockTransfersList() {
 											weight={500}
 											style={{ fontFamily: 'monospace' }}
 										>
-											{transfer.id.slice(-8).toUpperCase()}
+											{transfer.id.toString().slice(-8).toUpperCase()}
 										</Text>
 									</td>
 									<td>
@@ -456,7 +436,14 @@ export function StockTransfersList() {
 													size="sm"
 													weight={500}
 												>
-													{transfer.fromDealerName}
+													{
+														(
+															dealers?.data.data.find(
+																(d: Dealer) =>
+																	d.id === transfer.fromDealerId
+															) as unknown as Dealer
+														).dealerName
+													}
 												</Text>
 											</Group>
 											<IconArrowRight
@@ -472,44 +459,51 @@ export function StockTransfersList() {
 													size="sm"
 													weight={500}
 												>
-													{transfer.toDealerName}
+													{
+														(
+															dealers?.data.data.find(
+																(d: Dealer) =>
+																	d.id === transfer.toDealerId
+															) as unknown as Dealer
+														).dealerName
+													}
 												</Text>
 											</Group>
 										</div>
 									</td>
 									<td>
-										<Text
+										<Badge
+											color="blue"
+											variant="light"
 											size="sm"
 											className={classes.imeiCount}
 										>
 											{transfer.imeiCount} items
-										</Text>
-									</td>
-									<td>
-										<Text size="sm">
-											{transfer.transferredByName || 'Unknown'}
-										</Text>
+										</Badge>
 									</td>
 									<td>
 										<Badge
 											color={getStatusColor(transfer.status)}
+											variant="light"
 											size="sm"
-											leftSection={getStatusIcon(transfer.status)}
-											className={classes.statusBadge}
 										>
 											{transfer.status}
 										</Badge>
 									</td>
 									<td>
-										<Text size="sm">
-											{new Date(transfer.createdAt).toLocaleDateString()}
+										<Text size="sm">{transfer.transferredBy || 'Unknown'}</Text>
+									</td>
+									<td>
+										<Text
+											size="sm"
+											style={{ maxWidth: 200, wordBreak: 'break-word' }}
+										>
+											{transfer.reason || 'No reason provided'}
 										</Text>
 									</td>
 									<td>
 										<Text size="sm">
-											{transfer.approvedAt
-												? new Date(transfer.approvedAt).toLocaleDateString()
-												: 'N/A'}
+											{new Date(transfer.createdAt).toLocaleDateString()}
 										</Text>
 									</td>
 									<td>
@@ -523,33 +517,27 @@ export function StockTransfersList() {
 												</ActionIcon>
 											</Menu.Target>
 											<Menu.Dropdown>
-												<Menu.Item
-													icon={<IconEye size={16} />}
-													onClick={() => handleViewDetails(transfer)}
-												>
-													View Details
-												</Menu.Item>
-												{transfer.status === 'Pending' && (
-													<>
-														<Menu.Item
-															icon={<IconCheck size={16} />}
-															color="green"
-															onClick={() =>
-																handleApproveTransfer(transfer)
-															}
-														>
-															Approve
-														</Menu.Item>
-														<Menu.Item
-															icon={<IconX size={16} />}
-															color="red"
-															onClick={() =>
-																handleRejectTransfer(transfer)
-															}
-														>
-															Reject
-														</Menu.Item>
-													</>
+												{transfer.status.toLowerCase() !== 'approved' && (
+													<Menu.Item
+														icon={<IconCheck size={16} />}
+														color="green"
+														onClick={() =>
+															handleApproveTransfer(transfer)
+														}
+													>
+														Approve
+													</Menu.Item>
+												)}
+												{transfer.status.toLowerCase() !== 'rejected' && (
+													<Menu.Item
+														icon={<IconX size={16} />}
+														color="red"
+														onClick={() =>
+															handleRejectTransfer(transfer)
+														}
+													>
+														Reject
+													</Menu.Item>
 												)}
 											</Menu.Dropdown>
 										</Menu>

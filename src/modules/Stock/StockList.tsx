@@ -26,7 +26,6 @@ import {
 	IconDeviceMobile,
 	IconDotsVertical,
 	IconDownload,
-	IconEye,
 	IconFilter,
 	IconPlus,
 	IconSearch,
@@ -332,21 +331,12 @@ export function StockList() {
 							Download Template
 						</Button>
 						<Button
-							leftIcon={<IconSettings size={16} />}
-							variant="outline"
-							onClick={openThresholdModal}
-							size="md"
-							radius="md"
-						>
-							Set Thresholds
-						</Button>
-						<Button
 							leftIcon={<IconPlus size={16} />}
 							onClick={openAddModal}
 							size="md"
 							radius="md"
 						>
-							Add Stock
+							Add Stocks
 						</Button>
 					</Group>
 				</Group>
@@ -621,12 +611,9 @@ export function StockList() {
 											</Menu.Target>
 											<Menu.Dropdown>
 												<Menu.Item
-													icon={<IconEye size={16} />}
-													onClick={() => handleViewDetails(stock)}
+													icon={<IconSettings size={16} />}
+													onClick={openThresholdModal}
 												>
-													View Details
-												</Menu.Item>
-												<Menu.Item icon={<IconSettings size={16} />}>
 													Set Threshold
 												</Menu.Item>
 											</Menu.Dropdown>
@@ -784,12 +771,9 @@ export function StockList() {
 											</Menu.Target>
 											<Menu.Dropdown>
 												<Menu.Item
-													icon={<IconEye size={16} />}
-													onClick={() => handleViewDetails(stock)}
+													icon={<IconSettings size={16} />}
+													onClick={openThresholdModal}
 												>
-													View Details
-												</Menu.Item>
-												<Menu.Item icon={<IconSettings size={16} />}>
 													Set Threshold
 												</Menu.Item>
 											</Menu.Dropdown>

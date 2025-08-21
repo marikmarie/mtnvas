@@ -1,6 +1,6 @@
 export interface Dealer {
-	id: string;
-	dealerName: string;
+	id: number;
+	dealerName: number;
 	email: string;
 	createdAt: string;
 	status: 'Active' | 'Inactive';
@@ -11,9 +11,9 @@ export interface Dealer {
 }
 
 export interface Shop {
-	id: string;
+	id: number;
 	dealerName: string;
-	dealerId: string;
+	dealerId: number;
 	shopName: string;
 	location: string;
 	region: string;
@@ -25,11 +25,11 @@ export interface Shop {
 }
 
 export interface ShopUser {
-	id: string;
+	id: number;
 	name: string;
 	email: string;
 	msisdn: string;
-	shopId: string;
+	shopid: number;
 	shopName: string;
 	userType: UserType;
 	createdAt: string;
@@ -80,10 +80,10 @@ export interface Stock {
 }
 
 export interface StockThreshold {
-	id: string;
-	dealerId: string;
-	productId: string;
-	deviceId: string;
+	id: number;
+	dealerid: number;
+	productid: number;
+	deviceid: number;
 	category: string;
 	threshold: number;
 	currentStock: number;
@@ -94,37 +94,22 @@ export interface StockThreshold {
 }
 
 export interface StockTransfer {
-	id: string;
-	fromDealerId: string;
-	fromDealerName: string;
-	toDealerId: string;
-	toDealerName: string;
+	id: number;
+	fromDealerId: number;
+	toDealerId: number;
 	imeiCount: number;
+	reason: string;
 	transferredBy: string;
-	transferredByName?: string;
-	reason?: string;
-	status: 'Pending' | 'Approved' | 'Rejected';
 	createdAt: string;
-	updatedAt?: string;
-	approvedBy?: string;
-	approvedByName?: string;
-	approvedAt?: string;
-	rejectionReason?: string;
-	imeis: string[];
+	status: string;
 }
 
 export interface StockTransferRequest {
 	imeis: string[];
-	fromDealerId: string;
-	toDealerId: string;
+	fromDealerId: number;
+	toDealerId: number;
 	reason?: string;
 }
-
-export interface StockTransferApprovalRequest {
-	action: 'approve' | 'reject';
-	reason?: string;
-}
-
 export interface StockTransferListParams {
 	page?: number;
 	pageSize?: number;
@@ -147,18 +132,18 @@ export interface StockUploadResponse {
 }
 
 export interface StockUploadRequest {
-	dealerId: string;
+	dealerid: number;
 	category: 'wakanet' | 'enterprise' | 'both';
-	productId: string;
-	deviceId: string;
+	productid: number;
+	deviceid: number;
 	imeiFile: File;
 }
 
 export interface StockThresholdRequest {
-	dealerId: string;
+	dealerid: number;
 	category: 'wakanet' | 'enterprise' | 'both';
-	productId: string;
-	deviceId: string;
+	productid: number;
+	deviceid: number;
 	threshold: number;
 	emailNotifications: boolean;
 	smsNotifications: boolean;
@@ -175,7 +160,7 @@ export interface StockThresholdUpdateRequest {
 }
 
 export interface StockThresholdAlert {
-	dealerId: string;
+	dealerid: number;
 	dealerName: string;
 	productName: string;
 	deviceName: string;
@@ -192,11 +177,11 @@ export interface StockThresholdAlertsResponse {
 export interface ImeiDetails {
 	imei: string;
 	status: 'Available' | 'Assigned' | 'Active' | 'Inactive' | 'Swapped';
-	productId: string;
+	productid: number;
 	productName: string;
-	deviceId: string;
+	deviceid: number;
 	deviceName: string;
-	dealerId: string;
+	dealerid: number;
 	dealerName: string;
 	agentId?: string;
 	agentName?: string;
@@ -218,18 +203,18 @@ export interface ImeiSwapRequest {
 	oldImei: string;
 	newImei: string;
 	reason: string;
-	agentId: string;
+	agentid: number;
 	customerId?: string;
 }
 
 export interface ImeiSwapRequestDetails {
-	id: string;
+	id: number;
 	oldImei: string;
 	newImei: string;
 	reason: string;
-	agentId: string;
+	agentid: number;
 	agentName: string;
-	dealerId: string;
+	dealerid: number;
 	status: 'pending' | 'approved' | 'rejected';
 	requestedAt: string;
 	processedAt?: string;
@@ -242,25 +227,25 @@ export interface ImeiSwapApproval {
 }
 
 export interface ImeiTransfer {
-	id: string;
+	id: number;
 	imei: string;
-	fromDealerId: string;
+	fromDealerid: number;
 	fromDealerName: string;
-	fromProductId: string;
+	fromProductid: number;
 	fromProductName: string;
-	toDealerId: string;
+	toDealerid: number;
 	toDealerName: string;
-	toProductId: string;
+	toProductid: number;
 	toProductName: string;
 	transferDate: string;
 }
 
 export interface ImeiSwap {
-	id: string;
+	id: number;
 	oldImei: string;
 	newImei: string;
 	reason: string;
-	agentId: string;
+	agentid: number;
 	agentName: string;
 	customerId?: string;
 	swappedAt: string;
@@ -274,7 +259,7 @@ export interface DealerModalProps {
 }
 
 export interface DealerAdmin {
-	id: string;
+	id: number;
 	name: string;
 	email: string;
 	msisdn: string;
@@ -289,14 +274,14 @@ export interface StockSummary {
 	availableStock: number;
 	soldStock: number;
 	byProduct: Array<{
-		productId: string;
+		productid: number;
 		productName: string;
 		total: number;
 		available: number;
 		sold: number;
 	}>;
 	byDealer: Array<{
-		dealerId: string;
+		dealerid: number;
 		dealerName: string;
 		total: number;
 		available: number;
@@ -357,12 +342,12 @@ export type UserType = 'ShopAgent' | 'DSA' | 'Retailer';
 export type AgentStatus = 'Active' | 'Inactive' | 'PendingApproval';
 
 export interface Agent {
-	id: string;
+	id: number;
 	agentName: string;
 	email: string;
 	msisdn: string;
 	userType: UserType;
-	dealerId: string;
+	dealerid: number;
 	shopId?: string;
 	merchantCode?: string;
 	status: AgentStatus;
@@ -385,10 +370,10 @@ export interface AgentDuplicateCheck {
 export interface AgentDuplicateResponse {
 	exists: boolean;
 	existingAgent?: {
-		id: string;
+		id: number;
 		name: string;
 		userTypes: string[];
-		dealerId: string;
+		dealerid: number;
 	};
 	canAddCategory: boolean;
 }
@@ -453,15 +438,15 @@ export interface ImeiSwapRequestsModalProps {
 
 // Transaction Interface
 export interface Transaction {
-	id: string;
+	id: number;
 	type: 'activation' | 'cash_sale';
-	agentId: string;
+	agentid: number;
 	agentName: string;
-	dealerId: string;
+	dealerid: number;
 	shopId?: string;
 	customerId?: string;
 	customerName?: string;
-	productId: string;
+	productid: number;
 	productName: string;
 	imei: string;
 	amount: number;
@@ -474,7 +459,7 @@ export interface Transaction {
 
 // Customer Activation Request
 export interface CustomerActivationRequest {
-	agentId: string;
+	agentid: number;
 	receiptNumber: string;
 	deviceMsisdn: string;
 	imei: string;
@@ -485,21 +470,21 @@ export interface CustomerActivationRequest {
 
 // Customer Activation Response
 export interface CustomerActivationResponse {
-	transactionId: string;
-	activationId: string;
+	transactionid: number;
+	activationid: number;
 	status: 'Completed' | 'Failed';
 	commissionEarned?: number;
 }
 
 // Cash Sale Request
 export interface CashSaleRequest {
-	agentId: string;
+	agentid: number;
 	customerId?: string;
 	customerName: string;
 	customerPhone: string;
 	customerEmail?: string;
-	productId: string;
-	deviceId: string;
+	productid: number;
+	deviceid: number;
 	imei: string;
 	paymentMethod: 'cash' | 'mobile_money';
 	amount: number;
@@ -508,7 +493,7 @@ export interface CashSaleRequest {
 
 // Cash Sale Response
 export interface CashSaleResponse {
-	transactionId: string;
+	transactionid: number;
 	receiptNumber: string;
 	activationId?: string;
 }
@@ -577,10 +562,10 @@ export interface SalesReportModalProps {
 
 // Commission Rate Interface
 export interface CommissionRate {
-	id: string;
+	id: number;
 	dealerId?: string;
 	userType: UserType;
-	productId: string;
+	productid: number;
 	productName: string;
 	commissionType: 'fixed' | 'percentage';
 	amount: number;
@@ -593,7 +578,7 @@ export interface CommissionRate {
 export interface CommissionRateRequest {
 	dealerId?: string;
 	userType: UserType;
-	productId: string;
+	productid: number;
 	commissionType: 'fixed' | 'percentage';
 	amount: number;
 	currency?: string;
@@ -602,10 +587,10 @@ export interface CommissionRateRequest {
 
 // Commission Earning Interface
 export interface CommissionEarning {
-	id: string;
-	agentId: string;
+	id: number;
+	agentid: number;
 	agentName: string;
-	transactionId: string;
+	transactionid: number;
 	productName: string;
 	commissionAmount: number;
 	status: 'Pending' | 'Paid' | 'Cancelled';

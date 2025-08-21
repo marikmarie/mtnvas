@@ -120,7 +120,6 @@ const useStyles = createStyles((theme) => ({
 
 export function ShopList() {
 	const { classes } = useStyles();
-	const request = useRequest(true);
 	const queryClient = useQueryClient();
 	const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
 	const [searchTerm, setSearchTerm] = useState('');
@@ -129,7 +128,7 @@ export function ShopList() {
 	const [dealerFilter, setDealerFilter] = useState<string>('all');
 	const [currentPage] = useState(1);
 	const [pageSize] = useState(10);
-
+	const request = useRequest(true);
 	const [addShopModalOpened, { open: openAddShopModal, close: closeAddShopModal }] =
 		useDisclosure(false);
 	const [addUserModalOpened, { open: openAddUserModal, close: closeAddUserModal }] =
@@ -226,7 +225,7 @@ export function ShopList() {
 			const matchesStatus =
 				statusFilter === 'all' || shop.status.toLowerCase() === statusFilter.toLowerCase();
 			const matchesRegion = regionFilter === 'all' || shop.region === regionFilter;
-			const matchesDealer = dealerFilter === 'all' || shop.dealerId === dealerFilter;
+			const matchesDealer = dealerFilter === 'all' || shop.dealerId === Number(dealerFilter);
 
 			return matchesSearch && matchesStatus && matchesRegion && matchesDealer;
 		});
@@ -610,11 +609,11 @@ export function ShopList() {
 								status: 'Active',
 								updatedAt: '',
 								isActive: true,
-							} as Dealer
+							} as unknown as Dealer
 						}
 						shops={[
 							{
-								id: selectedShop.id,
+								id: selectedShop.id.toString(),
 								name: selectedShop.shopName,
 							},
 						]}
