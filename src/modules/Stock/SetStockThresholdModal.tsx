@@ -1,36 +1,42 @@
 import {
+	ActionIcon,
 	Alert,
 	Button,
 	createStyles,
+	Divider,
+	Grid,
 	Group,
-	MultiSelect,
 	NumberInput,
 	Paper,
-	Select,
 	Stack,
 	Switch,
 	Text,
+	TextInput,
 	ThemeIcon,
 	Title,
+	Tooltip,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import {
 	IconAlertCircle,
-	IconBox,
-	IconBuilding,
-	IconCategory,
-	IconDeviceMobile,
+	IconCheck,
 	IconGauge,
+	IconInfoCircle,
 	IconMail,
+	IconMinus,
 	IconPhone,
+	IconPlus,
 	IconSettings,
+	IconX,
 } from '@tabler/icons-react';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../app/store';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { formatPhoneNumber } from '../../utils/phone.util';
-import { Dealer, Device, Product, StockThresholdRequest } from '../Dealer/types';
+import { Stock, StockThresholdRequest } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -53,20 +59,6 @@ const useStyles = createStyles((theme) => ({
 		marginBottom: theme.spacing.md,
 	},
 
-	formRow: {
-		display: 'grid',
-		gridTemplateColumns: '1fr 1fr',
-		gap: theme.spacing.md,
-
-		[theme.fn.smallerThan('sm')]: {
-			gridTemplateColumns: '1fr',
-		},
-	},
-
-	inputWrapper: {
-		position: 'relative',
-	},
-
 	inputIcon: {
 		color: theme.colors.gray[5],
 	},
@@ -79,6 +71,7 @@ const useStyles = createStyles((theme) => ({
 
 	submitButton: {
 		transition: 'all 0.2s ease',
+		background: `linear-gradient(135deg, ${theme.colors.yellow[6]} 0%, ${theme.colors.yellow[7]} 100%)`,
 
 		'&:hover': {
 			transform: 'translateY(-1px)',
@@ -100,7 +93,7 @@ const useStyles = createStyles((theme) => ({
 
 	thresholdInput: {
 		'& input': {
-			fontSize: theme.fontSizes.lg,
+			fontSize: theme.fontSizes.xl,
 			fontWeight: 600,
 			textAlign: 'center',
 		},
@@ -112,97 +105,192 @@ const useStyles = createStyles((theme) => ({
 		padding: theme.spacing.md,
 		marginTop: theme.spacing.md,
 	},
+
+	stockInfoCard: {
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		borderRadius: theme.radius.md,
+		padding: theme.spacing.md,
+		marginBottom: theme.spacing.lg,
+	},
+
+	stockInfoHeader: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.sm,
+		marginBottom: theme.spacing.sm,
+	},
+
+	stockInfoValue: {
+		fontSize: theme.fontSizes.lg,
+		fontWeight: 600,
+		color: theme.colors.yellow[6],
+	},
+
+	notificationToggle: {
+		'& .mantine-Switch-track': {
+			backgroundColor: theme.colors.gray[3],
+		},
+		'& .mantine-Switch-thumb': {
+			borderColor: theme.colors.gray[4],
+		},
+		'&[data-checked] .mantine-Switch-track': {
+			backgroundColor: theme.colors.green[6],
+		},
+		'&[data-checked] .mantine-Switch-thumb': {
+			borderColor: theme.colors.green[6],
+		},
+	},
+
+	emailToggle: {
+		'&[data-checked] .mantine-Switch-track': {
+			backgroundColor: theme.colors.yellow[6],
+		},
+		'&[data-checked] .mantine-Switch-thumb': {
+			borderColor: theme.colors.yellow[6],
+		},
+	},
+
+	smsToggle: {
+		'&[data-checked] .mantine-Switch-track': {
+			backgroundColor: theme.colors.green[6],
+		},
+		'&[data-checked] .mantine-Switch-thumb': {
+			borderColor: theme.colors.green[6],
+		},
+	},
+
+	formField: {
+		'& .mantine-InputWrapper-label': {
+			fontWeight: 600,
+			marginBottom: theme.spacing.xs,
+		},
+	},
+
+	helpText: {
+		fontSize: theme.fontSizes.xs,
+		color: theme.colors.gray[6],
+		marginTop: theme.spacing.xs,
+	},
+
+	successMessage: {
+		backgroundColor: theme.colors.green[0],
+		border: `1px solid ${theme.colors.green[2]}`,
+		color: theme.colors.green[7],
+	},
 }));
 
 interface SetStockThresholdModalProps {
 	opened: boolean;
 	onClose: () => void;
+	stock: Stock | null;
 }
 
-export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdModalProps) {
+export function SetStockThresholdModal({ opened, onClose, stock }: SetStockThresholdModalProps) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
+	const queryClient = useQueryClient();
 
-	const { data: dealers } = useQuery({
-		queryKey: ['dealer'],
-		queryFn: () => request.get('/dealer'),
-	});
-
-	const { data: products } = useQuery({
-		queryKey: ['products'],
-		queryFn: () => request.get('/lookups/products'),
-	});
-
-	const { data: devices } = useQuery({
-		queryKey: ['devices'],
-		queryFn: () => request.get('/lookups/devices'),
-	});
-
-	const dealerOptions = useMemo(() => {
-		if (!dealers?.data?.data) return [];
-		return dealers.data.data.map((dealer: Dealer) => ({
-			value: dealer.id?.toString() || '',
-			label: dealer.dealerName || 'Unknown Dealer',
-		}));
-	}, [dealers?.data?.data]);
-
-	const productOptions = useMemo(() => {
-		if (!products?.data?.data) return [];
-		return products.data.data.map((product: Product) => ({
-			value: product.id?.toString() || '',
-			label: product.productName.toUpperCase() || 'Unknown Product',
-		}));
-	}, [products?.data?.data]);
-
-	const deviceOptions = useMemo(() => {
-		if (!devices?.data?.data) return [];
-		return devices.data.data.map((device: Device) => ({
-			value: device.id?.toString() || '',
-			label: device.deviceName.toUpperCase() || 'Unknown Device',
-		}));
-	}, [devices?.data?.data]);
+	const [showSuccess, setShowSuccess] = useState(false);
+	const user = useSelector((state: RootState) => state.auth.user);
 
 	const form = useForm<StockThresholdRequest>({
 		initialValues: {
-			dealerId: '',
-			category: 'wakanet',
-			productId: '',
-			deviceId: '',
+			dealerId: stock?.dealerId || 0,
+			productId: stock?.productId || 0,
+			deviceId: stock?.deviceId || 0,
 			threshold: 100,
 			emailNotifications: true,
 			smsNotifications: false,
+			createdBy: user?.email || '',
 			notificationEmails: [],
 			notificationMsisdns: [],
 		},
 		validate: {
-			dealerId: (value) => (!value ? 'Dealer is required' : null),
-			category: (value) => (!value ? 'Category is required' : null),
-			productId: (value) => (!value ? 'Product is required' : null),
-			deviceId: (value) => (!value ? 'Device is required' : null),
 			threshold: (value) => {
 				if (!value) return 'Threshold is required';
 				if (value < 1) return 'Threshold must be greater than 0';
 				return null;
 			},
+			notificationEmails: (value, values) => {
+				if (values.emailNotifications && (!value || value.length === 0)) {
+					return 'At least one email is required when email notifications are enabled';
+				}
+				return null;
+			},
+			notificationMsisdns: (value, values) => {
+				if (values.smsNotifications && (!value || value.length === 0)) {
+					return 'At least one phone number is required when SMS notifications are enabled';
+				}
+				return null;
+			},
 		},
 	});
+
+	useEffect(() => {
+		if (stock) {
+			form.setValues({
+				dealerId: stock.dealerId,
+				productId: stock.productId,
+				deviceId: stock.deviceId,
+				threshold: 100,
+				emailNotifications: true,
+				smsNotifications: false,
+				createdBy: user?.email || '',
+				notificationEmails: [],
+				notificationMsisdns: [],
+			});
+		}
+	}, [stock, user?.email]);
 
 	const mutation = useMutation({
 		mutationFn: (values: StockThresholdRequest) =>
 			request.post('/stock-thresholds', {
 				...values,
-				notificationEmails: values.notificationEmails?.map(formatPhoneNumber),
-				notificationMsisdns: values.notificationMsisdns?.map(formatPhoneNumber),
+				notificationEmails: values.notificationEmails?.map((email) => email.trim()),
+				notificationMsisdns: values.notificationMsisdns?.map((phone) =>
+					formatPhoneNumber(phone)
+				),
 			}),
 		onSuccess: () => {
-			onClose();
-			form.reset();
+			setShowSuccess(true);
+			queryClient.invalidateQueries({ queryKey: ['stock-thresholds'] });
+			setTimeout(() => {
+				onClose();
+				form.reset();
+				setShowSuccess(false);
+			}, 2000);
 		},
 	});
 
 	const handleSubmit = form.onSubmit((values) => mutation.mutate(values));
 
 	const hasErrors = Object.keys(form.errors).length > 0;
+
+	const addNotificationEmail = () => {
+		form.setFieldValue('notificationEmails', [...form.values.notificationEmails, '']);
+	};
+
+	const removeNotificationEmail = (index: number) => {
+		form.setFieldValue(
+			'notificationEmails',
+			form.values.notificationEmails.filter((_, i) => i !== index)
+		);
+	};
+
+	const addNotificationPhone = () => {
+		form.setFieldValue('notificationMsisdns', [
+			...form.values.notificationMsisdns.map((phone: string) => formatPhoneNumber(phone)),
+			'',
+		]);
+	};
+
+	const removeNotificationPhone = (index: number) => {
+		form.setFieldValue(
+			'notificationMsisdns',
+			form.values.notificationMsisdns.filter((_, i) => i !== index)
+		);
+	};
 
 	return (
 		<Modal
@@ -216,9 +304,9 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 						size={40}
 						radius="md"
 						variant="light"
-						color="purple"
+						color="yellow"
 					>
-						<IconSettings size={20} />
+						<IconGauge size={20} />
 					</ThemeIcon>
 					<div>
 						<Title
@@ -231,31 +319,135 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 							color="dimmed"
 							size="sm"
 						>
-							Configure minimum stock levels for inventory management
+							Configure minimum stock levels and notification preferences
 						</Text>
 					</div>
 				</div>
 			</div>
 
 			<div className={classes.formSection}>
+				{/* Stock Information Card */}
+				<Paper
+					className={classes.stockInfoCard}
+					shadow="xs"
+				>
+					<div className={classes.stockInfoHeader}>
+						<ThemeIcon
+							size="md"
+							radius="md"
+							variant="light"
+							color="yellow"
+						>
+							<IconInfoCircle size={16} />
+						</ThemeIcon>
+						<Text
+							weight={600}
+							size="sm"
+						>
+							Stock Information
+						</Text>
+					</div>
+					<Grid>
+						<Grid.Col span={6}>
+							<Text
+								size="xs"
+								color="dimmed"
+								mb={4}
+							>
+								Dealer
+							</Text>
+							<Text
+								className={classes.stockInfoValue}
+								size="sm"
+							>
+								{stock?.dealerName?.toUpperCase() || 'N/A'}
+							</Text>
+						</Grid.Col>
+						<Grid.Col span={6}>
+							<Text
+								size="xs"
+								color="dimmed"
+								mb={4}
+							>
+								Product
+							</Text>
+							<Text
+								className={classes.stockInfoValue}
+								size="sm"
+							>
+								{stock?.productName?.toUpperCase() || 'N/A'}
+							</Text>
+						</Grid.Col>
+						<Grid.Col span={6}>
+							<Text
+								size="xs"
+								color="dimmed"
+								mb={4}
+							>
+								Device
+							</Text>
+							<Text
+								className={classes.stockInfoValue}
+								size="sm"
+							>
+								{stock?.deviceName?.toUpperCase() || 'N/A'}
+							</Text>
+						</Grid.Col>
+						<Grid.Col span={6}>
+							<Text
+								size="xs"
+								color="dimmed"
+								mb={4}
+							>
+								IMEI
+							</Text>
+							<Text
+								className={classes.stockInfoValue}
+								size="sm"
+							>
+								{stock?.imei || 'N/A'}
+							</Text>
+						</Grid.Col>
+					</Grid>
+				</Paper>
+
+				{/* Information Card */}
 				<Paper
 					className={classes.infoCard}
 					shadow="xs"
 				>
-					<Text
-						size="sm"
-						weight={500}
-						color="dimmed"
+					<Group
+						spacing="xs"
 						mb="xs"
 					>
-						Threshold Information
-					</Text>
+						<IconInfoCircle
+							size={16}
+							color="yellow"
+						/>
+						<Text
+							size="sm"
+							weight={500}
+							color="dimmed"
+						>
+							Threshold Configuration
+						</Text>
+					</Group>
 					<Text size="sm">
 						Set minimum stock levels to receive alerts when inventory falls below the
-						threshold. You can configure email and SMS notifications for low stock
-						alerts.
+						threshold. Configure email and SMS notifications for low stock alerts.
 					</Text>
 				</Paper>
+
+				{showSuccess && (
+					<Alert
+						icon={<IconCheck size={16} />}
+						title="Threshold Set Successfully!"
+						color="green"
+						className={classes.successMessage}
+					>
+						Stock threshold has been configured and notifications are now active.
+					</Alert>
+				)}
 
 				{hasErrors && (
 					<Alert
@@ -270,210 +462,242 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 
 				<form onSubmit={handleSubmit}>
 					<Stack spacing="lg">
+						{/* Threshold Configuration */}
 						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Dealer Assignment
-							</Text>
-							<div className={classes.formRow}>
-								<div className={classes.inputWrapper}>
-									<Select
-										label="Dealer"
-										placeholder="Select dealer"
-										required
-										icon={
-											<IconBuilding
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										data={dealerOptions}
-										searchable
-										nothingFound="No dealers found"
-										{...form.getInputProps('dealerId')}
-										radius="md"
+							<NumberInput
+								label="Stock Threshold"
+								placeholder="Enter minimum stock level"
+								required
+								min={1}
+								icon={
+									<IconGauge
+										size={16}
+										className={classes.inputIcon}
 									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<Select
-										label="Category"
-										placeholder="Select category"
-										required
-										icon={
-											<IconCategory
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										data={[
-											{ value: 'wakanet', label: 'WakaNet' },
-											{ value: 'enterprise', label: 'Enterprise' },
-											{ value: 'both', label: 'Both' },
-										]}
-										{...form.getInputProps('category')}
-										radius="md"
-									/>
-								</div>
-							</div>
+								}
+								className={`${classes.thresholdInput} ${classes.formField}`}
+								{...form.getInputProps('threshold')}
+								radius="md"
+								description="Minimum quantity before low stock alert"
+								styles={{
+									label: { fontWeight: 600, marginBottom: 8 },
+									description: { fontSize: '0.75rem', marginTop: 4 },
+								}}
+							/>
 						</div>
 
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Product Details
-							</Text>
-							<div className={classes.formRow}>
-								<div className={classes.inputWrapper}>
-									<Select
-										label="Product"
-										placeholder="Select product"
-										required
-										icon={
-											<IconBox
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										data={productOptions}
-										searchable
-										nothingFound="No products found"
-										disabled={!form.values.category}
-										{...form.getInputProps('productId')}
-										radius="md"
-									/>
-								</div>
-								<div className={classes.inputWrapper}>
-									<Select
-										label="Device"
-										placeholder="Select device"
-										required
-										icon={
-											<IconDeviceMobile
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										data={deviceOptions}
-										searchable
-										nothingFound="No devices found"
-										disabled={!form.values.category}
-										{...form.getInputProps('deviceId')}
-										radius="md"
-									/>
-								</div>
-							</div>
-						</div>
+						<Divider
+							label="Notification Settings"
+							labelPosition="center"
+						/>
 
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Threshold Configuration
-							</Text>
-							<div className={classes.inputWrapper}>
-								<NumberInput
-									label="Stock Threshold"
-									placeholder="Enter minimum stock level"
-									required
-									min={1}
-									icon={
-										<IconGauge
-											size={16}
-											className={classes.inputIcon}
-										/>
-									}
-									className={classes.thresholdInput}
-									{...form.getInputProps('threshold')}
-									radius="md"
-									description="Minimum quantity before low stock alert"
-								/>
-							</div>
-						</div>
-
+						{/* Email Notifications */}
 						<div className={classes.notificationSection}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
+							<Group
+								position="apart"
+								mb="md"
 							>
-								Notification Settings
-							</Text>
-							<Stack spacing="md">
-								<Group position="apart">
-									<Text size="sm">Email Notifications</Text>
-									<Switch
-										{...form.getInputProps('emailNotifications', {
-											type: 'checkbox',
-										})}
+								<Group spacing="xs">
+									<IconMail
+										size={18}
+										color="yellow"
 									/>
+									<Text
+										size="sm"
+										weight={500}
+									>
+										Email Notifications
+									</Text>
 								</Group>
+								<Switch
+									{...form.getInputProps('emailNotifications', {
+										type: 'checkbox',
+									})}
+									className={`${classes.notificationToggle} ${classes.emailToggle}`}
+									size="md"
+								/>
+							</Group>
 
-								{form.values.emailNotifications && (
-									<MultiSelect
-										label="Notification Emails"
-										placeholder="Add email addresses for notifications"
-										icon={<IconMail size={16} />}
-										data={form.values.notificationEmails || []}
-										searchable
-										creatable
-										getCreateLabel={(query) => `+ Add ${query}`}
-										onCreate={(query) => {
-											const item = { value: query, label: query };
-											form.setFieldValue('notificationEmails', [
-												...(form.values.notificationEmails || []),
-												query,
-											]);
-											return item;
-										}}
-										{...form.getInputProps('notificationEmails')}
-										radius="md"
-									/>
-								)}
+							{form.values.emailNotifications && (
+								<Stack spacing="sm">
+									<Group position="apart">
+										<Text
+											size="xs"
+											color="dimmed"
+										>
+											Notification Emails
+										</Text>
+										<Tooltip label="Add email address">
+											<ActionIcon
+												size="sm"
+												variant="light"
+												color="yellow"
+												onClick={addNotificationEmail}
+											>
+												<IconPlus size={14} />
+											</ActionIcon>
+										</Tooltip>
+									</Group>
 
-								<Group position="apart">
-									<Text size="sm">SMS Notifications</Text>
-									<Switch
-										{...form.getInputProps('smsNotifications', {
-											type: 'checkbox',
-										})}
-									/>
-								</Group>
-
-								{form.values.smsNotifications && (
-									<MultiSelect
-										label="Notification Phone Numbers"
-										placeholder="Add phone numbers for SMS notifications"
-										icon={<IconPhone size={16} />}
-										data={form.values.notificationMsisdns || []}
-										searchable
-										creatable
-										getCreateLabel={(query) => `+ Add ${query}`}
-										onCreate={(query) => {
-											const item = { value: query, label: query };
-											form.setFieldValue('notificationMsisdns', [
-												...(form.values.notificationMsisdns || []),
-												query,
-											]);
-											return item;
-										}}
-										{...form.getInputProps('notificationMsisdns')}
-										radius="md"
-									/>
-								)}
-							</Stack>
+									{form.values.notificationEmails.map((email, index) => (
+										<Group
+											key={index}
+											spacing="xs"
+										>
+											<TextInput
+												placeholder="Enter email address"
+												value={email}
+												onChange={(e) => {
+													const newEmails = [
+														...form.values.notificationEmails,
+													];
+													newEmails[index] = e.currentTarget.value;
+													form.setFieldValue(
+														'notificationEmails',
+														newEmails
+													);
+												}}
+												style={{ flex: 1 }}
+												radius="sm"
+												error={form.errors.notificationEmails}
+											/>
+											<Tooltip label="Remove email">
+												<ActionIcon
+													size="sm"
+													variant="light"
+													color="red"
+													onClick={() => removeNotificationEmail(index)}
+												>
+													<IconMinus size={14} />
+												</ActionIcon>
+											</Tooltip>
+										</Group>
+									))}
+									{form.errors.notificationEmails && (
+										<Text
+											size="xs"
+											color="red"
+										>
+											{form.errors.notificationEmails}
+										</Text>
+									)}
+								</Stack>
+							)}
 						</div>
+
+						{/* SMS Notifications */}
+						<div className={classes.notificationSection}>
+							<Group
+								position="apart"
+								mb="md"
+							>
+								<Group spacing="xs">
+									<IconPhone
+										size={18}
+										color="green"
+									/>
+									<Text
+										size="sm"
+										weight={500}
+									>
+										SMS Notifications
+									</Text>
+								</Group>
+								<Switch
+									{...form.getInputProps('smsNotifications', {
+										type: 'checkbox',
+									})}
+									className={`${classes.notificationToggle} ${classes.smsToggle}`}
+									size="md"
+								/>
+							</Group>
+
+							{form.values.smsNotifications && (
+								<Stack spacing="sm">
+									<Group position="apart">
+										<Text
+											size="xs"
+											color="dimmed"
+										>
+											Notification Phone Numbers
+										</Text>
+										<Tooltip label="Add phone number">
+											<ActionIcon
+												size="sm"
+												variant="light"
+												color="green"
+												onClick={addNotificationPhone}
+											>
+												<IconPlus size={14} />
+											</ActionIcon>
+										</Tooltip>
+									</Group>
+
+									{form.values.notificationMsisdns.map((phone, index) => (
+										<Group
+											key={index}
+											spacing="xs"
+										>
+											<TextInput
+												placeholder="Enter phone number"
+												value={phone}
+												onChange={(e) => {
+													const newPhones = [
+														...form.values.notificationMsisdns,
+													];
+													newPhones[index] = e.currentTarget.value;
+													form.setFieldValue(
+														'notificationMsisdns',
+														newPhones
+													);
+												}}
+												style={{ flex: 1 }}
+												radius="sm"
+												error={form.errors.notificationMsisdns}
+											/>
+											<Tooltip label="Remove phone number">
+												<ActionIcon
+													size="sm"
+													variant="light"
+													color="red"
+													onClick={() => removeNotificationPhone(index)}
+												>
+													<IconMinus size={14} />
+												</ActionIcon>
+											</Tooltip>
+										</Group>
+									))}
+									{form.errors.notificationMsisdns && (
+										<Text
+											size="xs"
+											color="red"
+										>
+											{form.errors.notificationMsisdns}
+										</Text>
+									)}
+								</Stack>
+							)}
+						</div>
+
+						{/* Help Text */}
+						<Paper
+							p="xs"
+							bg="yellow.0"
+							radius="sm"
+						>
+							<Text
+								size="xs"
+								color="yellow.7"
+							>
+								<IconInfoCircle
+									size={12}
+									style={{ marginRight: 6, verticalAlign: 'middle' }}
+								/>
+								You'll receive notifications when stock levels fall below the
+								threshold. Make sure to add at least one contact method for each
+								notification type you enable.
+							</Text>
+						</Paper>
 					</Stack>
 				</form>
 			</div>
@@ -487,6 +711,7 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 						variant="subtle"
 						onClick={onClose}
 						radius="md"
+						leftIcon={<IconX size={16} />}
 					>
 						Cancel
 					</Button>
@@ -497,8 +722,9 @@ export function SetStockThresholdModal({ opened, onClose }: SetStockThresholdMod
 						className={classes.submitButton}
 						radius="md"
 						onClick={() => handleSubmit()}
+						disabled={hasErrors}
 					>
-						Set Threshold
+						{mutation.isLoading ? 'Setting Threshold...' : 'Set Threshold'}
 					</Button>
 				</Group>
 			</div>

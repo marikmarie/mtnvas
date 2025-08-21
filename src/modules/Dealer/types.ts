@@ -140,27 +140,50 @@ export interface StockUploadRequest {
 }
 
 export interface StockThresholdRequest {
-	dealerid: number;
-	category: 'wakanet' | 'enterprise' | 'both';
-	productid: number;
-	deviceid: number;
+	dealerId: number;
+	productId: number;
+	deviceId: number;
 	threshold: number;
 	emailNotifications: boolean;
 	smsNotifications: boolean;
-	notificationEmails?: string[];
-	notificationMsisdns?: string[];
+	createdBy: string;
+	notificationEmails: string[];
+	notificationMsisdns: string[];
 }
 
 export interface StockThresholdUpdateRequest {
-	threshold?: number;
-	emailNotifications?: boolean;
-	smsNotifications?: boolean;
-	notificationEmails?: string[];
-	notificationMsisdns?: string[];
+	threshold: number;
+	emailNotifications: boolean;
+	smsNotifications: boolean;
+	notificationEmails: string[];
+	notificationMsisdns: string[];
+}
+
+export interface StockThresholdResponse {
+	id: number;
+	dealerId: number;
+	productId: number;
+	deviceId: number;
+	dealerName: string;
+	productName: string;
+	deviceName: string;
+	threshold: number;
+	currentStock: number;
+	setBy: string | null;
+	belowThreshold: boolean;
+	emailNotifications: boolean;
+	smsNotifications: boolean;
+	lastNotifiedAt: string | null;
+}
+
+export interface StockThresholdListParams {
+	dealerId?: number;
+	category?: string;
+	belowThreshold?: boolean;
 }
 
 export interface StockThresholdAlert {
-	dealerid: number;
+	dealerId: number;
 	dealerName: string;
 	productName: string;
 	deviceName: string;

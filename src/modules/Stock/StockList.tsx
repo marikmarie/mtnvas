@@ -27,6 +27,7 @@ import {
 	IconDotsVertical,
 	IconDownload,
 	IconFilter,
+	IconGauge,
 	IconPlus,
 	IconSearch,
 	IconSettings,
@@ -41,6 +42,7 @@ import { Stock } from '../Dealer/types';
 import { AddStockModal } from './AddStockModal';
 import { SetStockThresholdModal } from './SetStockThresholdModal';
 import { StockThresholdAlertsModal } from './StockThresholdAlertsModal';
+import { StockThresholdsList } from './StockThresholdsList';
 import { StockTransferModal } from './StockTransferModal';
 
 const useStyles = createStyles((theme) => ({
@@ -180,6 +182,7 @@ export function StockList() {
 	const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage] = useState(12);
+	const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
 
 	const [addModalOpened, { open: openAddModal, close: closeAddModal }] = useDisclosure(false);
 	const [thresholdModalOpened, { open: openThresholdModal, close: closeThresholdModal }] =
@@ -187,6 +190,8 @@ export function StockList() {
 	const [transferModalOpened, { open: openTransferModal, close: closeTransferModal }] =
 		useDisclosure(false);
 	const [alertsModalOpened, { open: openAlertsModal, close: closeAlertsModal }] =
+		useDisclosure(false);
+	const [thresholdsListOpened, { open: openThresholdsList, close: closeThresholdsList }] =
 		useDisclosure(false);
 
 	const { data: stockSummary } = useQuery({
@@ -270,7 +275,7 @@ export function StockList() {
 	};
 
 	const handleOpenSetThresholdModal = (stock: Stock) => {
-		console.log(stock);
+		setSelectedStock(stock);
 		openThresholdModal();
 	};
 
@@ -302,6 +307,16 @@ export function StockList() {
 						</Text>
 					</div>
 					<Group spacing="md">
+						<Button
+							leftIcon={<IconGauge size={16} />}
+							variant="outline"
+							onClick={openThresholdsList}
+							size="md"
+							radius="md"
+							color="purple"
+						>
+							View Thresholds
+						</Button>
 						<Button
 							leftIcon={<IconAlertTriangle size={16} />}
 							variant="outline"
@@ -813,6 +828,7 @@ export function StockList() {
 			<SetStockThresholdModal
 				opened={thresholdModalOpened}
 				onClose={closeThresholdModal}
+				stock={selectedStock as Stock}
 			/>
 
 			<StockTransferModal
@@ -823,6 +839,11 @@ export function StockList() {
 			<StockThresholdAlertsModal
 				opened={alertsModalOpened}
 				onClose={closeAlertsModal}
+			/>
+
+			<StockThresholdsList
+				opened={thresholdsListOpened}
+				onClose={closeThresholdsList}
 			/>
 		</div>
 	);
