@@ -160,7 +160,6 @@ const useStyles = createStyles((theme) => ({
 		fontFamily: 'monospace',
 		fontSize: '0.875rem',
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
-		padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
 		borderRadius: theme.radius.sm,
 	},
 }));
@@ -393,24 +392,15 @@ export function StockList() {
 			defaultFlex: 1,
 			minWidth: 100,
 			render: ({ data }: { data: Stock }) => (
-				<Menu>
-					<Menu.Target>
-						<ActionIcon
-							variant="subtle"
-							size="sm"
-						>
-							<IconDotsVertical size={16} />
-						</ActionIcon>
-					</Menu.Target>
-					<Menu.Dropdown>
-						<Menu.Item
-							icon={<IconSettings size={16} />}
-							onClick={() => handleOpenSetThresholdModal(data)}
-						>
-							Set Threshold
-						</Menu.Item>
-					</Menu.Dropdown>
-				</Menu>
+				<Button
+					variant="light"
+					size="xs"
+					color="gray"
+					onClick={() => handleOpenSetThresholdModal(data)}
+					leftIcon={<IconSettings size={16} />}
+				>
+					Threshold
+				</Button>
 			),
 		},
 	];

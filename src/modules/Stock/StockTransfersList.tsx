@@ -2,9 +2,9 @@ import {
 	ActionIcon,
 	Badge,
 	createStyles,
+	Flex,
 	Grid,
 	Group,
-	Menu,
 	Pagination,
 	Paper,
 	Select,
@@ -12,13 +12,13 @@ import {
 	Text,
 	TextInput,
 	Title,
+	Tooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
 	IconArrowRight,
 	IconBuilding,
 	IconCheck,
-	IconDotsVertical,
 	IconFilter,
 	IconSearch,
 	IconTransfer,
@@ -261,8 +261,7 @@ export function StockTransfersList() {
 							{
 								(
 									dealers?.data.data.find(
-										(d: Dealer) =>
-											d.id === data.fromDealerId
+										(d: Dealer) => d.id === data.fromDealerId
 									) as unknown as Dealer
 								).dealerName
 							}
@@ -284,8 +283,7 @@ export function StockTransfersList() {
 							{
 								(
 									dealers?.data.data.find(
-										(d: Dealer) =>
-											d.id === data.toDealerId
+										(d: Dealer) => d.id === data.toDealerId
 									) as unknown as Dealer
 								).dealerName
 							}
@@ -354,9 +352,7 @@ export function StockTransfersList() {
 			defaultFlex: 1,
 			minWidth: 120,
 			render: ({ data }: { data: StockTransfer }) => (
-				<Text size="sm">
-					{new Date(data.createdAt).toLocaleDateString()}
-				</Text>
+				<Text size="sm">{new Date(data.createdAt).toLocaleDateString()}</Text>
 			),
 		},
 		{
@@ -365,40 +361,43 @@ export function StockTransfersList() {
 			defaultFlex: 1,
 			minWidth: 100,
 			render: ({ data }: { data: StockTransfer }) => (
-				<Menu>
-					<Menu.Target>
-						<ActionIcon
-							variant="subtle"
-							size="sm"
+				<Flex
+					gap={10}
+					justify="center"
+				>
+					{data.status.toLowerCase() !== 'approved' && (
+						<Tooltip
+							withArrow
+							label="Approve"
+							position="top"
 						>
-							<IconDotsVertical size={16} />
-						</ActionIcon>
-					</Menu.Target>
-					<Menu.Dropdown>
-						{data.status.toLowerCase() !== 'approved' && (
-							<Menu.Item
-								icon={<IconCheck size={16} />}
+							<ActionIcon
+								variant="subtle"
+								size="xs"
 								color="green"
-								onClick={() =>
-									handleApproveTransfer(data)
-								}
+								onClick={() => handleApproveTransfer(data)}
 							>
-								Approve
-							</Menu.Item>
-						)}
-						{data.status.toLowerCase() !== 'rejected' && (
-							<Menu.Item
-								icon={<IconX size={16} />}
+								<IconCheck size={16} />
+							</ActionIcon>
+						</Tooltip>
+					)}
+					{data.status.toLowerCase() !== 'rejected' && (
+						<Tooltip
+							withArrow
+							label="Reject"
+							position="top"
+						>
+							<ActionIcon
+								variant="subtle"
+								size="xs"
 								color="red"
-								onClick={() =>
-									handleRejectTransfer(data)
-								}
+								onClick={() => handleRejectTransfer(data)}
 							>
-								Reject
-							</Menu.Item>
-						)}
-					</Menu.Dropdown>
-				</Menu>
+								<IconX size={16} />
+							</ActionIcon>
+						</Tooltip>
+					)}
+				</Flex>
 			),
 		},
 	];
@@ -576,9 +575,7 @@ export function StockTransfersList() {
 					</Text>
 				</div>
 			) : (
-				<div className={classes.tableContainer}>
-					{transfersTable}
-				</div>
+				<div className={classes.tableContainer}>{transfersTable}</div>
 			)}
 
 			{totalPages > 1 && (

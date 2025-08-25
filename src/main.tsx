@@ -1,10 +1,10 @@
 import '@inovua/reactdatagrid-community/index.css';
 import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
-import { Notifications } from '@mantine/notifications';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
+import { Toaster } from 'react-hot-toast';
 import { useIdleTimer } from 'react-idle-timer';
 import { Provider, useDispatch } from 'react-redux';
 import { BrowserRouter, useNavigate } from 'react-router-dom';
@@ -25,10 +25,29 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 					persistor={persistor}
 				>
 					<BrowserRouter>
-						<Notifications
-							autoClose={10000}
+						<Toaster
 							position="bottom-right"
-							zIndex={2077}
+							toastOptions={{
+								duration: 10000,
+								style: {
+									background: '#363636',
+									color: '#fff',
+								},
+								success: {
+									duration: 5000,
+									iconTheme: {
+										primary: '#4ade80',
+										secondary: '#fff',
+									},
+								},
+								error: {
+									duration: 8000,
+									iconTheme: {
+										primary: '#ef4444',
+										secondary: '#fff',
+									},
+								},
+							}}
 						/>
 						<App />
 					</BrowserRouter>

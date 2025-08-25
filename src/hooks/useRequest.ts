@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
+import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { signout } from '../app/slices/auth';
@@ -35,7 +36,6 @@ export default function useRequest(
 		successColor = 'green',
 		errorColor = 'red',
 		autoClose = 5000,
-		title = 'Notification',
 	} = notificationOptions;
 
 	function logout() {
@@ -48,16 +48,22 @@ export default function useRequest(
 		headers: requireAuth ? { Authorization: `Bearer ${token}` } : {},
 	});
 
-	const showNotification = (message: string, color: string, customTitle?: string) => {
+	const showNotification = (message: string, color: string) => {
 		if (!message || message.toLowerCase().trim() === 'success') return;
 
-		// notifications.show({
-		// 	title: customTitle || title,
-		// 	message:
-		// 		typeof message === 'string' ? message : JSON.stringify(message).replace(/"/g, ''),
-		// 	color,
-		// 	autoClose,
-		// });
+		const toastOptions = {
+			duration: autoClose,
+		};
+
+		if (color === 'green' || color === 'success') {
+			toast.success(message, toastOptions);
+		} else if (color === 'red' || color === 'error') {
+			toast.error(message, toastOptions);
+		} else if (color === 'yellow' || color === 'warning') {
+			toast(message, { ...toastOptions, icon: '⚠️' });
+		} else {
+			toast(message, toastOptions);
+		}
 	};
 
 	instance.interceptors.response.use(
@@ -65,14 +71,12 @@ export default function useRequest(
 			const responseMessage = String(
 				response?.data?.status ||
 					response?.data?.message ||
-					response?.data ||
-					// @ts-ignore
-					response.message
+					JSON.stringify(response?.data).replace(/"/g, '')
 			);
 			if (response.data.status === 401) {
 				logout();
 				if (response.data.message) {
-					showNotification(responseMessage, 'yellow', 'Authentication Error');
+					showNotification(responseMessage, 'yellow');
 				}
 			}
 
@@ -93,7 +97,7 @@ export default function useRequest(
 			);
 
 			if (error.response) {
-				showNotification(errorMessage, errorColor, 'Error');
+				showNotification(errorMessage, errorColor);
 			}
 
 			return Promise.reject(error);

@@ -2,10 +2,9 @@ import {
 	ActionIcon,
 	Badge,
 	Button,
-	Card,
 	createStyles,
+	Flex,
 	Group,
-	Menu,
 	NumberInput,
 	Stack,
 	Switch,
@@ -32,6 +31,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Modal } from '../../components/Modal';
+import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { StockThresholdResponse, StockThresholdUpdateRequest } from '../Dealer/types';
 
@@ -42,14 +42,6 @@ const useStyles = createStyles((theme) => ({
 
 	header: {
 		marginBottom: theme.spacing.lg,
-	},
-
-	card: {
-		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
-		borderRadius: theme.radius.md,
-		padding: theme.spacing.md,
-		marginBottom: theme.spacing.md,
 	},
 
 	thresholdValue: {
@@ -85,6 +77,17 @@ const useStyles = createStyles((theme) => ({
 		textAlign: 'center',
 		padding: theme.spacing.xl,
 		color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
+	},
+
+	tableContainer: {
+		overflowX: 'auto',
+		width: '100%',
+	},
+
+	imeiText: {
+		fontFamily: 'monospace',
+		fontSize: '0.875rem',
+		fontWeight: 600,
 	},
 }));
 
@@ -186,7 +189,193 @@ export function StockThresholdsList({ opened, onClose }: StockThresholdsListProp
 
 	const thresholds = thresholdsData?.data?.data || [];
 
-	console.log(thresholds);
+	const columns = [
+		{
+			name: 'productDevice',
+			header: 'Product - Device',
+			defaultFlex: 1,
+			minWidth: 200,
+			render: ({ data }: { data: StockThresholdResponse }) => (
+				<Group spacing="xs">
+					<ThemeIcon
+						size="md"
+						radius="md"
+						variant="light"
+						color="blue"
+					>
+						<IconGauge size={16} />
+					</ThemeIcon>
+					<Text
+						weight={600}
+						size="sm"
+					>
+						{data.productName?.toUpperCase() || 'Product'} -{' '}
+						{data.deviceName?.toUpperCase() || 'Device'}
+					</Text>
+				</Group>
+			),
+		},
+		{
+			name: 'dealer',
+			header: 'Dealer',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: StockThresholdResponse }) => (
+				<Group spacing="xs">
+					<IconBuilding
+						size={14}
+						color="gray"
+					/>
+					<Text size="sm">{data.dealerName?.toUpperCase() || 'Unknown Dealer'}</Text>
+				</Group>
+			),
+		},
+		{
+			name: 'threshold',
+			header: 'Threshold',
+			defaultFlex: 1,
+			minWidth: 100,
+			render: ({ data }: { data: StockThresholdResponse }) => (
+				<Text className={classes.thresholdValue}>{data.threshold}</Text>
+			),
+		},
+		{
+			name: 'currentStock',
+			header: 'Current Stock',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: StockThresholdResponse }) => (
+				<Text className={classes.thresholdValue}>{data.currentStock}</Text>
+			),
+		},
+		{
+			name: 'status',
+			header: 'Status',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: StockThresholdResponse }) => (
+				<Badge
+					color={data.emailNotifications || data.smsNotifications ? 'green' : 'gray'}
+					size="sm"
+					leftSection={
+						data.emailNotifications || data.smsNotifications ? (
+							<IconAlertTriangle size={12} />
+						) : (
+							<IconSettings size={12} />
+						)
+					}
+				>
+					{data.emailNotifications || data.smsNotifications ? 'Active' : 'Inactive'}
+				</Badge>
+			),
+		},
+		{
+			name: 'notifications',
+			header: 'Notifications',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: StockThresholdResponse }) => (
+				<Group spacing="xs">
+					{data.emailNotifications && (
+						<Tooltip
+							label="Email Notifications enabled"
+							position="top"
+							withArrow
+						>
+							<ThemeIcon
+								radius="xl"
+								variant="light"
+								color="blue"
+							>
+								<IconMail size={12} />
+							</ThemeIcon>
+						</Tooltip>
+					)}
+					{data.smsNotifications && (
+						<Tooltip
+							label="SMS Notifications enabled"
+							position="top"
+							withArrow
+						>
+							<ThemeIcon
+								radius="xl"
+								variant="light"
+								color="green"
+							>
+								<IconPhone size={12} />
+							</ThemeIcon>
+						</Tooltip>
+					)}
+				</Group>
+			),
+		},
+		{
+			name: 'createdBy',
+			header: 'Created By',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: StockThresholdResponse }) => (
+				<Text
+					size="sm"
+					color="dimmed"
+				>
+					{data.setBy || 'N/A'}
+				</Text>
+			),
+		},
+		{
+			name: 'lastNotified',
+			header: 'Last Notified',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: StockThresholdResponse }) => (
+				<Text
+					size="sm"
+					color="dimmed"
+				>
+					{data.lastNotifiedAt
+						? new Date(data.lastNotifiedAt).toLocaleDateString()
+						: 'Never'}
+				</Text>
+			),
+		},
+		{
+			name: 'actions',
+			header: 'Actions',
+			defaultFlex: 1,
+			minWidth: 100,
+			render: ({ data }: { data: StockThresholdResponse }) => (
+				<Flex
+					gap={10}
+					justify="center"
+				>
+					<ActionIcon
+						variant="subtle"
+						size="xs"
+						color="blue"
+						onClick={() => handleEdit(data)}
+					>
+						<IconEdit size={16} />
+					</ActionIcon>
+					<ActionIcon
+						variant="subtle"
+						size="xs"
+						color="red"
+						onClick={() => handleDelete(data.id)}
+					>
+						<IconTrash size={16} />
+					</ActionIcon>
+				</Flex>
+			),
+		},
+	];
+
+	const thresholdsTable = useDataGridTable<StockThresholdResponse>({
+		columns,
+		data: thresholds,
+		loading: isLoading,
+		mih: '50vh',
+	});
 
 	return (
 		<Modal
@@ -210,39 +399,7 @@ export function StockThresholdsList({ opened, onClose }: StockThresholdsListProp
 					</Text>
 				</div>
 
-				{isLoading ? (
-					<Stack spacing="md">
-						{Array.from({ length: 3 }).map((_, index) => (
-							<Card
-								key={index}
-								className={classes.card}
-							>
-								<Stack spacing="xs">
-									<Group position="apart">
-										<Text
-											size="sm"
-											weight={500}
-										>
-											Loading...
-										</Text>
-										<Badge
-											size="sm"
-											variant="outline"
-										>
-											Loading...
-										</Badge>
-									</Group>
-									<Text
-										size="xs"
-										color="dimmed"
-									>
-										Loading...
-									</Text>
-								</Stack>
-							</Card>
-						))}
-					</Stack>
-				) : thresholds.length === 0 ? (
+				{thresholds.length === 0 && !isLoading ? (
 					<div className={classes.emptyState}>
 						<IconSettings
 							size={48}
@@ -262,195 +419,7 @@ export function StockThresholdsList({ opened, onClose }: StockThresholdsListProp
 						</Text>
 					</div>
 				) : (
-					<Stack spacing="md">
-						{thresholds?.map((threshold: StockThresholdResponse) => (
-							<Card
-								key={threshold.id}
-								className={classes.card}
-							>
-								<Group
-									position="apart"
-									align="flex-start"
-								>
-									<Stack
-										spacing="xs"
-										style={{ flex: 1 }}
-									>
-										<Group position="apart">
-											<Group spacing="xs">
-												<ThemeIcon
-													size="md"
-													radius="md"
-													variant="light"
-													color="blue"
-												>
-													<IconGauge size={16} />
-												</ThemeIcon>
-												<Text
-													weight={600}
-													size="sm"
-												>
-													{threshold.productName.toUpperCase() ||
-														'Product'}{' '}
-													-{' '}
-													{threshold.deviceName.toUpperCase() || 'Device'}
-												</Text>
-											</Group>
-											<Badge
-												color={
-													threshold.emailNotifications ||
-													threshold.smsNotifications
-														? 'green'
-														: 'gray'
-												}
-												size="sm"
-												leftSection={
-													threshold.emailNotifications ||
-													threshold.smsNotifications ? (
-														<IconAlertTriangle size={12} />
-													) : (
-														<IconSettings size={12} />
-													)
-												}
-											>
-												{threshold.emailNotifications ||
-												threshold.smsNotifications
-													? 'Active'
-													: 'Inactive'}
-											</Badge>
-										</Group>
-
-										<Group spacing="lg">
-											<div>
-												<Text
-													size="xs"
-													color="dimmed"
-													mb={4}
-												>
-													Dealer
-												</Text>
-												<Group spacing="xs">
-													<IconBuilding
-														size={14}
-														color="gray"
-													/>
-													<Text size="sm">
-														{threshold.dealerName.toUpperCase() ||
-															'Unknown Dealer'}
-													</Text>
-												</Group>
-											</div>
-
-											<div>
-												<Text
-													size="xs"
-													color="dimmed"
-													mb={4}
-												>
-													Threshold
-												</Text>
-												<Text className={classes.thresholdValue}>
-													{threshold.threshold}
-												</Text>
-											</div>
-											<div>
-												<Text
-													size="xs"
-													color="dimmed"
-													mb={4}
-												>
-													Current Stock
-												</Text>
-												<Text className={classes.thresholdValue}>
-													{threshold.currentStock}
-												</Text>
-											</div>
-
-											<div>
-												<Text
-													size="xs"
-													color="dimmed"
-													mb={4}
-												>
-													Notifications
-												</Text>
-												<Group spacing="xs">
-													{threshold.emailNotifications && (
-														<Tooltip
-															label="Email Notifications enabled"
-															position="top"
-															withArrow
-														>
-															<ThemeIcon
-																radius="xl"
-																variant="light"
-																color="blue"
-															>
-																<IconMail size={12} />
-															</ThemeIcon>
-														</Tooltip>
-													)}
-													{threshold.smsNotifications && (
-														<Tooltip
-															label="SMS Notifications enabled"
-															position="top"
-															withArrow
-														>
-															<ThemeIcon
-																radius="xl"
-																variant="light"
-																color="green"
-															>
-																<IconPhone size={12} />
-															</ThemeIcon>
-														</Tooltip>
-													)}
-												</Group>
-											</div>
-										</Group>
-
-										<Text
-											size="xs"
-											color="dimmed"
-										>
-											Created by {threshold.setBy || 'N/A'} on{' '}
-											{threshold.lastNotifiedAt
-												? new Date(
-														threshold.lastNotifiedAt
-													).toLocaleDateString()
-												: 'Never'}
-										</Text>
-									</Stack>
-
-									<Menu>
-										<Menu.Target>
-											<ActionIcon
-												variant="subtle"
-												size="sm"
-											>
-												<IconSettings size={16} />
-											</ActionIcon>
-										</Menu.Target>
-										<Menu.Dropdown>
-											<Menu.Item
-												icon={<IconEdit size={16} />}
-												onClick={() => handleEdit(threshold)}
-											>
-												Edit Threshold
-											</Menu.Item>
-											<Menu.Item
-												icon={<IconTrash size={16} />}
-												color="red"
-												onClick={() => handleDelete(threshold.id)}
-											>
-												Delete Threshold
-											</Menu.Item>
-										</Menu.Dropdown>
-									</Menu>
-								</Group>
-							</Card>
-						))}
-					</Stack>
+					<div className={classes.tableContainer}>{thresholdsTable}</div>
 				)}
 			</div>
 
@@ -471,8 +440,8 @@ export function StockThresholdsList({ opened, onClose }: StockThresholdsListProp
 								Product Details
 							</Text>
 							<Text size="sm">
-								{editingThreshold?.productName.toUpperCase() || 'Unknown Product'} -{' '}
-								{editingThreshold?.deviceName.toUpperCase() || 'Unknown Device'}
+								{editingThreshold?.productName?.toUpperCase() || 'Unknown Product'}{' '}
+								- {editingThreshold?.deviceName?.toUpperCase() || 'Unknown Device'}
 							</Text>
 						</div>
 
@@ -486,7 +455,7 @@ export function StockThresholdsList({ opened, onClose }: StockThresholdsListProp
 								Dealer
 							</Text>
 							<Text size="sm">
-								{editingThreshold?.dealerName.toUpperCase() || 'Unknown Dealer'}
+								{editingThreshold?.dealerName?.toUpperCase() || 'Unknown Dealer'}
 							</Text>
 						</div>
 
