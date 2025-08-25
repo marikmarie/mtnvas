@@ -1,12 +1,10 @@
 import {
 	Badge,
 	Button,
-	Card,
 	createStyles,
 	Group,
 	Pagination,
 	Select,
-	Stack,
 	Text,
 	TextInput,
 	ThemeIcon,
@@ -19,7 +17,6 @@ import {
 	IconCheck,
 	IconClock,
 	IconDeviceMobile,
-	IconDotsVertical,
 	IconFilter,
 	IconSearch,
 	IconShield,
@@ -29,6 +26,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Modal } from '../../components/Modal';
+import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { Dealer, ImeiSwapRequestDetails } from '../Dealer/types';
 import { ImeiSwapApprovalModal } from './ImeiSwapApprovalModal';
@@ -102,6 +100,11 @@ const useStyles = createStyles((theme) => ({
 		textAlign: 'center',
 		padding: theme.spacing.xl,
 		color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
+	},
+
+	tableContainer: {
+		overflowX: 'auto',
+		width: '100%',
 	},
 }));
 
@@ -181,6 +184,143 @@ export function ImeiSwapRequestsModal({ opened, close }: { opened: boolean; clos
 		setSelectedRequest(null);
 	};
 
+	const columns = [
+		{
+			name: 'id',
+			header: 'Request #',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: ImeiSwapRequestDetails }) => (
+				<Group spacing="xs">
+					<ThemeIcon
+						size="md"
+						radius="md"
+						variant="light"
+						color={getStatusColor(data.status)}
+					>
+						<IconDeviceMobile size={16} />
+					</ThemeIcon>
+					<Text
+						size="sm"
+						weight={600}
+					>
+						#{data.id}
+					</Text>
+				</Group>
+			),
+		},
+		{
+			name: 'status',
+			header: 'Status',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: ImeiSwapRequestDetails }) => (
+				<Group spacing="xs">
+					<Badge
+						color={getStatusColor(data.status)}
+						variant="light"
+						size="sm"
+						className={classes.statusBadge}
+						leftSection={getStatusIcon(data.status)}
+					>
+						{data.status.toUpperCase()}
+					</Badge>
+					{data.status.toLowerCase() === 'pending' && (
+						<Button
+							size="xs"
+							color="blue"
+							leftIcon={<IconShield size={14} />}
+							onClick={() => handleApproveRequest(data)}
+						>
+							Review
+						</Button>
+					)}
+				</Group>
+			),
+		},
+		{
+			name: 'requestedBy',
+			header: 'Requested By',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: ImeiSwapRequestDetails }) => (
+				<div className={classes.infoRow}>
+					<IconUser
+						size={14}
+						color="gray"
+					/>
+					<Text
+						size="sm"
+						color="dimmed"
+					>
+						{data.requestedBy.toUpperCase() || 'Unknown Agent'}
+					</Text>
+				</div>
+			),
+		},
+		{
+			name: 'requestedAt',
+			header: 'Requested',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: ImeiSwapRequestDetails }) => (
+				<div className={classes.infoRow}>
+					<IconCalendar
+						size={14}
+						color="gray"
+					/>
+					<Text
+						size="sm"
+						color="dimmed"
+					>
+						{new Date(data.requestedAt).toLocaleDateString()}
+					</Text>
+				</div>
+			),
+		},
+		{
+			name: 'oldImei',
+			header: 'Current IMEI',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: ImeiSwapRequestDetails }) => (
+				<Text className={classes.imeiText}>{data.oldImei}</Text>
+			),
+		},
+		{
+			name: 'newImei',
+			header: 'New IMEI',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: ImeiSwapRequestDetails }) => (
+				<Text className={classes.imeiText}>{data.newImei}</Text>
+			),
+		},
+		{
+			name: 'reason',
+			header: 'Reason',
+			defaultFlex: 1,
+			minWidth: 200,
+			render: ({ data }: { data: ImeiSwapRequestDetails }) => (
+				<Text
+					size="sm"
+					color="dimmed"
+					lineClamp={2}
+					style={{ maxWidth: 200 }}
+				>
+					{data.reason}
+				</Text>
+			),
+		},
+	];
+
+	const requestsTable = useDataGridTable<ImeiSwapRequestDetails>({
+		columns,
+		data: requests,
+		loading: isLoading,
+		mih: '50vh',
+	});
+
 	return (
 		<>
 			<Modal
@@ -247,11 +387,7 @@ export function ImeiSwapRequestsModal({ opened, close }: { opened: boolean; clos
 						</div>
 					</div>
 
-					{isLoading ? (
-						<Stack spacing="md">
-							<Text>Loading swap requests...</Text>
-						</Stack>
-					) : requests.length === 0 ? (
+					{requests.length === 0 && !isLoading ? (
 						<div className={classes.emptyState}>
 							<IconDeviceMobile
 								size={48}
@@ -271,136 +407,7 @@ export function ImeiSwapRequestsModal({ opened, close }: { opened: boolean; clos
 							</Text>
 						</div>
 					) : (
-						<Stack spacing="md">
-							{requests.map((request) => (
-								<Card
-									key={request.id}
-									className={classes.card}
-									shadow="sm"
-								>
-									<Card.Section className={classes.cardHeader}>
-										<Group position="apart">
-											<Group spacing="xs">
-												<ThemeIcon
-													size="md"
-													radius="md"
-													variant="light"
-													color={getStatusColor(request.status)}
-												>
-													<IconDeviceMobile size={16} />
-												</ThemeIcon>
-												<Text
-													size="sm"
-													weight={600}
-												>
-													Request #{request.id}
-												</Text>
-											</Group>
-											<Group spacing="xs">
-												<Badge
-													color={getStatusColor(request.status)}
-													variant="light"
-													size="sm"
-													className={classes.statusBadge}
-													leftSection={getStatusIcon(request.status)}
-												>
-													{request.status.toUpperCase()}
-												</Badge>
-												{request.status.toLowerCase() === 'pending' && (
-													<Button
-														size="xs"
-														color="blue"
-														leftIcon={<IconShield size={14} />}
-														onClick={() =>
-															handleApproveRequest(request)
-														}
-													>
-														Review
-													</Button>
-												)}
-											</Group>
-										</Group>
-									</Card.Section>
-
-									<Card.Section className={classes.cardBody}>
-										<Stack spacing="xs">
-											<div className={classes.infoRow}>
-												<IconUser
-													size={14}
-													color="gray"
-												/>
-												<Text
-													size="sm"
-													color="dimmed"
-												>
-													Requested by:{' '}
-													{request.requestedBy.toUpperCase() ||
-														'Unknown Agent'}
-												</Text>
-											</div>
-											<div className={classes.infoRow}>
-												<IconCalendar
-													size={14}
-													color="gray"
-												/>
-												<Text
-													size="sm"
-													color="dimmed"
-												>
-													Requested:{' '}
-													{new Date(
-														request.requestedAt
-													).toLocaleDateString()}
-												</Text>
-											</div>
-										</Stack>
-									</Card.Section>
-
-									<Card.Section className={classes.cardFooter}>
-										<Group position="apart">
-											<Group spacing="md">
-												<div>
-													<Text
-														size="xs"
-														color="dimmed"
-														mb="xs"
-													>
-														Current IMEI
-													</Text>
-													<Text className={classes.imeiText}>
-														{request.oldImei}
-													</Text>
-												</div>
-												<IconDotsVertical
-													size={16}
-													color="gray"
-												/>
-												<div>
-													<Text
-														size="xs"
-														color="dimmed"
-														mb="xs"
-													>
-														New IMEI
-													</Text>
-													<Text className={classes.imeiText}>
-														{request.newImei}
-													</Text>
-												</div>
-											</Group>
-											<Text
-												size="sm"
-												color="dimmed"
-												lineClamp={2}
-												style={{ maxWidth: 200 }}
-											>
-												{request.reason}
-											</Text>
-										</Group>
-									</Card.Section>
-								</Card>
-							))}
-						</Stack>
+						<div className={classes.tableContainer}>{requestsTable}</div>
 					)}
 
 					{totalPages > 1 && (

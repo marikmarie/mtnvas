@@ -12,7 +12,6 @@ import {
 	Select,
 	Skeleton,
 	Stack,
-	Table,
 	Text,
 	TextInput,
 	ThemeIcon,
@@ -37,6 +36,7 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { Stock } from '../Dealer/types';
 import { AddStockModal } from './AddStockModal';
@@ -284,6 +284,143 @@ export function StockList() {
 	};
 
 	const totalPages = Math.ceil((stockData?.data?.meta?.total || 0) / itemsPerPage);
+
+	const columns = [
+		{
+			name: 'productName',
+			header: 'Product',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: Stock }) => (
+				<Text
+					size="sm"
+					weight={500}
+				>
+					{data.productName.toUpperCase()}
+				</Text>
+			),
+		},
+		{
+			name: 'deviceName',
+			header: 'Device',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: Stock }) => (
+				<Text size="sm">{data.deviceName.toUpperCase()}</Text>
+			),
+		},
+		{
+			name: 'dealerName',
+			header: 'Dealer',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: Stock }) => (
+				<Group spacing="xs">
+					<IconBuilding
+						size={16}
+						color="gray"
+					/>
+					<Text size="sm">{data.dealerName.toUpperCase()}</Text>
+				</Group>
+			),
+		},
+		{
+			name: 'imei',
+			header: 'IMEI',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: Stock }) => (
+				<Text
+					size="sm"
+					className={classes.imeiCode}
+				>
+					{data.imei || 'N/A'}
+				</Text>
+			),
+		},
+		{
+			name: 'serialNumber',
+			header: 'Serial Number',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: Stock }) => (
+				<Text
+					size="sm"
+					className={classes.imeiCode}
+				>
+					{data.serialNumber || 'N/A'}
+				</Text>
+			),
+		},
+		{
+			name: 'status',
+			header: 'Status',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: Stock }) => (
+				<Badge
+					color={getStatusColor(data.status)}
+					size="sm"
+					leftSection={getStatusIcon(data.status)}
+				>
+					{statusMap[data.status as keyof typeof statusMap]}
+				</Badge>
+			),
+		},
+		{
+			name: 'assignedAt',
+			header: 'Assigned Date',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: Stock }) => (
+				<Text size="sm">{new Date(data.assignedAt).toLocaleDateString()}</Text>
+			),
+		},
+		{
+			name: 'transferedOn',
+			header: 'Transferred Date',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: Stock }) => (
+				<Text size="sm">
+					{data.transferedOn ? new Date(data.transferedOn).toLocaleDateString() : 'N/A'}
+				</Text>
+			),
+		},
+		{
+			name: 'actions',
+			header: 'Actions',
+			defaultFlex: 1,
+			minWidth: 100,
+			render: ({ data }: { data: Stock }) => (
+				<Menu>
+					<Menu.Target>
+						<ActionIcon
+							variant="subtle"
+							size="sm"
+						>
+							<IconDotsVertical size={16} />
+						</ActionIcon>
+					</Menu.Target>
+					<Menu.Dropdown>
+						<Menu.Item
+							icon={<IconSettings size={16} />}
+							onClick={() => handleOpenSetThresholdModal(data)}
+						>
+							Set Threshold
+						</Menu.Item>
+					</Menu.Dropdown>
+				</Menu>
+			),
+		},
+	];
+
+	const stockTable = useDataGridTable<Stock>({
+		columns,
+		data: filteredStocks,
+		loading: isLoading,
+		mih: '50vh',
+	});
 
 	return (
 		<div className={classes.root}>
@@ -701,109 +838,7 @@ export function StockList() {
 					))}
 				</Grid>
 			) : (
-				<div className={classes.tableContainer}>
-					<Table>
-						<thead>
-							<tr>
-								<th>Product</th>
-								<th>Device</th>
-								<th>Dealer</th>
-								<th>IMEI</th>
-								<th>Serial Number</th>
-								<th>Status</th>
-								<th>Assigned Date</th>
-								<th>Transferred Date</th>
-								<th>Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{filteredStocks.map((stock: Stock) => (
-								<tr key={stock.imei}>
-									<td>
-										<Text
-											size="sm"
-											weight={500}
-										>
-											{stock.productName.toUpperCase()}
-										</Text>
-									</td>
-									<td>
-										<Text size="sm">{stock.deviceName.toUpperCase()}</Text>
-									</td>
-									<td>
-										<Group spacing="xs">
-											<IconBuilding
-												size={16}
-												color="gray"
-											/>
-											<Text size="sm">{stock.dealerName.toUpperCase()}</Text>
-										</Group>
-									</td>
-									<td>
-										<Text
-											size="sm"
-											className={classes.imeiCode}
-										>
-											{stock.imei || 'N/A'}
-										</Text>
-									</td>
-									<td>
-										<Text
-											size="sm"
-											className={classes.imeiCode}
-										>
-											{stock.serialNumber || 'N/A'}
-										</Text>
-									</td>
-
-									<td>
-										<Badge
-											color={getStatusColor(stock.status)}
-											size="sm"
-											leftSection={getStatusIcon(stock.status)}
-										>
-											{statusMap[stock.status as keyof typeof statusMap]}
-										</Badge>
-									</td>
-									<td>
-										<Text size="sm">
-											{new Date(stock.assignedAt).toLocaleDateString()}
-										</Text>
-									</td>
-									<td>
-										<Text size="sm">
-											{stock.transferedOn
-												? new Date(stock.transferedOn).toLocaleDateString()
-												: 'N/A'}
-										</Text>
-									</td>
-									<td>
-										<Menu>
-											<Menu.Target>
-												<ActionIcon
-													variant="subtle"
-													size="sm"
-												>
-													<IconDotsVertical size={16} />
-												</ActionIcon>
-											</Menu.Target>
-											<Menu.Dropdown>
-												<Menu.Item
-													icon={<IconSettings size={16} />}
-													onClick={() =>
-														handleOpenSetThresholdModal(stock)
-													}
-												>
-													Set Threshold
-												</Menu.Item>
-											</Menu.Dropdown>
-										</Menu>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</Table>
-				</div>
+				<div className={classes.tableContainer}>{stockTable}</div>
 			)}
 
 			{totalPages > 1 && (

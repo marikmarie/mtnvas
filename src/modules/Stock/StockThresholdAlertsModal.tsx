@@ -1,26 +1,19 @@
 import {
 	ActionIcon,
-	Alert,
 	Badge,
 	createStyles,
 	Group,
 	Modal,
-	Paper,
 	Stack,
-	Table,
 	Text,
 	ThemeIcon,
 	Title,
 } from '@mantine/core';
-import {
-	IconAlertTriangle,
-	IconBuilding,
-	IconEye,
-	IconPackage,
-	IconTrendingDown,
-} from '@tabler/icons-react';
+import { useDisclosure } from '@mantine/hooks';
+import { IconAlertTriangle, IconBuilding, IconEye, IconPackage } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { StockThresholdAlert } from '../Dealer/types';
 
@@ -115,53 +108,137 @@ export function StockThresholdAlertsModal({ opened, onClose }: StockThresholdAle
 	const { classes } = useStyles();
 	const request = useRequest(true);
 	const [selectedAlert, setSelectedAlert] = useState<StockThresholdAlert | null>(null);
-	const [detailModalOpened, setDetailModalOpened] = useState(false);
+	const [detailModalOpened, { open: openDetailModal, close: closeDetailModal }] =
+		useDisclosure(false);
 
 	const { data: alertsData, isLoading } = useQuery({
-		queryKey: [
-			'stock-thresholds',
-			{ dealerId: undefined, category: undefined, belowThreshold: true },
-		],
-		queryFn: () =>
-			request.get('/stock-thresholds', {
-				params: {
-					belowThreshold: true,
-				},
-			}),
+		queryKey: ['stock-threshold-alerts'],
+		queryFn: () => request.get('/stock/threshold-alerts'),
 	});
 
-	const alerts = alertsData?.data?.alerts || [];
-	const totalAlerts = alertsData?.data?.totalAlerts || 0;
-
-	const handleViewDetails = (alert: StockThresholdAlert) => {
-		setSelectedAlert(alert);
-		setDetailModalOpened(true);
-	};
-
-	const closeDetailModal = () => {
-		setDetailModalOpened(false);
-		setSelectedAlert(null);
-	};
+	const alerts: StockThresholdAlert[] = alertsData?.data?.data || [];
 
 	const getShortfallColor = (shortfall: number) => {
-		if (shortfall <= 10) return 'yellow';
-		if (shortfall <= 50) return 'orange';
-		return 'red';
+		if (shortfall <= 5) return 'red';
+		if (shortfall <= 10) return 'orange';
+		return 'yellow';
 	};
 
 	const getShortfallSeverity = (shortfall: number) => {
-		if (shortfall <= 10) return 'Low';
-		if (shortfall <= 50) return 'Medium';
-		return 'High';
+		if (shortfall <= 5) return 'Critical';
+		if (shortfall <= 10) return 'High';
+		return 'Medium';
 	};
+
+	const handleViewDetails = (alert: StockThresholdAlert) => {
+		setSelectedAlert(alert);
+		openDetailModal();
+	};
+
+	const columns = [
+		{
+			name: 'dealerName',
+			header: 'Dealer',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: StockThresholdAlert }) => (
+				<Group spacing="xs">
+					<IconBuilding
+						size={16}
+						color="gray"
+					/>
+					<Text size="sm">{data.dealerName}</Text>
+				</Group>
+			),
+		},
+		{
+			name: 'productName',
+			header: 'Product',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: StockThresholdAlert }) => (
+				<Text size="sm">{data.productName}</Text>
+			),
+		},
+		{
+			name: 'deviceName',
+			header: 'Device',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: StockThresholdAlert }) => (
+				<Text size="sm">{data.deviceName}</Text>
+			),
+		},
+		{
+			name: 'currentStock',
+			header: 'Current Stock',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: StockThresholdAlert }) => (
+				<Badge
+					color="red"
+					variant="light"
+					className={classes.statusBadge}
+				>
+					{data.currentStock}
+				</Badge>
+			),
+		},
+		{
+			name: 'threshold',
+			header: 'Threshold',
+			defaultFlex: 1,
+			minWidth: 100,
+			render: ({ data }: { data: StockThresholdAlert }) => (
+				<Text size="sm">{data.threshold}</Text>
+			),
+		},
+		{
+			name: 'shortfall',
+			header: 'Shortfall',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: StockThresholdAlert }) => (
+				<Badge
+					color={getShortfallColor(data.shortfall)}
+					variant="filled"
+					className={classes.shortfallBadge}
+				>
+					{data.shortfall} ({getShortfallSeverity(data.shortfall)})
+				</Badge>
+			),
+		},
+		{
+			name: 'actions',
+			header: 'Actions',
+			defaultFlex: 1,
+			minWidth: 80,
+			render: ({ data }: { data: StockThresholdAlert }) => (
+				<ActionIcon
+					color="blue"
+					variant="subtle"
+					onClick={() => handleViewDetails(data)}
+				>
+					<IconEye size={16} />
+				</ActionIcon>
+			),
+		},
+	];
+
+	const alertsTable = useDataGridTable<StockThresholdAlert>({
+		columns,
+		data: alerts,
+		loading: isLoading,
+		mih: '40vh',
+	});
 
 	return (
 		<>
 			<Modal
 				opened={opened}
 				onClose={onClose}
-				size="xl"
 				title="Stock Threshold Alerts"
+				size="xl"
 				centered
 			>
 				<div className={classes.header}>
@@ -192,128 +269,18 @@ export function StockThresholdAlertsModal({ opened, onClose }: StockThresholdAle
 				</div>
 
 				<div className={classes.content}>
-					<Paper
-						className={classes.summaryCard}
-						shadow="xs"
-					>
-						<Group
-							position="apart"
-							mb="md"
-						>
-							<Text
-								size="lg"
-								weight={600}
-							>
-								Alert Summary
-							</Text>
-							<Badge
-								color="red"
-								size="lg"
-								variant="light"
-							>
-								{totalAlerts} Active Alerts
-							</Badge>
-						</Group>
-
-						<div className={classes.summaryRow}>
-							<Text
-								size="sm"
-								color="dimmed"
-							>
-								Total Dealers Affected:
-							</Text>
-							<Text
-								size="sm"
-								weight={600}
-							>
-								{
-									new Set(
-										alerts.map((alert: StockThresholdAlert) => alert.dealerId)
-									).size
-								}
-							</Text>
-						</div>
-
-						<div className={classes.summaryRow}>
-							<Text
-								size="sm"
-								color="dimmed"
-							>
-								Total Products Affected:
-							</Text>
-							<Text
-								size="sm"
-								weight={600}
-							>
-								{
-									new Set(
-										alerts.map(
-											(alert: StockThresholdAlert) => alert.productName
-										)
-									).size
-								}
-							</Text>
-						</div>
-
-						<div className={classes.summaryRow}>
-							<Text
-								size="sm"
-								color="dimmed"
-							>
-								Average Shortfall:
-							</Text>
-							<Text
-								size="sm"
-								weight={600}
-							>
-								{alerts.length > 0
-									? Math.round(
-											alerts.reduce(
-												(sum: number, alert: StockThresholdAlert) =>
-													sum + alert.shortfall,
-												0
-											) / alerts.length
-										)
-									: 0}{' '}
-								units
-							</Text>
-						</div>
-					</Paper>
-
-					{isLoading ? (
-						<Stack spacing="md">
-							{Array.from({ length: 3 }).map((_, index) => (
-								<Paper
-									key={index}
-									p="md"
-									withBorder
-								>
-									<Group position="apart">
-										<Stack spacing="xs">
-											<Text size="sm">Loading...</Text>
-											<Text
-												size="xs"
-												color="dimmed"
-											>
-												Loading...
-											</Text>
-										</Stack>
-										<Badge>Loading...</Badge>
-									</Group>
-								</Paper>
-							))}
-						</Stack>
-					) : alerts.length === 0 ? (
+					{alerts.length === 0 ? (
 						<div className={classes.emptyState}>
 							<IconPackage
 								size={48}
-								color="gray"
+								color="green"
 							/>
 							<Text
 								size="lg"
 								mt="md"
+								color="green"
 							>
-								No Alerts Found
+								All Good!
 							</Text>
 							<Text
 								size="sm"
@@ -323,71 +290,7 @@ export function StockThresholdAlertsModal({ opened, onClose }: StockThresholdAle
 							</Text>
 						</div>
 					) : (
-						<Table className={classes.alertTable}>
-							<thead>
-								<tr>
-									<th>Dealer</th>
-									<th>Product</th>
-									<th>Device</th>
-									<th>Current Stock</th>
-									<th>Threshold</th>
-									<th>Shortfall</th>
-									<th>Actions</th>
-								</tr>
-							</thead>
-							<tbody>
-								{alerts.map((alert: StockThresholdAlert, index: number) => (
-									<tr key={index}>
-										<td>
-											<Group spacing="xs">
-												<IconBuilding
-													size={16}
-													color="gray"
-												/>
-												<Text size="sm">{alert.dealerName}</Text>
-											</Group>
-										</td>
-										<td>
-											<Text size="sm">{alert.productName}</Text>
-										</td>
-										<td>
-											<Text size="sm">{alert.deviceName}</Text>
-										</td>
-										<td>
-											<Badge
-												color="red"
-												variant="light"
-												className={classes.statusBadge}
-											>
-												{alert.currentStock}
-											</Badge>
-										</td>
-										<td>
-											<Text size="sm">{alert.threshold}</Text>
-										</td>
-										<td>
-											<Badge
-												color={getShortfallColor(alert.shortfall)}
-												variant="filled"
-												className={classes.shortfallBadge}
-											>
-												{alert.shortfall} (
-												{getShortfallSeverity(alert.shortfall)})
-											</Badge>
-										</td>
-										<td>
-											<ActionIcon
-												color="blue"
-												variant="subtle"
-												onClick={() => handleViewDetails(alert)}
-											>
-												<IconEye size={16} />
-											</ActionIcon>
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</Table>
+						<div className={classes.alertTable}>{alertsTable}</div>
 					)}
 				</div>
 			</Modal>
@@ -426,52 +329,29 @@ export function StockThresholdAlertsModal({ opened, onClose }: StockThresholdAle
 								<Badge
 									color="red"
 									variant="light"
-									size="lg"
+									className={classes.statusBadge}
 								>
 									{selectedAlert.currentStock}
 								</Badge>
 							</div>
 							<div className={classes.detailRow}>
 								<Text className={classes.detailLabel}>Threshold:</Text>
-								<Badge
-									color="green"
-									variant="light"
-									size="lg"
-								>
+								<Text className={classes.detailValue}>
 									{selectedAlert.threshold}
-								</Badge>
+								</Text>
 							</div>
 							<div className={classes.detailRow}>
 								<Text className={classes.detailLabel}>Shortfall:</Text>
 								<Badge
 									color={getShortfallColor(selectedAlert.shortfall)}
 									variant="filled"
-									size="lg"
+									className={classes.shortfallBadge}
 								>
-									{selectedAlert.shortfall} units
-								</Badge>
-							</div>
-							<div className={classes.detailRow}>
-								<Text className={classes.detailLabel}>Severity:</Text>
-								<Badge
-									color={getShortfallColor(selectedAlert.shortfall)}
-									variant="light"
-									size="lg"
-								>
-									{getShortfallSeverity(selectedAlert.shortfall)}
+									{selectedAlert.shortfall} (
+									{getShortfallSeverity(selectedAlert.shortfall)})
 								</Badge>
 							</div>
 						</Stack>
-
-						<Alert
-							icon={<IconTrendingDown size={16} />}
-							title="Action Required"
-							color="red"
-							mt="lg"
-						>
-							Stock level is {selectedAlert.shortfall} units below the threshold.
-							Consider restocking or adjusting the threshold.
-						</Alert>
 					</div>
 				)}
 			</Modal>

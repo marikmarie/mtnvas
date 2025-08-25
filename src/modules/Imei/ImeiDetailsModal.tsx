@@ -1,14 +1,4 @@
-import {
-	Badge,
-	createStyles,
-	Group,
-	Paper,
-	Stack,
-	Table,
-	Text,
-	ThemeIcon,
-	Title,
-} from '@mantine/core';
+import { Badge, createStyles, Group, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import {
 	IconAlertCircle,
 	IconBuilding,
@@ -22,6 +12,7 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
+import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { ImeiDetails, ImeiDetailsModalProps, ImeiSwap } from '../Dealer/types';
 
@@ -43,11 +34,11 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	detailCard: {
-		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
-		borderRadius: theme.radius.md,
 		padding: theme.spacing.md,
 		marginBottom: theme.spacing.lg,
+		borderRadius: theme.radius.md,
+		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
 	},
 
 	detailRow: {
@@ -79,7 +70,6 @@ const useStyles = createStyles((theme) => ({
 		fontFamily: 'monospace',
 		fontSize: '1.1rem',
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
-		padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
 		borderRadius: theme.radius.sm,
 		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
 	},
@@ -145,6 +135,83 @@ export function ImeiDetailsModal({ opened, close, imei }: ImeiDetailsModalProps)
 		}
 	};
 
+	const columns = [
+		{
+			name: 'oldImei',
+			header: 'Old IMEI',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: ImeiSwap }) => (
+				<Text
+					size="sm"
+					className={classes.imeiCode}
+				>
+					{data.oldImei}
+				</Text>
+			),
+		},
+		{
+			name: 'newImei',
+			header: 'New IMEI',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: ImeiSwap }) => (
+				<Text
+					size="sm"
+					className={classes.imeiCode}
+				>
+					{data.newImei}
+				</Text>
+			),
+		},
+		{
+			name: 'agentName',
+			header: 'Agent',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: ImeiSwap }) => (
+				<Text size="sm">{data.agentName || 'N/A'}</Text>
+			),
+		},
+		{
+			name: 'reason',
+			header: 'Reason',
+			defaultFlex: 1,
+			minWidth: 200,
+			render: ({ data }: { data: ImeiSwap }) => (
+				<Text
+					size="sm"
+					lineClamp={2}
+				>
+					{data.reason}
+				</Text>
+			),
+		},
+		{
+			name: 'swappedAt',
+			header: 'Swapped Date',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: ImeiSwap }) => (
+				<Text size="sm">{new Date(data.swappedAt).toLocaleDateString()}</Text>
+			),
+		},
+		{
+			name: 'approvedBy',
+			header: 'Approved By',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: ImeiSwap }) => <Text size="sm">{data.approvedBy}</Text>,
+		},
+	];
+
+	const historyTable = useDataGridTable<ImeiSwap>({
+		columns,
+		data: history,
+		loading: false,
+		mih: '30vh',
+	});
+
 	return (
 		<Modal
 			opened={opened}
@@ -186,7 +253,7 @@ export function ImeiDetailsModal({ opened, close, imei }: ImeiDetailsModalProps)
 				) : details ? (
 					<>
 						<Paper
-							className={classes.detailCard}
+							p={16}
 							shadow="xs"
 						>
 							<Group
@@ -290,105 +357,47 @@ export function ImeiDetailsModal({ opened, close, imei }: ImeiDetailsModalProps)
 							</Stack>
 						</Paper>
 
-						<Paper
-							className={classes.detailCard}
-							shadow="xs"
+						<Group
+							position="apart"
+							mb="md"
 						>
-							<Group
-								position="apart"
-								mb="md"
+							<Text
+								size="lg"
+								mt={16}
+								weight={600}
 							>
+								Swap History
+							</Text>
+							<Badge
+								color="gray"
+								variant="light"
+							>
+								{history.length} Records
+							</Badge>
+						</Group>
+
+						{history.length === 0 ? (
+							<div className={classes.emptyState}>
+								<IconRefresh
+									size={48}
+									color="gray"
+								/>
 								<Text
 									size="lg"
-									weight={600}
+									mt="md"
 								>
-									Swap History
+									No Swap History
 								</Text>
-								<Badge
-									color="gray"
-									variant="light"
+								<Text
+									size="sm"
+									color="dimmed"
 								>
-									{history.length} Records
-								</Badge>
-							</Group>
-
-							{history.length === 0 ? (
-								<div className={classes.emptyState}>
-									<IconRefresh
-										size={48}
-										color="gray"
-									/>
-									<Text
-										size="lg"
-										mt="md"
-									>
-										No Swap History
-									</Text>
-									<Text
-										size="sm"
-										color="dimmed"
-									>
-										This IMEI has not been swapped yet
-									</Text>
-								</div>
-							) : (
-								<Table className={classes.historyTable}>
-									<thead>
-										<tr>
-											<th>Old IMEI</th>
-											<th>New IMEI</th>
-											<th>Agent</th>
-											<th>Reason</th>
-											<th>Swapped Date</th>
-											<th>Approved By</th>
-										</tr>
-									</thead>
-									<tbody>
-										{history.map((swap, index) => (
-											<tr key={swap.id || index}>
-												<td>
-													<Text
-														size="sm"
-														className={classes.imeiCode}
-													>
-														{swap.oldImei}
-													</Text>
-												</td>
-												<td>
-													<Text
-														size="sm"
-														className={classes.imeiCode}
-													>
-														{swap.newImei}
-													</Text>
-												</td>
-												<td>
-													<Text size="sm">{swap.agentName}</Text>
-												</td>
-												<td>
-													<Text
-														size="sm"
-														lineClamp={2}
-													>
-														{swap.reason}
-													</Text>
-												</td>
-												<td>
-													<Text size="sm">
-														{new Date(
-															swap.swappedAt
-														).toLocaleDateString()}
-													</Text>
-												</td>
-												<td>
-													<Text size="sm">{swap.approvedBy}</Text>
-												</td>
-											</tr>
-										))}
-									</tbody>
-								</Table>
-							)}
-						</Paper>
+									This IMEI has not been swapped yet
+								</Text>
+							</div>
+						) : (
+							<div className={classes.historyTable}>{historyTable}</div>
+						)}
 					</>
 				) : (
 					<div className={classes.emptyState}>

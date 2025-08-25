@@ -1,14 +1,11 @@
 import {
-	ActionIcon,
 	Badge,
 	Button,
 	createStyles,
+	Flex,
 	Group,
-	Menu,
 	Pagination,
 	Select,
-	Skeleton,
-	Table,
 	Text,
 	TextInput,
 	ThemeIcon,
@@ -21,7 +18,6 @@ import {
 	IconCheck,
 	IconClock,
 	IconDeviceMobile,
-	IconDotsVertical,
 	IconEye,
 	IconFilter,
 	IconRefresh,
@@ -32,6 +28,7 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { Dealer, Stock } from '../Dealer/types';
 import { statusMap } from '../Stock/StockList';
@@ -202,6 +199,151 @@ export function ImeiList() {
 		}
 	};
 
+	const columns = [
+		{
+			name: 'imei',
+			header: 'IMEI',
+			defaultFlex: 1,
+			minWidth: 200,
+			render: ({ data }: { data: Stock }) => (
+				<Group spacing="xs">
+					<ThemeIcon
+						size="md"
+						radius="md"
+						variant="light"
+						color={getStatusColor(data.status)}
+					>
+						<IconDeviceMobile size={16} />
+					</ThemeIcon>
+					<Text
+						className={classes.imeiText}
+						lineClamp={1}
+					>
+						{data.imei}
+					</Text>
+				</Group>
+			),
+		},
+		{
+			name: 'productName',
+			header: 'Product',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: Stock }) => (
+				<Text
+					size="sm"
+					weight={500}
+				>
+					{data.productName?.toUpperCase() || 'N/A'}
+				</Text>
+			),
+		},
+		{
+			name: 'deviceName',
+			header: 'Device',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: Stock }) => (
+				<Text size="sm">{data.deviceName?.toUpperCase() || 'N/A'}</Text>
+			),
+		},
+		{
+			name: 'status',
+			header: 'Status',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: Stock }) => (
+				<Badge
+					color={getStatusColor(data.status)}
+					variant="filled"
+					size="sm"
+					className={classes.statusBadge}
+					leftSection={getStatusIcon(data.status)}
+				>
+					{statusMap[data.status as keyof typeof statusMap]}
+				</Badge>
+			),
+		},
+		{
+			name: 'dealerName',
+			header: 'Sold By',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: Stock }) => (
+				<div className={classes.infoRow}>
+					<IconUser
+						size={14}
+						color="gray"
+					/>
+					<Text
+						size="sm"
+						color="dimmed"
+						lineClamp={1}
+					>
+						{data.dealerName || 'Not assigned'}
+					</Text>
+				</div>
+			),
+		},
+		{
+			name: 'assignedAt',
+			header: 'Assigned At',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: Stock }) => (
+				<div className={classes.infoRow}>
+					<IconCalendar
+						size={14}
+						color="gray"
+					/>
+					<Text
+						size="sm"
+						color="dimmed"
+					>
+						{data.assignedAt
+							? new Date(data.assignedAt).toLocaleDateString()
+							: 'Not activated'}
+					</Text>
+				</div>
+			),
+		},
+		{
+			name: 'actions',
+			header: 'Actions',
+			defaultFlex: 1,
+			minWidth: 100,
+			render: ({ data }: { data: Stock }) => (
+				<Flex gap="xs">
+					<Button
+						variant="light"
+						color="gray"
+						size="xs"
+						leftIcon={<IconEye size={16} />}
+						onClick={() => handleOpenDetails(data.imei)}
+					>
+						View
+					</Button>
+					<Button
+						variant="light"
+						color="gray"
+						size="xs"
+						leftIcon={<IconRefresh size={16} />}
+						onClick={() => handleOpenSwap(data.imei)}
+					>
+						Swap
+					</Button>
+				</Flex>
+			),
+		},
+	];
+
+	const imeiTable = useDataGridTable<Stock>({
+		columns,
+		data: imeiList,
+		loading: isLoading,
+		mih: '50vh',
+	});
+
 	return (
 		<div className={classes.root}>
 			<div className={classes.header}>
@@ -271,88 +413,7 @@ export function ImeiList() {
 				</div>
 			</div>
 
-			{isLoading ? (
-				<div className={classes.tableContainer}>
-					<Table
-						striped
-						highlightOnHover
-						withColumnBorders
-						withBorder
-					>
-						<thead>
-							<tr>
-								<th className={classes.tableHeader}>IMEI</th>
-								<th className={classes.tableHeader}>Product</th>
-								<th className={classes.tableHeader}>Device</th>
-								<th className={classes.tableHeader}>Status</th>
-								<th className={classes.tableHeader}>Sold By</th>
-								<th className={classes.tableHeader}>Assigned At</th>
-								<th className={classes.tableHeader}>Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{Array.from({ length: 6 }).map((_, index) => (
-								<tr
-									key={index}
-									className={classes.tableRow}
-								>
-									<td className={classes.tableCell}>
-										<Group spacing="xs">
-											<Skeleton
-												height={24}
-												width={24}
-												radius="xl"
-											/>
-											<Skeleton
-												height={12}
-												width={180}
-											/>
-										</Group>
-									</td>
-									<td className={classes.tableCell}>
-										<Skeleton
-											height={12}
-											width="80%"
-										/>
-									</td>
-									<td className={classes.tableCell}>
-										<Skeleton
-											height={12}
-											width="70%"
-										/>
-									</td>
-									<td className={classes.tableCell}>
-										<Skeleton
-											height={24}
-											width={100}
-											radius="xl"
-										/>
-									</td>
-									<td className={classes.tableCell}>
-										<Skeleton
-											height={12}
-											width="70%"
-										/>
-									</td>
-									<td className={classes.tableCell}>
-										<Skeleton
-											height={12}
-											width="40%"
-										/>
-									</td>
-									<td className={classes.tableCell}>
-										<Skeleton
-											height={24}
-											width={24}
-											radius="md"
-										/>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</Table>
-				</div>
-			) : imeiList.length === 0 ? (
+			{imeiList.length === 0 && !isLoading ? (
 				<div className={classes.emptyState}>
 					<IconDeviceMobile
 						size={48}
@@ -372,136 +433,7 @@ export function ImeiList() {
 					</Text>
 				</div>
 			) : (
-				<div className={classes.tableContainer}>
-					<Table
-						striped
-						// highlightOnHover
-						// withColumnBorders
-						// withBorder
-					>
-						<thead>
-							<tr>
-								<th className={classes.tableHeader}>IMEI</th>
-								<th className={classes.tableHeader}>Product</th>
-								<th className={classes.tableHeader}>Device</th>
-								<th className={classes.tableHeader}>Status</th>
-								<th className={classes.tableHeader}>Sold By</th>
-								<th className={classes.tableHeader}>Assigned At</th>
-								<th className={classes.tableHeader}>Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{imeiList.map((imei: Stock) => (
-								<tr
-									key={imei.imei}
-									className={classes.tableRow}
-								>
-									<td className={classes.tableCell}>
-										<Group spacing="xs">
-											<ThemeIcon
-												size="md"
-												radius="md"
-												variant="light"
-												color={getStatusColor(imei.status)}
-											>
-												<IconDeviceMobile size={16} />
-											</ThemeIcon>
-											<Text
-												className={classes.imeiText}
-												lineClamp={1}
-											>
-												{imei.imei}
-											</Text>
-										</Group>
-									</td>
-									<td className={classes.tableCell}>
-										<Text
-											size="sm"
-											weight={500}
-										>
-											{imei.productName?.toUpperCase() || 'N/A'}
-										</Text>
-									</td>
-									<td className={classes.tableCell}>
-										<Text size="sm">
-											{imei.deviceName?.toUpperCase() || 'N/A'}
-										</Text>
-									</td>
-									<td className={classes.tableCell}>
-										<Badge
-											color={getStatusColor(imei.status)}
-											variant="filled"
-											size="sm"
-											className={classes.statusBadge}
-											leftSection={getStatusIcon(imei.status)}
-										>
-											{statusMap[imei.status as keyof typeof statusMap]}
-										</Badge>
-									</td>
-									<td className={classes.tableCell}>
-										<div className={classes.infoRow}>
-											<IconUser
-												size={14}
-												color="gray"
-											/>
-											<Text
-												size="sm"
-												color="dimmed"
-												lineClamp={1}
-											>
-												{imei.dealerName || 'Not assigned'}
-											</Text>
-										</div>
-									</td>
-									<td className={classes.tableCell}>
-										<div className={classes.infoRow}>
-											<IconCalendar
-												size={14}
-												color="gray"
-											/>
-											<Text
-												size="sm"
-												color="dimmed"
-											>
-												{imei.assignedAt
-													? new Date(imei.assignedAt).toLocaleDateString()
-													: 'Not activated'}
-											</Text>
-										</div>
-									</td>
-									<td className={classes.tableCell}>
-										<Group spacing="xs">
-											<Menu>
-												<Menu.Target>
-													<ActionIcon
-														variant="subtle"
-														size="sm"
-													>
-														<IconDotsVertical size={16} />
-													</ActionIcon>
-												</Menu.Target>
-												<Menu.Dropdown>
-													<Menu.Item
-														icon={<IconEye size={16} />}
-														onClick={() => handleOpenDetails(imei.imei)}
-													>
-														View Details
-													</Menu.Item>
-													<Menu.Item
-														icon={<IconRefresh size={16} />}
-														onClick={() => handleOpenSwap(imei.imei)}
-													>
-														Request Swap
-													</Menu.Item>
-												</Menu.Dropdown>
-											</Menu>
-										</Group>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</Table>
-				</div>
+				<div className={classes.tableContainer}>{imeiTable}</div>
 			)}
 
 			{totalPages > 1 && (

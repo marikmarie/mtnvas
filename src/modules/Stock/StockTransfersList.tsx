@@ -9,7 +9,6 @@ import {
 	Paper,
 	Select,
 	Stack,
-	Table,
 	Text,
 	TextInput,
 	Title,
@@ -27,6 +26,7 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { Dealer, StockTransfer, StockTransferListParams } from '../Dealer/types';
 import { StockTransferApprovalModal } from './StockTransferApprovalModal';
@@ -226,6 +226,190 @@ export function StockTransfersList() {
 
 	const totalPages = Math.ceil((transfersData?.data?.meta?.total || 0) / itemsPerPage);
 
+	const columns = [
+		{
+			name: 'id',
+			header: 'Transfer ID',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: StockTransfer }) => (
+				<Text
+					size="sm"
+					weight={500}
+					style={{ fontFamily: 'monospace' }}
+				>
+					{data.id.toString().slice(-8).toUpperCase()}
+				</Text>
+			),
+		},
+		{
+			name: 'transferRoute',
+			header: 'Transfer Route',
+			defaultFlex: 1,
+			minWidth: 200,
+			render: ({ data }: { data: StockTransfer }) => (
+				<div className={classes.transferRoute}>
+					<Group spacing="xs">
+						<IconBuilding
+							size={14}
+							color="gray"
+						/>
+						<Text
+							size="sm"
+							weight={500}
+						>
+							{
+								(
+									dealers?.data.data.find(
+										(d: Dealer) =>
+											d.id === data.fromDealerId
+									) as unknown as Dealer
+								).dealerName
+							}
+						</Text>
+					</Group>
+					<IconArrowRight
+						size={16}
+						color="gray"
+					/>
+					<Group spacing="xs">
+						<IconBuilding
+							size={14}
+							color="gray"
+						/>
+						<Text
+							size="sm"
+							weight={500}
+						>
+							{
+								(
+									dealers?.data.data.find(
+										(d: Dealer) =>
+											d.id === data.toDealerId
+									) as unknown as Dealer
+								).dealerName
+							}
+						</Text>
+					</Group>
+				</div>
+			),
+		},
+		{
+			name: 'imeiCount',
+			header: 'IMEI Count',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: StockTransfer }) => (
+				<Badge
+					color="blue"
+					variant="light"
+					size="sm"
+					className={classes.imeiCount}
+				>
+					{data.imeiCount} items
+				</Badge>
+			),
+		},
+		{
+			name: 'status',
+			header: 'Status',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: StockTransfer }) => (
+				<Badge
+					color={getStatusColor(data.status)}
+					variant="light"
+					size="sm"
+				>
+					{data.status}
+				</Badge>
+			),
+		},
+		{
+			name: 'transferredBy',
+			header: 'Transferred By',
+			defaultFlex: 1,
+			minWidth: 150,
+			render: ({ data }: { data: StockTransfer }) => (
+				<Text size="sm">{data.transferredBy || 'Unknown'}</Text>
+			),
+		},
+		{
+			name: 'reason',
+			header: 'Reason',
+			defaultFlex: 1,
+			minWidth: 200,
+			render: ({ data }: { data: StockTransfer }) => (
+				<Text
+					size="sm"
+					style={{ maxWidth: 200, wordBreak: 'break-word' }}
+				>
+					{data.reason || 'No reason provided'}
+				</Text>
+			),
+		},
+		{
+			name: 'createdAt',
+			header: 'Created Date',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: StockTransfer }) => (
+				<Text size="sm">
+					{new Date(data.createdAt).toLocaleDateString()}
+				</Text>
+			),
+		},
+		{
+			name: 'actions',
+			header: 'Actions',
+			defaultFlex: 1,
+			minWidth: 100,
+			render: ({ data }: { data: StockTransfer }) => (
+				<Menu>
+					<Menu.Target>
+						<ActionIcon
+							variant="subtle"
+							size="sm"
+						>
+							<IconDotsVertical size={16} />
+						</ActionIcon>
+					</Menu.Target>
+					<Menu.Dropdown>
+						{data.status.toLowerCase() !== 'approved' && (
+							<Menu.Item
+								icon={<IconCheck size={16} />}
+								color="green"
+								onClick={() =>
+									handleApproveTransfer(data)
+								}
+							>
+								Approve
+							</Menu.Item>
+						)}
+						{data.status.toLowerCase() !== 'rejected' && (
+							<Menu.Item
+								icon={<IconX size={16} />}
+								color="red"
+								onClick={() =>
+									handleRejectTransfer(data)
+								}
+							>
+								Reject
+							</Menu.Item>
+						)}
+					</Menu.Dropdown>
+				</Menu>
+			),
+		},
+	];
+
+	const transfersTable = useDataGridTable<StockTransfer>({
+		columns,
+		data: filteredTransfers,
+		loading: isLoading,
+		mih: '50vh',
+	});
+
 	return (
 		<div className={classes.root}>
 			<div className={classes.header}>
@@ -372,11 +556,7 @@ export function StockTransfersList() {
 				</Stack>
 			</div>
 
-			{isLoading ? (
-				<div className={classes.emptyState}>
-					<Text>Loading transfers...</Text>
-				</div>
-			) : filteredTransfers.length === 0 ? (
+			{filteredTransfers.length === 0 && !isLoading ? (
 				<div className={classes.emptyState}>
 					<IconTransfer
 						size={48}
@@ -397,152 +577,7 @@ export function StockTransfersList() {
 				</div>
 			) : (
 				<div className={classes.tableContainer}>
-					<Table>
-						<thead>
-							<tr>
-								<th>Transfer ID</th>
-								<th>Transfer Route</th>
-								<th>IMEI Count</th>
-								<th>Status</th>
-								<th>Transferred By</th>
-								<th>Reason</th>
-								<th>Created Date</th>
-								<th>Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{filteredTransfers.map((transfer: StockTransfer) => (
-								<tr key={transfer.id}>
-									<td>
-										<Text
-											size="sm"
-											weight={500}
-											style={{ fontFamily: 'monospace' }}
-										>
-											{transfer.id.toString().slice(-8).toUpperCase()}
-										</Text>
-									</td>
-									<td>
-										<div className={classes.transferRoute}>
-											<Group spacing="xs">
-												<IconBuilding
-													size={14}
-													color="gray"
-												/>
-												<Text
-													size="sm"
-													weight={500}
-												>
-													{
-														(
-															dealers?.data.data.find(
-																(d: Dealer) =>
-																	d.id === transfer.fromDealerId
-															) as unknown as Dealer
-														).dealerName
-													}
-												</Text>
-											</Group>
-											<IconArrowRight
-												size={16}
-												color="gray"
-											/>
-											<Group spacing="xs">
-												<IconBuilding
-													size={14}
-													color="gray"
-												/>
-												<Text
-													size="sm"
-													weight={500}
-												>
-													{
-														(
-															dealers?.data.data.find(
-																(d: Dealer) =>
-																	d.id === transfer.toDealerId
-															) as unknown as Dealer
-														).dealerName
-													}
-												</Text>
-											</Group>
-										</div>
-									</td>
-									<td>
-										<Badge
-											color="blue"
-											variant="light"
-											size="sm"
-											className={classes.imeiCount}
-										>
-											{transfer.imeiCount} items
-										</Badge>
-									</td>
-									<td>
-										<Badge
-											color={getStatusColor(transfer.status)}
-											variant="light"
-											size="sm"
-										>
-											{transfer.status}
-										</Badge>
-									</td>
-									<td>
-										<Text size="sm">{transfer.transferredBy || 'Unknown'}</Text>
-									</td>
-									<td>
-										<Text
-											size="sm"
-											style={{ maxWidth: 200, wordBreak: 'break-word' }}
-										>
-											{transfer.reason || 'No reason provided'}
-										</Text>
-									</td>
-									<td>
-										<Text size="sm">
-											{new Date(transfer.createdAt).toLocaleDateString()}
-										</Text>
-									</td>
-									<td>
-										<Menu>
-											<Menu.Target>
-												<ActionIcon
-													variant="subtle"
-													size="sm"
-												>
-													<IconDotsVertical size={16} />
-												</ActionIcon>
-											</Menu.Target>
-											<Menu.Dropdown>
-												{transfer.status.toLowerCase() !== 'approved' && (
-													<Menu.Item
-														icon={<IconCheck size={16} />}
-														color="green"
-														onClick={() =>
-															handleApproveTransfer(transfer)
-														}
-													>
-														Approve
-													</Menu.Item>
-												)}
-												{transfer.status.toLowerCase() !== 'rejected' && (
-													<Menu.Item
-														icon={<IconX size={16} />}
-														color="red"
-														onClick={() =>
-															handleRejectTransfer(transfer)
-														}
-													>
-														Reject
-													</Menu.Item>
-												)}
-											</Menu.Dropdown>
-										</Menu>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</Table>
+					{transfersTable}
 				</div>
 			)}
 
