@@ -165,7 +165,7 @@ const useStyles = createStyles((theme) => ({
 	},
 }));
 
-const statusMap = {
+export const statusMap = {
 	1: 'Available',
 	2: 'Sold',
 	3: 'Transferred',

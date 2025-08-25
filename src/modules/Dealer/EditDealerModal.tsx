@@ -172,7 +172,6 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -218,7 +217,6 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 				</div>
 			</div>
 
-			{/* Form Section */}
 			<div className={classes.formSection}>
 				{hasErrors && (
 					<Alert
@@ -233,7 +231,6 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 
 				<form onSubmit={form.onSubmit(handleSubmit)}>
 					<Stack spacing="lg">
-						{/* Dealer Information */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -260,7 +257,6 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 							</div>
 						</div>
 
-						{/* Contact Information */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -319,7 +315,6 @@ export function EditDealerModal({ opened, onClose, dealer }: EditDealerModalProp
 							</div>
 						</div>
 
-						{/* Region & Location & Contact Person */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"

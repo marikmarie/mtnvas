@@ -326,7 +326,6 @@ export function SetStockThresholdModal({ opened, onClose, stock }: SetStockThres
 			</div>
 
 			<div className={classes.formSection}>
-				{/* Stock Information Card */}
 				<Paper
 					className={classes.stockInfoCard}
 					shadow="xs"
@@ -411,7 +410,6 @@ export function SetStockThresholdModal({ opened, onClose, stock }: SetStockThres
 					</Grid>
 				</Paper>
 
-				{/* Information Card */}
 				<Paper
 					className={classes.infoCard}
 					shadow="xs"
@@ -462,7 +460,6 @@ export function SetStockThresholdModal({ opened, onClose, stock }: SetStockThres
 
 				<form onSubmit={handleSubmit}>
 					<Stack spacing="lg">
-						{/* Threshold Configuration */}
 						<div className={classes.formGroup}>
 							<NumberInput
 								label="Stock Threshold"
@@ -491,7 +488,6 @@ export function SetStockThresholdModal({ opened, onClose, stock }: SetStockThres
 							labelPosition="center"
 						/>
 
-						{/* Email Notifications */}
 						<div className={classes.notificationSection}>
 							<Group
 								position="apart"
@@ -585,7 +581,6 @@ export function SetStockThresholdModal({ opened, onClose, stock }: SetStockThres
 							)}
 						</div>
 
-						{/* SMS Notifications */}
 						<div className={classes.notificationSection}>
 							<Group
 								position="apart"
@@ -679,7 +674,6 @@ export function SetStockThresholdModal({ opened, onClose, stock }: SetStockThres
 							)}
 						</div>
 
-						{/* Help Text */}
 						<Paper
 							p="xs"
 							bg="yellow.0"

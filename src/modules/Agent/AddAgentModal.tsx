@@ -46,14 +46,26 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 	const request = useRequest(true);
 	const queryClient = useQueryClient();
 
-	const { data: dealers } = useQuery({
+	const {
+		data: dealers,
+		isLoading: dealersLoading,
+		error: dealersError,
+	} = useQuery({
 		queryKey: ['dealer'],
 		queryFn: () => request.get('/dealer'),
+		retry: false,
+		refetchOnWindowFocus: false,
 	});
 
-	const { data: shops } = useQuery({
+	const {
+		data: shops,
+		isLoading: shopsLoading,
+		error: shopsError,
+	} = useQuery({
 		queryKey: ['shops'],
 		queryFn: () => request.get('/shops'),
+		retry: false,
+		refetchOnWindowFocus: false,
 	});
 
 	const userTypes = [
@@ -104,12 +116,16 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 		onError: (error) => {
 			console.error('Error creating agent:', error);
 		},
+		retry: false,
 	});
 
 	const handleSubmit = async (values: AddAgentFormValues) => {
 		setIsSubmitting(true);
 		try {
 			await createAgentMutation.mutateAsync(values);
+		} catch (error) {
+			// Error is already handled by the mutation
+			console.error('Form submission error:', error);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -195,6 +211,21 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 					</Flex>
 				</Stack>
 
+				{Boolean(dealersError || shopsError) && (
+					<Alert
+						icon={<IconAlertCircle size={16} />}
+						title="Connection Error"
+						color="red"
+						variant="light"
+						mb="md"
+					>
+						<Text size="sm">
+							Unable to load dealer and shop data. Please check your internet
+							connection and try again.
+						</Text>
+					</Alert>
+				)}
+
 				<Title
 					order={4}
 					my="sm"
@@ -211,26 +242,45 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 					/>
 					<Select
 						label="Dealer"
-						placeholder="Select dealer"
-						data={dealers?.data.data.map((dealer: Dealer) => ({
-							value: dealer.id,
-							label: dealer.dealerName,
-						}))}
+						placeholder={
+							dealersLoading
+								? 'Loading dealers...'
+								: dealersError
+									? 'Error loading dealers'
+									: 'Select dealer'
+						}
+						data={
+							dealers?.data?.data?.map((dealer: Dealer) => ({
+								value: dealer.id,
+								label: dealer.dealerName,
+							})) || []
+						}
 						required
 						searchable
+						disabled={dealersLoading || !!dealersError}
 						{...form.getInputProps('dealerId')}
 					/>
 					<Select
 						label="Shop (Required for Shop Agents)"
-						placeholder="Select shop"
-						data={shops?.data.data.map((shop: Shop) => ({
-							value: shop.id,
-							label: shop.shopName,
-						}))}
+						placeholder={
+							shopsLoading
+								? 'Loading shops...'
+								: shopsError
+									? 'Error loading shops'
+									: 'Select shop'
+						}
+						data={
+							shops?.data?.data?.map((shop: Shop) => ({
+								value: shop.id,
+								label: shop.shopName,
+							})) || []
+						}
 						searchable
 						clearable
+						disabled={
+							shopsLoading || !!shopsError || form.values.userType !== 'ShopAgent'
+						}
 						{...form.getInputProps('shopId')}
-						disabled={form.values.userType !== 'ShopAgent'}
 					/>
 				</Stack>
 
@@ -270,6 +320,36 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 					</Text>
 				</Alert>
 
+				{Boolean(dealersError || shopsError) && (
+					<Alert
+						icon={<IconAlertCircle size={16} />}
+						title="Form Disabled"
+						color="orange"
+						variant="light"
+						mb="lg"
+					>
+						<Text size="sm">
+							The form is currently disabled due to connection issues. Please check
+							your internet connection and refresh the page to try again.
+						</Text>
+					</Alert>
+				)}
+
+				{Boolean(createAgentMutation.error) && (
+					<Alert
+						icon={<IconAlertCircle size={16} />}
+						title="Submission Error"
+						color="red"
+						variant="light"
+						mb="lg"
+					>
+						<Text size="sm">
+							Failed to create agent. Please check your connection and try again. If
+							the problem persists, contact support.
+						</Text>
+					</Alert>
+				)}
+
 				<Group
 					position="right"
 					mt="xl"
@@ -285,6 +365,7 @@ export function AddAgentModal({ opened, onClose }: AgentModalProps) {
 						loading={isSubmitting}
 						color="yellow"
 						leftIcon={<IconUserPlus size={16} />}
+						disabled={Boolean(dealersError || shopsError)}
 					>
 						Create Agent
 					</Button>

@@ -91,6 +91,7 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 
 	if (!agent) return null;
 
+	// Mock shops data - in a real app, this would come from an API
 	const mockShops = [
 		{ value: 'shop1', label: 'Kampala Central Branch' },
 		{ value: 'shop2', label: 'Entebbe Branch' },
@@ -128,6 +129,7 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 		onError: (error) => {
 			console.error('Error adding agent category:', error);
 		},
+		retry: false,
 	});
 
 	const handleSubmit = async (values: AddCategoryFormValues) => {
@@ -328,6 +330,21 @@ export function AddAgentCategoryModal({ opened, onClose, agent }: AddAgentCatego
 						<br />• Commission rates may vary between different user types
 					</Text>
 				</Alert>
+
+				{Boolean(addCategoryMutation.error) && (
+					<Alert
+						icon={<IconAlertCircle size={16} />}
+						title="Category Addition Error"
+						color="red"
+						variant="light"
+						mb="lg"
+					>
+						<Text size="sm">
+							Failed to add agent category. Please check your connection and try
+							again. If the problem persists, contact support.
+						</Text>
+					</Alert>
+				)}
 
 				<Group
 					position="right"

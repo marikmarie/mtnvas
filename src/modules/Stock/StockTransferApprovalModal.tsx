@@ -238,7 +238,6 @@ export function StockTransferApprovalModal({
 			</div>
 
 			<div className={classes.content}>
-				{/* Transfer Details Card */}
 				<Paper
 					className={classes.transferCard}
 					shadow="xs"
@@ -369,7 +368,6 @@ export function StockTransferApprovalModal({
 					</Stack>
 				</Paper>
 
-				{/* Action Alert */}
 				<Alert
 					icon={<IconAlertCircle size={16} />}
 					title={`${actionText} Transfer`}
@@ -381,7 +379,6 @@ export function StockTransferApprovalModal({
 						: 'This will reject the transfer request. The items will remain with the source dealer.'}
 				</Alert>
 
-				{/* Approval Form */}
 				<form onSubmit={handleSubmit}>
 					<Stack spacing="md">
 						<Textarea

@@ -160,7 +160,6 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -188,9 +187,7 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 				</div>
 			</div>
 
-			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Dealer Information */}
 				<div className={classes.dealerInfo}>
 					<Text
 						size="sm"
@@ -223,7 +220,6 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 
 				<form onSubmit={handleSubmit}>
 					<Stack spacing="lg">
-						{/* Personal Information */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -267,7 +263,6 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 							</div>
 						</div>
 
-						{/* Contact Information */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -311,7 +306,6 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 							</div>
 						</div>
 
-						{/* Location and Role */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -382,7 +376,6 @@ export function AddDealerUserModal({ opened, onClose, dealer, userType }: AddDea
 				</form>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"

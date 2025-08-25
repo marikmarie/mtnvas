@@ -162,7 +162,7 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 		if (!dealers?.data?.data) return [];
 		return dealers.data.data.map((dealer: Dealer) => ({
 			value: dealer.id,
-			label: dealer.dealerName || 'Unknown Dealer',
+			label: dealer.dealerName.toUpperCase() || 'Unknown Dealer',
 		}));
 	}, [dealers?.data?.data]);
 

@@ -197,56 +197,67 @@ export interface StockThresholdAlertsResponse {
 	alerts: StockThresholdAlert[];
 }
 
+// IMEI Types
 export interface ImeiDetails {
 	imei: string;
-	status: 'Available' | 'Assigned' | 'Active' | 'Inactive' | 'Swapped';
+	serialNumber: string | null;
 	productId: number;
-	productName: string;
 	deviceId: number;
-	deviceName: string;
-	dealerid: number;
+	dealerId: number;
 	dealerName: string;
-	agentId?: string;
-	agentName?: string;
-	activatedAt?: string;
-	lastSwapDate?: string;
-	swapHistory: ImeiSwap[];
+	status: 'Available' | 'Sold' | 'Transferred' | 'Swapped';
+	currentAgentId: number;
+	assignedAt: string;
+	activatedAt: string;
+	updatedAt: string;
+	productName: string;
+	deviceName: string;
+}
+
+export interface ImeiSwap {
+	id: number;
+	oldImei: string;
+	newImei: string;
+	agentName: string;
+	reason: string;
+	swappedAt: string;
+	approvedBy: string;
 }
 
 export interface ImeiAvailabilityCheck {
-	available: boolean;
-	active: boolean;
-	canSwap: boolean;
-	belongsToDealer: boolean;
-	dealerId?: string;
-	currentStatus: string;
+	statusCode: number;
+	message: string;
 }
 
 export interface ImeiSwapRequest {
-	oldImei: string;
-	newImei: string;
-	reason: string;
-	agentId: number;
-	customerId?: string;
-}
-
-export interface ImeiSwapRequestDetails {
 	id: number;
 	oldImei: string;
 	newImei: string;
 	reason: string;
-	agentId: number;
-	agentName: string;
-	dealerid: number;
-	status: 'pending' | 'approved' | 'rejected';
+	dealerId: number;
+	status: string;
 	requestedAt: string;
 	processedAt?: string;
 	processedBy?: string;
+	rejectionReason?: string;
+	requestedBy: string;
+}
+
+export interface ImeiSwapRequestDetails extends ImeiSwapRequest {
+	agentName?: string;
+	dealerName?: string;
 }
 
 export interface ImeiSwapApproval {
 	action: 'approve' | 'reject';
 	reason?: string;
+}
+
+export interface ImeiSwapRequestPayload {
+	newImei: string;
+	reason: string;
+	dealerId: number;
+	requestedBy: string;
 }
 
 export interface ImeiTransfer {
@@ -261,18 +272,6 @@ export interface ImeiTransfer {
 	toProductid: number;
 	toProductName: string;
 	transferDate: string;
-}
-
-export interface ImeiSwap {
-	id: number;
-	oldImei: string;
-	newImei: string;
-	reason: string;
-	agentId: number;
-	agentName: string;
-	customerId?: string;
-	swappedAt: string;
-	approvedBy: string;
 }
 
 export interface DealerModalProps {
@@ -434,14 +433,14 @@ export interface AddAgentCategoryModalProps {
 // IMEI Modal Props
 export interface ImeiDetailsModalProps {
 	opened: boolean;
-	onClose: () => void;
+	close: () => void;
 	imei: string;
 }
 
 export interface ImeiSwapModalProps {
 	opened: boolean;
-	onClose: () => void;
-	imei?: string;
+	close: () => void;
+	selectedImei?: string;
 }
 
 export interface ImeiSwapApprovalModalProps {

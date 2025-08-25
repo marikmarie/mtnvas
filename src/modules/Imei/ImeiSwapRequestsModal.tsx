@@ -1,14 +1,12 @@
 import {
-	ActionIcon,
 	Badge,
+	Button,
+	Card,
 	createStyles,
 	Group,
-	Modal,
 	Pagination,
-	Paper,
 	Select,
 	Stack,
-	Table,
 	Text,
 	TextInput,
 	ThemeIcon,
@@ -16,37 +14,32 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
+	IconAlertCircle,
 	IconCalendar,
 	IconCheck,
 	IconClock,
-	IconEye,
+	IconDeviceMobile,
+	IconDotsVertical,
 	IconFilter,
-	IconRefresh,
 	IconSearch,
+	IconShield,
 	IconUser,
 	IconX,
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { ImeiSwapRequestDetails, ImeiSwapRequestsModalProps } from '../Dealer/types';
+import { Dealer, ImeiSwapRequestDetails } from '../Dealer/types';
 import { ImeiSwapApprovalModal } from './ImeiSwapApprovalModal';
 
 const useStyles = createStyles((theme) => ({
+	root: {
+		padding: 0,
+	},
+
 	header: {
-		padding: theme.spacing.lg,
-		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
-		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-	},
-
-	headerContent: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: theme.spacing.md,
-	},
-
-	content: {
-		padding: theme.spacing.lg,
+		marginBottom: theme.spacing.lg,
 	},
 
 	searchSection: {
@@ -60,49 +53,41 @@ const useStyles = createStyles((theme) => ({
 		flexWrap: 'wrap',
 	},
 
-	summaryCards: {
-		marginBottom: theme.spacing.lg,
+	card: {
+		transition: 'all 0.2s ease',
+		cursor: 'pointer',
 	},
 
-	summaryCard: {
-		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
-		borderRadius: theme.radius.md,
+	cardHeader: {
 		padding: theme.spacing.md,
-		textAlign: 'center',
+		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 	},
 
-	summaryValue: {
-		fontSize: theme.fontSizes.xl,
-		fontWeight: 700,
+	cardBody: {
+		padding: theme.spacing.md,
+	},
+
+	cardFooter: {
+		padding: theme.spacing.md,
+		borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+	},
+
+	infoRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.xs,
 		marginBottom: theme.spacing.xs,
-	},
-
-	summaryLabel: {
-		fontSize: theme.fontSizes.sm,
-		color: theme.colorScheme === 'dark' ? theme.colors.dark[1] : theme.colors.gray[7],
 	},
 
 	statusBadge: {
 		fontWeight: 600,
 	},
 
-	imeiCode: {
+	imeiText: {
 		fontFamily: 'monospace',
 		fontSize: '0.875rem',
-		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
-		padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-		borderRadius: theme.radius.sm,
-	},
-
-	requestsTable: {
-		marginTop: theme.spacing.md,
-	},
-
-	emptyState: {
-		textAlign: 'center',
-		padding: theme.spacing.xl,
-		color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
+		fontWeight: 600,
 	},
 
 	actionButton: {
@@ -112,56 +97,58 @@ const useStyles = createStyles((theme) => ({
 			transform: 'scale(1.05)',
 		},
 	},
+
+	emptyState: {
+		textAlign: 'center',
+		padding: theme.spacing.xl,
+		color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
+	},
 }));
 
-export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModalProps) {
+export function ImeiSwapRequestsModal({ opened, close }: { opened: boolean; close: () => void }) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
-
 	const [searchTerm, setSearchTerm] = useState('');
 	const [statusFilter, setStatusFilter] = useState<string>('all');
+	const [dealerFilter, setDealerFilter] = useState<string>('all');
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage] = useState(10);
-	const [selectedRequest, setSelectedRequest] = useState<ImeiSwapRequestDetails | null>(null);
 
+	const [selectedRequest, setSelectedRequest] = useState<ImeiSwapRequestDetails | null>(null);
 	const [approvalModalOpened, { open: openApprovalModal, close: closeApprovalModal }] =
 		useDisclosure(false);
 
 	const { data: requestsData, isLoading } = useQuery({
-		queryKey: ['imei-swap-requests', { statusFilter, searchTerm, currentPage }],
+		queryKey: ['imei-swap-requests', { statusFilter, dealerFilter, searchTerm, currentPage }],
 		queryFn: () =>
 			request.get('/imeis/swap-requests', {
 				params: {
 					status: statusFilter !== 'all' ? statusFilter : undefined,
+					dealerId: dealerFilter !== 'all' ? dealerFilter : undefined,
 					search: searchTerm || undefined,
 					page: currentPage,
-					limit: itemsPerPage,
+					pageSize: itemsPerPage,
 				},
 			}),
-		enabled: opened,
 	});
 
-	const requests: ImeiSwapRequestDetails[] = requestsData?.data?.data || [];
+	const { data: dealersData } = useQuery({
+		queryKey: ['dealers'],
+		queryFn: () => request.get('/dealer'),
+	});
+
+	const uniqueDealers = dealersData?.data?.data?.map((dealer: Dealer) => ({
+		value: dealer.id.toString(),
+		label: dealer.dealerName.toUpperCase() || 'Unknown Dealer',
+	}));
+
+	const requests: ImeiSwapRequestDetails[] = requestsData?.data?.data || requestsData?.data || [];
 	const totalPages = Math.ceil((requestsData?.data?.meta?.total || 0) / itemsPerPage);
-
-	const filteredRequests = useMemo(() => {
-		return requests.filter((request) => {
-			const matchesSearch =
-				request.oldImei.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				request.newImei.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				request.agentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				request.reason.toLowerCase().includes(searchTerm.toLowerCase());
-
-			const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
-
-			return matchesSearch && matchesStatus;
-		});
-	}, [requests, searchTerm, statusFilter]);
 
 	const getStatusColor = (status: string) => {
 		switch (status?.toLowerCase()) {
 			case 'pending':
-				return 'orange';
+				return 'yellow';
 			case 'approved':
 				return 'green';
 			case 'rejected':
@@ -180,7 +167,7 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 			case 'rejected':
 				return <IconX size={14} />;
 			default:
-				return <IconRefresh size={14} />;
+				return <IconAlertCircle size={14} />;
 		}
 	};
 
@@ -194,100 +181,33 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 		setSelectedRequest(null);
 	};
 
-	const summaryStats = useMemo(() => {
-		const pending = requests.filter((r) => r.status === 'pending').length;
-		const approved = requests.filter((r) => r.status === 'approved').length;
-		const rejected = requests.filter((r) => r.status === 'rejected').length;
-		return { total: requests.length, pending, approved, rejected };
-	}, [requests]);
-
 	return (
 		<>
 			<Modal
 				opened={opened}
-				onClose={onClose}
-				size="xl"
-				title="IMEI Swap Requests"
-				centered
+				close={close}
+				size="lg"
 			>
-				<div className={classes.header}>
-					<div className={classes.headerContent}>
-						<ThemeIcon
-							size={40}
-							radius="md"
-							variant="light"
-							color="orange"
+				<div className={classes.root}>
+					<div className={classes.header}>
+						<Group
+							position="apart"
+							mb="md"
 						>
-							<IconRefresh size={20} />
-						</ThemeIcon>
-						<div>
-							<Title
-								order={3}
-								size="h4"
-							>
-								IMEI Swap Requests
-							</Title>
-							<Text
-								color="dimmed"
-								size="sm"
-							>
-								Manage and approve IMEI swap requests from agents
-							</Text>
-						</div>
-					</div>
-				</div>
-
-				<div className={classes.content}>
-					<div className={classes.summaryCards}>
-						<Group grow>
-							<Paper
-								className={classes.summaryCard}
-								shadow="xs"
-							>
-								<Text
-									className={classes.summaryValue}
-									color="blue"
+							<div>
+								<Title
+									order={3}
+									mb="xs"
 								>
-									{summaryStats.total}
-								</Text>
-								<Text className={classes.summaryLabel}>Total Requests</Text>
-							</Paper>
-							<Paper
-								className={classes.summaryCard}
-								shadow="xs"
-							>
+									IMEI Swap Requests
+								</Title>
 								<Text
-									className={classes.summaryValue}
-									color="orange"
+									color="dimmed"
+									size="sm"
 								>
-									{summaryStats.pending}
+									Review and manage IMEI swap requests from agents and dealers
 								</Text>
-								<Text className={classes.summaryLabel}>Pending</Text>
-							</Paper>
-							<Paper
-								className={classes.summaryCard}
-								shadow="xs"
-							>
-								<Text
-									className={classes.summaryValue}
-									color="green"
-								>
-									{summaryStats.approved}
-								</Text>
-								<Text className={classes.summaryLabel}>Approved</Text>
-							</Paper>
-							<Paper
-								className={classes.summaryCard}
-								shadow="xs"
-							>
-								<Text
-									className={classes.summaryValue}
-									color="red"
-								>
-									{summaryStats.rejected}
-								</Text>
-								<Text className={classes.summaryLabel}>Rejected</Text>
-							</Paper>
+							</div>
 						</Group>
 					</div>
 
@@ -313,6 +233,17 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 								icon={<IconFilter size={16} />}
 								style={{ minWidth: 150 }}
 							/>
+							<Select
+								placeholder="Filter by dealer"
+								data={[
+									{ value: 'all', label: 'All Dealers' },
+									...(uniqueDealers || []),
+								]}
+								value={dealerFilter}
+								onChange={(value) => setDealerFilter(value || 'all')}
+								icon={<IconFilter size={16} />}
+								style={{ minWidth: 150 }}
+							/>
 						</div>
 					</div>
 
@@ -320,9 +251,9 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 						<Stack spacing="md">
 							<Text>Loading swap requests...</Text>
 						</Stack>
-					) : filteredRequests.length === 0 ? (
+					) : requests.length === 0 ? (
 						<div className={classes.emptyState}>
-							<IconRefresh
+							<IconDeviceMobile
 								size={48}
 								color="gray"
 							/>
@@ -330,7 +261,7 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 								size="lg"
 								mt="md"
 							>
-								No Swap Requests Found
+								No swap requests found
 							</Text>
 							<Text
 								size="sm"
@@ -340,115 +271,150 @@ export function ImeiSwapRequestsModal({ opened, onClose }: ImeiSwapRequestsModal
 							</Text>
 						</div>
 					) : (
-						<>
-							<Table className={classes.requestsTable}>
-								<thead>
-									<tr>
-										<th>Request ID</th>
-										<th>Old IMEI</th>
-										<th>New IMEI</th>
-										<th>Agent</th>
-										<th>Status</th>
-										<th>Requested</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-									{filteredRequests.map((request) => (
-										<tr key={request.id}>
-											<td>
+						<Stack spacing="md">
+							{requests.map((request) => (
+								<Card
+									key={request.id}
+									className={classes.card}
+									shadow="sm"
+								>
+									<Card.Section className={classes.cardHeader}>
+										<Group position="apart">
+											<Group spacing="xs">
+												<ThemeIcon
+													size="md"
+													radius="md"
+													variant="light"
+													color={getStatusColor(request.status)}
+												>
+													<IconDeviceMobile size={16} />
+												</ThemeIcon>
 												<Text
 													size="sm"
-													weight={500}
+													weight={600}
 												>
-													{request.id}
+													Request #{request.id}
 												</Text>
-											</td>
-											<td>
-												<Text
-													size="sm"
-													className={classes.imeiCode}
-												>
-													{request.oldImei}
-												</Text>
-											</td>
-											<td>
-												<Text
-													size="sm"
-													className={classes.imeiCode}
-												>
-													{request.newImei}
-												</Text>
-											</td>
-											<td>
-												<Group spacing="xs">
-													<IconUser
-														size={16}
-														color="gray"
-													/>
-													<Text size="sm">{request.agentName}</Text>
-												</Group>
-											</td>
-											<td>
+											</Group>
+											<Group spacing="xs">
 												<Badge
 													color={getStatusColor(request.status)}
-													variant="filled"
+													variant="light"
 													size="sm"
 													className={classes.statusBadge}
 													leftSection={getStatusIcon(request.status)}
 												>
 													{request.status.toUpperCase()}
 												</Badge>
-											</td>
-											<td>
-												<Group spacing="xs">
-													<IconCalendar
-														size={16}
-														color="gray"
-													/>
-													<Text size="sm">
-														{new Date(
-															request.requestedAt
-														).toLocaleDateString()}
-													</Text>
-												</Group>
-											</td>
-											<td>
-												<Group spacing="xs">
-													{request.status === 'pending' && (
-														<ActionIcon
-															color="orange"
-															variant="subtle"
-															size="sm"
-															className={classes.actionButton}
-															onClick={() =>
-																handleApproveRequest(request)
-															}
-														>
-															<IconEye size={16} />
-														</ActionIcon>
-													)}
-												</Group>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</Table>
+												{request.status === 'pending' && (
+													<Button
+														size="xs"
+														color="blue"
+														leftIcon={<IconShield size={14} />}
+														onClick={() =>
+															handleApproveRequest(request)
+														}
+													>
+														Review
+													</Button>
+												)}
+											</Group>
+										</Group>
+									</Card.Section>
 
-							{totalPages > 1 && (
-								<Group
-									position="center"
-									mt="xl"
-								>
-									<Pagination
-										total={totalPages}
-										value={currentPage}
-										onChange={setCurrentPage}
-										size="sm"
-									/>
-								</Group>
-							)}
-						</>
+									<Card.Section className={classes.cardBody}>
+										<Stack spacing="xs">
+											<div className={classes.infoRow}>
+												<IconUser
+													size={14}
+													color="gray"
+												/>
+												<Text
+													size="sm"
+													color="dimmed"
+												>
+													Requested by:{' '}
+													{request.requestedBy.toUpperCase() ||
+														'Unknown Agent'}
+												</Text>
+											</div>
+											<div className={classes.infoRow}>
+												<IconCalendar
+													size={14}
+													color="gray"
+												/>
+												<Text
+													size="sm"
+													color="dimmed"
+												>
+													Requested:{' '}
+													{new Date(
+														request.requestedAt
+													).toLocaleDateString()}
+												</Text>
+											</div>
+										</Stack>
+									</Card.Section>
+
+									<Card.Section className={classes.cardFooter}>
+										<Group position="apart">
+											<Group spacing="md">
+												<div>
+													<Text
+														size="xs"
+														color="dimmed"
+														mb="xs"
+													>
+														Current IMEI
+													</Text>
+													<Text className={classes.imeiText}>
+														{request.oldImei}
+													</Text>
+												</div>
+												<IconDotsVertical
+													size={16}
+													color="gray"
+												/>
+												<div>
+													<Text
+														size="xs"
+														color="dimmed"
+														mb="xs"
+													>
+														New IMEI
+													</Text>
+													<Text className={classes.imeiText}>
+														{request.newImei}
+													</Text>
+												</div>
+											</Group>
+											<Text
+												size="sm"
+												color="dimmed"
+												lineClamp={2}
+												style={{ maxWidth: 200 }}
+											>
+												{request.reason}
+											</Text>
+										</Group>
+									</Card.Section>
+								</Card>
+							))}
+						</Stack>
+					)}
+
+					{totalPages > 1 && (
+						<Group
+							position="center"
+							mt="xl"
+						>
+							<Pagination
+								total={totalPages}
+								value={currentPage}
+								onChange={setCurrentPage}
+								size="sm"
+							/>
+						</Group>
 					)}
 				</div>
 			</Modal>

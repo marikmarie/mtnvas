@@ -2,15 +2,13 @@ import {
 	ActionIcon,
 	Badge,
 	Button,
-	Card,
 	createStyles,
-	Grid,
 	Group,
 	Menu,
 	Pagination,
 	Select,
 	Skeleton,
-	Stack,
+	Table,
 	Text,
 	TextInput,
 	ThemeIcon,
@@ -26,7 +24,6 @@ import {
 	IconDotsVertical,
 	IconEye,
 	IconFilter,
-	IconPlus,
 	IconRefresh,
 	IconSearch,
 	IconSettings,
@@ -36,7 +33,8 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import useRequest from '../../hooks/useRequest';
-import { Dealer, ImeiDetails } from '../Dealer/types';
+import { Dealer, Stock } from '../Dealer/types';
+import { statusMap } from '../Stock/StockList';
 import { ImeiDetailsModal } from './ImeiDetailsModal';
 import { ImeiSwapModal } from './ImeiSwapModal';
 import { ImeiSwapRequestsModal } from './ImeiSwapRequestsModal';
@@ -52,6 +50,10 @@ const useStyles = createStyles((theme) => ({
 
 	searchSection: {
 		marginBottom: theme.spacing.lg,
+		padding: theme.spacing.md,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		borderRadius: theme.radius.md,
 	},
 
 	searchRow: {
@@ -59,26 +61,6 @@ const useStyles = createStyles((theme) => ({
 		gap: theme.spacing.md,
 		alignItems: 'flex-end',
 		flexWrap: 'wrap',
-	},
-
-	card: {
-		transition: 'all 0.2s ease',
-		cursor: 'pointer',
-	},
-
-	cardHeader: {
-		padding: theme.spacing.md,
-		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
-	},
-
-	cardBody: {
-		padding: theme.spacing.md,
-	},
-
-	cardFooter: {
-		padding: theme.spacing.md,
-		borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
-		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 	},
 
 	infoRow: {
@@ -96,20 +78,39 @@ const useStyles = createStyles((theme) => ({
 		fontFamily: 'monospace',
 		fontSize: '0.875rem',
 		fontWeight: 600,
-	},
-
-	actionButton: {
-		transition: 'all 0.2s ease',
-
-		'&:hover': {
-			transform: 'scale(1.05)',
-		},
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
+		padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+		borderRadius: theme.radius.sm,
 	},
 
 	emptyState: {
 		textAlign: 'center',
 		padding: theme.spacing.xl,
 		color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
+		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+		borderRadius: theme.radius.md,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+	},
+
+	tableContainer: {
+		overflowX: 'auto',
+	},
+
+	tableHeader: {
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+		fontWeight: 600,
+	},
+
+	tableRow: {
+		'&:hover': {
+			backgroundColor:
+				theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[0],
+		},
+	},
+
+	tableCell: {
+		padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+		verticalAlign: 'middle',
 	},
 }));
 
@@ -129,28 +130,28 @@ export function ImeiList() {
 	const [requestsModalOpened, { open: openRequestsModal, close: closeRequestsModal }] =
 		useDisclosure(false);
 
-	const { data: imeiData, isLoading } = useQuery({
-		queryKey: ['imeis', { statusFilter, dealerFilter, searchTerm, currentPage }],
+	const { data: stockData, isLoading } = useQuery({
+		queryKey: ['stock', { statusFilter, dealerFilter, searchTerm, currentPage }],
 		queryFn: () =>
-			request.get('/imeis', {
+			request.get('/stock', {
 				params: {
 					status: statusFilter !== 'all' ? statusFilter : undefined,
 					dealerId: dealerFilter !== 'all' ? dealerFilter : undefined,
 					search: searchTerm || undefined,
 					page: currentPage,
-					limit: itemsPerPage,
+					pageSize: itemsPerPage,
 				},
 			}),
 	});
 
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers'],
-		queryFn: () => request.get('/lookups/dealers'),
+		queryFn: () => request.get('/dealer'),
 	});
 
 	const uniqueDealers = dealersData?.data?.data?.map((dealer: Dealer) => ({
 		value: dealer.id,
-		label: dealer.dealerName,
+		label: dealer.dealerName.toUpperCase() || 'Unknown Dealer',
 	}));
 
 	const handleOpenDetails = (imei: string) => {
@@ -163,37 +164,37 @@ export function ImeiList() {
 		openSwapModal();
 	};
 
-	const imeiList: ImeiDetails[] = imeiData?.data?.data || [];
-	const totalPages = Math.ceil((imeiData?.data?.meta?.total || 0) / itemsPerPage);
+	const imeiList: Stock[] = stockData?.data?.data || stockData?.data || [];
+	const totalPages = Math.ceil((stockData?.data?.meta?.total || 0) / itemsPerPage);
 
-	const getStatusColor = (status: string) => {
-		switch (status?.toLowerCase()) {
-			case 'available':
+	const getStatusColor = (status: number) => {
+		switch (status) {
+			case 1:
 				return 'green';
-			case 'active':
+			case 2:
 				return 'blue';
-			case 'assigned':
+			case 3:
 				return 'orange';
-			case 'inactive':
+			case 4:
 				return 'red';
-			case 'swapped':
+			case 5:
 				return 'purple';
 			default:
 				return 'gray';
 		}
 	};
 
-	const getStatusIcon = (status: string) => {
-		switch (status?.toLowerCase()) {
-			case 'available':
+	const getStatusIcon = (status: number) => {
+		switch (status) {
+			case 1:
 				return <IconCheck size={14} />;
-			case 'active':
+			case 2:
 				return <IconCheck size={14} />;
-			case 'assigned':
+			case 3:
 				return <IconClock size={14} />;
-			case 'inactive':
+			case 4:
 				return <IconX size={14} />;
-			case 'swapped':
+			case 5:
 				return <IconRefresh size={14} />;
 			default:
 				return <IconAlertCircle size={14} />;
@@ -218,29 +219,19 @@ export function ImeiList() {
 							color="dimmed"
 							size="sm"
 						>
-							Track and manage device IMEI numbers across the network
+							Track and manage device IMEI numbers across the network.
 						</Text>
 					</div>
-					<Group spacing="md">
-						<Button
-							leftIcon={<IconSettings size={16} />}
-							variant="outline"
-							onClick={openRequestsModal}
-							size="md"
-							radius="md"
-							color="orange"
-						>
-							Manage Swap Requests
-						</Button>
-						<Button
-							leftIcon={<IconPlus size={16} />}
-							onClick={() => handleOpenSwap('')}
-							size="md"
-							radius="md"
-						>
-							Request IMEI Swap
-						</Button>
-					</Group>
+					<Button
+						leftIcon={<IconSettings size={16} />}
+						variant="outline"
+						onClick={openRequestsModal}
+						size="md"
+						radius="md"
+						color="orange"
+					>
+						View Swap Requests
+					</Button>
 				</Group>
 			</div>
 
@@ -270,13 +261,7 @@ export function ImeiList() {
 					/>
 					<Select
 						placeholder="Filter by dealer"
-						data={[
-							{ value: 'all', label: 'All Dealers' },
-							...(uniqueDealers || []).map((dealer: Dealer) => ({
-								value: dealer.id,
-								label: dealer.dealerName,
-							})),
-						]}
+						data={[{ value: 'all', label: 'All Dealers' }, ...(uniqueDealers || [])]}
 						value={dealerFilter}
 						onChange={(value) => setDealerFilter(value || 'all')}
 						icon={<IconFilter size={16} />}
@@ -286,17 +271,31 @@ export function ImeiList() {
 			</div>
 
 			{isLoading ? (
-				<Grid>
-					{Array.from({ length: 6 }).map((_, index) => (
-						<Grid.Col
-							key={index}
-							xs={12}
-							sm={6}
-							lg={4}
-						>
-							<Card className={classes.card}>
-								<Card.Section className={classes.cardHeader}>
-									<Group position="apart">
+				<div className={classes.tableContainer}>
+					<Table
+						striped
+						highlightOnHover
+						withColumnBorders
+						withBorder
+					>
+						<thead>
+							<tr>
+								<th className={classes.tableHeader}>IMEI</th>
+								<th className={classes.tableHeader}>Product</th>
+								<th className={classes.tableHeader}>Device</th>
+								<th className={classes.tableHeader}>Status</th>
+								<th className={classes.tableHeader}>Sold By</th>
+								<th className={classes.tableHeader}>Assigned At</th>
+								<th className={classes.tableHeader}>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{Array.from({ length: 6 }).map((_, index) => (
+								<tr
+									key={index}
+									className={classes.tableRow}
+								>
+									<td className={classes.tableCell}>
 										<Group spacing="xs">
 											<Skeleton
 												height={24}
@@ -308,40 +307,50 @@ export function ImeiList() {
 												width={180}
 											/>
 										</Group>
+									</td>
+									<td className={classes.tableCell}>
+										<Skeleton
+											height={12}
+											width="80%"
+										/>
+									</td>
+									<td className={classes.tableCell}>
+										<Skeleton
+											height={12}
+											width="70%"
+										/>
+									</td>
+									<td className={classes.tableCell}>
+										<Skeleton
+											height={24}
+											width={100}
+											radius="xl"
+										/>
+									</td>
+									<td className={classes.tableCell}>
+										<Skeleton
+											height={12}
+											width="70%"
+										/>
+									</td>
+									<td className={classes.tableCell}>
+										<Skeleton
+											height={12}
+											width="40%"
+										/>
+									</td>
+									<td className={classes.tableCell}>
 										<Skeleton
 											height={24}
 											width={24}
 											radius="md"
 										/>
-									</Group>
-								</Card.Section>
-
-								<Card.Section className={classes.cardBody}>
-									<Stack spacing="xs">
-										<Skeleton
-											height={12}
-											width="70%"
-										/>
-										<Skeleton
-											height={12}
-											width="40%"
-										/>
-									</Stack>
-								</Card.Section>
-
-								<Card.Section className={classes.cardFooter}>
-									<Group position="apart">
-										<Skeleton
-											height={24}
-											width={120}
-											radius="xl"
-										/>
-									</Group>
-								</Card.Section>
-							</Card>
-						</Grid.Col>
-					))}
-				</Grid>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</Table>
+				</div>
 			) : imeiList.length === 0 ? (
 				<div className={classes.emptyState}>
 					<IconDeviceMobile
@@ -362,17 +371,31 @@ export function ImeiList() {
 					</Text>
 				</div>
 			) : (
-				<Grid>
-					{imeiList.map((imei: ImeiDetails) => (
-						<Grid.Col
-							key={imei.imei}
-							xs={12}
-							sm={6}
-							lg={4}
-						>
-							<Card className={classes.card}>
-								<Card.Section className={classes.cardHeader}>
-									<Group position="apart">
+				<div className={classes.tableContainer}>
+					<Table
+						striped
+						highlightOnHover
+						withColumnBorders
+						withBorder
+					>
+						<thead>
+							<tr>
+								<th className={classes.tableHeader}>IMEI</th>
+								<th className={classes.tableHeader}>Product</th>
+								<th className={classes.tableHeader}>Device</th>
+								<th className={classes.tableHeader}>Status</th>
+								<th className={classes.tableHeader}>Sold By</th>
+								<th className={classes.tableHeader}>Assigned At</th>
+								<th className={classes.tableHeader}>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{imeiList.map((imei: Stock) => (
+								<tr
+									key={imei.imei}
+									className={classes.tableRow}
+								>
+									<td className={classes.tableCell}>
 										<Group spacing="xs">
 											<ThemeIcon
 												size="md"
@@ -389,35 +412,32 @@ export function ImeiList() {
 												{imei.imei}
 											</Text>
 										</Group>
-										<Menu>
-											<Menu.Target>
-												<ActionIcon
-													variant="subtle"
-													size="sm"
-												>
-													<IconDotsVertical size={16} />
-												</ActionIcon>
-											</Menu.Target>
-											<Menu.Dropdown>
-												<Menu.Item
-													icon={<IconEye size={16} />}
-													onClick={() => handleOpenDetails(imei.imei)}
-												>
-													View Details
-												</Menu.Item>
-												<Menu.Item
-													icon={<IconRefresh size={16} />}
-													onClick={() => handleOpenSwap(imei.imei)}
-												>
-													Request Swap
-												</Menu.Item>
-											</Menu.Dropdown>
-										</Menu>
-									</Group>
-								</Card.Section>
-
-								<Card.Section className={classes.cardBody}>
-									<Stack spacing="xs">
+									</td>
+									<td className={classes.tableCell}>
+										<Text
+											size="sm"
+											weight={500}
+										>
+											{imei.productName?.toUpperCase() || 'N/A'}
+										</Text>
+									</td>
+									<td className={classes.tableCell}>
+										<Text size="sm">
+											{imei.deviceName?.toUpperCase() || 'N/A'}
+										</Text>
+									</td>
+									<td className={classes.tableCell}>
+										<Badge
+											color={getStatusColor(imei.status)}
+											variant="filled"
+											size="sm"
+											className={classes.statusBadge}
+											leftSection={getStatusIcon(imei.status)}
+										>
+											{statusMap[imei.status as keyof typeof statusMap]}
+										</Badge>
+									</td>
+									<td className={classes.tableCell}>
 										<div className={classes.infoRow}>
 											<IconUser
 												size={14}
@@ -428,9 +448,11 @@ export function ImeiList() {
 												color="dimmed"
 												lineClamp={1}
 											>
-												{imei.agentName || 'Not assigned'}
+												{imei.dealerName || 'Not assigned'}
 											</Text>
 										</div>
+									</td>
+									<td className={classes.tableCell}>
 										<div className={classes.infoRow}>
 											<IconCalendar
 												size={14}
@@ -440,34 +462,45 @@ export function ImeiList() {
 												size="sm"
 												color="dimmed"
 											>
-												{imei.activatedAt
-													? new Date(
-															imei.activatedAt
-														).toLocaleDateString()
+												{imei.assignedAt
+													? new Date(imei.assignedAt).toLocaleDateString()
 													: 'Not activated'}
 											</Text>
 										</div>
-									</Stack>
-								</Card.Section>
-
-								<Card.Section className={classes.cardFooter}>
-									<Group position="apart">
-										<Badge
-											color={getStatusColor(imei.status)}
-											variant="filled"
-											size="sm"
-											className={classes.statusBadge}
-											leftSection={getStatusIcon(imei.status)}
-										>
-											{imei.status?.charAt(0)?.toUpperCase() +
-												imei.status?.slice(1)}
-										</Badge>
-									</Group>
-								</Card.Section>
-							</Card>
-						</Grid.Col>
-					))}
-				</Grid>
+									</td>
+									<td className={classes.tableCell}>
+										<Group spacing="xs">
+											<Menu>
+												<Menu.Target>
+													<ActionIcon
+														variant="subtle"
+														size="sm"
+													>
+														<IconDotsVertical size={16} />
+													</ActionIcon>
+												</Menu.Target>
+												<Menu.Dropdown>
+													<Menu.Item
+														icon={<IconEye size={16} />}
+														onClick={() => handleOpenDetails(imei.imei)}
+													>
+														View Details
+													</Menu.Item>
+													<Menu.Item
+														icon={<IconRefresh size={16} />}
+														onClick={() => handleOpenSwap(imei.imei)}
+													>
+														Request Swap
+													</Menu.Item>
+												</Menu.Dropdown>
+											</Menu>
+										</Group>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</Table>
+				</div>
 			)}
 
 			{totalPages > 1 && (
@@ -486,17 +519,17 @@ export function ImeiList() {
 
 			<ImeiDetailsModal
 				opened={detailsModalOpened}
-				onClose={closeDetailsModal}
+				close={closeDetailsModal}
 				imei={selectedImei}
 			/>
 			<ImeiSwapModal
 				opened={swapModalOpened}
-				onClose={closeSwapModal}
-				imei={selectedImei}
+				close={closeSwapModal}
+				selectedImei={selectedImei}
 			/>
 			<ImeiSwapRequestsModal
 				opened={requestsModalOpened}
-				onClose={closeRequestsModal}
+				close={closeRequestsModal}
 			/>
 		</div>
 	);

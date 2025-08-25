@@ -1,30 +1,30 @@
 import {
+	Alert,
+	Badge,
 	Button,
+	createStyles,
 	Group,
+	Paper,
 	Stack,
 	Text,
-	createStyles,
-	ThemeIcon,
-	Alert,
-	Paper,
 	Textarea,
-	Badge,
+	ThemeIcon,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-	IconCheck,
-	IconX,
-	IconDeviceMobile,
-	IconUser,
-	IconCalendar,
 	IconAlertCircle,
 	IconArrowRight,
+	IconCalendar,
+	IconCheck,
+	IconDeviceMobile,
 	IconMessageCircle,
+	IconUser,
+	IconX,
 } from '@tabler/icons-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { ImeiSwapApprovalModalProps, ImeiSwapApproval } from '../Dealer/types';
+import { ImeiSwapApproval, ImeiSwapApprovalModalProps } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -171,9 +171,13 @@ export function ImeiSwapApprovalModal({
 		},
 	});
 
+	// Updated to use the correct API endpoint
 	const mutation = useMutation({
 		mutationFn: (values: ImeiSwapApproval) =>
-			request.post(`/imeis/swap-requests/${swapRequest.id}/approval`, values),
+			request.post(`/imeis/swap-requests/${swapRequest.id}/approval`, {
+				action: values.action,
+				reason: values.reason,
+			}),
 		onSuccess: () => {
 			queryClient.invalidateQueries(['imei-swap-requests']);
 			queryClient.invalidateQueries(['imeis']);
@@ -204,7 +208,6 @@ export function ImeiSwapApprovalModal({
 			close={onClose}
 			size="lg"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -232,9 +235,7 @@ export function ImeiSwapApprovalModal({
 				</div>
 			</div>
 
-			{/* Form Section */}
 			<div className={classes.formSection}>
-				{/* Request Information */}
 				<Paper
 					className={classes.requestCard}
 					shadow="xs"
@@ -265,13 +266,15 @@ export function ImeiSwapApprovalModal({
 							<Text className={classes.detailValue}>{swapRequest.id}</Text>
 						</div>
 						<div className={classes.detailRow}>
-							<Text className={classes.detailLabel}>Agent:</Text>
+							<Text className={classes.detailLabel}>Requested By:</Text>
 							<Group spacing="xs">
 								<IconUser
 									size={16}
 									color="gray"
 								/>
-								<Text className={classes.detailValue}>{swapRequest.agentName}</Text>
+								<Text className={classes.detailValue}>
+									{swapRequest.requestedBy}
+								</Text>
 							</Group>
 						</div>
 						<div className={classes.detailRow}>
@@ -293,7 +296,6 @@ export function ImeiSwapApprovalModal({
 					</Stack>
 				</Paper>
 
-				{/* IMEI Swap Visualization */}
 				<Paper
 					className={classes.swapVisualization}
 					shadow="xs"
@@ -336,7 +338,6 @@ export function ImeiSwapApprovalModal({
 					</Alert>
 				)}
 
-				{/* Approval Comments */}
 				<div className={classes.formGroup}>
 					<Text
 						size="sm"
@@ -364,7 +365,6 @@ export function ImeiSwapApprovalModal({
 				</div>
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="apart"

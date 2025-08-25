@@ -149,6 +149,7 @@ export function AgentDuplicateCheckModal({
 		onError: (error) => {
 			console.error('Error checking duplicates:', error);
 		},
+		retry: false,
 	});
 
 	const handleSubmit = async (values: DuplicateCheckFormValues) => {
@@ -269,6 +270,21 @@ export function AgentDuplicateCheckModal({
 						<br />• This helps prevent duplicate registrations and fraud
 					</Text>
 				</Alert>
+
+				{Boolean(duplicateCheckMutation.error) && (
+					<Alert
+						icon={<IconAlertCircle size={16} />}
+						title="Search Error"
+						color="red"
+						variant="light"
+						mb="lg"
+					>
+						<Text size="sm">
+							Failed to check for duplicates. Please check your connection and try
+							again. If the problem persists, contact support.
+						</Text>
+					</Alert>
+				)}
 
 				<Group
 					position="center"

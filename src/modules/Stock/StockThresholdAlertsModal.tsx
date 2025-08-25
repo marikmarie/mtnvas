@@ -164,7 +164,6 @@ export function StockThresholdAlertsModal({ opened, onClose }: StockThresholdAle
 				title="Stock Threshold Alerts"
 				centered
 			>
-				{/* Header */}
 				<div className={classes.header}>
 					<div className={classes.headerContent}>
 						<ThemeIcon
@@ -192,9 +191,7 @@ export function StockThresholdAlertsModal({ opened, onClose }: StockThresholdAle
 					</div>
 				</div>
 
-				{/* Content */}
 				<div className={classes.content}>
-					{/* Summary Card */}
 					<Paper
 						className={classes.summaryCard}
 						shadow="xs"
@@ -283,7 +280,6 @@ export function StockThresholdAlertsModal({ opened, onClose }: StockThresholdAle
 						</div>
 					</Paper>
 
-					{/* Alerts Table */}
 					{isLoading ? (
 						<Stack spacing="md">
 							{Array.from({ length: 3 }).map((_, index) => (
@@ -396,7 +392,6 @@ export function StockThresholdAlertsModal({ opened, onClose }: StockThresholdAle
 				</div>
 			</Modal>
 
-			{/* Detail Modal */}
 			<Modal
 				opened={detailModalOpened}
 				onClose={closeDetailModal}

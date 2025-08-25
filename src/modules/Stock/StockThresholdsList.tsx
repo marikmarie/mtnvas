@@ -454,7 +454,6 @@ export function StockThresholdsList({ opened, onClose }: StockThresholdsListProp
 				)}
 			</div>
 
-			{/* Edit Modal */}
 			<Modal
 				opened={editModalOpened}
 				close={closeEditModal}

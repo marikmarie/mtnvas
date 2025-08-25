@@ -250,7 +250,6 @@ export function StockTransfersList() {
 				</Group>
 			</div>
 
-			{/* Summary Cards */}
 			{transferSummary?.data && (
 				<div className={classes.summaryCards}>
 					<Grid>
@@ -330,7 +329,6 @@ export function StockTransfersList() {
 				</div>
 			)}
 
-			{/* Search and Filters */}
 			<div className={classes.searchSection}>
 				<Stack spacing="md">
 					<div className={classes.searchRow}>
@@ -374,7 +372,6 @@ export function StockTransfersList() {
 				</Stack>
 			</div>
 
-			{/* Transfers Table */}
 			{isLoading ? (
 				<div className={classes.emptyState}>
 					<Text>Loading transfers...</Text>
@@ -549,7 +546,6 @@ export function StockTransfersList() {
 				</div>
 			)}
 
-			{/* Pagination */}
 			{totalPages > 1 && (
 				<Group
 					position="center"
@@ -564,7 +560,6 @@ export function StockTransfersList() {
 				</Group>
 			)}
 
-			{/* Approval Modal */}
 			<StockTransferApprovalModal
 				opened={approvalModalOpened}
 				onClose={closeApprovalModal}

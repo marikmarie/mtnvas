@@ -107,6 +107,7 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 		onError: (error) => {
 			console.error('Error updating agent:', error);
 		},
+		retry: false,
 	});
 
 	const handleSubmit = async (values: EditAgentFormValues) => {
@@ -229,6 +230,21 @@ export function EditAgentModal({ opened, onClose, agent }: AgentModalProps) {
 						<br />• Updates will be applied immediately
 					</Text>
 				</Alert>
+
+				{Boolean(updateAgentMutation.error) && (
+					<Alert
+						icon={<IconAlertCircle size={16} />}
+						title="Update Error"
+						color="red"
+						variant="light"
+						mb="lg"
+					>
+						<Text size="sm">
+							Failed to update agent. Please check your connection and try again. If
+							the problem persists, contact support.
+						</Text>
+					</Alert>
+				)}
 
 				<Group
 					position="right"

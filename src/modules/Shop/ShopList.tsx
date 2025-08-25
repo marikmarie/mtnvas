@@ -262,7 +262,6 @@ export function ShopList() {
 
 	return (
 		<div className={classes.root}>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<Group
 					position="apart"
@@ -303,7 +302,6 @@ export function ShopList() {
 				</Group>
 			</div>
 
-			{/* Search and Filter Section */}
 			<div className={classes.searchSection}>
 				<div className={classes.searchRow}>
 					<TextInput
@@ -351,7 +349,6 @@ export function ShopList() {
 				</div>
 			</div>
 
-			{/* Enhanced Card Grid */}
 			{isLoading ? (
 				<Grid>
 					{Array.from({ length: 6 }).map((_, index) => (

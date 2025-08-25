@@ -188,7 +188,6 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 			close={onClose}
 			size="md"
 		>
-			{/* Enhanced Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -216,9 +215,7 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 				</div>
 			</div>
 
-			{/* Content */}
 			<div className={classes.content}>
-				{/* Action Icon */}
 				<div className={classes.iconContainer}>
 					<div
 						className={classes.actionIcon}
@@ -231,7 +228,6 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 					</div>
 				</div>
 
-				{/* Title and Description */}
 				<Title
 					order={4}
 					className={classes.title}
@@ -240,7 +236,6 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 				</Title>
 				<Text className={classes.description}>{getActionDescription()}</Text>
 
-				{/* Dealer Information */}
 				<div className={classes.dealerInfo}>
 					<Text
 						size="sm"
@@ -264,7 +259,6 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 					</Text>
 				</div>
 
-				{/* Warning Text */}
 				{getWarningText() && (
 					<Alert
 						color={
@@ -282,7 +276,6 @@ export function ConfirmationModal({ opened, onClose, action, dealer }: Confirmat
 				)}
 			</div>
 
-			{/* Enhanced Actions */}
 			<div className={classes.actions}>
 				<Group
 					position="right"

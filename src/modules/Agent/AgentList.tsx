@@ -1,5 +1,6 @@
 import {
 	ActionIcon,
+	Alert,
 	Badge,
 	Button,
 	Card,
@@ -191,15 +192,27 @@ export function AgentList() {
 		keepPreviousData: true,
 	});
 
-	const { data: dealers, isLoading: dealersLoading } = useQuery({
+	const {
+		data: dealers,
+		isLoading: dealersLoading,
+		error: dealersError,
+	} = useQuery({
 		queryKey: ['dealer'],
 		queryFn: () => request.get('/dealer'),
+		retry: false,
+		refetchOnWindowFocus: false,
 	});
 
-	const { data: shopsResponse, isLoading: shopsLoading } = useQuery({
+	const {
+		data: shopsResponse,
+		isLoading: shopsLoading,
+		error: shopsError,
+	} = useQuery({
 		queryKey: ['shops', shopsQueryParams],
 		queryFn: () => request.get(`/shops?${shopsQueryParams}`),
 		keepPreviousData: true,
+		retry: false,
+		refetchOnWindowFocus: false,
 	});
 
 	const agents = agentsResponse?.data?.data || agentsResponse?.data || [];
@@ -436,6 +449,21 @@ export function AgentList() {
 				</Group>
 			</div>
 
+			{Boolean(dealersError || shopsError) && (
+				<Alert
+					icon={<IconAlertCircle size={16} />}
+					title="Connection Error"
+					color="red"
+					variant="light"
+					mb="lg"
+				>
+					<Text size="sm">
+						Unable to load dealer and shop data. Some filtering options may be
+						unavailable. Please check your internet connection and refresh the page.
+					</Text>
+				</Alert>
+			)}
+
 			<div className={classes.searchSection}>
 				<div className={classes.searchRow}>
 					<TextInput
@@ -446,7 +474,7 @@ export function AgentList() {
 						style={{ flex: 1, minWidth: 200 }}
 					/>
 					<Select
-						placeholder="Select Dealer"
+						placeholder={dealersLoading ? 'Loading dealers...' : 'Select Dealer'}
 						value={selectedDealer}
 						onChange={setSelectedDealer}
 						data={
@@ -456,10 +484,11 @@ export function AgentList() {
 							})) || []
 						}
 						clearable
+						disabled={dealersLoading}
 						style={{ minWidth: 150 }}
 					/>
 					<Select
-						placeholder="Select Shop"
+						placeholder={shopsLoading ? 'Loading shops...' : 'Select Shop'}
 						value={selectedShop}
 						onChange={setSelectedShop}
 						data={
@@ -469,6 +498,7 @@ export function AgentList() {
 							})) || []
 						}
 						clearable
+						disabled={shopsLoading}
 						style={{ minWidth: 150 }}
 					/>
 					<Select

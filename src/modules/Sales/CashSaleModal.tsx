@@ -214,7 +214,6 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 
 			<form onSubmit={form.onSubmit(handleSubmit)}>
 				<div className={classes.formSection}>
-					{/* Info Card */}
 					<div className={classes.infoCard}>
 						<Text
 							size="sm"
@@ -234,7 +233,6 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 					</div>
 
 					<Stack spacing="lg">
-						{/* Agent and Customer Information */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -325,7 +323,6 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 							</Stack>
 						</div>
 
-						{/* Product and Device Information */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -387,7 +384,6 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 							</Stack>
 						</div>
 
-						{/* Payment Information */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -457,7 +453,6 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 					</Stack>
 				</div>
 
-				{/* Actions */}
 				<div className={classes.actions}>
 					<Group
 						position="right"

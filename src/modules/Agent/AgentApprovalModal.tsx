@@ -85,6 +85,7 @@ export function AgentApprovalModal({ opened, onClose, agent, action }: AgentAppr
 			queryClient.invalidateQueries(['agents']);
 			onClose();
 		},
+		retry: false,
 	});
 
 	const handleSubmit = () => {
@@ -219,6 +220,21 @@ export function AgentApprovalModal({ opened, onClose, agent, action }: AgentAppr
 					<br />• Reason is required for rejection
 				</Text>
 			</Alert>
+
+			{Boolean(approvalMutation.error) && (
+				<Alert
+					icon={<IconAlertCircle size={16} />}
+					title="Action Error"
+					color="red"
+					variant="light"
+					mb="lg"
+				>
+					<Text size="sm">
+						Failed to {action.toLowerCase()} agent. Please check your connection and try
+						again. If the problem persists, contact support.
+					</Text>
+				</Alert>
+			)}
 
 			<Group
 				position="right"

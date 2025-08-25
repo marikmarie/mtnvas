@@ -164,7 +164,6 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 
 			<form onSubmit={form.onSubmit(handleSubmit)}>
 				<div className={classes.formSection}>
-					{/* Info Card */}
 					<div className={classes.infoCard}>
 						<Text
 							size="sm"
@@ -184,7 +183,6 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 					</div>
 
 					<Stack spacing="lg">
-						{/* Agent Selection */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -215,7 +213,6 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 							/>
 						</div>
 
-						{/* Transaction Details */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -271,7 +268,6 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 							</Stack>
 						</div>
 
-						{/* Customer Information */}
 						<div className={classes.formGroup}>
 							<Text
 								size="sm"
@@ -327,7 +323,6 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 					</Stack>
 				</div>
 
-				{/* Actions */}
 				<div className={classes.actions}>
 					<Group
 						position="right"

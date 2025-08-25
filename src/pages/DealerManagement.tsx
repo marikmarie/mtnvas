@@ -130,7 +130,6 @@ export default function DealerManagement() {
 	return (
 		<Layout>
 			<div className={classes.root}>
-				{/* Enhanced Header */}
 				<div className={classes.header}>
 					<div className={classes.headerContent}>
 						<div className={classes.titleSection}>
@@ -164,7 +163,6 @@ export default function DealerManagement() {
 							</Group>
 						</div>
 
-						{/* Quick Stats */}
 						<div className={classes.statsGroup}>
 							<div className={classes.statCard}>
 								<Badge
@@ -238,7 +236,6 @@ export default function DealerManagement() {
 					</div>
 				</div>
 
-				{/* Enhanced Content Card */}
 				<div className={classes.contentCard}>
 					<Tabs
 						defaultValue="dealers"

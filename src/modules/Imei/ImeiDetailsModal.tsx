@@ -1,29 +1,29 @@
 import {
-	Group,
-	Stack,
-	Text,
 	Badge,
 	createStyles,
-	ThemeIcon,
-	Table,
-	Modal,
+	Group,
 	Paper,
+	Stack,
+	Table,
+	Text,
+	ThemeIcon,
 	Title,
 } from '@mantine/core';
-import { useQuery } from '@tanstack/react-query';
 import {
-	IconDeviceMobile,
-	IconUser,
-	IconCalendar,
-	IconBuilding,
-	IconRefresh,
-	IconCheck,
-	IconX,
 	IconAlertCircle,
+	IconBuilding,
+	IconCalendar,
+	IconCheck,
 	IconClock,
+	IconDeviceMobile,
+	IconRefresh,
+	IconUser,
+	IconX,
 } from '@tabler/icons-react';
+import { useQuery } from '@tanstack/react-query';
+import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { ImeiDetails, ImeiSwap, ImeiDetailsModalProps } from '../Dealer/types';
+import { ImeiDetails, ImeiDetailsModalProps, ImeiSwap } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -95,7 +95,7 @@ const useStyles = createStyles((theme) => ({
 	},
 }));
 
-export function ImeiDetailsModal({ opened, onClose, imei }: ImeiDetailsModalProps) {
+export function ImeiDetailsModal({ opened, close, imei }: ImeiDetailsModalProps) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
 
@@ -111,38 +111,35 @@ export function ImeiDetailsModal({ opened, onClose, imei }: ImeiDetailsModalProp
 		enabled: opened && !!imei,
 	});
 
-	const details: ImeiDetails | undefined = imeiDetails?.data;
-	const history: ImeiSwap[] = swapHistory?.data || details?.swapHistory || [];
+	const history: ImeiSwap[] = swapHistory?.data?.data || [];
 
-	const getStatusColor = (status: string) => {
-		switch (status?.toLowerCase()) {
-			case 'available':
+	const details: ImeiDetails | undefined = imeiDetails?.data?.data;
+
+	const getStatusColor = (status: 'Available' | 'Sold' | 'Transferred' | 'Swapped') => {
+		switch (status) {
+			case 'Available':
 				return 'green';
-			case 'active':
+			case 'Sold':
 				return 'blue';
-			case 'assigned':
+			case 'Transferred':
 				return 'orange';
-			case 'inactive':
+			case 'Swapped':
 				return 'red';
-			case 'swapped':
-				return 'purple';
 			default:
 				return 'gray';
 		}
 	};
 
-	const getStatusIcon = (status: string) => {
-		switch (status?.toLowerCase()) {
-			case 'available':
+	const getStatusIcon = (status: 'Available' | 'Sold' | 'Transferred' | 'Swapped') => {
+		switch (status) {
+			case 'Available':
 				return <IconCheck size={14} />;
-			case 'active':
+			case 'Sold':
 				return <IconCheck size={14} />;
-			case 'assigned':
+			case 'Transferred':
 				return <IconClock size={14} />;
-			case 'inactive':
+			case 'Swapped':
 				return <IconX size={14} />;
-			case 'swapped':
-				return <IconRefresh size={14} />;
 			default:
 				return <IconAlertCircle size={14} />;
 		}
@@ -151,11 +148,9 @@ export function ImeiDetailsModal({ opened, onClose, imei }: ImeiDetailsModalProp
 	return (
 		<Modal
 			opened={opened}
-			onClose={onClose}
-			size="xl"
-			title="IMEI Details"
+			close={close}
+			size="lg"
 		>
-			{/* Header */}
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<ThemeIcon
@@ -183,7 +178,6 @@ export function ImeiDetailsModal({ opened, onClose, imei }: ImeiDetailsModalProp
 				</div>
 			</div>
 
-			{/* Content */}
 			<div className={classes.content}>
 				{isLoading ? (
 					<Stack spacing="md">
@@ -191,7 +185,6 @@ export function ImeiDetailsModal({ opened, onClose, imei }: ImeiDetailsModalProp
 					</Stack>
 				) : details ? (
 					<>
-						{/* IMEI Basic Information */}
 						<Paper
 							className={classes.detailCard}
 							shadow="xs"
@@ -209,53 +202,59 @@ export function ImeiDetailsModal({ opened, onClose, imei }: ImeiDetailsModalProp
 								<Badge
 									color={getStatusColor(details.status)}
 									variant="filled"
-									size="lg"
+									size="sm"
 									className={classes.statusBadge}
 									leftSection={getStatusIcon(details.status)}
 								>
-									{details.status.toUpperCase()}
+									{details.status}
 								</Badge>
 							</Group>
 
 							<Stack spacing="sm">
 								<div className={classes.detailRow}>
-									<Text className={classes.detailLabel}>IMEI Number:</Text>
+									<Text className={classes.detailLabel}>IMEI:</Text>
 									<Text className={classes.imeiCode}>{details.imei}</Text>
 								</div>
-								<div className={classes.detailRow}>
-									<Text className={classes.detailLabel}>Product:</Text>
-									<Text className={classes.detailValue}>
-										{details.productName}
-									</Text>
-								</div>
-								<div className={classes.detailRow}>
-									<Text className={classes.detailLabel}>Device:</Text>
-									<Text className={classes.detailValue}>
-										{details.deviceName}
-									</Text>
-								</div>
-								<div className={classes.detailRow}>
-									<Text className={classes.detailLabel}>Dealer:</Text>
-									<Group spacing="xs">
-										<IconBuilding
-											size={16}
-											color="gray"
-										/>
-										<Text className={classes.detailValue}>
-											{details.dealerName}
-										</Text>
-									</Group>
-								</div>
-								{details.agentName && (
+								{details.productId && (
 									<div className={classes.detailRow}>
-										<Text className={classes.detailLabel}>Agent:</Text>
+										<Text className={classes.detailLabel}>Product:</Text>
+										<Text className={classes.detailValue}>
+											{details.productName.toUpperCase()}
+										</Text>
+									</div>
+								)}
+								{details.deviceId && (
+									<div className={classes.detailRow}>
+										<Text className={classes.detailLabel}>Device:</Text>
+										<Text className={classes.detailValue}>
+											{details.deviceName.toUpperCase()}
+										</Text>
+									</div>
+								)}
+								{details.dealerName && (
+									<div className={classes.detailRow}>
+										<Text className={classes.detailLabel}>Sold By:</Text>
+										<Group spacing="xs">
+											<IconBuilding
+												size={16}
+												color="gray"
+											/>
+											<Text className={classes.detailValue}>
+												{details.dealerName.toUpperCase()}
+											</Text>
+										</Group>
+									</div>
+								)}
+								{details.currentAgentId && (
+									<div className={classes.detailRow}>
+										<Text className={classes.detailLabel}>Assigned To:</Text>
 										<Group spacing="xs">
 											<IconUser
 												size={16}
 												color="gray"
 											/>
 											<Text className={classes.detailValue}>
-												{details.agentName}
+												{details.currentAgentId.toString().toUpperCase()}
 											</Text>
 										</Group>
 									</div>
@@ -274,7 +273,7 @@ export function ImeiDetailsModal({ opened, onClose, imei }: ImeiDetailsModalProp
 										</Group>
 									</div>
 								)}
-								{details.lastSwapDate && (
+								{details.updatedAt && (
 									<div className={classes.detailRow}>
 										<Text className={classes.detailLabel}>Last Swapped:</Text>
 										<Group spacing="xs">
@@ -283,7 +282,7 @@ export function ImeiDetailsModal({ opened, onClose, imei }: ImeiDetailsModalProp
 												color="gray"
 											/>
 											<Text className={classes.detailValue}>
-												{new Date(details.lastSwapDate).toLocaleString()}
+												{new Date(details.updatedAt).toLocaleString()}
 											</Text>
 										</Group>
 									</div>
@@ -291,7 +290,6 @@ export function ImeiDetailsModal({ opened, onClose, imei }: ImeiDetailsModalProp
 							</Stack>
 						</Paper>
 
-						{/* Swap History */}
 						<Paper
 							className={classes.detailCard}
 							shadow="xs"
@@ -347,7 +345,7 @@ export function ImeiDetailsModal({ opened, onClose, imei }: ImeiDetailsModalProp
 									</thead>
 									<tbody>
 										{history.map((swap, index) => (
-											<tr key={index}>
+											<tr key={swap.id || index}>
 												<td>
 													<Text
 														size="sm"
