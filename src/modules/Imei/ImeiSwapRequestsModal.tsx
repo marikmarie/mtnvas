@@ -306,7 +306,7 @@ export function ImeiSwapRequestsModal({ opened, close }: { opened: boolean; clos
 												>
 													{request.status.toUpperCase()}
 												</Badge>
-												{request.status === 'pending' && (
+												{request.status.toLowerCase() === 'pending' && (
 													<Button
 														size="xs"
 														color="blue"

@@ -20,17 +20,14 @@ import {
 	IconDeviceMobile,
 	IconFileText,
 	IconRefresh,
-	IconUser,
 	IconUserCircle,
 } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../app/store';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import {
-	Dealer,
 	ImeiAvailabilityCheck,
 	ImeiSwapModalProps,
 	ImeiSwapRequestPayload,
@@ -126,31 +123,15 @@ export function ImeiSwapModal({ opened, close, selectedImei }: ImeiSwapModalProp
 	const queryClient = useQueryClient();
 	const user = useSelector((state: RootState) => state.auth.user);
 
-	const { data: dealersData } = useQuery({
-		queryKey: ['dealers'],
-		queryFn: () => request.get('/dealer'),
-		enabled: opened,
-	});
-
-	const dealerOptions = useMemo(() => {
-		if (!dealersData?.data?.data) return [];
-		return dealersData.data.data.map((dealer: Dealer) => ({
-			value: dealer.id,
-			label: dealer.dealerName.toUpperCase() || 'Unknown Dealer',
-		}));
-	}, [dealersData?.data?.data]);
-
 	const form = useForm<ImeiSwapRequestPayload>({
 		initialValues: {
 			newImei: '',
 			reason: '',
-			dealerId: 0,
 			requestedBy: user?.name || user?.email || '',
 		},
 		validate: {
 			newImei: (value) => (!value ? 'New IMEI is required' : null),
 			reason: (value) => (!value ? 'Reason is required' : null),
-			dealerId: (value) => (!value ? 'Dealer is required' : null),
 			requestedBy: (value) => (!value ? 'Requested by is required' : null),
 		},
 	});
@@ -169,6 +150,7 @@ export function ImeiSwapModal({ opened, close, selectedImei }: ImeiSwapModalProp
 			return request.post('/imeis/swap-request', {
 				...values,
 				oldImei: selectedImei || '',
+				dealerId: availableImei?.dealerId!,
 			});
 		},
 		onSuccess: () => {
@@ -190,7 +172,9 @@ export function ImeiSwapModal({ opened, close, selectedImei }: ImeiSwapModalProp
 
 	const imeiList: Stock[] = stockData?.data?.data || stockData?.data || [];
 	const availableImei: Stock | undefined = imeiList.find((imei) => imei.imei === selectedImei);
-	const availableImeiListToSwap: Stock[] = imeiList.filter((imei) => imei.imei !== selectedImei);
+	const availableImeiListToSwap: Stock[] = imeiList.filter(
+		(imei) => imei.imei !== selectedImei && imei.dealerId === availableImei?.dealerId
+	);
 
 	const hasErrors = Object.keys(form.errors).length > 0;
 
@@ -384,34 +368,6 @@ export function ImeiSwapModal({ opened, close, selectedImei }: ImeiSwapModalProp
 									)}
 								</Paper>
 							)}
-						</div>
-
-						<div className={classes.formGroup}>
-							<Text
-								size="sm"
-								weight={500}
-								color="dimmed"
-								mb="xs"
-							>
-								Dealer Information
-							</Text>
-							<div className={classes.inputWrapper}>
-								<Select
-									label="Dealer"
-									placeholder="Select the dealer for this swap"
-									required
-									icon={
-										<IconUser
-											size={16}
-											className={classes.inputIcon}
-										/>
-									}
-									data={dealerOptions}
-									searchable
-									{...form.getInputProps('dealerId')}
-									description="The dealer associated with this IMEI swap"
-								/>
-							</div>
 						</div>
 
 						<div className={classes.formGroup}>

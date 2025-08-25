@@ -99,6 +99,7 @@ const useStyles = createStyles((theme) => ({
 	tableHeader: {
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 		fontWeight: 600,
+		textTransform: 'uppercase',
 	},
 
 	tableRow: {
@@ -374,9 +375,9 @@ export function ImeiList() {
 				<div className={classes.tableContainer}>
 					<Table
 						striped
-						highlightOnHover
-						withColumnBorders
-						withBorder
+						// highlightOnHover
+						// withColumnBorders
+						// withBorder
 					>
 						<thead>
 							<tr>

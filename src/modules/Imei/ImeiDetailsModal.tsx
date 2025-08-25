@@ -149,7 +149,7 @@ export function ImeiDetailsModal({ opened, close, imei }: ImeiDetailsModalProps)
 		<Modal
 			opened={opened}
 			close={close}
-			size="lg"
+			size="xl"
 		>
 			<div className={classes.header}>
 				<div className={classes.headerContent}>

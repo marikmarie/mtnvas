@@ -17,7 +17,6 @@ import {
 	IconCalendar,
 	IconCheck,
 	IconDeviceMobile,
-	IconMessageCircle,
 	IconUser,
 	IconX,
 } from '@tabler/icons-react';
@@ -158,12 +157,12 @@ export function ImeiSwapApprovalModal({
 
 	const form = useForm<ImeiSwapApproval>({
 		initialValues: {
-			action: 'approve',
+			action: 'Approve',
 			reason: '',
 		},
 		validate: {
 			reason: (value, values) => {
-				if (values.action === 'reject' && !value) {
+				if (values.action === 'Reject' && !value) {
 					return 'Reason is required when rejecting a swap request';
 				}
 				return null;
@@ -171,13 +170,11 @@ export function ImeiSwapApprovalModal({
 		},
 	});
 
-	// Updated to use the correct API endpoint
 	const mutation = useMutation({
 		mutationFn: (values: ImeiSwapApproval) =>
-			request.post(`/imeis/swap-requests/${swapRequest.id}/approval`, {
-				action: values.action,
-				reason: values.reason,
-			}),
+			request.post(
+				`/imeis/swap-requests/${swapRequest.id}/approval?action=${values.action}&reason=${values.reason}`
+			),
 		onSuccess: () => {
 			queryClient.invalidateQueries(['imei-swap-requests']);
 			queryClient.invalidateQueries(['imeis']);
@@ -187,17 +184,17 @@ export function ImeiSwapApprovalModal({
 	});
 
 	const handleApprove = () => {
-		form.setFieldValue('action', 'approve');
-		mutation.mutate({ action: 'approve', reason: form.values.reason || undefined });
+		form.setFieldValue('action', 'Approve');
+		mutation.mutate({ action: 'Approve', reason: form.values.reason || undefined });
 	};
 
 	const handleReject = () => {
-		form.setFieldValue('action', 'reject');
+		form.setFieldValue('action', 'Reject');
 		if (!form.values.reason) {
 			form.setFieldError('reason', 'Reason is required when rejecting a swap request');
 			return;
 		}
-		mutation.mutate({ action: 'reject', reason: form.values.reason });
+		mutation.mutate({ action: 'Reject', reason: form.values.reason });
 	};
 
 	const hasErrors = Object.keys(form.errors).length > 0;
@@ -300,31 +297,13 @@ export function ImeiSwapApprovalModal({
 					className={classes.swapVisualization}
 					shadow="xs"
 				>
-					<div className={classes.imeiBox}>
-						<Text
-							size="sm"
-							color="dimmed"
-							mb="xs"
-						>
-							Current IMEI
-						</Text>
-						<Text className={classes.imeiCode}>{swapRequest.oldImei}</Text>
-					</div>
+					<Text className={classes.imeiCode}>{swapRequest.oldImei}</Text>
 
 					<div className={classes.arrowContainer}>
 						<IconArrowRight size={32} />
 					</div>
 
-					<div className={classes.imeiBox}>
-						<Text
-							size="sm"
-							color="dimmed"
-							mb="xs"
-						>
-							New IMEI
-						</Text>
-						<Text className={classes.imeiCode}>{swapRequest.newImei}</Text>
-					</div>
+					<Text className={classes.imeiCode}>{swapRequest.newImei}</Text>
 				</Paper>
 
 				{hasErrors && (
@@ -352,12 +331,6 @@ export function ImeiSwapApprovalModal({
 							label="Approval/Rejection Comments"
 							placeholder="Enter comments about this decision (required for rejection)"
 							minRows={3}
-							icon={
-								<IconMessageCircle
-									size={16}
-									className={classes.inputIcon}
-								/>
-							}
 							{...form.getInputProps('reason')}
 							radius="md"
 						/>
@@ -384,7 +357,7 @@ export function ImeiSwapApprovalModal({
 							leftIcon={<IconX size={16} />}
 							className={classes.submitButton}
 							radius="md"
-							loading={mutation.isLoading && form.values.action === 'reject'}
+							loading={mutation.isLoading && form.values.action === 'Reject'}
 							onClick={handleReject}
 						>
 							Reject
@@ -394,7 +367,7 @@ export function ImeiSwapApprovalModal({
 							leftIcon={<IconCheck size={16} />}
 							className={classes.submitButton}
 							radius="md"
-							loading={mutation.isLoading && form.values.action === 'approve'}
+							loading={mutation.isLoading && form.values.action === 'Approve'}
 							onClick={handleApprove}
 						>
 							Approve

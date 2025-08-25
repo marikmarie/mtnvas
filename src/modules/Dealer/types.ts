@@ -218,10 +218,14 @@ export interface ImeiSwap {
 	id: number;
 	oldImei: string;
 	newImei: string;
-	agentName: string;
 	reason: string;
+	agentId: number;
+	agentName: string;
+	customerId: number;
 	swappedAt: string;
 	approvedBy: string;
+	dealerId: number;
+	createdBy: string;
 }
 
 export interface ImeiAvailabilityCheck {
@@ -235,7 +239,7 @@ export interface ImeiSwapRequest {
 	newImei: string;
 	reason: string;
 	dealerId: number;
-	status: string;
+	status: 'Pending' | 'Approved' | 'Rejected';
 	requestedAt: string;
 	processedAt?: string;
 	processedBy?: string;
@@ -249,14 +253,13 @@ export interface ImeiSwapRequestDetails extends ImeiSwapRequest {
 }
 
 export interface ImeiSwapApproval {
-	action: 'approve' | 'reject';
+	action: 'Approve' | 'Reject';
 	reason?: string;
 }
 
 export interface ImeiSwapRequestPayload {
 	newImei: string;
 	reason: string;
-	dealerId: number;
 	requestedBy: string;
 }
 
