@@ -30,6 +30,7 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
+import { Modal } from '../../components/Modal';
 import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
@@ -94,6 +95,11 @@ const useStyles = createStyles((theme) => ({
 		border: `1px solid ${
 			theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
 		}`,
+		transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+		'&:hover': {
+			transform: 'translateY(-2px)',
+			boxShadow: theme.shadows.md,
+		},
 	},
 
 	statIcon: {
@@ -122,6 +128,10 @@ const useStyles = createStyles((theme) => ({
 		marginBottom: theme.spacing.xl,
 		padding: theme.spacing.lg,
 		borderRadius: theme.radius.lg,
+		background: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.white,
+		border: `1px solid ${
+			theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
+		}`,
 	},
 
 	filtersGrid: {
@@ -135,6 +145,10 @@ const useStyles = createStyles((theme) => ({
 		padding: 0,
 		overflow: 'hidden',
 		borderRadius: theme.radius.lg,
+		background: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.white,
+		border: `1px solid ${
+			theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
+		}`,
 	},
 
 	tableHeader: {
@@ -159,6 +173,18 @@ const useStyles = createStyles((theme) => ({
 		'&:hover': {
 			transform: 'scale(1.05)',
 		},
+		transition: 'transform 0.2s ease',
+	},
+
+	paginationContainer: {
+		padding: theme.spacing.lg,
+		borderTop: `1px solid ${
+			theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
+		}`,
+		display: 'flex',
+		justifyContent: 'center',
+		gap: theme.spacing.sm,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 	},
 }));
 
@@ -184,8 +210,13 @@ export function TransactionList() {
 		useDisclosure(false);
 	const [reportsModalOpened, { open: openReportsModal, close: closeReportsModal }] =
 		useDisclosure(false);
+	const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+	const [
+		transactionDetailsOpened,
+		{ open: openTransactionDetails, close: closeTransactionDetails },
+	] = useDisclosure(false);
 
-	const { data: summaryData } = useQuery({
+	const { data: summaryData, isLoading: summaryLoading } = useQuery({
 		queryKey: ['transactionSummary', dealerFilter, agentFilter, shopFilter],
 		queryFn: () =>
 			request.get('/transactions', {
@@ -213,7 +244,7 @@ export function TransactionList() {
 		};
 
 		const response = await request.get('/transactions', { params });
-		return response.data;
+		return response;
 	}, [
 		request,
 		currentPage,
@@ -246,16 +277,19 @@ export function TransactionList() {
 			dateTo,
 		],
 		queryFn: fetchTransactions,
+		retry: 2,
 	});
 
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers-lookup'],
 		queryFn: () => request.get('/lookups/dealers'),
+		retry: 2,
 	});
 
 	const { data: agentsData } = useQuery({
 		queryKey: ['agents-lookup'],
 		queryFn: () => request.get('/agents'),
+		retry: 2,
 	});
 
 	const summary: TransactionSummary = summaryData?.data?.summary || {
@@ -264,10 +298,11 @@ export function TransactionList() {
 		totalTransactions: 0,
 	};
 
-	const transactions: Transaction[] = transactionsData?.data?.data || [];
+	const transactions = transactionsData?.data?.data || [];
+	const totalTransactions = transactionsData?.data?.meta?.total || 0;
 
 	const filteredTransactions = transactions.filter(
-		(transaction) =>
+		(transaction: Transaction) =>
 			searchTerm === '' ||
 			transaction.agentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			transaction.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -292,9 +327,87 @@ export function TransactionList() {
 		setCurrentPage(1);
 	};
 
-	const handleExportTransactions = () => {
-		console.log('Exporting transactions...');
+	const handleFilterChange = (filterType: string, value: string | Date | null) => {
+		setCurrentPage(1);
+
+		switch (filterType) {
+			case 'search':
+				setSearchTerm(value as string);
+				break;
+			case 'agent':
+				setAgentFilter(value as string);
+				break;
+			case 'dealer':
+				setDealerFilter(value as string);
+				break;
+			case 'shop':
+				setShopFilter(value as string);
+				break;
+			case 'type':
+				setTypeFilter(value as string);
+				break;
+			case 'status':
+				setStatusFilter(value as string);
+				break;
+			case 'paymentMethod':
+				setPaymentMethodFilter(value as string);
+				break;
+			case 'dateFrom':
+				setDateFrom(value as Date | null);
+				break;
+			case 'dateTo':
+				setDateTo(value as Date | null);
+				break;
+		}
 	};
+
+	const handleExportTransactions = () => {
+		const headers = [
+			'Receipt #',
+			'Type',
+			'Agent',
+			'Customer',
+			'Product',
+			'Amount',
+			'Payment Method',
+			'Commission',
+			'Status',
+			'Date',
+		];
+
+		const csvData = filteredTransactions.map((transaction: Transaction) => [
+			transaction.receiptNumber || 'N/A',
+			toTitle(transaction.type),
+			transaction.agentName,
+			transaction.customerName || 'N/A',
+			transaction.productName,
+			transaction.amount,
+			toTitle(transaction.paymentMethod),
+			transaction.commission,
+			toTitle(transaction.status),
+			new Date(transaction.createdAt).toLocaleDateString(),
+		]);
+
+		const csvContent = [headers, ...csvData]
+			.map((row: string[]) => row.map((cell: string) => `"${cell}"`).join(','))
+			.join('\n');
+
+		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+		const link = document.createElement('a');
+		const url = URL.createObjectURL(blob);
+		link.setAttribute('href', url);
+		link.setAttribute('download', `transactions_${new Date().toISOString().split('T')[0]}.csv`);
+		link.style.visibility = 'hidden';
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+	};
+
+	const handlePageChange = (page: number) => {
+		setCurrentPage(page);
+	};
+
+	const totalPages = Math.ceil(totalTransactions / itemsPerPage);
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
@@ -329,6 +442,11 @@ export function TransactionList() {
 			default:
 				return <IconCash size={14} />;
 		}
+	};
+
+	const handleViewTransaction = (transaction: Transaction) => {
+		setSelectedTransaction(transaction);
+		openTransactionDetails();
 	};
 
 	const columns = [
@@ -432,7 +550,7 @@ export function TransactionList() {
 					variant="light"
 					size="sm"
 					className={classes.actionButton}
-					onClick={() => console.log('View transaction details:', data.id)}
+					onClick={() => handleViewTransaction(data)}
 				>
 					<IconEye size={16} />
 				</ActionIcon>
@@ -530,7 +648,9 @@ export function TransactionList() {
 							color="#228B22"
 						/>
 					</div>
-					<Text className={classes.statValue}>{formatCurrency(summary.totalAmount)}</Text>
+					<Text className={classes.statValue}>
+						{summaryLoading ? '...' : formatCurrency(summary.totalAmount)}
+					</Text>
 					<Text className={classes.statLabel}>Total Sales</Text>
 				</Card>
 
@@ -545,7 +665,7 @@ export function TransactionList() {
 						/>
 					</div>
 					<Text className={classes.statValue}>
-						{formatCurrency(summary.totalCommission)}
+						{summaryLoading ? '...' : formatCurrency(summary.totalCommission)}
 					</Text>
 					<Text className={classes.statLabel}>Total Commission</Text>
 				</Card>
@@ -560,7 +680,9 @@ export function TransactionList() {
 							color="#1E90FF"
 						/>
 					</div>
-					<Text className={classes.statValue}>{summary.totalTransactions}</Text>
+					<Text className={classes.statValue}>
+						{summaryLoading ? '...' : summary.totalTransactions}
+					</Text>
 					<Text className={classes.statLabel}>Total Transactions</Text>
 				</Card>
 			</div>
@@ -589,7 +711,7 @@ export function TransactionList() {
 						placeholder="Search transactions..."
 						icon={<IconSearch size={16} />}
 						value={searchTerm}
-						onChange={(e) => setSearchTerm(e.currentTarget.value)}
+						onChange={(e) => handleFilterChange('search', e.currentTarget.value)}
 						radius="md"
 					/>
 
@@ -604,7 +726,7 @@ export function TransactionList() {
 							})),
 						]}
 						value={dealerFilter}
-						onChange={(value) => setDealerFilter(value || '')}
+						onChange={(value) => handleFilterChange('dealer', value || '')}
 						radius="md"
 						clearable
 					/>
@@ -620,7 +742,7 @@ export function TransactionList() {
 							})),
 						]}
 						value={agentFilter}
-						onChange={(value) => setAgentFilter(value || '')}
+						onChange={(value) => handleFilterChange('agent', value || '')}
 						radius="md"
 						clearable
 					/>
@@ -633,7 +755,7 @@ export function TransactionList() {
 							{ value: 'cash_sale', label: 'Cash Sale' },
 						]}
 						value={typeFilter}
-						onChange={(value) => setTypeFilter(value || '')}
+						onChange={(value) => handleFilterChange('type', value || '')}
 						radius="md"
 						clearable
 					/>
@@ -647,7 +769,7 @@ export function TransactionList() {
 							{ value: 'failed', label: 'Failed' },
 						]}
 						value={statusFilter}
-						onChange={(value) => setStatusFilter(value || '')}
+						onChange={(value) => handleFilterChange('status', value || '')}
 						radius="md"
 						clearable
 					/>
@@ -660,23 +782,25 @@ export function TransactionList() {
 							{ value: 'mobile_money', label: 'Mobile Money' },
 						]}
 						value={paymentMethodFilter}
-						onChange={(value) => setPaymentMethodFilter(value || '')}
+						onChange={(value) => handleFilterChange('paymentMethod', value || '')}
 						radius="md"
 						clearable
 					/>
 
 					<DatePickerInput
 						value={dateFrom}
-						onChange={setDateFrom}
+						onChange={(value) => handleFilterChange('dateFrom', value)}
 						radius="md"
 						clearable
+						label="From Date"
 					/>
 
 					<DatePickerInput
 						value={dateTo}
-						onChange={setDateTo}
+						onChange={(value) => handleFilterChange('dateTo', value)}
 						radius="md"
 						clearable
+						label="To Date"
 					/>
 				</div>
 			</Paper>
@@ -694,12 +818,124 @@ export function TransactionList() {
 							color="dimmed"
 							size="sm"
 						>
-							{transactionsData?.data?.meta?.total || 0} transactions
+							{totalTransactions} transactions
 						</Text>
 					</Group>
 				</div>
 
-				{transactionTable}
+				{transactionsLoading ? (
+					<div className={classes.emptyState}>
+						<Text
+							size="lg"
+							weight={500}
+							mb="md"
+						>
+							Loading transactions...
+						</Text>
+					</div>
+				) : filteredTransactions.length === 0 ? (
+					<div className={classes.emptyState}>
+						<Text
+							size="lg"
+							weight={500}
+							mb="md"
+						>
+							No transactions found
+						</Text>
+						<Text
+							size="sm"
+							color="dimmed"
+						>
+							{searchTerm ||
+							agentFilter ||
+							dealerFilter ||
+							shopFilter ||
+							typeFilter ||
+							statusFilter ||
+							paymentMethodFilter ||
+							dateFrom ||
+							dateTo
+								? 'Try adjusting your filters or search terms'
+								: 'No transactions have been recorded yet'}
+						</Text>
+					</div>
+				) : (
+					<>
+						{transactionTable}
+
+						{/* Pagination Controls */}
+						{totalPages > 1 && (
+							<div className={classes.paginationContainer}>
+								<Button
+									variant="light"
+									size="sm"
+									disabled={currentPage === 1}
+									onClick={() => handlePageChange(currentPage - 1)}
+								>
+									Previous
+								</Button>
+
+								{Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+									const page = i + 1;
+									if (totalPages <= 5) {
+										return (
+											<Button
+												key={page}
+												variant={currentPage === page ? 'filled' : 'light'}
+												size="sm"
+												onClick={() => handlePageChange(page)}
+											>
+												{page}
+											</Button>
+										);
+									}
+
+									// Show first page, last page, current page, and pages around current
+									if (
+										page === 1 ||
+										page === totalPages ||
+										(page >= currentPage - 1 && page <= currentPage + 1)
+									) {
+										return (
+											<Button
+												key={page}
+												variant={currentPage === page ? 'filled' : 'light'}
+												size="sm"
+												onClick={() => handlePageChange(page)}
+											>
+												{page}
+											</Button>
+										);
+									}
+
+									// Show ellipsis
+									if (page === currentPage - 2 || page === currentPage + 2) {
+										return (
+											<Text
+												key={page}
+												size="sm"
+												color="dimmed"
+											>
+												...
+											</Text>
+										);
+									}
+
+									return null;
+								})}
+
+								<Button
+									variant="light"
+									size="sm"
+									disabled={currentPage === totalPages}
+									onClick={() => handlePageChange(currentPage + 1)}
+								>
+									Next
+								</Button>
+							</div>
+						)}
+					</>
+				)}
 			</Card>
 
 			<CustomerActivationModal
@@ -716,6 +952,153 @@ export function TransactionList() {
 				opened={reportsModalOpened}
 				onClose={closeReportsModal}
 			/>
+
+			{selectedTransaction && (
+				<Modal
+					opened={transactionDetailsOpened}
+					close={closeTransactionDetails}
+					size="lg"
+				>
+					<div style={{ padding: '1rem 0' }}>
+						<Group
+							position="apart"
+							mb="md"
+						>
+							<Text weight={600}>
+								Receipt #{selectedTransaction.receiptNumber || 'N/A'}
+							</Text>
+							<Badge
+								color={getStatusColor(selectedTransaction.status)}
+								variant="light"
+								className={classes.badge}
+							>
+								{toTitle(selectedTransaction.status)}
+							</Badge>
+						</Group>
+
+						<div
+							style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}
+						>
+							<div>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
+									Transaction Type
+								</Text>
+								<Badge
+									color={getTypeColor(selectedTransaction.type)}
+									variant="light"
+									className={classes.badge}
+								>
+									{toTitle(selectedTransaction.type)}
+								</Badge>
+							</div>
+
+							<div>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
+									Amount
+								</Text>
+								<Text weight={600}>
+									{formatCurrency(selectedTransaction.amount)}
+								</Text>
+							</div>
+
+							<div>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
+									Commission
+								</Text>
+								<Text weight={600}>
+									{formatCurrency(selectedTransaction.commission)}
+								</Text>
+							</div>
+
+							<div>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
+									Payment Method
+								</Text>
+								<Group spacing="xs">
+									{getPaymentMethodIcon(selectedTransaction.paymentMethod)}
+									<Text>{toTitle(selectedTransaction.paymentMethod)}</Text>
+								</Group>
+							</div>
+
+							<div>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
+									Agent
+								</Text>
+								<Text>{selectedTransaction.agentName}</Text>
+							</div>
+
+							<div>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
+									Customer
+								</Text>
+								<Text>{selectedTransaction.customerName || 'N/A'}</Text>
+							</div>
+
+							<div>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
+									Product
+								</Text>
+								<Text>{selectedTransaction.productName}</Text>
+							</div>
+
+							<div>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
+									IMEI
+								</Text>
+								<Text style={{ fontFamily: 'monospace' }}>
+									{selectedTransaction.imei}
+								</Text>
+							</div>
+
+							<div>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
+									Date
+								</Text>
+								<Text>
+									{new Date(selectedTransaction.createdAt).toLocaleString()}
+								</Text>
+							</div>
+
+							<div>
+								<Text
+									size="sm"
+									color="dimmed"
+								>
+									Customer Phone
+								</Text>
+								<Text>{selectedTransaction.customerPhone || 'N/A'}</Text>
+							</div>
+						</div>
+					</div>
+				</Modal>
+			)}
 		</Container>
 	);
 }

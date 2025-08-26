@@ -477,9 +477,28 @@ export interface Transaction {
 	amount: number;
 	paymentMethod: 'cash' | 'mobile_money';
 	commission: number;
-	status: 'Completed' | 'Pending' | 'Failed';
+	status: 'completed' | 'pending' | 'failed';
 	receiptNumber?: string;
 	createdAt: string;
+	createdBy: string | null;
+	dealerId: number;
+	customerPhone: string;
+	deviceId: number;
+}
+
+export interface TransactionListResponse {
+	statusCode: number;
+	status: string;
+	message?: string;
+	data: {
+		data: Transaction[];
+		meta: {
+			total: number;
+			page: number;
+			limit: number;
+			totalPages: number;
+		};
+	};
 }
 
 // Customer Activation Request
