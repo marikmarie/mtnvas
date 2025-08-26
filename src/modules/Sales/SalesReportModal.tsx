@@ -152,8 +152,8 @@ export function SalesReportModal({ opened, onClose }: SalesReportModalProps) {
 	}, [form.values.dateTo]);
 
 	const { data: dealersData } = useQuery({
-		queryKey: ['dealers-lookup'],
-		queryFn: () => request.get('/lookups/dealers'),
+		queryKey: ['dealers'],
+		queryFn: () => request.get('/dealer'),
 	});
 
 	const { data: agentsData } = useQuery({

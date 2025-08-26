@@ -211,7 +211,7 @@ export function CommissionEarnings() {
 
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers-lookup'],
-		queryFn: () => request.get('/lookups/dealers'),
+		queryFn: () => request.get('/dealer'),
 	});
 
 	const { data: agentsData } = useQuery({

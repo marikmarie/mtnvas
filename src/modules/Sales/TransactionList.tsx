@@ -282,7 +282,7 @@ export function TransactionList() {
 
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers-lookup'],
-		queryFn: () => request.get('/lookups/dealers'),
+		queryFn: () => request.get('/dealer'),
 		retry: 2,
 	});
 

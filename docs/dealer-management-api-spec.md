@@ -1057,7 +1057,7 @@ Response: ApiResponse<{
 ### 11.1 Get Dealers List (Dropdown)
 
 ```typescript
-GET /lookups/dealers
+GET /dealer
 Query Params: {
   department?: 'wakanet' | 'enterprise' | 'both';
   status?: 'active' | 'inactive';
