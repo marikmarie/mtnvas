@@ -125,7 +125,7 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 
 	const { data: productsData } = useQuery({
 		queryKey: ['products-lookup'],
-		queryFn: () => request.get('/lookups/products'),
+		queryFn: () => request.get('/shops'),
 	});
 
 	const commissionRateMutation = useMutation({

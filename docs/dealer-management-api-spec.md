@@ -1072,7 +1072,7 @@ Response: ApiResponse<Array<{
 ### 11.2 Get Products List
 
 ```typescript
-GET /lookups/products
+GET /shops
 Query Params: {
   category?: 'wakanet' | 'enterprise' | 'both';
 }
@@ -1113,7 +1113,7 @@ interface Device {
 ### 11.4 Get Shops List (Dropdown)
 
 ```typescript
-GET /lookups/shops
+GET /shops
 Query Params: {
   dealerId?: string;
   status?: 'active' | 'inactive';

@@ -19,7 +19,6 @@ import {
 	IconCash,
 	IconDeviceMobile,
 	IconDownload,
-	IconEye,
 	IconFilter,
 	IconPlus,
 	IconReceipt,
@@ -30,7 +29,6 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
-import { Modal } from '../../components/Modal';
 import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
@@ -38,7 +36,6 @@ import { toTitle } from '../../utils/toTitle';
 import { Transaction, TransactionSummary } from '../Dealer/types';
 import { CashSaleModal } from './CashSaleModal';
 import { CustomerActivationModal } from './CustomerActivationModal';
-import { SalesReportModal } from './SalesReportModal';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -199,6 +196,7 @@ export function TransactionList() {
 	const [typeFilter, setTypeFilter] = useState<string>('');
 	const [statusFilter, setStatusFilter] = useState<string>('');
 	const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>('');
+	const [productFilter, setProductFilter] = useState<string>('');
 	const [dateFrom, setDateFrom] = useState<Date | null>(null);
 	const [dateTo, setDateTo] = useState<Date | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -208,39 +206,20 @@ export function TransactionList() {
 		useDisclosure(false);
 	const [cashSaleModalOpened, { open: openCashSaleModal, close: closeCashSaleModal }] =
 		useDisclosure(false);
-	const [reportsModalOpened, { open: openReportsModal, close: closeReportsModal }] =
-		useDisclosure(false);
-	const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-	const [
-		transactionDetailsOpened,
-		{ open: openTransactionDetails, close: closeTransactionDetails },
-	] = useDisclosure(false);
-
-	const { data: summaryData, isLoading: summaryLoading } = useQuery({
-		queryKey: ['transactionSummary', dealerFilter, agentFilter, shopFilter],
-		queryFn: () =>
-			request.get('/transactions', {
-				params: {
-					summary: true,
-					dealerId: dealerFilter || undefined,
-					agentId: agentFilter || undefined,
-					shopId: shopFilter || undefined,
-				},
-			}),
-	});
 
 	const fetchTransactions = useCallback(async () => {
 		const params = {
 			page: currentPage,
-			limit: itemsPerPage,
+			pageSize: itemsPerPage,
 			agentId: agentFilter || undefined,
 			dealerId: dealerFilter || undefined,
 			shopId: shopFilter || undefined,
 			transactionType: typeFilter || undefined,
 			status: statusFilter || undefined,
-			paymentMethod: paymentMethodFilter || undefined,
 			dateFrom: dateFrom?.toISOString().split('T')[0] || undefined,
 			dateTo: dateTo?.toISOString().split('T')[0] || undefined,
+			productId: productFilter || undefined,
+			paymentMethod: paymentMethodFilter || undefined,
 		};
 
 		const response = await request.get('/transactions', { params });
@@ -254,9 +233,10 @@ export function TransactionList() {
 		shopFilter,
 		typeFilter,
 		statusFilter,
-		paymentMethodFilter,
 		dateFrom,
 		dateTo,
+		productFilter,
+		paymentMethodFilter,
 	]);
 
 	const {
@@ -273,6 +253,7 @@ export function TransactionList() {
 			typeFilter,
 			statusFilter,
 			paymentMethodFilter,
+			productFilter,
 			dateFrom,
 			dateTo,
 		],
@@ -292,7 +273,13 @@ export function TransactionList() {
 		retry: 2,
 	});
 
-	const summary: TransactionSummary = summaryData?.data?.summary || {
+	const { data: productsData } = useQuery({
+		queryKey: ['products-lookup'],
+		queryFn: () => request.get('/products'),
+		retry: 2,
+	});
+
+	const summary: TransactionSummary = transactionsData?.data?.summary || {
 		totalAmount: 0,
 		totalCommission: 0,
 		totalTransactions: 0,
@@ -301,13 +288,15 @@ export function TransactionList() {
 	const transactions = transactionsData?.data?.data || [];
 	const totalTransactions = transactionsData?.data?.meta?.total || 0;
 
+	console.log(transactions);
+
 	const filteredTransactions = transactions.filter(
 		(transaction: Transaction) =>
 			searchTerm === '' ||
-			transaction.agentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			transaction.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			transaction.receiptNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			transaction.imei.toLowerCase().includes(searchTerm.toLowerCase())
+			transaction.agentName.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+			transaction.customerName?.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+			transaction.receiptNumber?.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+			transaction.imei.toLowerCase().includes(searchTerm.trim().toLowerCase())
 	);
 
 	const handleRefresh = () => {
@@ -322,6 +311,7 @@ export function TransactionList() {
 		setTypeFilter('');
 		setStatusFilter('');
 		setPaymentMethodFilter('');
+		setProductFilter('');
 		setDateFrom(null);
 		setDateTo(null);
 		setCurrentPage(1);
@@ -351,6 +341,9 @@ export function TransactionList() {
 				break;
 			case 'paymentMethod':
 				setPaymentMethodFilter(value as string);
+				break;
+			case 'product':
+				setProductFilter(value as string);
 				break;
 			case 'dateFrom':
 				setDateFrom(value as Date | null);
@@ -444,11 +437,6 @@ export function TransactionList() {
 		}
 	};
 
-	const handleViewTransaction = (transaction: Transaction) => {
-		setSelectedTransaction(transaction);
-		openTransactionDetails();
-	};
-
 	const columns = [
 		{
 			name: 'receiptNumber',
@@ -476,6 +464,7 @@ export function TransactionList() {
 			header: 'Agent',
 			defaultFlex: 1,
 			minWidth: 150,
+			render: ({ data }: { data: Transaction }) => data.agentName || 'N/A',
 		},
 		{
 			name: 'customerName',
@@ -489,6 +478,7 @@ export function TransactionList() {
 			header: 'Product',
 			defaultFlex: 1,
 			minWidth: 120,
+			render: ({ data }: { data: Transaction }) => data.productName || 'N/A',
 		},
 		{
 			name: 'amount',
@@ -537,24 +527,17 @@ export function TransactionList() {
 			defaultFlex: 1,
 			minWidth: 120,
 			render: ({ data }: { data: Transaction }) =>
-				new Date(data.createdAt).toLocaleDateString(),
-		},
-		{
-			name: 'actions',
-			header: 'Actions',
-			defaultFlex: 1,
-			minWidth: 80,
-			render: ({ data }: { data: Transaction }) => (
-				<ActionIcon
-					color="blue"
-					variant="light"
-					size="sm"
-					className={classes.actionButton}
-					onClick={() => handleViewTransaction(data)}
-				>
-					<IconEye size={16} />
-				</ActionIcon>
-			),
+				new Date(data.createdAt)
+					.toLocaleString('en-UG', {
+						day: '2-digit',
+						month: '2-digit',
+						year: 'numeric',
+						hour: '2-digit',
+						minute: '2-digit',
+						hour12: true,
+						timeZone: 'Africa/Kampala',
+					})
+					.toUpperCase(),
 		},
 	];
 
@@ -605,15 +588,6 @@ export function TransactionList() {
 							Cash Sale
 						</Button>
 
-						<Button
-							leftIcon={<IconTrendingUp size={16} />}
-							onClick={openReportsModal}
-							variant="light"
-							radius="md"
-						>
-							Sales Report
-						</Button>
-
 						<ActionIcon
 							color="blue"
 							variant="light"
@@ -649,7 +623,7 @@ export function TransactionList() {
 						/>
 					</div>
 					<Text className={classes.statValue}>
-						{summaryLoading ? '...' : formatCurrency(summary.totalAmount)}
+						{transactionsLoading ? '...' : formatCurrency(summary.totalAmount)}
 					</Text>
 					<Text className={classes.statLabel}>Total Sales</Text>
 				</Card>
@@ -665,7 +639,7 @@ export function TransactionList() {
 						/>
 					</div>
 					<Text className={classes.statValue}>
-						{summaryLoading ? '...' : formatCurrency(summary.totalCommission)}
+						{transactionsLoading ? '...' : formatCurrency(summary.totalCommission)}
 					</Text>
 					<Text className={classes.statLabel}>Total Commission</Text>
 				</Card>
@@ -681,7 +655,7 @@ export function TransactionList() {
 						/>
 					</div>
 					<Text className={classes.statValue}>
-						{summaryLoading ? '...' : summary.totalTransactions}
+						{transactionsLoading ? '...' : transactionsData?.data?.totalCount}
 					</Text>
 					<Text className={classes.statLabel}>Total Transactions</Text>
 				</Card>
@@ -783,6 +757,22 @@ export function TransactionList() {
 						]}
 						value={paymentMethodFilter}
 						onChange={(value) => handleFilterChange('paymentMethod', value || '')}
+						radius="md"
+						clearable
+					/>
+
+					<Select
+						placeholder="Product"
+						icon={<IconDeviceMobile size={16} />}
+						data={[
+							{ value: '', label: 'All Products' },
+							...(productsData?.data?.data || []).map((product: any) => ({
+								value: product.id,
+								label: product.productName,
+							})),
+						]}
+						value={productFilter}
+						onChange={(value) => handleFilterChange('product', value || '')}
 						radius="md"
 						clearable
 					/>
@@ -947,158 +937,6 @@ export function TransactionList() {
 				opened={cashSaleModalOpened}
 				onClose={closeCashSaleModal}
 			/>
-
-			<SalesReportModal
-				opened={reportsModalOpened}
-				onClose={closeReportsModal}
-			/>
-
-			{selectedTransaction && (
-				<Modal
-					opened={transactionDetailsOpened}
-					close={closeTransactionDetails}
-					size="lg"
-				>
-					<div style={{ padding: '1rem 0' }}>
-						<Group
-							position="apart"
-							mb="md"
-						>
-							<Text weight={600}>
-								Receipt #{selectedTransaction.receiptNumber || 'N/A'}
-							</Text>
-							<Badge
-								color={getStatusColor(selectedTransaction.status)}
-								variant="light"
-								className={classes.badge}
-							>
-								{toTitle(selectedTransaction.status)}
-							</Badge>
-						</Group>
-
-						<div
-							style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}
-						>
-							<div>
-								<Text
-									size="sm"
-									color="dimmed"
-								>
-									Transaction Type
-								</Text>
-								<Badge
-									color={getTypeColor(selectedTransaction.type)}
-									variant="light"
-									className={classes.badge}
-								>
-									{toTitle(selectedTransaction.type)}
-								</Badge>
-							</div>
-
-							<div>
-								<Text
-									size="sm"
-									color="dimmed"
-								>
-									Amount
-								</Text>
-								<Text weight={600}>
-									{formatCurrency(selectedTransaction.amount)}
-								</Text>
-							</div>
-
-							<div>
-								<Text
-									size="sm"
-									color="dimmed"
-								>
-									Commission
-								</Text>
-								<Text weight={600}>
-									{formatCurrency(selectedTransaction.commission)}
-								</Text>
-							</div>
-
-							<div>
-								<Text
-									size="sm"
-									color="dimmed"
-								>
-									Payment Method
-								</Text>
-								<Group spacing="xs">
-									{getPaymentMethodIcon(selectedTransaction.paymentMethod)}
-									<Text>{toTitle(selectedTransaction.paymentMethod)}</Text>
-								</Group>
-							</div>
-
-							<div>
-								<Text
-									size="sm"
-									color="dimmed"
-								>
-									Agent
-								</Text>
-								<Text>{selectedTransaction.agentName}</Text>
-							</div>
-
-							<div>
-								<Text
-									size="sm"
-									color="dimmed"
-								>
-									Customer
-								</Text>
-								<Text>{selectedTransaction.customerName || 'N/A'}</Text>
-							</div>
-
-							<div>
-								<Text
-									size="sm"
-									color="dimmed"
-								>
-									Product
-								</Text>
-								<Text>{selectedTransaction.productName}</Text>
-							</div>
-
-							<div>
-								<Text
-									size="sm"
-									color="dimmed"
-								>
-									IMEI
-								</Text>
-								<Text style={{ fontFamily: 'monospace' }}>
-									{selectedTransaction.imei}
-								</Text>
-							</div>
-
-							<div>
-								<Text
-									size="sm"
-									color="dimmed"
-								>
-									Date
-								</Text>
-								<Text>
-									{new Date(selectedTransaction.createdAt).toLocaleString()}
-								</Text>
-							</div>
-
-							<div>
-								<Text
-									size="sm"
-									color="dimmed"
-								>
-									Customer Phone
-								</Text>
-								<Text>{selectedTransaction.customerPhone || 'N/A'}</Text>
-							</div>
-						</div>
-					</div>
-				</Modal>
-			)}
 		</Container>
 	);
 }

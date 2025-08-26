@@ -154,7 +154,7 @@ export function AddStockModal({ opened, onClose, onSuccess }: AddStockModalProps
 
 	const { data: products, isLoading: productsLoading } = useQuery({
 		queryKey: ['products'],
-		queryFn: () => request.get('/lookups/products'),
+		queryFn: () => request.get('/shops'),
 		staleTime: 5 * 60 * 1000,
 	});
 

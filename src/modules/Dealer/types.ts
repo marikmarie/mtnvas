@@ -505,11 +505,10 @@ export interface TransactionListResponse {
 export interface CustomerActivationRequest {
 	agentId: number;
 	receiptNumber: string;
-	deviceMsisdn: string;
 	imei: string;
-	customerId?: string;
-	customerName?: string;
-	customerPhone?: string;
+	customerId: string;
+	customerName: string;
+	customerPhone: string;
 }
 
 // Customer Activation Response
@@ -523,16 +522,14 @@ export interface CustomerActivationResponse {
 // Cash Sale Request
 export interface CashSaleRequest {
 	agentId: number;
-	customerId?: string;
 	customerName: string;
 	customerPhone: string;
-	customerEmail?: string;
 	productId: number;
 	deviceId: number;
 	imei: string;
-	paymentMethod: 'cash' | 'mobile_money';
+	paymentMethod: string;
 	amount: number;
-	sponsorMsisdn?: string; // For mobile money
+	sponsorMsisdn?: string;
 }
 
 // Cash Sale Response
@@ -595,10 +592,7 @@ export interface CashSaleModalProps {
 	onClose: () => void;
 }
 
-export interface SalesReportModalProps {
-	opened: boolean;
-	onClose: () => void;
-}
+
 
 // =====================
 // Commission Management Types

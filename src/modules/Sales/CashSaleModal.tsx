@@ -10,14 +10,7 @@ import {
 	createStyles,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import {
-	IconCash,
-	IconDeviceMobile,
-	IconHash,
-	IconMail,
-	IconPhone,
-	IconUser,
-} from '@tabler/icons-react';
+import { IconCash, IconDeviceMobile, IconHash, IconPhone, IconUser } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
@@ -82,10 +75,8 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 	const form = useForm<CashSaleRequest>({
 		initialValues: {
 			agentId: 0,
-			customerId: '',
 			customerName: '',
 			customerPhone: '',
-			customerEmail: '',
 			productId: 0,
 			deviceId: 0,
 			imei: '',
@@ -98,11 +89,7 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 			customerName: (value) => (!value ? 'Customer name is required' : null),
 			customerPhone: (value) => {
 				if (!value) return 'Customer phone is required';
-				if (!/^\+?[1-9]\d{1,14}$/.test(value)) return 'Invalid phone number format';
-				return null;
-			},
-			customerEmail: (value) => {
-				if (value && !/^\S+@\S+$/.test(value)) return 'Invalid email format';
+				if (!/^\+?[1-9]\d{1,14}$/.test(value)) return 'Customer phone is required';
 				return null;
 			},
 			productId: (value) => (!value ? 'Product is required' : null),
@@ -135,7 +122,7 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 
 	const { data: productsData } = useQuery({
 		queryKey: ['products-lookup'],
-		queryFn: () => request.get('/lookups/products'),
+		queryFn: () => request.get('/products'),
 	});
 
 	const { data: devicesData } = useQuery({
@@ -290,34 +277,6 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 										{...form.getInputProps('customerPhone')}
 										radius="md"
 										required
-									/>
-								</Group>
-
-								<Group grow>
-									<TextInput
-										label="Customer ID (Optional)"
-										placeholder="Enter customer ID if available"
-										icon={
-											<IconHash
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										{...form.getInputProps('customerId')}
-										radius="md"
-									/>
-
-									<TextInput
-										label="Customer Email (Optional)"
-										placeholder="Enter customer email"
-										icon={
-											<IconMail
-												size={16}
-												className={classes.inputIcon}
-											/>
-										}
-										{...form.getInputProps('customerEmail')}
-										radius="md"
 									/>
 								</Group>
 							</Stack>

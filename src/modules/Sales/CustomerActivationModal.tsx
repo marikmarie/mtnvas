@@ -68,7 +68,6 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 		initialValues: {
 			agentId: 0,
 			receiptNumber: '',
-			deviceMsisdn: '',
 			imei: '',
 			customerId: '',
 			customerName: '',
@@ -77,16 +76,12 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 		validate: {
 			agentId: (value) => (!value ? 'Agent is required' : null),
 			receiptNumber: (value) => (!value ? 'Receipt number is required' : null),
-			deviceMsisdn: (value) => {
-				if (!value) return 'Device MSISDN is required';
-				if (!/^\+?[1-9]\d{1,14}$/.test(value)) return 'Invalid phone number format';
-				return null;
-			},
 			imei: (value) => {
 				if (!value) return 'IMEI is required';
 				if (!/^\d{15}$/.test(value)) return 'IMEI must be 15 digits';
 				return null;
 			},
+			customerId: (value) => (!value ? 'Customer ID is required' : null),
 			customerName: (value) => (!value ? 'Customer name is required' : null),
 			customerPhone: (value) => {
 				if (!value) return 'Customer phone is required';
@@ -238,15 +233,15 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 								/>
 
 								<TextInput
-									label="Device MSISDN"
-									placeholder="Enter device phone number"
+									label="Customer ID"
+									placeholder="Enter customer ID"
 									icon={
-										<IconPhone
+										<IconHash
 											size={16}
 											className={classes.inputIcon}
 										/>
 									}
-									{...form.getInputProps('deviceMsisdn')}
+									{...form.getInputProps('customerId')}
 									radius="md"
 									required
 								/>

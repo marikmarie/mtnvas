@@ -156,7 +156,7 @@ export function CommissionRates() {
 
 	const { data: productsData } = useQuery({
 		queryKey: ['products-lookup'],
-		queryFn: () => request.get('/lookups/products'),
+		queryFn: () => request.get('/shops'),
 	});
 
 	const deleteRateMutation = useMutation({
