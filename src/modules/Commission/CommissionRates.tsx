@@ -150,12 +150,12 @@ export function CommissionRates() {
 	});
 
 	const { data: dealersData } = useQuery({
-		queryKey: ['dealers-lookup'],
+		queryKey: ['dealers'],
 		queryFn: () => request.get('/dealer'),
 	});
 
 	const { data: productsData } = useQuery({
-		queryKey: ['products-lookup'],
+		queryKey: ['products'],
 		queryFn: () => request.get('/shops'),
 	});
 

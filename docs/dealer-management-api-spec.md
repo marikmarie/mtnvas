@@ -1091,7 +1091,7 @@ interface Product {
 ### 11.3 Get Devices List
 
 ```typescript
-GET /lookups/devices
+GET /devices
 Query Params: {
   category?: 'wakanet' | 'enterprise' | 'both';
   productId?: string;

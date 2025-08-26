@@ -28,12 +28,12 @@ import {
 	IconUser,
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
 import { toTitle } from '../../utils/toTitle';
-import { Transaction, TransactionSummary } from '../Dealer/types';
+import { Agent, Dealer, Product, Transaction, TransactionSummary } from '../Dealer/types';
 import { CashSaleModal } from './CashSaleModal';
 import { CustomerActivationModal } from './CustomerActivationModal';
 
@@ -92,11 +92,6 @@ const useStyles = createStyles((theme) => ({
 		border: `1px solid ${
 			theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
 		}`,
-		transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-		'&:hover': {
-			transform: 'translateY(-2px)',
-			boxShadow: theme.shadows.md,
-		},
 	},
 
 	statIcon: {
@@ -262,22 +257,46 @@ export function TransactionList() {
 	});
 
 	const { data: dealersData } = useQuery({
-		queryKey: ['dealers-lookup'],
+		queryKey: ['dealers'],
 		queryFn: () => request.get('/dealer'),
 		retry: 2,
 	});
 
 	const { data: agentsData } = useQuery({
-		queryKey: ['agents-lookup'],
+		queryKey: ['agents'],
 		queryFn: () => request.get('/agents'),
 		retry: 2,
 	});
 
 	const { data: productsData } = useQuery({
-		queryKey: ['products-lookup'],
+		queryKey: ['products'],
 		queryFn: () => request.get('/products'),
 		retry: 2,
 	});
+
+	const agentOptions = useMemo(() => {
+		if (!agentsData?.data?.data) return [];
+		return agentsData.data.data.map((agent: Agent) => ({
+			value: agent.id,
+			label: agent.agentName.toUpperCase() || 'Unknown Agent',
+		})) as unknown as { value: string; label: string }[];
+	}, [agentsData?.data?.data]);
+
+	const dealerOptions = useMemo(() => {
+		if (!dealersData?.data?.data) return [];
+		return dealersData.data.data.map((dealer: Dealer) => ({
+			value: dealer.id,
+			label: dealer.dealerName.toUpperCase() || 'Unknown Dealer',
+		})) as unknown as { value: string; label: string }[];
+	}, [dealersData?.data?.data]);
+
+	const productOptions = useMemo(() => {
+		if (!productsData?.data?.data) return [];
+		return productsData.data.data.map((product: Product) => ({
+			value: product.id,
+			label: product.productName.toUpperCase() || 'Unknown Product',
+		})) as unknown as { value: string; label: string }[];
+	}, [productsData?.data?.data]);
 
 	const summary: TransactionSummary = transactionsData?.data?.summary || {
 		totalAmount: 0,
@@ -287,8 +306,6 @@ export function TransactionList() {
 
 	const transactions = transactionsData?.data?.data || [];
 	const totalTransactions = transactionsData?.data?.meta?.total || 0;
-
-	console.log(transactions);
 
 	const filteredTransactions = transactions.filter(
 		(transaction: Transaction) =>
@@ -692,13 +709,7 @@ export function TransactionList() {
 					<Select
 						placeholder="All Dealers"
 						icon={<IconUser size={16} />}
-						data={[
-							{ value: '', label: 'All Dealers' },
-							...(dealersData?.data?.data || []).map((dealer: any) => ({
-								value: dealer.id,
-								label: dealer.name,
-							})),
-						]}
+						data={[{ value: '', label: 'All Dealers' }, ...dealerOptions]}
 						value={dealerFilter}
 						onChange={(value) => handleFilterChange('dealer', value || '')}
 						radius="md"
@@ -708,13 +719,7 @@ export function TransactionList() {
 					<Select
 						placeholder="All Agents"
 						icon={<IconUser size={16} />}
-						data={[
-							{ value: '', label: 'All Agents' },
-							...(agentsData?.data?.data || []).map((agent: any) => ({
-								value: agent.id,
-								label: agent.name,
-							})),
-						]}
+						data={[{ value: '', label: 'All Agents' }, ...agentOptions]}
 						value={agentFilter}
 						onChange={(value) => handleFilterChange('agent', value || '')}
 						radius="md"
@@ -764,13 +769,7 @@ export function TransactionList() {
 					<Select
 						placeholder="Product"
 						icon={<IconDeviceMobile size={16} />}
-						data={[
-							{ value: '', label: 'All Products' },
-							...(productsData?.data?.data || []).map((product: any) => ({
-								value: product.id,
-								label: product.productName,
-							})),
-						]}
+						data={[{ value: '', label: 'All Products' }, ...productOptions]}
 						value={productFilter}
 						onChange={(value) => handleFilterChange('product', value || '')}
 						radius="md"
@@ -779,18 +778,20 @@ export function TransactionList() {
 
 					<DatePickerInput
 						value={dateFrom}
+						// @ts-expect-error
+						placeholder="From Date"
 						onChange={(value) => handleFilterChange('dateFrom', value)}
 						radius="md"
 						clearable
-						label="From Date"
 					/>
 
 					<DatePickerInput
 						value={dateTo}
+						// @ts-expect-error
+						placeholder="To Date"
 						onChange={(value) => handleFilterChange('dateTo', value)}
 						radius="md"
 						clearable
-						label="To Date"
 					/>
 				</div>
 			</Paper>

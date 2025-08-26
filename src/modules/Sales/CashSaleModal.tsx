@@ -12,10 +12,18 @@ import {
 import { useForm } from '@mantine/form';
 import { IconCash, IconDeviceMobile, IconHash, IconPhone, IconUser } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
-import { CashSaleModalProps, CashSaleRequest, CashSaleResponse } from '../Dealer/types';
+import {
+	Agent,
+	CashSaleModalProps,
+	CashSaleRequest,
+	CashSaleResponse,
+	Device,
+	Product,
+} from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -116,19 +124,19 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 	});
 
 	const { data: agentsData } = useQuery({
-		queryKey: ['agents-lookup'],
+		queryKey: ['agents'],
 		queryFn: () => request.get('/agents', { params: { status: 'active' } }),
 	});
 
 	const { data: productsData } = useQuery({
-		queryKey: ['products-lookup'],
+		queryKey: ['products'],
 		queryFn: () => request.get('/products'),
 	});
 
 	const { data: devicesData } = useQuery({
-		queryKey: ['devices-lookup', form.values.productId],
+		queryKey: ['devices', form.values.productId],
 		queryFn: () =>
-			request.get('/lookups/devices', {
+			request.get('/devices', {
 				params: { productId: form.values.productId },
 			}),
 		enabled: !!form.values.productId,
@@ -165,6 +173,30 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 	const handleProductChange = (productId: number | undefined) => {
 		form.setFieldValue('productId', productId || 0);
 	};
+
+	const agentOptions = useMemo(() => {
+		if (!agentsData?.data?.data) return [];
+		return agentsData.data.data.map((agent: Agent) => ({
+			value: agent.id,
+			label: agent.agentName.toUpperCase() || 'Unknown Agent',
+		})) as unknown as { value: string; label: string }[];
+	}, [agentsData?.data?.data]);
+
+	const productOptions = useMemo(() => {
+		if (!productsData?.data?.data) return [];
+		return productsData.data.data.map((product: Product) => ({
+			value: product.id,
+			label: product.productName.toUpperCase() || 'Unknown Product',
+		})) as unknown as { value: string; label: string }[];
+	}, [productsData?.data?.data]);
+
+	const deviceOptions = useMemo(() => {
+		if (!devicesData?.data?.data) return [];
+		return devicesData.data.data.map((device: Device) => ({
+			value: device.id,
+			label: device.deviceName.toUpperCase() || 'Unknown Device',
+		})) as unknown as { value: string; label: string }[];
+	}, [devicesData?.data?.data]);
 
 	return (
 		<Modal
@@ -239,12 +271,7 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 											className={classes.inputIcon}
 										/>
 									}
-									data={
-										agentsData?.data?.data?.map((agent: any) => ({
-											value: agent.id,
-											label: `${agent.name} (${agent.userType})`,
-										})) || []
-									}
+									data={[{ value: '', label: 'All Agents' }, ...agentOptions]}
 									{...form.getInputProps('agentId')}
 									radius="md"
 									required
@@ -296,12 +323,10 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 									<Select
 										label="Product"
 										placeholder="Select product"
-										data={
-											productsData?.data?.data?.map((product: any) => ({
-												value: product.id,
-												label: product.name,
-											})) || []
-										}
+										data={[
+											{ value: '', label: 'All Products' },
+											...productOptions,
+										]}
 										value={form.values.productId.toString()}
 										onChange={(value) =>
 											handleProductChange(Number(value) || undefined)
@@ -313,12 +338,10 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 									<Select
 										label="Device"
 										placeholder="Select device"
-										data={
-											devicesData?.data?.data?.map((device: any) => ({
-												value: device.id,
-												label: device.name,
-											})) || []
-										}
+										data={[
+											{ value: '', label: 'All Devices' },
+											...deviceOptions,
+										]}
 										{...form.getInputProps('deviceId')}
 										radius="md"
 										disabled={!form.values.productId}

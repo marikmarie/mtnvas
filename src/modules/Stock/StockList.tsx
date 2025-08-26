@@ -19,7 +19,6 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-	IconAlertTriangle,
 	IconBox,
 	IconBuilding,
 	IconDeviceMobile,
@@ -41,7 +40,6 @@ import useRequest from '../../hooks/useRequest';
 import { Stock } from '../Dealer/types';
 import { AddStockModal } from './AddStockModal';
 import { SetStockThresholdModal } from './SetStockThresholdModal';
-import { StockThresholdAlertsModal } from './StockThresholdAlertsModal';
 import { StockThresholdsList } from './StockThresholdsList';
 import { StockTransferModal } from './StockTransferModal';
 
@@ -187,8 +185,6 @@ export function StockList() {
 	const [thresholdModalOpened, { open: openThresholdModal, close: closeThresholdModal }] =
 		useDisclosure(false);
 	const [transferModalOpened, { open: openTransferModal, close: closeTransferModal }] =
-		useDisclosure(false);
-	const [alertsModalOpened, { open: openAlertsModal, close: closeAlertsModal }] =
 		useDisclosure(false);
 	const [thresholdsListOpened, { open: openThresholdsList, close: closeThresholdsList }] =
 		useDisclosure(false);
@@ -443,16 +439,6 @@ export function StockList() {
 							color="purple"
 						>
 							View Thresholds
-						</Button>
-						<Button
-							leftIcon={<IconAlertTriangle size={16} />}
-							variant="outline"
-							onClick={openAlertsModal}
-							size="md"
-							radius="md"
-							color="red"
-						>
-							View Alerts
 						</Button>
 						<Button
 							leftIcon={<IconTransfer size={16} />}
@@ -859,11 +845,6 @@ export function StockList() {
 			<StockTransferModal
 				opened={transferModalOpened}
 				onClose={closeTransferModal}
-			/>
-
-			<StockThresholdAlertsModal
-				opened={alertsModalOpened}
-				onClose={closeAlertsModal}
 			/>
 
 			<StockThresholdsList

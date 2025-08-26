@@ -11,12 +11,18 @@ import {
 import { useForm } from '@mantine/form';
 import { IconDeviceMobile, IconHash, IconPhone, IconReceipt, IconUser } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
+import { formatPhoneNumber } from '../../utils/phone.util';
 import {
+	Agent,
 	CustomerActivationModalProps,
 	CustomerActivationRequest,
 	CustomerActivationResponse,
+	Stock,
+	Transaction,
+	TransactionListResponse,
 } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
@@ -85,20 +91,30 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 			customerName: (value) => (!value ? 'Customer name is required' : null),
 			customerPhone: (value) => {
 				if (!value) return 'Customer phone is required';
-				if (!/^\+?[1-9]\d{1,14}$/.test(value)) return 'Invalid phone number format';
 				return null;
 			},
 		},
 	});
 
 	const { data: agentsData } = useQuery({
-		queryKey: ['agents-lookup'],
+		queryKey: ['agents'],
 		queryFn: () => request.get('/agents', { params: { status: 'active' } }),
 	});
 
+	const agentOptions = useMemo(() => {
+		if (!agentsData?.data?.data) return [];
+		return agentsData.data.data.map((agent: Agent) => ({
+			value: agent.id,
+			label: agent.agentName.toUpperCase() || 'Unknown Agent',
+		})) as unknown as { value: string; label: string }[];
+	}, [agentsData?.data?.data]);
+
 	const activationMutation = useMutation({
 		mutationFn: async (data: CustomerActivationRequest) => {
-			const response = await request.post('/transactions/activation', data);
+			const response = await request.post('/transactions/activation', {
+				...data,
+				customerPhone: formatPhoneNumber(data.customerPhone),
+			});
 			return response.data as CustomerActivationResponse;
 		},
 		onSuccess: (data) => {
@@ -114,6 +130,44 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 			console.error('Activation failed:', error);
 		},
 	});
+
+	const { data: stockItems } = useQuery({
+		queryKey: ['stock'],
+		queryFn: () =>
+			request.get('/stock', {
+				params: {
+					status: 1,
+					pageSize: 1000,
+				},
+			}),
+	});
+
+	const { data: transactionsData } = useQuery({
+		queryKey: ['transactions'],
+		queryFn: async () => {
+			const response = await request.get('/transactions', {
+				params: {
+					imei: form.values.imei,
+				},
+			});
+			return response as unknown as TransactionListResponse;
+		},
+		retry: 2,
+	});
+
+	const imeiOptions = useMemo(() => {
+		return stockItems?.data?.data?.map((item: Stock) => ({
+			value: item.imei,
+			label: item.imei,
+		})) as unknown as { value: string; label: string }[];
+	}, [stockItems?.data?.data]);
+
+	const receiptNumberOptions = useMemo(() => {
+		return transactionsData?.data?.data?.map((item: Transaction) => ({
+			value: item.receiptNumber,
+			label: item.receiptNumber,
+		})) as unknown as { value: string; label: string }[];
+	}, [transactionsData?.data?.data]);
 
 	const handleSubmit = (values: CustomerActivationRequest) => {
 		activationMutation.mutate(values);
@@ -196,12 +250,7 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 										className={classes.inputIcon}
 									/>
 								}
-								data={
-									agentsData?.data?.data?.map((agent: any) => ({
-										value: agent.id,
-										label: `${agent.name} (${agent.userType})`,
-									})) || []
-								}
+								data={agentOptions}
 								{...form.getInputProps('agentId')}
 								radius="md"
 								required
@@ -218,7 +267,7 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 								Transaction Details
 							</Text>
 							<Stack spacing="md">
-								<TextInput
+								<Select
 									label="Receipt Number"
 									placeholder="Enter unique receipt number"
 									icon={
@@ -227,8 +276,11 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 											className={classes.inputIcon}
 										/>
 									}
+									data={receiptNumberOptions}
 									{...form.getInputProps('receiptNumber')}
 									radius="md"
+									searchable
+									clearable
 									required
 								/>
 
@@ -246,7 +298,7 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 									required
 								/>
 
-								<TextInput
+								<Select
 									label="IMEI"
 									placeholder="Enter 15-digit IMEI number"
 									icon={
@@ -255,9 +307,11 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 											className={classes.inputIcon}
 										/>
 									}
+									searchable
+									clearable
+									data={imeiOptions}
 									{...form.getInputProps('imei')}
 									radius="md"
-									maxLength={15}
 									required
 								/>
 							</Stack>

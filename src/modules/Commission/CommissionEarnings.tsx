@@ -210,12 +210,12 @@ export function CommissionEarnings() {
 	});
 
 	const { data: dealersData } = useQuery({
-		queryKey: ['dealers-lookup'],
+		queryKey: ['dealers'],
 		queryFn: () => request.get('/dealer'),
 	});
 
 	const { data: agentsData } = useQuery({
-		queryKey: ['agents-lookup'],
+		queryKey: ['agents'],
 		queryFn: () => request.get('/agents'),
 	});
 

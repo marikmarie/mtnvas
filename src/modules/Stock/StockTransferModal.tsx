@@ -148,6 +148,7 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 
 	const mutation = useMutation({
 		mutationFn: (values: StockTransferRequest) => request.post('/stock/transfer', values),
+		mutationKey: ['stock-transfers'],
 		onSuccess: () => {
 			onClose();
 			form.reset();
@@ -173,6 +174,13 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 			)
 			?.map((item: Stock) => item.imei)
 			?.filter(Boolean) || [];
+
+	const imeiOptions = useMemo(() => {
+		return availableImeis.map((imei: string) => ({
+			value: imei,
+			label: imei,
+		})) as unknown as { value: string; label: string }[];
+	}, [availableImeis]);
 
 	return (
 		<Modal
@@ -260,6 +268,7 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 								}
 								data={dealerOptions}
 								searchable
+								clearable
 								nothingFound="No dealers found"
 								{...form.getInputProps('fromDealerId')}
 								radius="md"
@@ -293,6 +302,7 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 								}
 								data={dealerOptions}
 								searchable
+								clearable
 								nothingFound="No dealers found"
 								{...form.getInputProps('toDealerId')}
 								radius="md"
@@ -320,11 +330,9 @@ export function StockTransferModal({ opened, onClose }: StockTransferModalProps)
 										className={classes.inputIcon}
 									/>
 								}
-								data={availableImeis.map((imei: string) => ({
-									value: imei,
-									label: imei,
-								}))}
+								data={imeiOptions}
 								searchable
+								clearable
 								nothingFound="No IMEIs available"
 								disabled={!form.values.fromDealerId}
 								className={classes.imeiInput}

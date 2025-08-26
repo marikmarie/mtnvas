@@ -154,13 +154,13 @@ export function AddStockModal({ opened, onClose, onSuccess }: AddStockModalProps
 
 	const { data: products, isLoading: productsLoading } = useQuery({
 		queryKey: ['products'],
-		queryFn: () => request.get('/shops'),
+		queryFn: () => request.get('/products'),
 		staleTime: 5 * 60 * 1000,
 	});
 
 	const { data: devices, isLoading: devicesLoading } = useQuery({
 		queryKey: ['devices'],
-		queryFn: () => request.get('/lookups/devices'),
+		queryFn: () => request.get('/devices'),
 		staleTime: 5 * 60 * 1000,
 	});
 
@@ -169,7 +169,7 @@ export function AddStockModal({ opened, onClose, onSuccess }: AddStockModalProps
 		return dealers.data.data.map((dealer: Dealer) => ({
 			value: dealer.id?.toString() || '',
 			label: dealer.dealerName?.toUpperCase() || 'Unknown Dealer',
-		}));
+		})) as unknown as { value: string; label: string }[];
 	}, [dealers?.data?.data]);
 
 	const productOptions = useMemo(() => {
@@ -177,7 +177,7 @@ export function AddStockModal({ opened, onClose, onSuccess }: AddStockModalProps
 		return products.data.data.map((product: Product) => ({
 			value: product.id?.toString() || '',
 			label: product.productName?.toUpperCase() || 'Unknown Product',
-		}));
+		})) as unknown as { value: string; label: string }[];
 	}, [products?.data?.data]);
 
 	const deviceOptions = useMemo(() => {
@@ -185,7 +185,7 @@ export function AddStockModal({ opened, onClose, onSuccess }: AddStockModalProps
 		return devices.data.data.map((device: Device) => ({
 			value: device.id?.toString() || '',
 			label: device.deviceName?.toUpperCase() || 'Unknown Device',
-		}));
+		})) as unknown as { value: string; label: string }[];
 	}, [devices?.data?.data]);
 
 	const form = useForm<StockFormValues>({
