@@ -11,18 +11,13 @@ import {
 import { useForm } from '@mantine/form';
 import { IconDeviceMobile, IconHash, IconPhone, IconReceipt, IconUser } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useEffect } from 'react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { formatPhoneNumber } from '../../utils/phone.util';
 import {
-	Agent,
 	CustomerActivationModalProps,
 	CustomerActivationRequest,
 	CustomerActivationResponse,
-	Stock,
-	Transaction,
-	TransactionListResponse,
 } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
@@ -65,19 +60,23 @@ const useStyles = createStyles((theme) => ({
 	},
 }));
 
-export function CustomerActivationModal({ opened, onClose }: CustomerActivationModalProps) {
+export function CustomerActivationModal({
+	opened,
+	onClose,
+	transaction,
+}: CustomerActivationModalProps) {
 	const { classes } = useStyles();
 	const request = useRequest(true);
 	const queryClient = useQueryClient();
 
 	const form = useForm<CustomerActivationRequest>({
 		initialValues: {
-			agentId: 0,
-			receiptNumber: '',
-			imei: '',
-			customerId: '',
-			customerName: '',
-			customerPhone: '',
+			agentId: transaction?.agentId || 0,
+			receiptNumber: transaction?.receiptNumber || '',
+			imei: transaction?.imei || '',
+			customerId: transaction?.customerId || '',
+			customerName: transaction?.customerName || '',
+			customerPhone: transaction?.customerPhone || '',
 		},
 		validate: {
 			agentId: (value) => (!value ? 'Agent is required' : null),
@@ -101,20 +100,29 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 		queryFn: () => request.get('/agents', { params: { status: 'active' } }),
 	});
 
-	const agentOptions = useMemo(() => {
-		if (!agentsData?.data?.data) return [];
-		return agentsData.data.data.map((agent: Agent) => ({
+	const agentOptions =
+		agentsData?.data?.data?.map((agent: any) => ({
 			value: agent.id,
 			label: agent.agentName.toUpperCase() || 'Unknown Agent',
-		})) as unknown as { value: string; label: string }[];
-	}, [agentsData?.data?.data]);
+		})) || [];
+
+	// Update form when transaction changes
+	useEffect(() => {
+		if (transaction) {
+			form.setValues({
+				agentId: transaction.agentId,
+				receiptNumber: transaction.receiptNumber || '',
+				imei: transaction.imei,
+				customerId: transaction.customerId || '',
+				customerName: transaction.customerName || '',
+				customerPhone: transaction.customerPhone,
+			});
+		}
+	}, [transaction, form]);
 
 	const activationMutation = useMutation({
 		mutationFn: async (data: CustomerActivationRequest) => {
-			const response = await request.post('/transactions/activation', {
-				...data,
-				customerPhone: formatPhoneNumber(data.customerPhone),
-			});
+			const response = await request.post('/transactions/activation', data);
 			return response.data as CustomerActivationResponse;
 		},
 		onSuccess: (data) => {
@@ -123,6 +131,15 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 			queryClient.invalidateQueries(['transactions']);
 			queryClient.invalidateQueries(['transactionSummary']);
 
+			// Show success message
+			if (transaction) {
+				alert(
+					`Successfully activated transaction ${transaction.receiptNumber || transaction.id} for ${transaction.customerName}`
+				);
+			} else {
+				alert('Successfully recorded new activation');
+			}
+
 			form.reset();
 			onClose();
 		},
@@ -130,44 +147,6 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 			console.error('Activation failed:', error);
 		},
 	});
-
-	const { data: stockItems } = useQuery({
-		queryKey: ['stock'],
-		queryFn: () =>
-			request.get('/stock', {
-				params: {
-					status: 1,
-					pageSize: 1000,
-				},
-			}),
-	});
-
-	const { data: transactionsData } = useQuery({
-		queryKey: ['transactions'],
-		queryFn: async () => {
-			const response = await request.get('/transactions', {
-				params: {
-					imei: form.values.imei,
-				},
-			});
-			return response as unknown as TransactionListResponse;
-		},
-		retry: 2,
-	});
-
-	const imeiOptions = useMemo(() => {
-		return stockItems?.data?.data?.map((item: Stock) => ({
-			value: item.imei,
-			label: item.imei,
-		})) as unknown as { value: string; label: string }[];
-	}, [stockItems?.data?.data]);
-
-	const receiptNumberOptions = useMemo(() => {
-		return transactionsData?.data?.data?.map((item: Transaction) => ({
-			value: item.receiptNumber,
-			label: item.receiptNumber,
-		})) as unknown as { value: string; label: string }[];
-	}, [transactionsData?.data?.data]);
 
 	const handleSubmit = (values: CustomerActivationRequest) => {
 		activationMutation.mutate(values);
@@ -191,7 +170,7 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 				<ThemeIcon
 					size="lg"
 					radius="md"
-					color="blue"
+					color={transaction ? 'green' : 'blue'}
 				>
 					<IconDeviceMobile size={24} />
 				</ThemeIcon>
@@ -200,13 +179,15 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 						size="lg"
 						weight={600}
 					>
-						Record Customer Activation
+						{transaction ? 'Activate Transaction' : 'Record Customer Activation'}
 					</Text>
 					<Text
 						color="dimmed"
 						size="sm"
 					>
-						Record a new customer activation transaction
+						{transaction
+							? `Activate transaction for ${transaction.customerName || 'customer'}`
+							: 'Record a new customer activation transaction'}
 					</Text>
 				</div>
 			</div>
@@ -219,16 +200,28 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 							weight={500}
 							mb="xs"
 						>
-							📋 Activation Requirements
+							{transaction
+								? '📋 Transaction Activation'
+								: '📋 Activation Requirements'}
 						</Text>
 						<Text
 							size="xs"
 							color="dimmed"
 						>
-							Ensure you have the customer's device MSISDN, IMEI, and receipt number
-							before proceeding. This will activate the customer's device on the
-							network.
+							{transaction
+								? `Activating transaction ${transaction.receiptNumber || transaction.id} for customer ${transaction.customerName}. This will activate the customer's device on the network.`
+								: "Ensure you have the customer's device MSISDN, IMEI, and receipt number before proceeding. This will activate the customer's device on the network."}
 						</Text>
+						{transaction && (
+							<Text
+								size="xs"
+								color="green"
+								mt="xs"
+								weight={500}
+							>
+								✓ Transaction data pre-filled from existing record
+							</Text>
+						)}
 					</div>
 
 					<Stack spacing="lg">
@@ -254,6 +247,7 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 								{...form.getInputProps('agentId')}
 								radius="md"
 								required
+								disabled={!!transaction}
 							/>
 						</div>
 
@@ -267,7 +261,7 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 								Transaction Details
 							</Text>
 							<Stack spacing="md">
-								<Select
+								<TextInput
 									label="Receipt Number"
 									placeholder="Enter unique receipt number"
 									icon={
@@ -276,12 +270,10 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 											className={classes.inputIcon}
 										/>
 									}
-									data={receiptNumberOptions}
 									{...form.getInputProps('receiptNumber')}
 									radius="md"
-									searchable
-									clearable
 									required
+									readOnly={!!transaction}
 								/>
 
 								<TextInput
@@ -298,7 +290,7 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 									required
 								/>
 
-								<Select
+								<TextInput
 									label="IMEI"
 									placeholder="Enter 15-digit IMEI number"
 									icon={
@@ -307,12 +299,10 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 											className={classes.inputIcon}
 										/>
 									}
-									searchable
-									clearable
-									data={imeiOptions}
 									{...form.getInputProps('imei')}
 									radius="md"
 									required
+									readOnly={!!transaction}
 								/>
 							</Stack>
 						</div>
@@ -390,7 +380,7 @@ export function CustomerActivationModal({ opened, onClose }: CustomerActivationM
 							leftIcon={<IconDeviceMobile size={16} />}
 							radius="md"
 						>
-							Record Activation
+							{transaction ? 'Activate Transaction' : 'Record Activation'}
 						</Button>
 					</Group>
 				</div>

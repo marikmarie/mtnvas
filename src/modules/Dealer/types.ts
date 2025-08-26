@@ -585,6 +585,7 @@ export interface SalesReportResponse {
 export interface CustomerActivationModalProps {
 	opened: boolean;
 	onClose: () => void;
+	transaction?: Transaction;
 }
 
 export interface CashSaleModalProps {

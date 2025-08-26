@@ -189,7 +189,7 @@ export function TransactionList() {
 	const [dealerFilter, setDealerFilter] = useState<string>('');
 	const [shopFilter, setShopFilter] = useState<string>('');
 	const [typeFilter, setTypeFilter] = useState<string>('');
-	const [statusFilter, setStatusFilter] = useState<string>('');
+	const [statusFilter, setStatusFilter] = useState<'pending' | 'completed'>('pending');
 	const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>('');
 	const [productFilter, setProductFilter] = useState<string>('');
 	const [dateFrom, setDateFrom] = useState<Date | null>(null);
@@ -201,15 +201,25 @@ export function TransactionList() {
 		useDisclosure(false);
 	const [cashSaleModalOpened, { open: openCashSaleModal, close: closeCashSaleModal }] =
 		useDisclosure(false);
+	const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>(
+		undefined
+	);
 
 	const fetchTransactions = useCallback(async () => {
+		let transactionType = typeFilter;
+
+		// Handle special filter for cash sales pending activation
+		if (typeFilter === 'cash_sale_pending_activation') {
+			transactionType = 'cash_sale';
+		}
+
 		const params = {
 			page: currentPage,
 			pageSize: itemsPerPage,
 			agentId: agentFilter || undefined,
 			dealerId: dealerFilter || undefined,
 			shopId: shopFilter || undefined,
-			transactionType: typeFilter || undefined,
+			transactionType: transactionType || undefined,
 			status: statusFilter || undefined,
 			dateFrom: dateFrom?.toISOString().split('T')[0] || undefined,
 			dateTo: dateTo?.toISOString().split('T')[0] || undefined,
@@ -307,14 +317,22 @@ export function TransactionList() {
 	const transactions = transactionsData?.data?.data || [];
 	const totalTransactions = transactionsData?.data?.meta?.total || 0;
 
-	const filteredTransactions = transactions.filter(
-		(transaction: Transaction) =>
+	const filteredTransactions = transactions.filter((transaction: Transaction) => {
+		// Handle special filter for cash sales pending activation
+		if (typeFilter === 'cash_sale_pending_activation') {
+			if (transaction.type !== 'cash_sale' || transaction.status !== 'completed') {
+				return false;
+			}
+		}
+
+		return (
 			searchTerm === '' ||
 			transaction.agentName.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
 			transaction.customerName?.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
 			transaction.receiptNumber?.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
 			transaction.imei.toLowerCase().includes(searchTerm.trim().toLowerCase())
-	);
+		);
+	});
 
 	const handleRefresh = () => {
 		refetch();
@@ -326,7 +344,7 @@ export function TransactionList() {
 		setDealerFilter('');
 		setShopFilter('');
 		setTypeFilter('');
-		setStatusFilter('');
+		setStatusFilter('pending');
 		setPaymentMethodFilter('');
 		setProductFilter('');
 		setDateFrom(null);
@@ -354,7 +372,7 @@ export function TransactionList() {
 				setTypeFilter(value as string);
 				break;
 			case 'status':
-				setStatusFilter(value as string);
+				setStatusFilter(value as 'pending' | 'completed');
 				break;
 			case 'paymentMethod':
 				setPaymentMethodFilter(value as string);
@@ -415,6 +433,16 @@ export function TransactionList() {
 
 	const handlePageChange = (page: number) => {
 		setCurrentPage(page);
+	};
+
+	const handleRecordActivation = (transaction: Transaction) => {
+		setSelectedTransaction(transaction);
+		openActivationModal();
+	};
+
+	const handleCloseActivationModal = () => {
+		setSelectedTransaction(undefined);
+		closeActivationModal();
 	};
 
 	const totalPages = Math.ceil(totalTransactions / itemsPerPage);
@@ -556,6 +584,28 @@ export function TransactionList() {
 					})
 					.toUpperCase(),
 		},
+		{
+			name: 'actions',
+			header: 'Actions',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: Transaction }) => (
+				<Group spacing="xs">
+					{data.type === 'cash_sale' && data.status === 'completed' && (
+						<Button
+							size="xs"
+							variant="light"
+							color="blue"
+							leftIcon={<IconDeviceMobile size={16} />}
+							onClick={() => handleRecordActivation(data)}
+							radius="md"
+						>
+							Record Activation
+						</Button>
+					)}
+				</Group>
+			),
+		},
 	];
 
 	const transactionTable = useDataGridTable<Transaction>({
@@ -593,7 +643,7 @@ export function TransactionList() {
 							onClick={openActivationModal}
 							radius="md"
 						>
-							Record Activation
+							New Activation
 						</Button>
 
 						<Button
@@ -732,6 +782,10 @@ export function TransactionList() {
 							{ value: '', label: 'All Types' },
 							{ value: 'activation', label: 'Activation' },
 							{ value: 'cash_sale', label: 'Cash Sale' },
+							{
+								value: 'cash_sale_pending_activation',
+								label: 'Cash Sale (Pending Activation)',
+							},
 						]}
 						value={typeFilter}
 						onChange={(value) => handleFilterChange('type', value || '')}
@@ -844,9 +898,12 @@ export function TransactionList() {
 							typeFilter ||
 							statusFilter ||
 							paymentMethodFilter ||
+							productFilter ||
 							dateFrom ||
 							dateTo
-								? 'Try adjusting your filters or search terms'
+								? typeFilter === 'cash_sale_pending_activation'
+									? 'No cash sale transactions pending activation found'
+									: 'Try adjusting your filters or search terms'
 								: 'No transactions have been recorded yet'}
 						</Text>
 					</div>
@@ -931,7 +988,8 @@ export function TransactionList() {
 
 			<CustomerActivationModal
 				opened={activationModalOpened}
-				onClose={closeActivationModal}
+				onClose={handleCloseActivationModal}
+				transaction={selectedTransaction}
 			/>
 
 			<CashSaleModal
