@@ -477,7 +477,7 @@ export interface Transaction {
 	amount: number;
 	paymentMethod: 'cash' | 'mobile_money';
 	commission: number;
-	status: 'completed' | 'pending' | 'failed';
+	status: 'completed' | 'pending' | 'activated';
 	receiptNumber?: string;
 	createdAt: string;
 	createdBy: string | null;
@@ -592,8 +592,6 @@ export interface CashSaleModalProps {
 	opened: boolean;
 	onClose: () => void;
 }
-
-
 
 // =====================
 // Commission Management Types

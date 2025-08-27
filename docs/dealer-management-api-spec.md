@@ -798,7 +798,7 @@ Response: ApiResponse<{
 }>
 ```
 
-### 8.2 Record Cash Sale
+### 8.2 Record Sale
 
 ```typescript
 POST /transactions/cash-sale

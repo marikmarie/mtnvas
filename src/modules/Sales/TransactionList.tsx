@@ -16,11 +16,11 @@ import {
 import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import {
+	IconCalendar,
 	IconCash,
 	IconDeviceMobile,
 	IconDownload,
 	IconFilter,
-	IconPlus,
 	IconReceipt,
 	IconRefresh,
 	IconSearch,
@@ -128,7 +128,7 @@ const useStyles = createStyles((theme) => ({
 
 	filtersGrid: {
 		display: 'grid',
-		gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+		gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
 		gap: theme.spacing.md,
 		alignItems: 'end',
 	},
@@ -189,7 +189,7 @@ export function TransactionList() {
 	const [dealerFilter, setDealerFilter] = useState<string>('');
 	const [shopFilter, setShopFilter] = useState<string>('');
 	const [typeFilter, setTypeFilter] = useState<string>('');
-	const [statusFilter, setStatusFilter] = useState<'pending' | 'completed'>('pending');
+	const [statusFilter, setStatusFilter] = useState<'pending' | 'completed' | ''>('');
 	const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>('');
 	const [productFilter, setProductFilter] = useState<string>('');
 	const [dateFrom, setDateFrom] = useState<Date | null>(null);
@@ -206,20 +206,13 @@ export function TransactionList() {
 	);
 
 	const fetchTransactions = useCallback(async () => {
-		let transactionType = typeFilter;
-
-		// Handle special filter for cash sales pending activation
-		if (typeFilter === 'cash_sale_pending_activation') {
-			transactionType = 'cash_sale';
-		}
-
 		const params = {
 			page: currentPage,
 			pageSize: itemsPerPage,
 			agentId: agentFilter || undefined,
 			dealerId: dealerFilter || undefined,
 			shopId: shopFilter || undefined,
-			transactionType: transactionType || undefined,
+			transactionType: typeFilter || undefined,
 			status: statusFilter || undefined,
 			dateFrom: dateFrom?.toISOString().split('T')[0] || undefined,
 			dateTo: dateTo?.toISOString().split('T')[0] || undefined,
@@ -318,13 +311,6 @@ export function TransactionList() {
 	const totalTransactions = transactionsData?.data?.meta?.total || 0;
 
 	const filteredTransactions = transactions.filter((transaction: Transaction) => {
-		// Handle special filter for cash sales pending activation
-		if (typeFilter === 'cash_sale_pending_activation') {
-			if (transaction.type !== 'cash_sale' || transaction.status !== 'completed') {
-				return false;
-			}
-		}
-
 		return (
 			searchTerm === '' ||
 			transaction.agentName.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
@@ -344,7 +330,7 @@ export function TransactionList() {
 		setDealerFilter('');
 		setShopFilter('');
 		setTypeFilter('');
-		setStatusFilter('pending');
+		setStatusFilter('');
 		setPaymentMethodFilter('');
 		setProductFilter('');
 		setDateFrom(null);
@@ -450,11 +436,11 @@ export function TransactionList() {
 	const getStatusColor = (status: string) => {
 		switch (status) {
 			case 'completed':
-				return 'green';
+				return 'gray';
 			case 'pending':
 				return 'yellow';
-			case 'failed':
-				return 'red';
+			case 'activated':
+				return 'green';
 			default:
 				return 'gray';
 		}
@@ -509,21 +495,21 @@ export function TransactionList() {
 			header: 'Agent',
 			defaultFlex: 1,
 			minWidth: 150,
-			render: ({ data }: { data: Transaction }) => data.agentName || 'N/A',
+			render: ({ data }: { data: Transaction }) => data.agentName?.toUpperCase() || 'N/A',
 		},
 		{
 			name: 'customerName',
 			header: 'Customer',
 			defaultFlex: 1,
 			minWidth: 150,
-			render: ({ data }: { data: Transaction }) => data.customerName || 'N/A',
+			render: ({ data }: { data: Transaction }) => data.customerName?.toUpperCase() || 'N/A',
 		},
 		{
 			name: 'productName',
 			header: 'Product',
 			defaultFlex: 1,
 			minWidth: 120,
-			render: ({ data }: { data: Transaction }) => data.productName || 'N/A',
+			render: ({ data }: { data: Transaction }) => data.productName?.toUpperCase() || 'N/A',
 		},
 		{
 			name: 'amount',
@@ -591,7 +577,7 @@ export function TransactionList() {
 			minWidth: 120,
 			render: ({ data }: { data: Transaction }) => (
 				<Group spacing="xs">
-					{data.type === 'cash_sale' && data.status === 'completed' && (
+					{data.status === 'pending' && (
 						<Button
 							size="xs"
 							variant="light"
@@ -639,20 +625,11 @@ export function TransactionList() {
 
 					<div className={classes.actionsSection}>
 						<Button
-							leftIcon={<IconPlus size={16} />}
-							onClick={openActivationModal}
-							radius="md"
-						>
-							New Activation
-						</Button>
-
-						<Button
 							leftIcon={<IconCash size={16} />}
 							onClick={openCashSaleModal}
-							color="teal"
 							radius="md"
 						>
-							Cash Sale
+							New Sale
 						</Button>
 
 						<ActionIcon
@@ -757,9 +734,9 @@ export function TransactionList() {
 					/>
 
 					<Select
-						placeholder="All Dealers"
+						placeholder="Filter By All Dealers"
 						icon={<IconUser size={16} />}
-						data={[{ value: '', label: 'All Dealers' }, ...dealerOptions]}
+						data={[{ value: '', label: 'Filter By All Dealers' }, ...dealerOptions]}
 						value={dealerFilter}
 						onChange={(value) => handleFilterChange('dealer', value || '')}
 						radius="md"
@@ -767,9 +744,9 @@ export function TransactionList() {
 					/>
 
 					<Select
-						placeholder="All Agents"
+						placeholder="Filter By All Agents"
 						icon={<IconUser size={16} />}
-						data={[{ value: '', label: 'All Agents' }, ...agentOptions]}
+						data={[{ value: '', label: 'Filter By All Agents' }, ...agentOptions]}
 						value={agentFilter}
 						onChange={(value) => handleFilterChange('agent', value || '')}
 						radius="md"
@@ -779,13 +756,9 @@ export function TransactionList() {
 					<Select
 						placeholder="Transaction Type"
 						data={[
-							{ value: '', label: 'All Types' },
+							{ value: '', label: 'Filter By All Types' },
 							{ value: 'activation', label: 'Activation' },
 							{ value: 'cash_sale', label: 'Cash Sale' },
-							{
-								value: 'cash_sale_pending_activation',
-								label: 'Cash Sale (Pending Activation)',
-							},
 						]}
 						value={typeFilter}
 						onChange={(value) => handleFilterChange('type', value || '')}
@@ -796,11 +769,12 @@ export function TransactionList() {
 					<Select
 						placeholder="Status"
 						data={[
-							{ value: '', label: 'All Statuses' },
+							{ value: '', label: 'Filter By All Status' },
 							{ value: 'completed', label: 'Completed' },
 							{ value: 'pending', label: 'Pending' },
 							{ value: 'failed', label: 'Failed' },
 						]}
+						defaultValue={''}
 						value={statusFilter}
 						onChange={(value) => handleFilterChange('status', value || '')}
 						radius="md"
@@ -808,9 +782,9 @@ export function TransactionList() {
 					/>
 
 					<Select
-						placeholder="Payment Method"
+						placeholder="Filter By All Payment Methods"
 						data={[
-							{ value: '', label: 'All Methods' },
+							{ value: '', label: 'Filter By All Payment Methods' },
 							{ value: 'cash', label: 'Cash' },
 							{ value: 'mobile_money', label: 'Mobile Money' },
 						]}
@@ -821,9 +795,9 @@ export function TransactionList() {
 					/>
 
 					<Select
-						placeholder="Product"
+						placeholder="Filter By All Products"
 						icon={<IconDeviceMobile size={16} />}
-						data={[{ value: '', label: 'All Products' }, ...productOptions]}
+						data={[{ value: '', label: 'Filter By All Products' }, ...productOptions]}
 						value={productFilter}
 						onChange={(value) => handleFilterChange('product', value || '')}
 						radius="md"
@@ -836,6 +810,7 @@ export function TransactionList() {
 						placeholder="From Date"
 						onChange={(value) => handleFilterChange('dateFrom', value)}
 						radius="md"
+						icon={<IconCalendar size={16} />}
 						clearable
 					/>
 
@@ -845,6 +820,7 @@ export function TransactionList() {
 						placeholder="To Date"
 						onChange={(value) => handleFilterChange('dateTo', value)}
 						radius="md"
+						icon={<IconCalendar size={16} />}
 						clearable
 					/>
 				</div>
@@ -901,9 +877,7 @@ export function TransactionList() {
 							productFilter ||
 							dateFrom ||
 							dateTo
-								? typeFilter === 'cash_sale_pending_activation'
-									? 'No cash sale transactions pending activation found'
-									: 'Try adjusting your filters or search terms'
+								? 'Try adjusting your filters or search terms'
 								: 'No transactions have been recorded yet'}
 						</Text>
 					</div>

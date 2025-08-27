@@ -68,7 +68,6 @@ const useStyles = createStyles((theme) => ({
 
 	imeiCode: {
 		fontFamily: 'monospace',
-		fontSize: '1.1rem',
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
 		borderRadius: theme.radius.sm,
 		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,

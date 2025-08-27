@@ -13,11 +13,25 @@ export function useDataGridTable<T>(props: {
 	const { columns, data, loading, mih } = props;
 	const theme = useMantineTheme();
 
+	// Validate inputs to prevent errors
+	if (!Array.isArray(columns) || columns.length === 0) {
+		console.warn('useDataGridTable: columns must be a non-empty array');
+		return null;
+	}
+
+	if (!Array.isArray(data)) {
+		console.warn('useDataGridTable: data must be an array');
+		return null;
+	}
+
+	// Ensure data has valid id properties
+	const validData = data.filter((item) => item && item !== null && typeof item === 'object');
+
 	return (
 		<ReactDataGrid
 			idProperty="id"
 			columns={columns}
-			dataSource={data}
+			dataSource={validData}
 			showCellBorders
 			showHeader
 			enableColumnAutosize={true}
@@ -47,7 +61,6 @@ export function useDataGridTable<T>(props: {
 			preventRowSelectionOnClickWithMouseMove
 			sortFunctions={{}}
 			generateIdFromPath={false}
-			columnResizeHandleWidth={5}
 			showWarnings
 			isExpandKeyPressed={() => false}
 			shareSpaceOnResize

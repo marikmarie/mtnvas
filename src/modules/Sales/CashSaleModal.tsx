@@ -220,7 +220,7 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 						size="lg"
 						weight={600}
 					>
-						Record Cash Sale
+						Record Sale
 					</Text>
 					<Text
 						color="dimmed"

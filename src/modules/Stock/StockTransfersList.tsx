@@ -26,6 +26,7 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { Dealer, StockTransfer, StockTransferListParams } from '../Dealer/types';
@@ -179,28 +180,51 @@ export function StockTransfersList() {
 	});
 
 	const dealerOptions = useMemo(() => {
-		if (!dealers?.data?.data) return [];
-		return dealers.data.data.map((dealer: Dealer) => ({
-			value: dealer.id.toString(),
-			label: dealer.dealerName?.toString() || 'Unknown Dealer',
-		}));
+		if (!dealers?.data?.data || !Array.isArray(dealers.data.data)) return [];
+		return dealers.data.data
+			.filter((dealer: Dealer) => dealer && dealer.id && dealer.dealerName)
+			.map((dealer: Dealer) => ({
+				value: dealer.id.toString(),
+				label: dealer.dealerName?.toString() || 'Unknown Dealer',
+			}));
 	}, [dealers?.data?.data]);
 
 	const filteredTransfers = useMemo(() => {
 		if (!transfersData?.data?.data) return [];
 
-		return transfersData.data.data.filter((transfer: StockTransfer) => {
-			const matchesSearch =
-				transfer.transferredBy?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				transfer.reason?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				transfer.id.toString().toLowerCase().includes(searchTerm.toLowerCase());
+		return transfersData.data.data
+			.filter((transfer: StockTransfer) => {
+				// Ensure transfer is valid and has required properties
+				if (!transfer || !transfer.id || typeof transfer.id !== 'number') {
+					return false;
+				}
 
-			return matchesSearch;
-		});
+				const searchLower = searchTerm?.toLowerCase() || '';
+				const matchesSearch =
+					transfer.transferredBy?.toLowerCase().includes(searchLower) ||
+					transfer.reason?.toLowerCase().includes(searchLower) ||
+					transfer.id?.toString().toLowerCase().includes(searchLower);
+
+				return matchesSearch;
+			})
+			.map((transfer: StockTransfer) => ({
+				...transfer,
+				// Ensure all required properties have fallback values
+				id: transfer.id || 0,
+				fromDealerId: transfer.fromDealerId || 0,
+				toDealerId: transfer.toDealerId || 0,
+				imeiCount: transfer.imeiCount || 0,
+				status: transfer.status || 'Unknown',
+				transferredBy: transfer.transferredBy || 'Unknown',
+				reason: transfer.reason || 'No reason provided',
+				createdAt: transfer.createdAt || new Date().toISOString(),
+			}));
 	}, [transfersData?.data?.data, searchTerm]);
 
 	const getStatusColor = (status: string) => {
-		switch (status?.toLowerCase()) {
+		if (!status) return 'gray';
+
+		switch (status.toLowerCase()) {
 			case 'pending':
 				return 'yellow';
 			case 'approved':
@@ -213,18 +237,22 @@ export function StockTransfersList() {
 	};
 
 	const handleApproveTransfer = (transfer: StockTransfer) => {
+		if (!transfer) return;
 		setSelectedTransfer(transfer);
 		setApprovalAction('Approve');
 		openApprovalModal();
 	};
 
 	const handleRejectTransfer = (transfer: StockTransfer) => {
+		if (!transfer) return;
 		setSelectedTransfer(transfer);
 		setApprovalAction('Reject');
 		openApprovalModal();
 	};
 
-	const totalPages = Math.ceil((transfersData?.data?.meta?.total || 0) / itemsPerPage);
+	const totalPages = Math.ceil(
+		(transfersData?.data?.meta?.total || 0) / Math.max(itemsPerPage, 1)
+	);
 
 	const columns = [
 		{
@@ -238,7 +266,7 @@ export function StockTransfersList() {
 					weight={500}
 					style={{ fontFamily: 'monospace' }}
 				>
-					{data.id.toString().slice(-8).toUpperCase()}
+					{data?.id ? data.id.toString().slice(-8).toUpperCase() : 'N/A'}
 				</Text>
 			),
 		},
@@ -247,50 +275,57 @@ export function StockTransfersList() {
 			header: 'Transfer Route',
 			defaultFlex: 1,
 			minWidth: 200,
-			render: ({ data }: { data: StockTransfer }) => (
-				<div className={classes.transferRoute}>
-					<Group spacing="xs">
-						<IconBuilding
-							size={14}
-							color="gray"
-						/>
+			render: ({ data }: { data: StockTransfer }) => {
+				// Safety check for dealers data
+				if (!dealers?.data?.data || !Array.isArray(dealers.data.data)) {
+					return (
 						<Text
 							size="sm"
-							weight={500}
+							color="dimmed"
 						>
-							{
-								(
-									dealers?.data.data.find(
-										(d: Dealer) => d.id === data.fromDealerId
-									) as unknown as Dealer
-								).dealerName
-							}
+							Loading dealer data...
 						</Text>
-					</Group>
-					<IconArrowRight
-						size={16}
-						color="gray"
-					/>
-					<Group spacing="xs">
-						<IconBuilding
-							size={14}
+					);
+				}
+
+				const fromDealer = dealers.data.data.find(
+					(d: Dealer) => d.id === data.fromDealerId
+				);
+				const toDealer = dealers.data.data.find((d: Dealer) => d.id === data.toDealerId);
+
+				return (
+					<div className={classes.transferRoute}>
+						<Group spacing="xs">
+							<IconBuilding
+								size={14}
+								color="gray"
+							/>
+							<Text
+								size="sm"
+								weight={500}
+							>
+								{fromDealer?.dealerName || `Dealer ${data.fromDealerId}`}
+							</Text>
+						</Group>
+						<IconArrowRight
+							size={16}
 							color="gray"
 						/>
-						<Text
-							size="sm"
-							weight={500}
-						>
-							{
-								(
-									dealers?.data.data.find(
-										(d: Dealer) => d.id === data.toDealerId
-									) as unknown as Dealer
-								).dealerName
-							}
-						</Text>
-					</Group>
-				</div>
-			),
+						<Group spacing="xs">
+							<IconBuilding
+								size={14}
+								color="gray"
+							/>
+							<Text
+								size="sm"
+								weight={500}
+							>
+								{toDealer?.dealerName || `Dealer ${data.toDealerId}`}
+							</Text>
+						</Group>
+					</div>
+				);
+			},
 		},
 		{
 			name: 'imeiCount',
@@ -304,7 +339,7 @@ export function StockTransfersList() {
 					size="sm"
 					className={classes.imeiCount}
 				>
-					{data.imeiCount} items
+					{data?.imeiCount || 0} items
 				</Badge>
 			),
 		},
@@ -315,11 +350,11 @@ export function StockTransfersList() {
 			minWidth: 120,
 			render: ({ data }: { data: StockTransfer }) => (
 				<Badge
-					color={getStatusColor(data.status)}
+					color={getStatusColor(data?.status || 'Unknown')}
 					variant="light"
 					size="sm"
 				>
-					{data.status}
+					{data?.status || 'Unknown'}
 				</Badge>
 			),
 		},
@@ -329,7 +364,7 @@ export function StockTransfersList() {
 			defaultFlex: 1,
 			minWidth: 150,
 			render: ({ data }: { data: StockTransfer }) => (
-				<Text size="sm">{data.transferredBy || 'Unknown'}</Text>
+				<Text size="sm">{data?.transferredBy || 'Unknown'}</Text>
 			),
 		},
 		{
@@ -342,7 +377,7 @@ export function StockTransfersList() {
 					size="sm"
 					style={{ maxWidth: 200, wordBreak: 'break-word' }}
 				>
-					{data.reason || 'No reason provided'}
+					{data?.reason || 'No reason provided'}
 				</Text>
 			),
 		},
@@ -352,7 +387,9 @@ export function StockTransfersList() {
 			defaultFlex: 1,
 			minWidth: 120,
 			render: ({ data }: { data: StockTransfer }) => (
-				<Text size="sm">{new Date(data.createdAt).toLocaleDateString()}</Text>
+				<Text size="sm">
+					{data?.createdAt ? new Date(data.createdAt).toLocaleDateString() : 'N/A'}
+				</Text>
 			),
 		},
 		{
@@ -365,7 +402,7 @@ export function StockTransfersList() {
 					gap={10}
 					justify="center"
 				>
-					{data.status.toLowerCase() !== 'approved' && (
+					{data?.status?.toLowerCase() !== 'approved' && (
 						<Tooltip
 							withArrow
 							label="Approve"
@@ -381,7 +418,7 @@ export function StockTransfersList() {
 							</ActionIcon>
 						</Tooltip>
 					)}
-					{data.status.toLowerCase() !== 'rejected' && (
+					{data?.status?.toLowerCase() !== 'rejected' && (
 						<Tooltip
 							withArrow
 							label="Reject"
@@ -408,6 +445,43 @@ export function StockTransfersList() {
 		loading: isLoading,
 		mih: '50vh',
 	});
+
+	// Don't render table if no valid data
+	if (!transfersTable) {
+		return (
+			<div className={classes.root}>
+				<div className={classes.header}>
+					<Group
+						position="apart"
+						mb="md"
+					>
+						<div>
+							<Title
+								order={3}
+								mb="xs"
+							>
+								Stock Transfers
+							</Title>
+							<Text
+								color="dimmed"
+								size="sm"
+							>
+								View and manage stock transfer requests between dealers
+							</Text>
+						</div>
+					</Group>
+				</div>
+				<Text
+					color="red"
+					size="sm"
+					ta="center"
+					py="xl"
+				>
+					Unable to load table. Please check your data and try again.
+				</Text>
+			</div>
+		);
+	}
 
 	return (
 		<div className={classes.root}>
@@ -575,7 +649,9 @@ export function StockTransfersList() {
 					</Text>
 				</div>
 			) : (
-				<div className={classes.tableContainer}>{transfersTable}</div>
+				<div className={classes.tableContainer}>
+					<ErrorBoundary>{transfersTable}</ErrorBoundary>
+				</div>
 			)}
 
 			{totalPages > 1 && (

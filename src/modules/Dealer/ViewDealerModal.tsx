@@ -34,7 +34,6 @@ interface ViewDealerModalProps {
 const useStyles = createStyles((theme) => ({
 	header: {
 		padding: theme.spacing.lg,
-		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 	},
 
@@ -75,7 +74,6 @@ const useStyles = createStyles((theme) => ({
 
 	infoCard: {
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-		border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		borderRadius: theme.radius.md,
 		padding: theme.spacing.md,
 		marginBottom: theme.spacing.sm,
@@ -86,7 +84,6 @@ const useStyles = createStyles((theme) => ({
 		alignItems: 'center',
 		justifyContent: 'space-between',
 		padding: theme.spacing.xs,
-		borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[1]}`,
 
 		'&:last-child': {
 			borderBottom: 'none',
@@ -127,7 +124,6 @@ const useStyles = createStyles((theme) => ({
 
 	actions: {
 		padding: theme.spacing.lg,
-		borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 	},
 
