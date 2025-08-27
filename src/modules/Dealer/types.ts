@@ -599,12 +599,13 @@ export interface CashSaleModalProps {
 
 // Commission Rate Interface
 export interface CommissionRate {
-	id: number;
+	id: string;
 	dealerId?: number;
-	userType: UserType;
+	agentId?: number;
+	userType: string;
 	productId: number;
-	productName: string;
-	commissionType: 'fixed' | 'percentage';
+	productName?: string;
+	commissionType: string;
 	amount: number;
 	currency: string;
 	effectiveFrom: string;
@@ -614,12 +615,14 @@ export interface CommissionRate {
 // Commission Rate Request
 export interface CommissionRateRequest {
 	dealerId?: number;
-	userType: UserType;
+	agentId?: number;
+	userType: string;
 	productId: number;
-	commissionType: 'fixed' | 'percentage';
+	commissionType: string;
 	amount: number;
-	currency?: string;
-	effectiveFrom?: string;
+	currency: string;
+	effectiveFrom: string;
+	isActive?: boolean;
 }
 
 // Commission Earning Interface

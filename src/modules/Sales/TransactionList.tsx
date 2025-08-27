@@ -6,7 +6,6 @@ import {
 	Container,
 	createStyles,
 	Group,
-	Paper,
 	rem,
 	Select,
 	Text,
@@ -177,6 +176,66 @@ const useStyles = createStyles((theme) => ({
 		justifyContent: 'center',
 		gap: theme.spacing.sm,
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+	},
+
+	filtersInline: {
+		display: 'flex',
+		gap: theme.spacing.sm,
+		flexWrap: 'wrap',
+		marginTop: theme.spacing.md,
+		[theme.fn.smallerThan('md')]: {
+			flexDirection: 'column',
+			alignItems: 'stretch',
+		},
+	},
+
+	filterItem: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.xs,
+		flex: 1,
+		minWidth: rem(150),
+		[theme.fn.smallerThan('md')]: {
+			flex: 'none',
+			width: '100%',
+		},
+	},
+
+	statsInline: {
+		display: 'flex',
+		gap: theme.spacing.md,
+		marginTop: theme.spacing.md,
+		flexWrap: 'wrap',
+		[theme.fn.smallerThan('md')]: {
+			justifyContent: 'stretch',
+			'& > *': {
+				flex: 1,
+			},
+		},
+	},
+
+	statItem: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.sm,
+	},
+
+	statContent: {
+		display: 'flex',
+		flexDirection: 'column',
+	},
+
+	statValueInline: {
+		fontSize: rem(18),
+		fontWeight: 700,
+		color: theme.colorScheme === 'dark' ? theme.white : theme.colors.gray[9],
+		marginBottom: rem(2),
+	},
+
+	statLabelInline: {
+		fontSize: theme.fontSizes.sm,
+		color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
+		fontWeight: 500,
 	},
 }));
 
@@ -652,179 +711,214 @@ export function TransactionList() {
 							<IconDownload size={18} />
 						</ActionIcon>
 					</div>
+
+					<div className={classes.filtersInline}>
+						<div className={classes.filterItem}>
+							<IconSearch size={16} />
+							<TextInput
+								placeholder="Search transactions..."
+								value={searchTerm}
+								onChange={(e) =>
+									handleFilterChange('search', e.currentTarget.value)
+								}
+								radius="md"
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconUser size={16} />
+							<Select
+								placeholder="Filter By All Dealers"
+								data={[
+									{ value: '', label: 'Filter By All Dealers' },
+									...dealerOptions,
+								]}
+								value={dealerFilter}
+								onChange={(value) => handleFilterChange('dealer', value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconUser size={16} />
+							<Select
+								placeholder="Filter By All Agents"
+								data={[
+									{ value: '', label: 'Filter By All Agents' },
+									...agentOptions,
+								]}
+								value={agentFilter}
+								onChange={(value) => handleFilterChange('agent', value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconFilter size={16} />
+							<Select
+								placeholder="Transaction Type"
+								data={[
+									{ value: '', label: 'Filter By All Types' },
+									{ value: 'activation', label: 'Activation' },
+									{ value: 'cash_sale', label: 'Cash Sale' },
+								]}
+								value={typeFilter}
+								onChange={(value) => handleFilterChange('type', value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconFilter size={16} />
+							<Select
+								placeholder="Status"
+								data={[
+									{ value: '', label: 'Filter By All Status' },
+									{ value: 'completed', label: 'Completed' },
+									{ value: 'pending', label: 'Pending' },
+									{ value: 'failed', label: 'Failed' },
+								]}
+								defaultValue={''}
+								value={statusFilter}
+								onChange={(value) => handleFilterChange('status', value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconFilter size={16} />
+							<Select
+								placeholder="Filter By All Payment Methods"
+								data={[
+									{ value: '', label: 'Filter By All Payment Methods' },
+									{ value: 'cash', label: 'Cash' },
+									{ value: 'mobile_money', label: 'Mobile Money' },
+								]}
+								value={paymentMethodFilter}
+								onChange={(value) =>
+									handleFilterChange('paymentMethod', value || '')
+								}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconFilter size={16} />
+							<Select
+								placeholder="Filter By All Products"
+								data={[
+									{ value: '', label: 'Filter By All Products' },
+									...productOptions,
+								]}
+								value={productFilter}
+								onChange={(value) => handleFilterChange('product', value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconCalendar size={16} />
+							<DatePickerInput
+								value={dateFrom}
+								// @ts-expect-error
+								placeholder="From Date"
+								onChange={(value) => handleFilterChange('dateFrom', value)}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconCalendar size={16} />
+							<DatePickerInput
+								value={dateTo}
+								// @ts-expect-error
+								placeholder="To Date"
+								onChange={(value) => handleFilterChange('dateTo', value)}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+					</div>
+
+					<div className={classes.statsInline}>
+						<div className={classes.statItem}>
+							<div
+								className={classes.statIcon}
+								style={{ backgroundColor: 'rgba(34, 139, 34, 0.1)' }}
+							>
+								<IconTrendingUp
+									size={20}
+									color="#228B22"
+								/>
+							</div>
+							<div className={classes.statContent}>
+								<Text className={classes.statValueInline}>
+									{transactionsLoading
+										? '...'
+										: formatCurrency(summary.totalAmount)}
+								</Text>
+								<Text className={classes.statLabelInline}>Total Sales</Text>
+							</div>
+						</div>
+
+						<div className={classes.statItem}>
+							<div
+								className={classes.statIcon}
+								style={{ backgroundColor: 'rgba(255, 165, 0, 0.1)' }}
+							>
+								<IconCash
+									size={20}
+									color="#FFA500"
+								/>
+							</div>
+							<div className={classes.statContent}>
+								<Text className={classes.statValueInline}>
+									{transactionsLoading
+										? '...'
+										: formatCurrency(summary.totalCommission)}
+								</Text>
+								<Text className={classes.statLabelInline}>Total Commission</Text>
+							</div>
+						</div>
+
+						<div className={classes.statItem}>
+							<div
+								className={classes.statIcon}
+								style={{ backgroundColor: 'rgba(30, 144, 255, 0.1)' }}
+							>
+								<IconReceipt
+									size={20}
+									color="#1E90FF"
+								/>
+							</div>
+							<div className={classes.statContent}>
+								<Text className={classes.statValueInline}>
+									{transactionsLoading
+										? '...'
+										: transactionsData?.data?.totalCount}
+								</Text>
+								<Text className={classes.statLabelInline}>Total Transactions</Text>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
-
-			<div className={classes.statsGrid}>
-				<Card className={classes.statCard}>
-					<div
-						className={classes.statIcon}
-						style={{ backgroundColor: 'rgba(34, 139, 34, 0.1)' }}
-					>
-						<IconTrendingUp
-							size={24}
-							color="#228B22"
-						/>
-					</div>
-					<Text className={classes.statValue}>
-						{transactionsLoading ? '...' : formatCurrency(summary.totalAmount)}
-					</Text>
-					<Text className={classes.statLabel}>Total Sales</Text>
-				</Card>
-
-				<Card className={classes.statCard}>
-					<div
-						className={classes.statIcon}
-						style={{ backgroundColor: 'rgba(255, 165, 0, 0.1)' }}
-					>
-						<IconCash
-							size={24}
-							color="#FFA500"
-						/>
-					</div>
-					<Text className={classes.statValue}>
-						{transactionsLoading ? '...' : formatCurrency(summary.totalCommission)}
-					</Text>
-					<Text className={classes.statLabel}>Total Commission</Text>
-				</Card>
-
-				<Card className={classes.statCard}>
-					<div
-						className={classes.statIcon}
-						style={{ backgroundColor: 'rgba(30, 144, 255, 0.1)' }}
-					>
-						<IconReceipt
-							size={24}
-							color="#1E90FF"
-						/>
-					</div>
-					<Text className={classes.statValue}>
-						{transactionsLoading ? '...' : transactionsData?.data?.totalCount}
-					</Text>
-					<Text className={classes.statLabel}>Total Transactions</Text>
-				</Card>
-			</div>
-
-			<Paper className={classes.filtersCard}>
-				<Group
-					position="apart"
-					mb="md"
-				>
-					<Group>
-						<IconFilter size={20} />
-						<Text weight={600}>Filters</Text>
-					</Group>
-
-					<Button
-						variant="subtle"
-						size="xs"
-						onClick={handleClearFilters}
-					>
-						Clear All
-					</Button>
-				</Group>
-
-				<div className={classes.filtersGrid}>
-					<TextInput
-						placeholder="Search transactions..."
-						icon={<IconSearch size={16} />}
-						value={searchTerm}
-						onChange={(e) => handleFilterChange('search', e.currentTarget.value)}
-						radius="md"
-					/>
-
-					<Select
-						placeholder="Filter By All Dealers"
-						icon={<IconUser size={16} />}
-						data={[{ value: '', label: 'Filter By All Dealers' }, ...dealerOptions]}
-						value={dealerFilter}
-						onChange={(value) => handleFilterChange('dealer', value || '')}
-						radius="md"
-						clearable
-					/>
-
-					<Select
-						placeholder="Filter By All Agents"
-						icon={<IconUser size={16} />}
-						data={[{ value: '', label: 'Filter By All Agents' }, ...agentOptions]}
-						value={agentFilter}
-						onChange={(value) => handleFilterChange('agent', value || '')}
-						radius="md"
-						clearable
-					/>
-
-					<Select
-						placeholder="Transaction Type"
-						data={[
-							{ value: '', label: 'Filter By All Types' },
-							{ value: 'activation', label: 'Activation' },
-							{ value: 'cash_sale', label: 'Cash Sale' },
-						]}
-						value={typeFilter}
-						onChange={(value) => handleFilterChange('type', value || '')}
-						radius="md"
-						clearable
-					/>
-
-					<Select
-						placeholder="Status"
-						data={[
-							{ value: '', label: 'Filter By All Status' },
-							{ value: 'completed', label: 'Completed' },
-							{ value: 'pending', label: 'Pending' },
-							{ value: 'failed', label: 'Failed' },
-						]}
-						defaultValue={''}
-						value={statusFilter}
-						onChange={(value) => handleFilterChange('status', value || '')}
-						radius="md"
-						clearable
-					/>
-
-					<Select
-						placeholder="Filter By All Payment Methods"
-						data={[
-							{ value: '', label: 'Filter By All Payment Methods' },
-							{ value: 'cash', label: 'Cash' },
-							{ value: 'mobile_money', label: 'Mobile Money' },
-						]}
-						value={paymentMethodFilter}
-						onChange={(value) => handleFilterChange('paymentMethod', value || '')}
-						radius="md"
-						clearable
-					/>
-
-					<Select
-						placeholder="Filter By All Products"
-						icon={<IconDeviceMobile size={16} />}
-						data={[{ value: '', label: 'Filter By All Products' }, ...productOptions]}
-						value={productFilter}
-						onChange={(value) => handleFilterChange('product', value || '')}
-						radius="md"
-						clearable
-					/>
-
-					<DatePickerInput
-						value={dateFrom}
-						// @ts-expect-error
-						placeholder="From Date"
-						onChange={(value) => handleFilterChange('dateFrom', value)}
-						radius="md"
-						icon={<IconCalendar size={16} />}
-						clearable
-					/>
-
-					<DatePickerInput
-						value={dateTo}
-						// @ts-expect-error
-						placeholder="To Date"
-						onChange={(value) => handleFilterChange('dateTo', value)}
-						radius="md"
-						icon={<IconCalendar size={16} />}
-						clearable
-					/>
-				</div>
-			</Paper>
 
 			<Card className={classes.tableCard}>
 				<div className={classes.tableHeader}>

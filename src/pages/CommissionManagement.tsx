@@ -1,7 +1,9 @@
 import { createStyles, Group, Paper, Tabs, Text, Title } from '@mantine/core';
 import { IconCash, IconPercentage } from '@tabler/icons-react';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import Layout from '../components/Layout';
+import useRequest from '../hooks/useRequest';
 import { CommissionEarnings, CommissionRates } from '../modules/Commission';
 
 const useStyles = createStyles((theme) => ({
@@ -110,12 +112,51 @@ const useStyles = createStyles((theme) => ({
 export default function CommissionManagement() {
 	const { classes } = useStyles();
 	const [activeTab, setActiveTab] = useState<string>('rates');
+	const request = useRequest(true);
 
-	const headerStats = {
-		totalRates: 12,
-		activeRates: 8,
-		totalEarnings: 2450000,
-		pendingPayments: 450000,
+	// Fetch commission summary data
+	const {
+		data: commissionSummary,
+		isLoading: summaryLoading,
+		error: summaryError,
+	} = useQuery({
+		queryKey: ['commission-summary'],
+		queryFn: async () => {
+			try {
+				const [ratesResponse, earningsResponse] = await Promise.all([
+					request.get('/commissions/rates'),
+					request.get('/commissions/earnings'),
+				]);
+
+				const totalRates = ratesResponse.data?.data?.length || 0;
+				const activeRates =
+					ratesResponse.data?.data?.filter((rate: any) => rate.isActive)?.length || 0;
+				const totalEarnings = earningsResponse.data?.summary?.totalEarned || 0;
+				const pendingPayments = earningsResponse.data?.summary?.totalPending || 0;
+
+				return {
+					totalRates,
+					activeRates,
+					totalEarnings,
+					pendingPayments,
+				};
+			} catch (error) {
+				console.error('Failed to fetch commission summary:', error);
+				return {
+					totalRates: 0,
+					activeRates: 0,
+					totalEarnings: 0,
+					pendingPayments: 0,
+				};
+			}
+		},
+	});
+
+	const headerStats = commissionSummary || {
+		totalRates: 0,
+		activeRates: 0,
+		totalEarnings: 0,
+		pendingPayments: 0,
 	};
 
 	return (
@@ -149,29 +190,66 @@ export default function CommissionManagement() {
 					</div>
 
 					<div className={classes.statsSection}>
-						<Paper className={classes.statCard}>
-							<Text className={classes.statValue}>{headerStats.totalRates}</Text>
-							<Text className={classes.statLabel}>Total Rates</Text>
-						</Paper>
+						{summaryError ? (
+							<Paper className={classes.statCard}>
+								<Text
+									className={classes.statValue}
+									color="red"
+								>
+									Error
+								</Text>
+								<Text className={classes.statLabel}>Failed to load data</Text>
+							</Paper>
+						) : summaryLoading ? (
+							<>
+								<Paper className={classes.statCard}>
+									<Text className={classes.statValue}>...</Text>
+									<Text className={classes.statLabel}>Loading...</Text>
+								</Paper>
+								<Paper className={classes.statCard}>
+									<Text className={classes.statValue}>...</Text>
+									<Text className={classes.statLabel}>Loading...</Text>
+								</Paper>
+								<Paper className={classes.statCard}>
+									<Text className={classes.statValue}>...</Text>
+									<Text className={classes.statLabel}>Loading...</Text>
+								</Paper>
+								<Paper className={classes.statCard}>
+									<Text className={classes.statValue}>...</Text>
+									<Text className={classes.statLabel}>Loading...</Text>
+								</Paper>
+							</>
+						) : (
+							<>
+								<Paper className={classes.statCard}>
+									<Text className={classes.statValue}>
+										{headerStats.totalRates}
+									</Text>
+									<Text className={classes.statLabel}>Total Rates</Text>
+								</Paper>
 
-						<Paper className={classes.statCard}>
-							<Text className={classes.statValue}>{headerStats.activeRates}</Text>
-							<Text className={classes.statLabel}>Active Rates</Text>
-						</Paper>
+								<Paper className={classes.statCard}>
+									<Text className={classes.statValue}>
+										{headerStats.activeRates}
+									</Text>
+									<Text className={classes.statLabel}>Active Rates</Text>
+								</Paper>
 
-						<Paper className={classes.statCard}>
-							<Text className={classes.statValue}>
-								{(headerStats.totalEarnings / 1000000).toFixed(1)}M
-							</Text>
-							<Text className={classes.statLabel}>Total Earnings</Text>
-						</Paper>
+								<Paper className={classes.statCard}>
+									<Text className={classes.statValue}>
+										{(headerStats.totalEarnings / 1000000).toFixed(1)}M
+									</Text>
+									<Text className={classes.statLabel}>Total Earnings</Text>
+								</Paper>
 
-						<Paper className={classes.statCard}>
-							<Text className={classes.statValue}>
-								{(headerStats.pendingPayments / 1000000).toFixed(1)}M
-							</Text>
-							<Text className={classes.statLabel}>Pending</Text>
-						</Paper>
+								<Paper className={classes.statCard}>
+									<Text className={classes.statValue}>
+										{(headerStats.pendingPayments / 1000000).toFixed(1)}M
+									</Text>
+									<Text className={classes.statLabel}>Pending</Text>
+								</Paper>
+							</>
+						)}
 					</div>
 				</div>
 			</Paper>

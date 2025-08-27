@@ -10,7 +10,6 @@ import {
 	Select,
 	Text,
 	TextInput,
-	Title,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -29,7 +28,7 @@ import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
 import { toTitle } from '../../utils/toTitle';
-import { CommissionRate, UserType } from '../Dealer/types';
+import { CommissionRate } from '../Dealer/types';
 import { CommissionRateModal } from './CommissionRateModal';
 
 const useStyles = createStyles((theme) => ({
@@ -45,7 +44,7 @@ const useStyles = createStyles((theme) => ({
 	headerContent: {
 		display: 'flex',
 		justifyContent: 'space-between',
-		alignItems: 'flex-start',
+		alignItems: 'center',
 		flexWrap: 'wrap',
 		gap: theme.spacing.md,
 		[theme.fn.smallerThan('md')]: {
@@ -63,11 +62,38 @@ const useStyles = createStyles((theme) => ({
 		display: 'flex',
 		gap: theme.spacing.sm,
 		flexWrap: 'wrap',
+		alignItems: 'center',
 		[theme.fn.smallerThan('md')]: {
 			justifyContent: 'stretch',
 			'& > *': {
 				flex: 1,
 			},
+		},
+	},
+
+	filtersInline: {
+		display: 'flex',
+		gap: theme.spacing.sm,
+		alignItems: 'center',
+		padding: theme.spacing.sm,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+		borderRadius: theme.radius.md,
+		border: `1px solid ${
+			theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
+		}`,
+		[theme.fn.smallerThan('md')]: {
+			flexDirection: 'column',
+			gap: theme.spacing.md,
+			width: '100%',
+		},
+	},
+
+	filterItem: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.xs,
+		[theme.fn.smallerThan('md')]: {
+			width: '100%',
 		},
 	},
 
@@ -128,13 +154,20 @@ export function CommissionRates() {
 	const [rateModalOpened, { open: openRateModal, close: closeRateModal }] = useDisclosure(false);
 
 	const fetchCommissionRates = useCallback(async () => {
-		const params = {
-			dealerId: dealerFilter || undefined,
-			userType: userTypeFilter || undefined,
-			productId: productFilter || undefined,
-			isActive:
-				statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined,
-		};
+		const params: Record<string, any> = {};
+
+		if (dealerFilter && dealerFilter !== 'system') {
+			params.dealerId = dealerFilter;
+		}
+		if (userTypeFilter) {
+			params.userType = userTypeFilter;
+		}
+		if (productFilter) {
+			params.productId = productFilter;
+		}
+		if (statusFilter) {
+			params.isActive = statusFilter === 'active';
+		}
 
 		const response = await request.get('/commissions/rates', { params });
 		return response.data;
@@ -151,16 +184,16 @@ export function CommissionRates() {
 
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers'],
-		queryFn: () => request.get('/dealer'),
+		queryFn: () => request.get('dealer'),
 	});
 
 	const { data: productsData } = useQuery({
 		queryKey: ['products'],
-		queryFn: () => request.get('/shops'),
+		queryFn: () => request.get('/products'),
 	});
 
 	const deleteRateMutation = useMutation({
-		mutationFn: async (rateId: number) => {
+		mutationFn: async (rateId: string) => {
 			await request.delete(`/commissions/rates/${rateId}`);
 		},
 		onSuccess: () => {
@@ -173,7 +206,7 @@ export function CommissionRates() {
 	const filteredRates = commissionRates.filter(
 		(rate) =>
 			searchTerm === '' ||
-			rate.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			rate.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			rate.userType.toLowerCase().includes(searchTerm.toLowerCase())
 	);
 
@@ -199,7 +232,7 @@ export function CommissionRates() {
 		openRateModal();
 	};
 
-	const handleDeleteRate = (rateId: number) => {
+	const handleDeleteRate = (rateId: string) => {
 		if (confirm('Are you sure you want to delete this commission rate?')) {
 			deleteRateMutation.mutate(rateId);
 		}
@@ -221,14 +254,16 @@ export function CommissionRates() {
 		}
 	};
 
-	const getUserTypeColor = (userType: UserType) => {
+	const getUserTypeColor = (userType: string) => {
 		switch (userType) {
-			case 'ShopAgent':
+			case 'shop_agent':
 				return 'blue';
-			case 'DSA':
+			case 'dsa':
 				return 'teal';
-			case 'Retailer':
+			case 'retailer':
 				return 'orange';
+			case 'agent':
+				return 'purple';
 			default:
 				return 'gray';
 		}
@@ -377,21 +412,6 @@ export function CommissionRates() {
 		>
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
-					<div className={classes.titleSection}>
-						<Title
-							order={3}
-							mb="xs"
-						>
-							Commission Rates
-						</Title>
-						<Text
-							color="dimmed"
-							size="sm"
-						>
-							Manage commission rates for different user types and products
-						</Text>
-					</div>
-
 					<div className={classes.actionsSection}>
 						<Button
 							leftIcon={<IconPlus size={16} />}
@@ -411,96 +431,96 @@ export function CommissionRates() {
 							<IconRefresh size={18} />
 						</ActionIcon>
 					</div>
+
+					<div className={classes.filtersInline}>
+						<div className={classes.filterItem}>
+							<IconSearch size={16} />
+							<TextInput
+								placeholder="Search rates..."
+								value={searchTerm}
+								onChange={(e) => setSearchTerm(e.currentTarget.value)}
+								radius="md"
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconFilter size={16} />
+							<Select
+								placeholder="All Dealers"
+								data={[
+									{ value: '', label: 'All Dealers' },
+									{ value: 'system', label: 'System Wide' },
+									...(dealersData?.data?.data || []).map((dealer: any) => ({
+										value: dealer.id,
+										label: dealer.name,
+									})),
+								]}
+								value={dealerFilter}
+								onChange={(value) => setDealerFilter(value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconFilter size={16} />
+							<Select
+								placeholder="User Type"
+								data={[
+									{ value: '', label: 'All User Types' },
+									{ value: 'shop_agent', label: 'Shop Agent' },
+									{ value: 'dsa', label: 'DSA' },
+									{ value: 'retailer', label: 'Retailer' },
+									{ value: 'agent', label: 'Agent' },
+								]}
+								value={userTypeFilter}
+								onChange={(value) => setUserTypeFilter(value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconFilter size={16} />
+							<Select
+								placeholder="Product"
+								data={[
+									{ value: '', label: 'All Products' },
+									...(productsData?.data?.data || []).map((product: any) => ({
+										value: product.id,
+										label: product.name,
+									})),
+								]}
+								value={productFilter}
+								onChange={(value) => setProductFilter(value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconFilter size={16} />
+							<Select
+								placeholder="Status"
+								data={[
+									{ value: '', label: 'All Statuses' },
+									{ value: 'active', label: 'Active' },
+									{ value: 'inactive', label: 'Inactive' },
+								]}
+								value={statusFilter}
+								onChange={(value) => setStatusFilter(value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+					</div>
 				</div>
 			</div>
-
-			<Card className={classes.filtersCard}>
-				<Group
-					position="apart"
-					mb="md"
-				>
-					<Group>
-						<IconFilter size={20} />
-						<Text weight={600}>Filters</Text>
-					</Group>
-
-					<Button
-						variant="subtle"
-						size="xs"
-						onClick={handleClearFilters}
-					>
-						Clear All
-					</Button>
-				</Group>
-
-				<div className={classes.filtersGrid}>
-					<TextInput
-						placeholder="Search rates..."
-						icon={<IconSearch size={16} />}
-						value={searchTerm}
-						onChange={(e) => setSearchTerm(e.currentTarget.value)}
-						radius="md"
-					/>
-
-					<Select
-						placeholder="All Dealers"
-						data={[
-							{ value: '', label: 'All Dealers' },
-							{ value: 'system', label: 'System Wide' },
-							...(dealersData?.data?.data || []).map((dealer: any) => ({
-								value: dealer.id,
-								label: dealer.name,
-							})),
-						]}
-						value={dealerFilter}
-						onChange={(value) => setDealerFilter(value || '')}
-						radius="md"
-						clearable
-					/>
-
-					<Select
-						placeholder="User Type"
-						data={[
-							{ value: '', label: 'All User Types' },
-							{ value: 'ShopAgent', label: 'Shop Agent' },
-							{ value: 'DSA', label: 'DSA' },
-							{ value: 'Retailer', label: 'Retailer' },
-						]}
-						value={userTypeFilter}
-						onChange={(value) => setUserTypeFilter(value || '')}
-						radius="md"
-						clearable
-					/>
-
-					<Select
-						placeholder="Product"
-						data={[
-							{ value: '', label: 'All Products' },
-							...(productsData?.data?.data || []).map((product: any) => ({
-								value: product.id,
-								label: product.name,
-							})),
-						]}
-						value={productFilter}
-						onChange={(value) => setProductFilter(value || '')}
-						radius="md"
-						clearable
-					/>
-
-					<Select
-						placeholder="Status"
-						data={[
-							{ value: '', label: 'All Statuses' },
-							{ value: 'active', label: 'Active' },
-							{ value: 'inactive', label: 'Inactive' },
-						]}
-						value={statusFilter}
-						onChange={(value) => setStatusFilter(value || '')}
-						radius="md"
-						clearable
-					/>
-				</div>
-			</Card>
 
 			<Card className={classes.tableCard}>
 				<div className={classes.tableHeader}>

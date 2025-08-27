@@ -86,7 +86,7 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 		initialValues: {
 			dealerId: commissionRate?.dealerId || undefined,
 			isSystemWide: !commissionRate?.dealerId,
-			userType: commissionRate?.userType || 'ShopAgent',
+			userType: commissionRate?.userType || 'shop_agent',
 			productId: commissionRate?.productId || 0,
 			commissionType: commissionRate?.commissionType || 'fixed',
 			amount: commissionRate?.amount || 0,
@@ -94,6 +94,7 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 			effectiveFrom: commissionRate?.effectiveFrom
 				? new Date(commissionRate.effectiveFrom).toISOString().split('T')[0]
 				: new Date().toISOString().split('T')[0],
+			isActive: commissionRate?.isActive ?? true,
 		},
 		validate: {
 			userType: (value) => (!value ? 'User type is required' : null),
@@ -120,18 +121,21 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers'],
-		queryFn: () => request.get('/dealer'),
+		queryFn: () => request.get('dealer'),
 	});
 
 	const { data: productsData } = useQuery({
 		queryKey: ['products'],
-		queryFn: () => request.get('/shops'),
+		queryFn: () => request.get('/products'),
 	});
 
 	const commissionRateMutation = useMutation({
 		mutationFn: async (data: CommissionRateRequest) => {
 			if (isEditing) {
-				const response = await request.put(`/commissions/rates/${commissionRate.id}`, data);
+				const response = await request.put(
+					`/commissions/rates/${commissionRate?.id}`,
+					data
+				);
 				return response.data;
 			} else {
 				const response = await request.post('/commissions/rates', data);
@@ -157,6 +161,7 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 			amount: values.amount,
 			currency: values.currency,
 			effectiveFrom: values.effectiveFrom,
+			isActive: values.isActive,
 		};
 
 		if (!values.isSystemWide && values.dealerId) {
@@ -262,6 +267,7 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 											{ value: 'shop_agent', label: 'Shop Agent' },
 											{ value: 'dsa', label: 'DSA' },
 											{ value: 'retailer', label: 'Retailer' },
+											{ value: 'agent', label: 'Agent' },
 										]}
 										{...form.getInputProps('userType')}
 										radius="md"
@@ -442,6 +448,15 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 								</Text>
 							</div>
 						)}
+
+						<Switch
+							label="Active"
+							description="Enable or disable this commission rate"
+							checked={form.values.isActive}
+							onChange={(event) =>
+								form.setFieldValue('isActive', event.currentTarget.checked)
+							}
+						/>
 					</Stack>
 				</div>
 

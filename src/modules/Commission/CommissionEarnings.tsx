@@ -10,7 +10,6 @@ import {
 	Select,
 	Text,
 	TextInput,
-	Title,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
@@ -40,10 +39,6 @@ import {
 import { BulkCommissionPaymentModal } from './BulkCommissionPaymentModal';
 
 const useStyles = createStyles((theme) => ({
-	root: {
-		padding: 0,
-	},
-
 	header: {
 		marginBottom: theme.spacing.xl,
 		marginTop: theme.spacing.xl,
@@ -52,7 +47,7 @@ const useStyles = createStyles((theme) => ({
 	headerContent: {
 		display: 'flex',
 		justifyContent: 'space-between',
-		alignItems: 'flex-start',
+		alignItems: 'center',
 		flexWrap: 'wrap',
 		gap: theme.spacing.md,
 		[theme.fn.smallerThan('md')]: {
@@ -70,6 +65,7 @@ const useStyles = createStyles((theme) => ({
 		display: 'flex',
 		gap: theme.spacing.sm,
 		flexWrap: 'wrap',
+		alignItems: 'center',
 		[theme.fn.smallerThan('md')]: {
 			justifyContent: 'stretch',
 			'& > *': {
@@ -78,45 +74,86 @@ const useStyles = createStyles((theme) => ({
 		},
 	},
 
-	statsGrid: {
-		display: 'grid',
-		gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-		gap: theme.spacing.md,
-		marginBottom: theme.spacing.xl,
-	},
-
-	statCard: {
-		padding: theme.spacing.lg,
-		borderRadius: theme.radius.lg,
-		background:
-			theme.colorScheme === 'dark'
-				? `linear-gradient(135deg, ${theme.colors.dark[6]} 0%, ${theme.colors.dark[7]} 100%)`
-				: `linear-gradient(135deg, ${theme.white} 0%, ${theme.colors.gray[0]} 100%)`,
+	statsInline: {
+		display: 'flex',
+		gap: theme.spacing.lg,
+		alignItems: 'center',
+		padding: theme.spacing.sm,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+		borderRadius: theme.radius.md,
 		border: `1px solid ${
 			theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
 		}`,
+		[theme.fn.smallerThan('md')]: {
+			flexDirection: 'column',
+			gap: theme.spacing.md,
+			width: '100%',
+		},
 	},
 
-	statIcon: {
-		padding: theme.spacing.sm,
-		borderRadius: theme.radius.md,
+	statItemInline: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.sm,
+		[theme.fn.smallerThan('md')]: {
+			justifyContent: 'space-between',
+			width: '100%',
+		},
+	},
+
+	statIconInline: {
+		padding: theme.spacing.xs,
+		borderRadius: theme.radius.sm,
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
-		marginBottom: theme.spacing.md,
 	},
 
-	statValue: {
-		fontSize: rem(24),
+	statContentInline: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: rem(2),
+	},
+
+	statValueInline: {
+		fontSize: rem(16),
 		fontWeight: 700,
 		color: theme.colorScheme === 'dark' ? theme.white : theme.colors.gray[9],
-		marginBottom: rem(4),
+		lineHeight: 1.2,
 	},
 
-	statLabel: {
-		fontSize: theme.fontSizes.sm,
+	statLabelInline: {
+		fontSize: theme.fontSizes.xs,
 		color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
 		fontWeight: 500,
+		textTransform: 'uppercase',
+		letterSpacing: '0.5px',
+	},
+
+	filtersInline: {
+		display: 'flex',
+		gap: theme.spacing.sm,
+		alignItems: 'center',
+		padding: theme.spacing.sm,
+		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+		borderRadius: theme.radius.md,
+		border: `1px solid ${
+			theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
+		}`,
+		[theme.fn.smallerThan('md')]: {
+			flexDirection: 'column',
+			gap: theme.spacing.md,
+			width: '100%',
+		},
+	},
+
+	filterItem: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: theme.spacing.xs,
+		[theme.fn.smallerThan('md')]: {
+			width: '100%',
+		},
 	},
 
 	filtersCard: {
@@ -181,13 +218,23 @@ export function CommissionEarnings() {
 		useDisclosure(false);
 
 	const fetchCommissionEarnings = useCallback(async () => {
-		const params = {
-			agentId: agentFilter || undefined,
-			dealerId: dealerFilter || undefined,
-			status: statusFilter || undefined,
-			dateFrom: dateFrom?.toISOString().split('T')[0] || undefined,
-			dateTo: dateTo?.toISOString().split('T')[0] || undefined,
-		};
+		const params: Record<string, any> = {};
+
+		if (agentFilter) {
+			params.agentId = agentFilter;
+		}
+		if (dealerFilter) {
+			params.dealerId = dealerFilter;
+		}
+		if (statusFilter) {
+			params.status = statusFilter;
+		}
+		if (dateFrom) {
+			params.dateFrom = dateFrom.toISOString().split('T')[0];
+		}
+		if (dateTo) {
+			params.dateTo = dateTo.toISOString().split('T')[0];
+		}
 
 		const response = await request.get('/commissions/earnings', { params });
 		return response.data as CommissionEarningsResponse;
@@ -211,7 +258,7 @@ export function CommissionEarnings() {
 
 	const { data: dealersData } = useQuery({
 		queryKey: ['dealers'],
-		queryFn: () => request.get('/dealer'),
+		queryFn: () => request.get('dealer'),
 	});
 
 	const { data: agentsData } = useQuery({
@@ -387,27 +434,9 @@ export function CommissionEarnings() {
 	});
 
 	return (
-		<Container
-			fluid
-			className={classes.root}
-		>
+		<Container fluid>
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
-					<div className={classes.titleSection}>
-						<Title
-							order={3}
-							mb="xs"
-						>
-							Commission Earnings
-						</Title>
-						<Text
-							color="dimmed"
-							size="sm"
-						>
-							Track and manage commission earnings for agents
-						</Text>
-					</div>
-
 					<div className={classes.actionsSection}>
 						<Button
 							leftIcon={<IconCash size={16} />}
@@ -439,144 +468,154 @@ export function CommissionEarnings() {
 							<IconDownload size={18} />
 						</ActionIcon>
 					</div>
+					<div className={classes.statsInline}>
+						<div className={classes.statItemInline}>
+							<div
+								className={classes.statIconInline}
+								style={{ backgroundColor: 'rgba(34, 139, 34, 0.1)' }}
+							>
+								<IconTrendingUp
+									size={20}
+									color="#228B22"
+								/>
+							</div>
+							<div className={classes.statContentInline}>
+								<Text className={classes.statValueInline}>
+									{formatCurrency(summary.totalEarned)}
+								</Text>
+								<Text className={classes.statLabelInline}>Total Earned</Text>
+							</div>
+						</div>
+
+						<div className={classes.statItemInline}>
+							<div
+								className={classes.statIconInline}
+								style={{ backgroundColor: 'rgba(0, 128, 0, 0.1)' }}
+							>
+								<IconCheck
+									size={20}
+									color="#008000"
+								/>
+							</div>
+							<div className={classes.statContentInline}>
+								<Text className={classes.statValueInline}>
+									{formatCurrency(summary.totalPaid)}
+								</Text>
+								<Text className={classes.statLabelInline}>Total Paid</Text>
+							</div>
+						</div>
+
+						<div className={classes.statItemInline}>
+							<div
+								className={classes.statIconInline}
+								style={{ backgroundColor: 'rgba(255, 165, 0, 0.1)' }}
+							>
+								<IconCash
+									size={20}
+									color="#FFA500"
+								/>
+							</div>
+							<div className={classes.statContentInline}>
+								<Text className={classes.statValueInline}>
+									{formatCurrency(summary.totalPending)}
+								</Text>
+								<Text className={classes.statLabelInline}>Pending Payment</Text>
+							</div>
+						</div>
+					</div>
+
+					<div className={classes.filtersInline}>
+						<div className={classes.filterItem}>
+							<IconSearch size={16} />
+							<TextInput
+								placeholder="Search earnings..."
+								value={searchTerm}
+								onChange={(e) => setSearchTerm(e.currentTarget.value)}
+								radius="md"
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconUser size={16} />
+							<Select
+								placeholder="All Dealers"
+								data={[
+									{ value: '', label: 'All Dealers' },
+									...(dealersData?.data?.data || []).map((dealer: any) => ({
+										value: dealer.id,
+										label: dealer.name,
+									})),
+								]}
+								value={dealerFilter}
+								onChange={(value) => setDealerFilter(value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconUser size={16} />
+							<Select
+								placeholder="All Agents"
+								data={[
+									{ value: '', label: 'All Agents' },
+									...(agentsData?.data?.data || []).map((agent: any) => ({
+										value: agent.id,
+										label: agent.name,
+									})),
+								]}
+								value={agentFilter}
+								onChange={(value) => setAgentFilter(value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconFilter size={16} />
+							<Select
+								placeholder="Status"
+								data={[
+									{ value: '', label: 'All Statuses' },
+									{ value: 'Pending', label: 'Pending' },
+									{ value: 'Paid', label: 'Paid' },
+									{ value: 'Cancelled', label: 'Cancelled' },
+								]}
+								value={statusFilter}
+								onChange={(value) => setStatusFilter(value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconFilter size={16} />
+							<DatePickerInput
+								value={dateFrom}
+								onChange={setDateFrom}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconFilter size={16} />
+							<DatePickerInput
+								value={dateTo}
+								onChange={setDateTo}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+					</div>
 				</div>
 			</div>
-
-			<div className={classes.statsGrid}>
-				<Card className={classes.statCard}>
-					<div
-						className={classes.statIcon}
-						style={{ backgroundColor: 'rgba(34, 139, 34, 0.1)' }}
-					>
-						<IconTrendingUp
-							size={24}
-							color="#228B22"
-						/>
-					</div>
-					<Text className={classes.statValue}>{formatCurrency(summary.totalEarned)}</Text>
-					<Text className={classes.statLabel}>Total Earned</Text>
-				</Card>
-
-				<Card className={classes.statCard}>
-					<div
-						className={classes.statIcon}
-						style={{ backgroundColor: 'rgba(0, 128, 0, 0.1)' }}
-					>
-						<IconCheck
-							size={24}
-							color="#008000"
-						/>
-					</div>
-					<Text className={classes.statValue}>{formatCurrency(summary.totalPaid)}</Text>
-					<Text className={classes.statLabel}>Total Paid</Text>
-				</Card>
-
-				<Card className={classes.statCard}>
-					<div
-						className={classes.statIcon}
-						style={{ backgroundColor: 'rgba(255, 165, 0, 0.1)' }}
-					>
-						<IconCash
-							size={24}
-							color="#FFA500"
-						/>
-					</div>
-					<Text className={classes.statValue}>
-						{formatCurrency(summary.totalPending)}
-					</Text>
-					<Text className={classes.statLabel}>Pending Payment</Text>
-				</Card>
-			</div>
-
-			<Card className={classes.filtersCard}>
-				<Group
-					position="apart"
-					mb="md"
-				>
-					<Group>
-						<IconFilter size={20} />
-						<Text weight={600}>Filters</Text>
-					</Group>
-
-					<Button
-						variant="subtle"
-						size="xs"
-						onClick={handleClearFilters}
-					>
-						Clear All
-					</Button>
-				</Group>
-
-				<div className={classes.filtersGrid}>
-					<TextInput
-						placeholder="Search earnings..."
-						icon={<IconSearch size={16} />}
-						value={searchTerm}
-						onChange={(e) => setSearchTerm(e.currentTarget.value)}
-						radius="md"
-					/>
-
-					<Select
-						placeholder="All Dealers"
-						icon={<IconUser size={16} />}
-						data={[
-							{ value: '', label: 'All Dealers' },
-							...(dealersData?.data?.data || []).map((dealer: any) => ({
-								value: dealer.id,
-								label: dealer.name,
-							})),
-						]}
-						value={dealerFilter}
-						onChange={(value) => setDealerFilter(value || '')}
-						radius="md"
-						clearable
-					/>
-
-					<Select
-						placeholder="All Agents"
-						icon={<IconUser size={16} />}
-						data={[
-							{ value: '', label: 'All Agents' },
-							...(agentsData?.data?.data || []).map((agent: any) => ({
-								value: agent.id,
-								label: agent.name,
-							})),
-						]}
-						value={agentFilter}
-						onChange={(value) => setAgentFilter(value || '')}
-						radius="md"
-						clearable
-					/>
-
-					<Select
-						placeholder="Status"
-						data={[
-							{ value: '', label: 'All Statuses' },
-							{ value: 'pending', label: 'Pending' },
-							{ value: 'paid', label: 'Paid' },
-							{ value: 'cancelled', label: 'Cancelled' },
-						]}
-						value={statusFilter}
-						onChange={(value) => setStatusFilter(value || '')}
-						radius="md"
-						clearable
-					/>
-
-					<DatePickerInput
-						value={dateFrom}
-						onChange={setDateFrom}
-						radius="md"
-						clearable
-					/>
-
-					<DatePickerInput
-						value={dateTo}
-						onChange={setDateTo}
-						radius="md"
-						clearable
-					/>
-				</div>
-			</Card>
 
 			<Card className={classes.tableCard}>
 				{selectedEarnings.length > 0 && (
