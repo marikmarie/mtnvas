@@ -24,7 +24,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
-import { CommissionRateModalProps, CommissionRateRequest } from '../Dealer/types';
+import {
+	Agent,
+	CommissionRateModalProps,
+	CommissionRateRequest,
+	Dealer,
+	Product,
+} from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -82,10 +88,14 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 	const queryClient = useQueryClient();
 	const isEditing = !!commissionRate;
 
-	const form = useForm<CommissionRateRequest & { isSystemWide: boolean }>({
+	const form = useForm<
+		CommissionRateRequest & { isSystemWide: boolean; isAgentSpecific: boolean }
+	>({
 		initialValues: {
 			dealerId: commissionRate?.dealerId || undefined,
+			agentId: commissionRate?.agentId || undefined,
 			isSystemWide: !commissionRate?.dealerId,
+			isAgentSpecific: !!commissionRate?.agentId,
 			userType: commissionRate?.userType || 'shop_agent',
 			productId: commissionRate?.productId || 0,
 			commissionType: commissionRate?.commissionType || 'fixed',
@@ -124,10 +134,45 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 		queryFn: () => request.get('dealer'),
 	});
 
+	const { data: agentsData } = useQuery({
+		queryKey: ['agents'],
+		queryFn: () => request.get('/agents'),
+	});
+
 	const { data: productsData } = useQuery({
 		queryKey: ['products'],
 		queryFn: () => request.get('/products'),
 	});
+
+	const dealerOptions = useMemo(() => {
+		if (!dealersData?.data?.data || !Array.isArray(dealersData.data.data)) return [];
+		return dealersData.data.data
+			.filter((dealer: Dealer) => dealer && dealer.id && dealer.dealerName)
+			.map((dealer: Dealer) => ({
+				value: dealer.id.toString(),
+				label: dealer.dealerName?.toString().toUpperCase() || 'Unknown Dealer',
+			}));
+	}, [dealersData?.data?.data]);
+
+	const agentOptions = useMemo(() => {
+		if (!agentsData?.data?.data || !Array.isArray(agentsData.data.data)) return [];
+		return agentsData.data.data
+			.filter((agent: Agent) => agent && agent.id && agent.agentName)
+			.map((agent: Agent) => ({
+				value: agent.id.toString(),
+				label: agent.agentName?.toString().toUpperCase() || 'Unknown Agent',
+			}));
+	}, [agentsData?.data?.data]);
+
+	const productOptions = useMemo(() => {
+		if (!productsData?.data?.data || !Array.isArray(productsData.data.data)) return [];
+		return productsData.data.data
+			.filter((product: Product) => product && product.id && product.productName)
+			.map((product: Product) => ({
+				value: product.id.toString(),
+				label: product.productName?.toString().toUpperCase() || 'Unknown Product',
+			}));
+	}, [productsData?.data?.data]);
 
 	const commissionRateMutation = useMutation({
 		mutationFn: async (data: CommissionRateRequest) => {
@@ -166,6 +211,10 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 
 		if (!values.isSystemWide && values.dealerId) {
 			submitData.dealerId = values.dealerId;
+		}
+
+		if (values.isAgentSpecific && values.agentId) {
+			submitData.agentId = values.agentId;
 		}
 
 		commissionRateMutation.mutate(submitData);
@@ -283,12 +332,7 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 												className={classes.inputIcon}
 											/>
 										}
-										data={
-											productsData?.data?.data?.map((product: any) => ({
-												value: product.id,
-												label: product.name,
-											})) || []
-										}
+										data={productOptions}
 										{...form.getInputProps('productId')}
 										radius="md"
 										required
@@ -314,15 +358,39 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 												className={classes.inputIcon}
 											/>
 										}
-										data={
-											dealersData?.data?.data?.map((dealer: any) => ({
-												value: dealer.id,
-												label: dealer.name,
-											})) || []
-										}
+										data={dealerOptions}
 										{...form.getInputProps('dealerId')}
 										radius="md"
 										required={!form.values.isSystemWide}
+									/>
+								)}
+
+								<Switch
+									label="Apply to specific agent"
+									description="When enabled, this rate applies to a specific agent. When disabled, applies to all agents."
+									checked={form.values.isAgentSpecific}
+									onChange={(event) =>
+										form.setFieldValue(
+											'isAgentSpecific',
+											event.currentTarget.checked
+										)
+									}
+								/>
+
+								{form.values.isAgentSpecific && (
+									<Select
+										label="Agent"
+										placeholder="Select specific agent"
+										icon={
+											<IconUser
+												size={16}
+												className={classes.inputIcon}
+											/>
+										}
+										data={agentOptions}
+										{...form.getInputProps('agentId')}
+										radius="md"
+										required={form.values.isAgentSpecific}
 									/>
 								)}
 							</Stack>
@@ -445,6 +513,10 @@ export function CommissionRateModal({ opened, onClose, commissionRate }: Commiss
 									{form.values.isSystemWide
 										? 'System-wide (all dealers)'
 										: 'Dealer-specific'}
+								</Text>
+								<Text size="sm">
+									<strong>Agent Scope:</strong>{' '}
+									{form.values.isAgentSpecific ? 'Agent-specific' : 'All agents'}
 								</Text>
 							</div>
 						)}

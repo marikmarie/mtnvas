@@ -16,6 +16,7 @@ import { useMemo } from 'react';
 import { Modal } from '../../components/Modal';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
+import { formatPhoneNumber } from '../../utils/phone.util';
 import {
 	Agent,
 	CashSaleModalProps,
@@ -23,6 +24,7 @@ import {
 	CashSaleResponse,
 	Device,
 	Product,
+	Stock,
 } from '../Dealer/types';
 
 const useStyles = createStyles((theme) => ({
@@ -97,7 +99,6 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 			customerName: (value) => (!value ? 'Customer name is required' : null),
 			customerPhone: (value) => {
 				if (!value) return 'Customer phone is required';
-				if (!/^\+?[1-9]\d{1,14}$/.test(value)) return 'Customer phone is required';
 				return null;
 			},
 			productId: (value) => (!value ? 'Product is required' : null),
@@ -144,7 +145,10 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 
 	const cashSaleMutation = useMutation({
 		mutationFn: async (data: CashSaleRequest) => {
-			const response = await request.post('/transactions/cash-sale', data);
+			const response = await request.post('/transactions/sale', {
+				...data,
+				customerPhone: formatPhoneNumber(data.customerPhone),
+			});
 			return response.data as CashSaleResponse;
 		},
 		onSuccess: (data) => {
@@ -170,10 +174,6 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 		onClose();
 	};
 
-	const handleProductChange = (productId: number | undefined) => {
-		form.setFieldValue('productId', productId || 0);
-	};
-
 	const agentOptions = useMemo(() => {
 		if (!agentsData?.data?.data) return [];
 		return agentsData.data.data.map((agent: Agent) => ({
@@ -197,6 +197,29 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 			label: device.deviceName.toUpperCase() || 'Unknown Device',
 		})) as unknown as { value: string; label: string }[];
 	}, [devicesData?.data?.data]);
+
+	const { data: stockItems } = useQuery({
+		queryKey: ['stock'],
+		queryFn: () =>
+			request.get('/stock', {
+				params: {
+					status: 1,
+					pageSize: 1000,
+				},
+			}),
+	});
+	const availableImeis = (stockItems?.data?.data as unknown as Stock[]) || [];
+
+	console.log('availableImeis:', availableImeis);
+	console.log('deviceOptions:', deviceOptions);
+
+	const imeiOptions = useMemo(() => {
+		console.log(availableImeis);
+		return availableImeis.map((stock) => ({
+			value: stock.imei,
+			label: stock.imei,
+		})) as unknown as { value: string; label: string }[];
+	}, [availableImeis]);
 
 	return (
 		<Modal
@@ -327,10 +350,7 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 											{ value: '', label: 'All Products' },
 											...productOptions,
 										]}
-										value={form.values.productId.toString()}
-										onChange={(value) =>
-											handleProductChange(Number(value) || undefined)
-										}
+										{...form.getInputProps('productId')}
 										radius="md"
 										required
 									/>
@@ -349,7 +369,7 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 									/>
 								</Group>
 
-								<TextInput
+								<Select
 									label="IMEI"
 									placeholder="Enter 15-digit IMEI number"
 									icon={
@@ -358,6 +378,7 @@ export function CashSaleModal({ opened, onClose }: CashSaleModalProps) {
 											className={classes.inputIcon}
 										/>
 									}
+									data={[{ value: '', label: 'All IMEIs' }, ...imeiOptions]}
 									{...form.getInputProps('imei')}
 									radius="md"
 									maxLength={15}

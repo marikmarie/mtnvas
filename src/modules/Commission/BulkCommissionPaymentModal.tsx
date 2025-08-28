@@ -113,7 +113,6 @@ export function BulkCommissionPaymentModal({
 				earningIds: data.earningIds,
 				notes: data.notes,
 			});
-			return response.data;
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries(['commission-earnings']);

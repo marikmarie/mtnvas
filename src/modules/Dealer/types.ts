@@ -642,6 +642,7 @@ export interface CommissionEarning {
 	status: 'Pending' | 'Paid' | 'Cancelled';
 	earnedAt: string;
 	paidAt?: string;
+	createdAt: string;
 }
 
 // Commission Earnings Summary

@@ -13,8 +13,8 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	header: {
-		marginBottom: theme.spacing.xl,
-		padding: theme.spacing.xl,
+		marginBottom: theme.spacing.md,
+		padding: theme.spacing.md,
 		borderRadius: theme.radius.lg,
 		background:
 			theme.colorScheme === 'dark'
@@ -52,7 +52,7 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	statCard: {
-		padding: theme.spacing.md,
+		padding: theme.spacing.sm,
 		borderRadius: theme.radius.md,
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
 		border: `1px solid ${
@@ -80,7 +80,6 @@ const useStyles = createStyles((theme) => ({
 	tabsContainer: {
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
 		borderRadius: theme.radius.lg,
-		padding: theme.spacing.md,
 		overflow: 'hidden',
 		border: `1px solid ${
 			theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
@@ -89,7 +88,6 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	tabsList: {
-		padding: theme.spacing.md,
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
 	},
 

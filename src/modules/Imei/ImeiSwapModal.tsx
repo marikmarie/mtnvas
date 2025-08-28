@@ -18,7 +18,6 @@ import {
 	IconAlertCircle,
 	IconArrowRight,
 	IconDeviceMobile,
-	IconFileText,
 	IconRefresh,
 	IconUserCircle,
 } from '@tabler/icons-react';
@@ -413,12 +412,6 @@ export function ImeiSwapModal({ opened, close, selectedImei }: ImeiSwapModalProp
 									placeholder="Enter detailed reason for swapping IMEI (e.g., device malfunction, upgrade, etc.)"
 									required
 									minRows={3}
-									icon={
-										<IconFileText
-											size={16}
-											className={classes.inputIcon}
-										/>
-									}
 									{...form.getInputProps('reason')}
 									radius="md"
 									description="Provide a detailed explanation for why this IMEI swap is necessary"

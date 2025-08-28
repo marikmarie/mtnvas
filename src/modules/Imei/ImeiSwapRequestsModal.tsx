@@ -33,7 +33,7 @@ import { ImeiSwapApprovalModal } from './ImeiSwapApprovalModal';
 
 const useStyles = createStyles((theme) => ({
 	root: {
-		padding: 0,
+		padding: theme.spacing.sm,
 	},
 
 	header: {

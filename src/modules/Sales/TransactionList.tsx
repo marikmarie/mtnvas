@@ -691,6 +691,15 @@ export function TransactionList() {
 							New Sale
 						</Button>
 
+						<Button
+							variant="light"
+							color="gray"
+							onClick={handleClearFilters}
+							radius="md"
+						>
+							Clear Filters
+						</Button>
+
 						<ActionIcon
 							color="blue"
 							variant="light"
@@ -729,11 +738,8 @@ export function TransactionList() {
 						<div className={classes.filterItem}>
 							<IconUser size={16} />
 							<Select
-								placeholder="Filter By All Dealers"
-								data={[
-									{ value: '', label: 'Filter By All Dealers' },
-									...dealerOptions,
-								]}
+								placeholder="Filter By Dealers"
+								data={[{ value: '', label: 'Filter By Dealers' }, ...dealerOptions]}
 								value={dealerFilter}
 								onChange={(value) => handleFilterChange('dealer', value || '')}
 								radius="md"
@@ -745,11 +751,8 @@ export function TransactionList() {
 						<div className={classes.filterItem}>
 							<IconUser size={16} />
 							<Select
-								placeholder="Filter By All Agents"
-								data={[
-									{ value: '', label: 'Filter By All Agents' },
-									...agentOptions,
-								]}
+								placeholder="Filter By Agents"
+								data={[{ value: '', label: 'Filter By Agents' }, ...agentOptions]}
 								value={agentFilter}
 								onChange={(value) => handleFilterChange('agent', value || '')}
 								radius="md"
@@ -763,7 +766,7 @@ export function TransactionList() {
 							<Select
 								placeholder="Transaction Type"
 								data={[
-									{ value: '', label: 'Filter By All Types' },
+									{ value: '', label: 'Filter By Types' },
 									{ value: 'activation', label: 'Activation' },
 									{ value: 'cash_sale', label: 'Cash Sale' },
 								]}
@@ -780,7 +783,7 @@ export function TransactionList() {
 							<Select
 								placeholder="Status"
 								data={[
-									{ value: '', label: 'Filter By All Status' },
+									{ value: '', label: 'Filter By Status' },
 									{ value: 'completed', label: 'Completed' },
 									{ value: 'pending', label: 'Pending' },
 									{ value: 'failed', label: 'Failed' },
@@ -797,9 +800,9 @@ export function TransactionList() {
 						<div className={classes.filterItem}>
 							<IconFilter size={16} />
 							<Select
-								placeholder="Filter By All Payment Methods"
+								placeholder="Filter By Payment Methods"
 								data={[
-									{ value: '', label: 'Filter By All Payment Methods' },
+									{ value: '', label: 'Filter By Payment Methods' },
 									{ value: 'cash', label: 'Cash' },
 									{ value: 'mobile_money', label: 'Mobile Money' },
 								]}
@@ -816,9 +819,9 @@ export function TransactionList() {
 						<div className={classes.filterItem}>
 							<IconFilter size={16} />
 							<Select
-								placeholder="Filter By All Products"
+								placeholder="Filter By Products"
 								data={[
-									{ value: '', label: 'Filter By All Products' },
+									{ value: '', label: 'Filter By Products' },
 									...productOptions,
 								]}
 								value={productFilter}
@@ -837,6 +840,8 @@ export function TransactionList() {
 								placeholder="From Date"
 								onChange={(value) => handleFilterChange('dateFrom', value)}
 								radius="md"
+								w="100%"
+								style={{ width: '100%' }}
 								clearable
 								size="xs"
 							/>
@@ -850,6 +855,8 @@ export function TransactionList() {
 								placeholder="To Date"
 								onChange={(value) => handleFilterChange('dateTo', value)}
 								radius="md"
+								w="100%"
+								style={{ width: '100%' }}
 								clearable
 								size="xs"
 							/>

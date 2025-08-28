@@ -3,7 +3,6 @@ import {
 	Badge,
 	Button,
 	Card,
-	Container,
 	createStyles,
 	Group,
 	rem,
@@ -17,7 +16,6 @@ import {
 	IconCash,
 	IconCheck,
 	IconDownload,
-	IconEye,
 	IconFilter,
 	IconRefresh,
 	IconSearch,
@@ -26,15 +24,17 @@ import {
 	IconX,
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
 import { toTitle } from '../../utils/toTitle';
 import {
+	Agent,
 	CommissionEarning,
 	CommissionEarningsResponse,
 	CommissionEarningsSummary,
+	Dealer,
 } from '../Dealer/types';
 import { BulkCommissionPaymentModal } from './BulkCommissionPaymentModal';
 
@@ -47,6 +47,7 @@ const useStyles = createStyles((theme) => ({
 	headerContent: {
 		display: 'flex',
 		justifyContent: 'space-between',
+		padding: theme.spacing.md,
 		alignItems: 'center',
 		flexWrap: 'wrap',
 		gap: theme.spacing.md,
@@ -176,7 +177,6 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	tableHeader: {
-		padding: theme.spacing.lg,
 		borderBottom: `1px solid ${
 			theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
 		}`,
@@ -265,6 +265,26 @@ export function CommissionEarnings() {
 		queryKey: ['agents'],
 		queryFn: () => request.get('/agents'),
 	});
+
+	const dealerOptions = useMemo(() => {
+		if (!dealersData?.data?.data || !Array.isArray(dealersData.data.data)) return [];
+		return dealersData.data.data
+			.filter((dealer: Dealer) => dealer && dealer.id && dealer.dealerName)
+			.map((dealer: Dealer) => ({
+				value: dealer.id.toString(),
+				label: dealer.dealerName?.toString().toUpperCase() || 'Unknown Dealer',
+			}));
+	}, [dealersData?.data?.data]);
+
+	const agentOptions = useMemo(() => {
+		if (!agentsData?.data?.data || !Array.isArray(agentsData.data.data)) return [];
+		return agentsData.data.data
+			.filter((agent: Agent) => agent && agent.id && agent.agentName)
+			.map((agent: Agent) => ({
+				value: agent.id.toString(),
+				label: agent.agentName?.toString().toUpperCase() || 'Unknown Agent',
+			}));
+	}, [agentsData?.data?.data]);
 
 	const commissionEarnings: CommissionEarning[] = earningsData?.data || [];
 	const summary: CommissionEarningsSummary = earningsData?.summary || {
@@ -397,7 +417,13 @@ export function CommissionEarnings() {
 			defaultFlex: 1,
 			minWidth: 120,
 			render: ({ data }: { data: CommissionEarning }) =>
-				new Date(data.earnedAt).toLocaleDateString(),
+				new Date(data.earnedAt)
+					.toLocaleDateString('en-US', {
+						year: 'numeric',
+						month: 'long',
+						day: 'numeric',
+					})
+					.toUpperCase(),
 		},
 		{
 			name: 'paidAt',
@@ -405,24 +431,29 @@ export function CommissionEarnings() {
 			defaultFlex: 1,
 			minWidth: 120,
 			render: ({ data }: { data: CommissionEarning }) =>
-				data.paidAt ? new Date(data.paidAt).toLocaleDateString() : 'N/A',
+				data.paidAt
+					? new Date(data.paidAt)
+							.toLocaleDateString('en-US', {
+								year: 'numeric',
+								month: 'long',
+								day: 'numeric',
+							})
+							.toUpperCase()
+					: 'N/A',
 		},
 		{
-			name: 'actions',
-			header: 'Actions',
+			name: 'createdAt',
+			header: 'Created At',
 			defaultFlex: 1,
 			minWidth: 80,
-			render: ({ data }: { data: CommissionEarning }) => (
-				<ActionIcon
-					color="blue"
-					variant="light"
-					size="sm"
-					className={classes.actionButton}
-					onClick={() => console.log('View earning details:', data.id)}
-				>
-					<IconEye size={16} />
-				</ActionIcon>
-			),
+			render: ({ data }: { data: CommissionEarning }) =>
+				new Date(data.createdAt)
+					.toLocaleDateString('en-US', {
+						year: 'numeric',
+						month: 'long',
+						day: 'numeric',
+					})
+					.toUpperCase(),
 		},
 	];
 
@@ -434,7 +465,7 @@ export function CommissionEarnings() {
 	});
 
 	return (
-		<Container fluid>
+		<>
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<div className={classes.actionsSection}>
@@ -446,6 +477,15 @@ export function CommissionEarnings() {
 							disabled={selectedEarnings.length === 0}
 						>
 							Bulk Payment
+						</Button>
+
+						<Button
+							variant="light"
+							color="gray"
+							onClick={handleClearFilters}
+							radius="md"
+						>
+							Clear Filters
 						</Button>
 
 						<ActionIcon
@@ -540,13 +580,7 @@ export function CommissionEarnings() {
 							<IconUser size={16} />
 							<Select
 								placeholder="All Dealers"
-								data={[
-									{ value: '', label: 'All Dealers' },
-									...(dealersData?.data?.data || []).map((dealer: any) => ({
-										value: dealer.id,
-										label: dealer.name,
-									})),
-								]}
+								data={[{ value: '', label: 'All Dealers' }, ...dealerOptions]}
 								value={dealerFilter}
 								onChange={(value) => setDealerFilter(value || '')}
 								radius="md"
@@ -559,13 +593,7 @@ export function CommissionEarnings() {
 							<IconUser size={16} />
 							<Select
 								placeholder="All Agents"
-								data={[
-									{ value: '', label: 'All Agents' },
-									...(agentsData?.data?.data || []).map((agent: any) => ({
-										value: agent.id,
-										label: agent.name,
-									})),
-								]}
+								data={[{ value: '', label: 'All Agents' }, ...agentOptions]}
 								value={agentFilter}
 								onChange={(value) => setAgentFilter(value || '')}
 								radius="md"
@@ -672,6 +700,6 @@ export function CommissionEarnings() {
 				onClose={closeBulkPaymentModal}
 				selectedEarnings={selectedEarnings}
 			/>
-		</Container>
+		</>
 	);
 }

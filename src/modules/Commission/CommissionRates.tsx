@@ -3,7 +3,6 @@ import {
 	Badge,
 	Button,
 	Card,
-	Container,
 	createStyles,
 	Group,
 	rem,
@@ -23,12 +22,12 @@ import {
 	IconTrash,
 } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDataGridTable } from '../../hooks/useDataGridTable';
 import useRequest from '../../hooks/useRequest';
 import { formatCurrency } from '../../utils/currenyFormatter';
 import { toTitle } from '../../utils/toTitle';
-import { CommissionRate } from '../Dealer/types';
+import { Agent, CommissionRate, Dealer, Product } from '../Dealer/types';
 import { CommissionRateModal } from './CommissionRateModal';
 
 const useStyles = createStyles((theme) => ({
@@ -44,6 +43,7 @@ const useStyles = createStyles((theme) => ({
 	headerContent: {
 		display: 'flex',
 		justifyContent: 'space-between',
+		padding: theme.spacing.md,
 		alignItems: 'center',
 		flexWrap: 'wrap',
 		gap: theme.spacing.md,
@@ -146,6 +146,7 @@ export function CommissionRates() {
 
 	const [searchTerm, setSearchTerm] = useState('');
 	const [dealerFilter, setDealerFilter] = useState<string>('');
+	const [agentFilter, setAgentFilter] = useState<string>('');
 	const [userTypeFilter, setUserTypeFilter] = useState<string>('');
 	const [productFilter, setProductFilter] = useState<string>('');
 	const [statusFilter, setStatusFilter] = useState<string>('');
@@ -159,6 +160,9 @@ export function CommissionRates() {
 		if (dealerFilter && dealerFilter !== 'system') {
 			params.dealerId = dealerFilter;
 		}
+		if (agentFilter) {
+			params.agentId = agentFilter;
+		}
 		if (userTypeFilter) {
 			params.userType = userTypeFilter;
 		}
@@ -171,14 +175,21 @@ export function CommissionRates() {
 
 		const response = await request.get('/commissions/rates', { params });
 		return response.data;
-	}, [request, dealerFilter, userTypeFilter, productFilter, statusFilter]);
+	}, [request, dealerFilter, agentFilter, userTypeFilter, productFilter, statusFilter]);
 
 	const {
 		data: ratesData,
 		isLoading: ratesLoading,
 		refetch,
 	} = useQuery({
-		queryKey: ['commission-rates', dealerFilter, userTypeFilter, productFilter, statusFilter],
+		queryKey: [
+			'commission-rates',
+			dealerFilter,
+			agentFilter,
+			userTypeFilter,
+			productFilter,
+			statusFilter,
+		],
 		queryFn: fetchCommissionRates,
 	});
 
@@ -187,10 +198,45 @@ export function CommissionRates() {
 		queryFn: () => request.get('dealer'),
 	});
 
+	const { data: agentsData } = useQuery({
+		queryKey: ['agents'],
+		queryFn: () => request.get('/agents'),
+	});
+
 	const { data: productsData } = useQuery({
 		queryKey: ['products'],
 		queryFn: () => request.get('/products'),
 	});
+
+	const dealerOptions = useMemo(() => {
+		if (!dealersData?.data?.data || !Array.isArray(dealersData.data.data)) return [];
+		return dealersData.data.data
+			.filter((dealer: Dealer) => dealer && dealer.id && dealer.dealerName)
+			.map((dealer: Dealer) => ({
+				value: dealer.id.toString(),
+				label: dealer.dealerName?.toString().toUpperCase() || 'Unknown Dealer',
+			}));
+	}, [dealersData?.data?.data]);
+
+	const agentOptions = useMemo(() => {
+		if (!agentsData?.data?.data || !Array.isArray(agentsData.data.data)) return [];
+		return agentsData.data.data
+			.filter((agent: Agent) => agent && agent.id && agent.agentName)
+			.map((agent: Agent) => ({
+				value: agent.id.toString(),
+				label: agent.agentName?.toString().toUpperCase() || 'Unknown Agent',
+			}));
+	}, [agentsData?.data?.data]);
+
+	const productOptions = useMemo(() => {
+		if (!productsData?.data?.data || !Array.isArray(productsData.data.data)) return [];
+		return productsData.data.data
+			.filter((product: Product) => product && product.id && product.productName)
+			.map((product: Product) => ({
+				value: product.id.toString(),
+				label: product.productName?.toString().toUpperCase() || 'Unknown Product',
+			}));
+	}, [productsData?.data?.data]);
 
 	const deleteRateMutation = useMutation({
 		mutationFn: async (rateId: string) => {
@@ -217,6 +263,7 @@ export function CommissionRates() {
 	const handleClearFilters = () => {
 		setSearchTerm('');
 		setDealerFilter('');
+		setAgentFilter('');
 		setUserTypeFilter('');
 		setProductFilter('');
 		setStatusFilter('');
@@ -279,6 +326,9 @@ export function CommissionRates() {
 			header: 'Product',
 			defaultFlex: 1,
 			minWidth: 150,
+			render: ({ data }: { data: CommissionRate }) => (
+				<Text size="sm">{data.productName?.toUpperCase()}</Text>
+			),
 		},
 		{
 			name: 'userType',
@@ -346,6 +396,15 @@ export function CommissionRates() {
 			),
 		},
 		{
+			name: 'agentId',
+			header: 'Agent',
+			defaultFlex: 1,
+			minWidth: 120,
+			render: ({ data }: { data: CommissionRate }) => (
+				<Text size="sm">{data.agentId ? `Agent Specific` : 'All Agents'}</Text>
+			),
+		},
+		{
 			name: 'effectiveFrom',
 			header: 'Effective From',
 			defaultFlex: 1,
@@ -406,10 +465,7 @@ export function CommissionRates() {
 	});
 
 	return (
-		<Container
-			fluid
-			className={classes.root}
-		>
+		<>
 			<div className={classes.header}>
 				<div className={classes.headerContent}>
 					<div className={classes.actionsSection}>
@@ -419,6 +475,15 @@ export function CommissionRates() {
 							radius="md"
 						>
 							Add Rate
+						</Button>
+
+						<Button
+							variant="light"
+							color="gray"
+							onClick={handleClearFilters}
+							radius="md"
+						>
+							Clear Filters
 						</Button>
 
 						<ActionIcon
@@ -448,16 +513,22 @@ export function CommissionRates() {
 							<IconFilter size={16} />
 							<Select
 								placeholder="All Dealers"
-								data={[
-									{ value: '', label: 'All Dealers' },
-									{ value: 'system', label: 'System Wide' },
-									...(dealersData?.data?.data || []).map((dealer: any) => ({
-										value: dealer.id,
-										label: dealer.name,
-									})),
-								]}
+								data={[{ value: '', label: 'All Dealers' }, ...dealerOptions]}
 								value={dealerFilter}
 								onChange={(value) => setDealerFilter(value || '')}
+								radius="md"
+								clearable
+								size="xs"
+							/>
+						</div>
+
+						<div className={classes.filterItem}>
+							<IconFilter size={16} />
+							<Select
+								placeholder="All Agents"
+								data={[{ value: '', label: 'All Agents' }, ...agentOptions]}
+								value={agentFilter}
+								onChange={(value) => setAgentFilter(value || '')}
 								radius="md"
 								clearable
 								size="xs"
@@ -487,13 +558,7 @@ export function CommissionRates() {
 							<IconFilter size={16} />
 							<Select
 								placeholder="Product"
-								data={[
-									{ value: '', label: 'All Products' },
-									...(productsData?.data?.data || []).map((product: any) => ({
-										value: product.id,
-										label: product.name,
-									})),
-								]}
+								data={[{ value: '', label: 'All Products' }, ...productOptions]}
 								value={productFilter}
 								onChange={(value) => setProductFilter(value || '')}
 								radius="md"
@@ -548,6 +613,6 @@ export function CommissionRates() {
 				onClose={handleCloseRateModal}
 				commissionRate={selectedRate}
 			/>
-		</Container>
+		</>
 	);
 }
