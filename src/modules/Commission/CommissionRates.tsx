@@ -327,7 +327,12 @@ export function CommissionRates() {
 			defaultFlex: 1,
 			minWidth: 150,
 			render: ({ data }: { data: CommissionRate }) => (
-				<Text size="sm">{data.productName?.toUpperCase()}</Text>
+				<Text
+					size="sm"
+					weight={500}
+				>
+					{data.productName?.toUpperCase()}
+				</Text>
 			),
 		},
 		{
@@ -356,11 +361,15 @@ export function CommissionRates() {
 						<IconCurrencyDollar
 							size={14}
 							className={classes.typeIcon}
+							color="blue"
+							stroke={1.5}
 						/>
 					) : (
 						<IconPercentage
 							size={14}
 							className={classes.typeIcon}
+							color="blue"
+							stroke={1.5}
 						/>
 					)}
 					<Badge
@@ -387,21 +396,31 @@ export function CommissionRates() {
 			),
 		},
 		{
-			name: 'dealerId',
+			name: 'dealerName',
 			header: 'Dealer',
 			defaultFlex: 1,
 			minWidth: 150,
 			render: ({ data }: { data: CommissionRate }) => (
-				<Text size="sm">{data.dealerId ? `Dealer Specific` : 'System Wide'}</Text>
+				<Text
+					size="sm"
+					weight={500}
+				>
+					{data.dealerName?.toUpperCase() || 'ALL DEALERS'}
+				</Text>
 			),
 		},
 		{
-			name: 'agentId',
+			name: 'agentName',
 			header: 'Agent',
 			defaultFlex: 1,
-			minWidth: 120,
+			minWidth: 150,
 			render: ({ data }: { data: CommissionRate }) => (
-				<Text size="sm">{data.agentId ? `Agent Specific` : 'All Agents'}</Text>
+				<Text
+					size="sm"
+					weight={500}
+				>
+					{data.agentName?.toUpperCase() || 'ALL AGENTS'}
+				</Text>
 			),
 		},
 		{

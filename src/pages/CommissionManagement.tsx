@@ -112,7 +112,6 @@ export default function CommissionManagement() {
 	const [activeTab, setActiveTab] = useState<string>('rates');
 	const request = useRequest(true);
 
-	// Fetch commission summary data
 	const {
 		data: commissionSummary,
 		isLoading: summaryLoading,
@@ -121,41 +120,29 @@ export default function CommissionManagement() {
 		queryKey: ['commission-summary'],
 		queryFn: async () => {
 			try {
-				const [ratesResponse, earningsResponse] = await Promise.all([
-					request.get('/commissions/rates'),
-					request.get('/commissions/earnings'),
-				]);
+				const earningsResponse = await request.get('/commissions/earnings');
 
-				const totalRates = ratesResponse.data?.data?.length || 0;
-				const activeRates =
-					ratesResponse.data?.data?.filter((rate: any) => rate.isActive)?.length || 0;
-				const totalEarnings = earningsResponse.data?.summary?.totalEarned || 0;
-				const pendingPayments = earningsResponse.data?.summary?.totalPending || 0;
+				const totalEarned = earningsResponse.data?.summary?.totalEarned;
+				const totalPending = earningsResponse.data?.summary?.totalPending;
+				const totalPaid = earningsResponse.data?.summary?.totalPaid;
 
 				return {
-					totalRates,
-					activeRates,
-					totalEarnings,
-					pendingPayments,
+					totalEarned,
+					totalPending,
+					totalPaid,
 				};
 			} catch (error) {
 				console.error('Failed to fetch commission summary:', error);
 				return {
-					totalRates: 0,
-					activeRates: 0,
-					totalEarnings: 0,
-					pendingPayments: 0,
+					totalEarned: 0,
+					totalPending: 0,
+					totalPaid: 0,
 				};
 			}
 		},
 	});
 
-	const headerStats = commissionSummary || {
-		totalRates: 0,
-		activeRates: 0,
-		totalEarnings: 0,
-		pendingPayments: 0,
-	};
+	console.log(commissionSummary);
 
 	return (
 		<Layout>
@@ -221,30 +208,30 @@ export default function CommissionManagement() {
 							<>
 								<Paper className={classes.statCard}>
 									<Text className={classes.statValue}>
-										{headerStats.totalRates}
-									</Text>
-									<Text className={classes.statLabel}>Total Rates</Text>
-								</Paper>
-
-								<Paper className={classes.statCard}>
-									<Text className={classes.statValue}>
-										{headerStats.activeRates}
-									</Text>
-									<Text className={classes.statLabel}>Active Rates</Text>
-								</Paper>
-
-								<Paper className={classes.statCard}>
-									<Text className={classes.statValue}>
-										{(headerStats.totalEarnings / 1000000).toFixed(1)}M
+										{commissionSummary?.totalEarned / 1000000}M
 									</Text>
 									<Text className={classes.statLabel}>Total Earnings</Text>
 								</Paper>
 
 								<Paper className={classes.statCard}>
 									<Text className={classes.statValue}>
-										{(headerStats.pendingPayments / 1000000).toFixed(1)}M
+										{commissionSummary?.totalEarned / 1000000}M
+									</Text>
+									<Text className={classes.statLabel}>Total Earnings</Text>
+								</Paper>
+
+								<Paper className={classes.statCard}>
+									<Text className={classes.statValue}>
+										{commissionSummary?.totalPending / 1000000}M
 									</Text>
 									<Text className={classes.statLabel}>Pending</Text>
+								</Paper>
+
+								<Paper className={classes.statCard}>
+									<Text className={classes.statValue}>
+										{commissionSummary?.totalPaid / 1000000}M
+									</Text>
+									<Text className={classes.statLabel}>Paid</Text>
 								</Paper>
 							</>
 						)}

@@ -600,16 +600,26 @@ export interface CashSaleModalProps {
 // Commission Rate Interface
 export interface CommissionRate {
 	id: string;
-	dealerId?: number;
-	agentId?: number;
-	userType: string;
+	dealerId: number;
+	dealerName: string;
+	agentId: number;
+	agentName: string;
+	userType: UserType;
 	productId: number;
-	productName?: string;
+	productName: string;
 	commissionType: string;
 	amount: number;
 	currency: string;
 	effectiveFrom: string;
 	isActive: boolean;
+}
+
+export interface CommissionEarningsResponse {
+	statusCode: number;
+	status: string;
+	message?: string;
+	data: CommissionEarning[];
+	summary: CommissionEarningsSummary;
 }
 
 // Commission Rate Request

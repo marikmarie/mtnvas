@@ -372,12 +372,14 @@ export function CommissionEarnings() {
 			header: 'Agent',
 			defaultFlex: 1,
 			minWidth: 150,
+			render: ({ data }: { data: CommissionEarning }) => data.agentName.toUpperCase(),
 		},
 		{
 			name: 'productName',
 			header: 'Product',
 			defaultFlex: 1,
 			minWidth: 120,
+			render: ({ data }: { data: CommissionEarning }) => data.productName.toUpperCase(),
 		},
 		{
 			name: 'commissionAmount',
