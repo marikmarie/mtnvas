@@ -391,7 +391,7 @@ export function CommissionRates() {
 				<Text weight={600}>
 					{data.commissionType === 'fixed'
 						? formatCurrency(data.amount)
-						: `${data.amount}%`}
+						: `${data.amount}`}
 				</Text>
 			),
 		},

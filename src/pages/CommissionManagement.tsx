@@ -215,13 +215,6 @@ export default function CommissionManagement() {
 
 								<Paper className={classes.statCard}>
 									<Text className={classes.statValue}>
-										{commissionSummary?.totalEarned / 1000000}M
-									</Text>
-									<Text className={classes.statLabel}>Total Earnings</Text>
-								</Paper>
-
-								<Paper className={classes.statCard}>
-									<Text className={classes.statValue}>
 										{commissionSummary?.totalPending / 1000000}M
 									</Text>
 									<Text className={classes.statLabel}>Pending</Text>

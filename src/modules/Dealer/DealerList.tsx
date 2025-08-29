@@ -36,6 +36,7 @@ import useRequest from '../../hooks/useRequest';
 import { AddDealerModal } from './AddDealerModal';
 import { AddDealerUserModal } from './AddDealerUserModal';
 import { ConfirmationModal } from './ConfirmationModal';
+import { DealerHierarchyModal } from './DealerHierarchyModal';
 import { EditDealerModal } from './EditDealerModal';
 import { Dealer } from './types';
 import { ViewDealerModal } from './ViewDealerModal';
@@ -130,6 +131,8 @@ export function DealerList() {
 	const [page, setPage] = useState(1);
 	const [limit] = useState(12);
 	const [confirmAction, setConfirmAction] = useState<'activate' | 'deactivate'>('activate');
+	const [hierarchyModalOpened, { open: openHierarchyModal, close: closeHierarchyModal }] =
+		useDisclosure(false);
 
 	const handleAction = (dealer: Dealer, action: 'edit' | 'view' | 'activate' | 'deactivate') => {
 		setSelectedDealer(dealer);
@@ -437,6 +440,16 @@ export function DealerList() {
 														? 'Deactivate'
 														: 'Approve'}
 												</Menu.Item>
+												<Menu.Item
+													icon={<IconBuilding size={16} />}
+													onClick={(e) => {
+														e.stopPropagation();
+														setSelectedDealer(dealer);
+														openHierarchyModal();
+													}}
+												>
+													View Hierarchy
+												</Menu.Item>
 											</Menu.Dropdown>
 										</Menu>
 									</Group>
@@ -552,6 +565,12 @@ export function DealerList() {
 						opened={confirmModalOpened}
 						onClose={closeConfirmModal}
 						action={confirmAction}
+						dealer={selectedDealer}
+					/>
+
+					<DealerHierarchyModal
+						opened={hierarchyModalOpened}
+						onClose={closeHierarchyModal}
 						dealer={selectedDealer}
 					/>
 				</>
