@@ -142,8 +142,8 @@ export function AddShopUserModal({ opened, onClose, dealer, shops }: AddShopUser
 		validate: {
 			name: (value) => (!value ? 'Name is required' : null),
 			email: (value) => (!value ? 'Email is required' : null),
-			msisdn: (value) => (!value ? 'Phone number is required' : null),
-			userType: (value) => (!value ? 'User type is required' : null),
+			msisdn: (value) => (!value ? 'Phone Number is required' : null),
+			userType: (value) => (!value ? 'User Type is required i.e dsa, retialer' : null),
 			dealerId: (value) => (!value ? 'Dealer is required' : null),
 			shopId: (value) => {
 				if (form.values.userType === 'shop_agent' && !value) {

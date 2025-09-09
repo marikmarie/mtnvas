@@ -138,7 +138,7 @@ export function AddShopModal({ opened, onClose }: AddShopModalProps) {
 		},
 		validate: {
 			shopName: (value) => (!value ? 'Shop name is required' : null),
-			dealerId: (value) => (!value ? 'Dealer is required' : null),
+			dealerId: (value) => (!value ? 'Dealer Id is required' : null),
 			location: (value) => (!value ? 'Location is required' : null),
 			region: (value) => (!value ? 'Region is required' : null),
 		},
@@ -224,7 +224,6 @@ export function AddShopModal({ opened, onClose }: AddShopModalProps) {
 						Please correct the highlighted fields before submitting.
 					</Alert>
 				)}
-
 				<form onSubmit={form.onSubmit(handleSubmit)}>
 					<Stack spacing="sm">
 						<Select
@@ -280,7 +279,7 @@ export function AddShopModal({ opened, onClose }: AddShopModalProps) {
 
 						<TextInput
 							label="Location"
-							placeholder="Enter shop address"
+							placeholder="Enter Shop Address"
 							required
 							icon={
 								<IconMapPin
