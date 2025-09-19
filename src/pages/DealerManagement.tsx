@@ -18,6 +18,7 @@ import { ShopList } from '../modules/Shop/ShopList';
 import { ShopUsersList } from '../modules/Shop/ShopUsersList';
 import { StockList } from '../modules/Stock/StockList';
 import { StockTransfersList } from '../modules/Stock/StockTransfersList';
+//import { ProductList } from '../modules/Product/ProductList';
 
 const useStyles = createStyles((theme) => ({
 	root: {

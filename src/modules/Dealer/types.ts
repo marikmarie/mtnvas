@@ -36,31 +36,6 @@ export interface ShopUser {
 	status: 'Active' | 'Inactive';
 }
 
-export interface Product {
-	id: number;
-	productName: string;
-	description: string;
-	productCategory: string;
-	status: string;
-	price: number;
-	createdAt: string;
-	createdBy: string;
-	updatedAt: string;
-	updatedBy: string;
-}
-
-export interface Device {
-	id: number;
-	deviceName: string;
-	description: string;
-	deviceCategory: string;
-	status: string;
-	price: number;
-	createdAt: string;
-	createdBy: string;
-	updatedAt: string;
-	updatedBy: string;
-}
 
 export interface Stock {
 	imei: string;
@@ -685,4 +660,31 @@ export interface BulkCommissionPaymentModalProps {
 	opened: boolean;
 	onClose: () => void;
 	selectedEarnings: CommissionEarning[];
+}
+
+
+export interface Product {
+	id: number;
+	productName: string;
+	description: string;
+	productCategory: string;
+	status: string;
+	price: number;
+	createdAt: string;
+	createdBy: string;
+	updatedAt: string;
+	updatedBy: string;
+}
+
+export interface Device {
+	id: number;
+	deviceName: string;
+	description: string;
+	deviceCategory: string;
+	status: string;
+	price: number;
+	createdAt: string;
+	createdBy: string;
+	updatedAt: string;
+	updatedBy: string;
 }

@@ -175,8 +175,8 @@ export function StockTransfersList() {
 
 	// Fetch transfer summary
 	const { data: transferSummary } = useQuery({
-		queryKey: ['stock-transfers/summary'],
-		queryFn: () => request.get('/stock-transfers/summary'),
+		queryKey: ['stock-transfers'],
+		queryFn: () => request.get('/stock-transfers'),
 	});
 
 	const dealerOptions = useMemo(() => {
