@@ -1,17 +1,23 @@
 import {
+  Alert,
   Button,
+  createStyles,
   Group,
   Select,
   Stack,
-  TextInput,
-  Title,
   Text,
+  TextInput,
   ThemeIcon,
-  Alert,
+  Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import {
+  IconAlertCircle,
+  IconCheck,
+  IconPackage,
+  IconPlus,
+} from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { IconPlus, IconAlertCircle, IconPackage } from "@tabler/icons-react";
 import { Modal } from "../../components/Modal";
 import useRequest from "../../hooks/useRequest";
 
@@ -28,7 +34,26 @@ interface ProductFormValues {
   price: number;
 }
 
+const useStyles = createStyles((theme) => ({
+  header: {
+    padding: theme.spacing.lg,
+    borderBottom: `1px solid ${theme.colorScheme === "dark"
+      ? theme.colors.dark[4]
+      : theme.colors.gray[2]}`,
+  },
+  actions: {
+    padding: theme.spacing.lg,
+    borderTop: `1px solid ${theme.colorScheme === "dark"
+      ? theme.colors.dark[4]
+      : theme.colors.gray[2]}`,
+  },
+  errorAlert: {
+    marginBottom: theme.spacing.md,
+  },
+}));
+
 export function AddProduct({ opened, onClose }: AddProductModalProps) {
+  const { classes } = useStyles();
   const request = useRequest(true);
   const queryClient = useQueryClient();
 
@@ -41,15 +66,15 @@ export function AddProduct({ opened, onClose }: AddProductModalProps) {
       price: 0,
     },
     validate: {
-      productName: (v) => (!v ? "Product name is required" : null),
-      productCategory: (v) => (!v ? "Category is required" : null),
-      status: (v) => (!v ? "Status is required" : null),
+      productName: (v) => (!v ? "Product name required" : null),
+      productCategory: (v) => (!v ? "Category required" : null),
+      status: (v) => (!v ? "Status required" : null),
+      price: (v) => (v <= 0 ? "Price must be greater than 0" : null),
     },
   });
 
   const mutation = useMutation({
-    mutationFn: (values: ProductFormValues) =>
-      request.post("/products", values),
+    mutationFn: (values: ProductFormValues) => request.post("/products", values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       onClose();
@@ -57,75 +82,87 @@ export function AddProduct({ opened, onClose }: AddProductModalProps) {
     },
   });
 
-  const handleSubmit = () => mutation.mutate(form.values);
+  const handleSubmit = (values: ProductFormValues) => mutation.mutate(values);
+  const hasErrors = Object.keys(form.errors).length > 0;
 
   return (
     <Modal opened={opened} close={onClose} size="lg">
-      <Group mb="md">
-        <ThemeIcon size={40} radius="md" color="blue" variant="light">
-          <IconPackage size={20} />
-        </ThemeIcon>
-        <div>
-          <Title order={3}>Add New Product</Title>
-          <Text size="sm" color="dimmed">
-            Create a new product
-          </Text>
-        </div>
-      </Group>
+      <div className={classes.header}>
+        <Group>
+          <ThemeIcon size={40} radius="md" color="blue" variant="light">
+            <IconPackage size={20} />
+          </ThemeIcon>
+          <div>
+            <Title order={3} size="h4">
+              Add Product
+            </Title>
+            <Text size="sm" color="dimmed">
+              Create a new product
+            </Text>
+          </div>
+        </Group>
+      </div>
 
-      {Object.keys(form.errors).length > 0 && (
-        <Alert
-          icon={<IconAlertCircle size={16} />}
-          title="Please fix errors"
-          color="red"
-          mb="md"
-        >
-          Correct the highlighted fields.
-        </Alert>
-      )}
+      <div style={{ padding: 20 }}>
+        {hasErrors && (
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            title="Please fix errors"
+            color="red"
+            className={classes.errorAlert}
+          >
+            Correct the highlighted fields.
+          </Alert>
+        )}
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+          <Stack spacing="md">
+            <TextInput
+              label="Product Name"
+              required
+              {...form.getInputProps("productName")}
+            />
+            <TextInput
+              label="Description"
+              {...form.getInputProps("description")}
+            />
+            <TextInput
+              label="Category"
+              required
+              {...form.getInputProps("productCategory")}
+            />
+            <Select
+              label="Status"
+              data={[
+                { value: "Active", label: "Active" },
+                { value: "Inactive", label: "Inactive" },
+              ]}
+              {...form.getInputProps("status")}
+            />
+            <TextInput
+              label="Price"
+              type="number"
+              required
+              {...form.getInputProps("price")}
+            />
+          </Stack>
+        </form>
+      </div>
 
-      <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Stack spacing="sm">
-          <TextInput
-            label="Product Name"
-            placeholder="Enter product name"
-            required
-            {...form.getInputProps("productName")}
-          />
-          <TextInput
-            label="Description"
-            placeholder="Enter description"
-            {...form.getInputProps("description")}
-          />
-          <TextInput
-            label="Category"
-            placeholder="Enter category"
-            required
-            {...form.getInputProps("productCategory")}
-          />
-          <Select
-            label="Status"
-            placeholder="Select status"
-            data={["Active", "Inactive"]}
-            {...form.getInputProps("status")}
-          />
-          <TextInput
-            label="Price"
-            placeholder="Enter price"
-            type="number"
-            {...form.getInputProps("price")}
-          />
-        </Stack>
-
-        <Group position="right" mt="lg">
+      <div className={classes.actions}>
+        <Group position="right">
           <Button variant="subtle" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" loading={mutation.isLoading} leftIcon={<IconPlus size={16} />}>
-            Add Product
+          <Button
+            type="submit"
+            loading={mutation.isLoading}
+            leftIcon={<IconPlus size={16} />}
+            onClick={() => handleSubmit(form.values)}
+          >
+            Save Product
           </Button>
         </Group>
-      </form>
+      </div>
     </Modal>
   );
 }
