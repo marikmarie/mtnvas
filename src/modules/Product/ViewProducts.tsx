@@ -1,0 +1,56 @@
+import { useQuery } from "@tanstack/react-query";
+import { Table, Button, Group } from "@mantine/core";
+import { IconEdit } from "@tabler/icons-react";
+import useRequest from "../../hooks/useRequest";
+import  { Product } from "../Dealer/types";
+
+interface ViewProductsProps {
+  onEdit: (product: Product) => void;
+}
+
+export function ViewProducts({ onEdit }: ViewProductsProps) {
+  const request = useRequest(true);
+
+  const { data } = useQuery({
+    queryKey: ["products"],
+    queryFn: () => request.get("/products"),
+  });
+
+  const products = data?.data.data as Product[];
+
+  return (
+    <Table highlightOnHover>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Status</th>
+          <th>Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {products?.map((p) => (
+          <tr key={p.id}>
+            <td>{p.productName}</td>
+            <td>{p.productCategory}</td>
+            <td>{p.status}</td>
+            <td>{p.price}</td>
+            <td>
+              <Group spacing="xs">
+                <Button
+                  size="xs"
+                  variant="light"
+                  leftIcon={<IconEdit size={14} />}
+                  onClick={() => onEdit(p)}
+                >
+                  Edit
+                </Button>
+              </Group>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
+}
