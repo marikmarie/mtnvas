@@ -2,6 +2,7 @@ import { Badge, createStyles, Group, Tabs, Text, ThemeIcon, Title } from '@manti
 import {
 	IconBox,
 	IconBuildingStore,
+	IconRouter,
 	IconSettings,
 	IconTransfer,
 	IconUser,
@@ -18,7 +19,7 @@ import { ShopList } from '../modules/Shop/ShopList';
 import { ShopUsersList } from '../modules/Shop/ShopUsersList';
 import { StockList } from '../modules/Stock/StockList';
 import { StockTransfersList } from '../modules/Stock/StockTransfersList';
-//import { ProductList } from '../modules/Product/ProductList';
+import { ViewProducts } from '../modules/Product/ViewProducts';
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -256,13 +257,30 @@ export default function DealerManagement() {
 								className={classes.tab}
 							>
 								Shops
-							</Tabs.Tab>
-							<Tabs.Tab
+							{/* </Tabs.Tab> */}
+							{/* <Tabs.Tab
 								value="users"
 								icon={<IconUserCircle size={16} />}
 								className={classes.tab}
 							>
-								Shop Users
+								Shop Users */}
+
+								</Tabs.Tab>
+							<Tabs.Tab
+								value="products"
+								icon={<IconBox size={16} />}
+								className={classes.tab}
+							>
+								Products
+
+								</Tabs.Tab>
+							<Tabs.Tab
+								value="devices"
+								icon={<IconRouter size={16} />}
+								className={classes.tab}
+							>
+								Devices
+
 							</Tabs.Tab>
 							<Tabs.Tab
 								value="agents"
