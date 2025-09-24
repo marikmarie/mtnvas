@@ -129,5 +129,34 @@ export function EditDeviceModal({ opened, onClose, device }: EditDeviceModalProp
         </Group>
       </div>
 
+      <div style={{ padding: 20 }}>
+        {hasErrors && (
+          <Alert icon={<IconAlertCircle size={16} />} title="Please fix errors" color="red" className={classes.errorAlert}>
+            Correct the highlighted fields.
+          </Alert>
+        )}
+
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+          <Stack spacing="md">
+            <TextInput label="Device Name" required {...form.getInputProps('deviceName')} radius="md" />
+            <TextInput label="Description" {...form.getInputProps('description')} radius="md" />
+            <TextInput label="Category" required {...form.getInputProps('deviceCategory')} radius="md" />
+            <Select label="Status" data={['Active', 'Inactive']} {...form.getInputProps('status')} radius="md" />
+            <TextInput label="Price" type="number" required {...form.getInputProps('price')} radius="md" />
+          </Stack>
+        </form>
+      </div>
+
+      <div className={classes.actions}>
+        <Group position="right">
+          <Button variant="subtle" onClick={onClose} radius="md">Cancel</Button>
+          <Button type="submit" loading={mutation.isLoading} leftIcon={<IconCheck size={16} />} radius="md" onClick={() => form.onSubmit(handleSubmit)()}>
+            Save Changes
+          </Button>
+        </Group>
+      </div>
+    </Modal>
+  );
+}
 
 export default EditDeviceModal;
