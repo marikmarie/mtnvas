@@ -678,6 +678,7 @@ export interface Product {
 
 export interface Device {
 	id: number;
+	imei: string;
 	deviceName: string;
 	description: string;
 	deviceCategory: string;
